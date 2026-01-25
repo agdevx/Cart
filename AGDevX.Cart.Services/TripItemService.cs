@@ -1,0 +1,136 @@
+// ABOUTME: Service implementation for TripItem business logic including add, update, delete operations
+// ABOUTME: and check/uncheck functionality with authorization checks ensuring user is trip collaborator
+using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Repositories;
+
+namespace AGDevX.Cart.Services;
+
+public class TripItemService(ITripItemRepository tripItemRepository, ITripRepository tripRepository) : ITripItemService
+{
+    public async Task<TripItem> AddTripItemAsync(Guid tripId, Guid inventoryItemId, int quantity, Guid userId, string? notes = null, Guid? storeId = null)
+    {
+        //== Verify user is collaborator before adding item to trip
+        var isCollaborator = await tripRepository.IsUserCollaboratorAsync(tripId, userId);
+        if (!isCollaborator)
+        {
+            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
+        }
+
+        //== Create new trip item with provided details
+        var tripItem = new TripItem
+        {
+            TripId = tripId,
+            InventoryItemId = inventoryItemId,
+            Quantity = quantity,
+            Notes = notes,
+            StoreId = storeId,
+            IsChecked = false,
+            CheckedAt = null,
+            Trip = null!,
+            InventoryItem = null!
+        };
+
+        return await tripItemRepository.CreateAsync(tripItem);
+    }
+
+    public async Task<IEnumerable<TripItem>> GetTripItemsAsync(Guid tripId, Guid userId)
+    {
+        //== Verify user is collaborator before retrieving trip items
+        var isCollaborator = await tripRepository.IsUserCollaboratorAsync(tripId, userId);
+        if (!isCollaborator)
+        {
+            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
+        }
+
+        return await tripItemRepository.GetTripItemsAsync(tripId);
+    }
+
+    public async Task<TripItem?> GetByIdAsync(Guid id, Guid userId)
+    {
+        var tripItem = await tripItemRepository.GetByIdAsync(id);
+        if (tripItem == null)
+        {
+            return null;
+        }
+
+        //== Verify user is collaborator before retrieving trip item
+        var isCollaborator = await tripRepository.IsUserCollaboratorAsync(tripItem.TripId, userId);
+        if (!isCollaborator)
+        {
+            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
+        }
+
+        return tripItem;
+    }
+
+    public async Task<TripItem> UpdateTripItemAsync(Guid id, int quantity, Guid userId, string? notes = null, Guid? storeId = null)
+    {
+        var tripItem = await tripItemRepository.GetByIdAsync(id);
+        if (tripItem == null)
+        {
+            throw new KeyNotFoundException("Trip item not found");
+        }
+
+        //== Verify user is collaborator before updating trip item
+        var isCollaborator = await tripRepository.IsUserCollaboratorAsync(tripItem.TripId, userId);
+        if (!isCollaborator)
+        {
+            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
+        }
+
+        //== Update trip item properties
+        tripItem.Quantity = quantity;
+        tripItem.Notes = notes;
+        tripItem.StoreId = storeId;
+
+        return await tripItemRepository.UpdateAsync(tripItem);
+    }
+
+    public async Task DeleteTripItemAsync(Guid id, Guid userId)
+    {
+        var tripItem = await tripItemRepository.GetByIdAsync(id);
+        if (tripItem == null)
+        {
+            throw new KeyNotFoundException("Trip item not found");
+        }
+
+        //== Verify user is collaborator before deleting trip item
+        var isCollaborator = await tripRepository.IsUserCollaboratorAsync(tripItem.TripId, userId);
+        if (!isCollaborator)
+        {
+            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
+        }
+
+        await tripItemRepository.DeleteAsync(id);
+    }
+
+    public async Task<TripItem> CheckItemAsync(Guid id, bool isChecked, Guid userId)
+    {
+        var tripItem = await tripItemRepository.GetByIdAsync(id);
+        if (tripItem == null)
+        {
+            throw new KeyNotFoundException("Trip item not found");
+        }
+
+        //== Verify user is collaborator before checking/unchecking trip item
+        var isCollaborator = await tripRepository.IsUserCollaboratorAsync(tripItem.TripId, userId);
+        if (!isCollaborator)
+        {
+            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
+        }
+
+        //== Set IsChecked and CheckedAt based on isChecked parameter
+        if (isChecked)
+        {
+            tripItem.IsChecked = true;
+            tripItem.CheckedAt = DateTime.UtcNow;
+        }
+        else
+        {
+            tripItem.IsChecked = false;
+            tripItem.CheckedAt = null;
+        }
+
+        return await tripItemRepository.UpdateAsync(tripItem);
+    }
+}
