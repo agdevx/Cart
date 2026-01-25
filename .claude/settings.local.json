@@ -17,7 +17,11 @@
       "Bash(ls:*)",
       "Bash(dotnet test:*)",
       "Bash(Select-String -Pattern \"error CS|CartDbContext\")",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(git -C \"D:\\\\AGDevX\\\\ws\\\\AGDevX.Cart\" status)",
+      "Bash(git -C \"D:\\\\AGDevX\\\\ws\\\\AGDevX.Cart\" diff)",
+      "Bash(git -C \"D:\\\\AGDevX\\\\ws\\\\AGDevX.Cart\" add \"AGDevX.Cart.Api/Controllers/InventoryController.cs\" \"AGDevX.Cart.Api.Tests/Controllers/InventoryControllerTests.cs\")",
+      "Bash(git -C \"D:\\\\AGDevX\\\\ws\\\\AGDevX.Cart\" commit -m \"$\\(cat <<''EOF''\nfeat: add InventoryController following established pattern\n\nImplements InventoryController with 7 endpoints following the\npattern established by HouseholdController and StoreController:\n- GET household/{householdId} - GetHouseholdInventory\n- GET personal - GetPersonalInventory\n- GET merged/{householdId} - GetMergedInventory\n- GET {id} - GetById\n- POST - Create\n- PUT {id} - Update\n- DELETE {id} - Delete\n\nUses primary constructor, User.GetUserId\\(\\), structured error\nresponses \\(UNAUTHORIZED, NOT_FOUND\\), ABOUTME headers, and //==\ncomments. All tests pass.\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }
