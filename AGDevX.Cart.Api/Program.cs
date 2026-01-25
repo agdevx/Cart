@@ -1,12 +1,27 @@
+// ABOUTME: Main entry point for the Cart API application
+// ABOUTME: Configures services, database context, and HTTP pipeline
+using AGDevX.Cart.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+//== Service Configuration
 builder.Services.AddOpenApi();
+
+//== Database Configuration
+builder.Services.AddDbContext<CartDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+//== Database Migration
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<CartDbContext>();
+    dbContext.Database.Migrate();
+}
+
+//== HTTP Pipeline Configuration
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -14,6 +29,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+//== API Endpoints
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -21,7 +37,7 @@ var summaries = new[]
 
 app.MapGet("/weatherforecast", () =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
+    var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
         (
             DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
