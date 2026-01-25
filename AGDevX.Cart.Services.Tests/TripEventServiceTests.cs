@@ -14,7 +14,8 @@ public class TripEventServiceTests
     {
         // Arrange
         var service = new TripEventService();
-        var tripId = 1;
+        var tripId = Guid.NewGuid();
+        var tripItemId = Guid.NewGuid();
         var receivedEvents = new List<TripEvent>();
 
         var subscription = service.SubscribeToTrip(tripId);
@@ -24,7 +25,7 @@ public class TripEventServiceTests
         {
             TripId = tripId,
             EventType = "ItemAdded",
-            TripItemId = 1,
+            TripItemId = tripItemId,
             Timestamp = DateTime.UtcNow
         };
 

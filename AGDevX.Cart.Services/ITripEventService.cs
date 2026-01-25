@@ -7,7 +7,7 @@ namespace AGDevX.Cart.Services;
 
 public interface ITripEventService
 {
-    IObservable<TripEvent> SubscribeToTrip(int tripId);
+    IObservable<TripEvent> SubscribeToTrip(Guid tripId);
     void PublishEvent(TripEvent tripEvent);
-    void UnsubscribeFromTrip(int tripId);
+    void UnsubscribeFromTrip(Guid tripId);
 }

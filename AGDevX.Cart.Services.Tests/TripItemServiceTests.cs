@@ -12,13 +12,15 @@ public class TripItemServiceTests
 {
     private readonly Mock<ITripItemRepository> _mockTripItemRepository;
     private readonly Mock<ITripRepository> _mockTripRepository;
+    private readonly Mock<ITripEventService> _mockTripEventService;
     private readonly TripItemService _tripItemService;
 
     public TripItemServiceTests()
     {
         _mockTripItemRepository = new Mock<ITripItemRepository>();
         _mockTripRepository = new Mock<ITripRepository>();
-        _tripItemService = new TripItemService(_mockTripItemRepository.Object, _mockTripRepository.Object);
+        _mockTripEventService = new Mock<ITripEventService>();
+        _tripItemService = new TripItemService(_mockTripItemRepository.Object, _mockTripRepository.Object, _mockTripEventService.Object);
     }
 
     [Fact]
@@ -178,5 +180,148 @@ public class TripItemServiceTests
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             _tripItemService.CheckItemAsync(tripItemId, true, userId));
+    }
+
+    [Fact]
+    public async Task Should_PublishItemAddedEvent_When_AddingTripItem()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var inventoryItemId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        var quantity = 2;
+
+        _mockTripRepository
+            .Setup(x => x.IsUserCollaboratorAsync(tripId, userId))
+            .ReturnsAsync(true);
+
+        _mockTripItemRepository
+            .Setup(x => x.CreateAsync(It.IsAny<TripItem>()))
+            .ReturnsAsync((TripItem ti) => { ti.Id = itemId; return ti; });
+
+        // Act
+        await _tripItemService.AddTripItemAsync(tripId, inventoryItemId, quantity, userId, null, null);
+
+        // Assert
+        _mockTripEventService.Verify(x => x.PublishEvent(
+            It.Is<TripEvent>(e => e.TripId == tripId && e.EventType == "ItemAdded" && e.TripItemId == itemId)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task Should_PublishItemUpdatedEvent_When_UpdatingTripItem()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripItemId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var tripItem = new TripItem
+        {
+            Id = tripItemId,
+            TripId = tripId,
+            InventoryItemId = Guid.NewGuid(),
+            Quantity = 1,
+            Trip = null!,
+            InventoryItem = null!
+        };
+
+        _mockTripItemRepository
+            .Setup(x => x.GetByIdAsync(tripItemId))
+            .ReturnsAsync(tripItem);
+
+        _mockTripRepository
+            .Setup(x => x.IsUserCollaboratorAsync(tripId, userId))
+            .ReturnsAsync(true);
+
+        _mockTripItemRepository
+            .Setup(x => x.UpdateAsync(It.IsAny<TripItem>()))
+            .ReturnsAsync((TripItem ti) => ti);
+
+        // Act
+        await _tripItemService.UpdateTripItemAsync(tripItemId, 5, userId, "Updated notes", null);
+
+        // Assert
+        _mockTripEventService.Verify(x => x.PublishEvent(
+            It.Is<TripEvent>(e => e.TripId == tripId && e.EventType == "ItemUpdated" && e.TripItemId == tripItemId)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task Should_PublishItemCheckedEvent_When_CheckingItem()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripItemId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var tripItem = new TripItem
+        {
+            Id = tripItemId,
+            TripId = tripId,
+            InventoryItemId = Guid.NewGuid(),
+            Quantity = 1,
+            IsChecked = false,
+            CheckedAt = null,
+            Trip = null!,
+            InventoryItem = null!
+        };
+
+        _mockTripItemRepository
+            .Setup(x => x.GetByIdAsync(tripItemId))
+            .ReturnsAsync(tripItem);
+
+        _mockTripRepository
+            .Setup(x => x.IsUserCollaboratorAsync(tripId, userId))
+            .ReturnsAsync(true);
+
+        _mockTripItemRepository
+            .Setup(x => x.UpdateAsync(It.IsAny<TripItem>()))
+            .ReturnsAsync((TripItem ti) => ti);
+
+        // Act
+        await _tripItemService.CheckItemAsync(tripItemId, true, userId);
+
+        // Assert
+        _mockTripEventService.Verify(x => x.PublishEvent(
+            It.Is<TripEvent>(e => e.TripId == tripId && e.EventType == "ItemChecked" && e.TripItemId == tripItemId)),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task Should_PublishItemRemovedEvent_When_DeletingTripItem()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripItemId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var tripItem = new TripItem
+        {
+            Id = tripItemId,
+            TripId = tripId,
+            InventoryItemId = Guid.NewGuid(),
+            Quantity = 1,
+            Trip = null!,
+            InventoryItem = null!
+        };
+
+        _mockTripItemRepository
+            .Setup(x => x.GetByIdAsync(tripItemId))
+            .ReturnsAsync(tripItem);
+
+        _mockTripRepository
+            .Setup(x => x.IsUserCollaboratorAsync(tripId, userId))
+            .ReturnsAsync(true);
+
+        _mockTripItemRepository
+            .Setup(x => x.DeleteAsync(tripItemId))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _tripItemService.DeleteTripItemAsync(tripItemId, userId);
+
+        // Assert
+        _mockTripEventService.Verify(x => x.PublishEvent(
+            It.Is<TripEvent>(e => e.TripId == tripId && e.EventType == "ItemRemoved" && e.TripItemId == tripItemId)),
+            Times.Once);
     }
 }

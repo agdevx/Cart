@@ -10,9 +10,9 @@ namespace AGDevX.Cart.Services;
 public class TripEventService : ITripEventService
 {
     //== ConcurrentDictionary maintains per-trip event subjects for isolated broadcasting
-    private readonly ConcurrentDictionary<int, Subject<TripEvent>> _tripSubjects = new();
+    private readonly ConcurrentDictionary<Guid, Subject<TripEvent>> _tripSubjects = new();
 
-    public IObservable<TripEvent> SubscribeToTrip(int tripId)
+    public IObservable<TripEvent> SubscribeToTrip(Guid tripId)
     {
         //== GetOrAdd ensures single subject per trip, preventing duplicate subscriptions
         var subject = _tripSubjects.GetOrAdd(tripId, _ => new Subject<TripEvent>());
@@ -28,7 +28,7 @@ public class TripEventService : ITripEventService
         }
     }
 
-    public void UnsubscribeFromTrip(int tripId)
+    public void UnsubscribeFromTrip(Guid tripId)
     {
         //== Clean up completed subscriptions to prevent memory leaks
         if (_tripSubjects.TryRemove(tripId, out var subject))
