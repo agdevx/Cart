@@ -4,10 +4,10 @@ namespace AGDevX.Cart.Shared.Models;
 
 public class HouseholdMember : BaseEntity
 {
-    public int HouseholdId { get; set; }
+    public Guid HouseholdId { get; set; }
     public Household? Household { get; set; }
 
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
     public User? User { get; set; }
 
     public DateTime JoinedAt { get; set; }

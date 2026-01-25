@@ -15,7 +15,7 @@ public class UserTests
         var user = new User();
 
         // Assert
-        user.Id.Should().Be(0);
+        user.Id.Should().Be(Guid.Empty);
         user.Email.Should().BeNull();
         user.PasswordHash.Should().BeNull();
         user.DisplayName.Should().BeNull();
