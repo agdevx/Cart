@@ -15,7 +15,9 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(ls:*)",
-      "Bash(dotnet test:*)"
+      "Bash(dotnet test:*)",
+      "Bash(Select-String -Pattern \"error CS|CartDbContext\")",
+      "Bash(git mv:*)"
     ]
   }
 }
