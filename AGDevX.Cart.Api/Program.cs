@@ -3,6 +3,8 @@
 using System.Text;
 using AGDevX.Cart.Auth;
 using AGDevX.Cart.Data;
+using AGDevX.Cart.Data.Repositories;
+using AGDevX.Cart.Services;
 using AGDevX.Cart.Shared.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -46,8 +48,20 @@ builder.Services.AddAuthorization();
 builder.Services.AddDbContext<CartDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//== Application Services
+//== Repository registrations
+builder.Services.AddScoped<IHouseholdRepository, HouseholdRepository>();
+builder.Services.AddScoped<IStoreRepository, StoreRepository>();
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+builder.Services.AddScoped<ITripRepository, TripRepository>();
+builder.Services.AddScoped<ITripItemRepository, TripItemRepository>();
+
+//== Service registrations
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IHouseholdService, HouseholdService>();
+builder.Services.AddScoped<IStoreService, StoreService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<ITripService, TripService>();
+builder.Services.AddScoped<ITripItemService, TripItemService>();
 
 var app = builder.Build();
 
