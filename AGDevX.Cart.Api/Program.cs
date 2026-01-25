@@ -62,6 +62,7 @@ builder.Services.AddScoped<IStoreService, StoreService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<ITripService, TripService>();
 builder.Services.AddScoped<ITripItemService, TripItemService>();
+builder.Services.AddSingleton<ITripEventService, TripEventService>(); //== Event broadcasting service (singleton for in-memory state)
 
 var app = builder.Build();
 
