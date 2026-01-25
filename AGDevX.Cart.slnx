@@ -1,0 +1,11 @@
+<Solution>
+  <Project Path="AGDevX.Cart.Api.Tests/AGDevX.Cart.Api.Tests.csproj" />
+  <Project Path="AGDevX.Cart.Api/AGDevX.Cart.Api.csproj" />
+  <Project Path="AGDevX.Cart.Auth.Tests/AGDevX.Cart.Auth.Tests.csproj" />
+  <Project Path="AGDevX.Cart.Auth/AGDevX.Cart.Auth.csproj" />
+  <Project Path="AGDevX.Cart.Data.Tests/AGDevX.Cart.Data.Tests.csproj" />
+  <Project Path="AGDevX.Cart.Data/AGDevX.Cart.Data.csproj" />
+  <Project Path="AGDevX.Cart.Services.Tests/AGDevX.Cart.Services.Tests.csproj" />
+  <Project Path="AGDevX.Cart.Services/AGDevX.Cart.Services.csproj" />
+  <Project Path="AGDevX.Cart.Shared/AGDevX.Cart.Shared.csproj" />
+</Solution>
