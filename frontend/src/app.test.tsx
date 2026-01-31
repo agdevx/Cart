@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react'
 import App from './app'
 
 describe('App', () => {
-  it('renders the app title', () => {
+  it('renders login page by default (unauthenticated)', () => {
     render(<App />)
-    expect(screen.getByText('AGDevX Cart')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/username/i)).toBeInTheDocument()
   })
 })
