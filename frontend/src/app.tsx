@@ -16,6 +16,7 @@ import { TripDetailPage } from '@/pages/trip-detail-page'
 import { ActiveTripPage } from '@/pages/active-trip-page'
 import { useAuth } from '@/auth/use-auth'
 import { BottomNav } from '@/features/bottom-nav/bottom-nav'
+import { PwaInstallPrompt } from '@/features/pwa-install-prompt/pwa-install-prompt'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth()
@@ -35,6 +36,7 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
+          <PwaInstallPrompt />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/inventory" element={<ProtectedRoute><LayoutWithNav><InventoryPage /></LayoutWithNav></ProtectedRoute>} />
