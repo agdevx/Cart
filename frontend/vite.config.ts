@@ -20,4 +20,9 @@ export default defineConfig({
       '@/utilities': path.resolve(__dirname, './src/utilities'),
     },
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/utilities/test-setup.ts',
+  },
 })
