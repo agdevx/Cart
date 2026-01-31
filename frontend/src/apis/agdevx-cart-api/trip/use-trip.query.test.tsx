@@ -46,7 +46,7 @@ describe('useTripQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockTrip)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trips/1', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trip/1', {
       token: 'test-token',
     })
   })

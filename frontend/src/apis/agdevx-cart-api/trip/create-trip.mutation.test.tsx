@@ -53,7 +53,7 @@ describe('useCreateTripMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockTrip)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trips', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trip', {
       method: 'POST',
       body: JSON.stringify({
         name: 'Grocery Shopping',
