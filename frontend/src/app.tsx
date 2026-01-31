@@ -7,11 +7,19 @@ import { queryClient } from '@/apis/tanstack-query/query-client'
 import { AuthProvider } from '@/auth/auth-provider'
 import { LoginPage } from '@/pages/login-page'
 import { useAuth } from '@/auth/use-auth'
+import { BottomNav } from '@/features/bottom-nav/bottom-nav'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth()
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
 }
+
+const LayoutWithNav = ({ children }: { children: React.ReactNode }) => (
+  <div className="min-h-screen pb-16">
+    {children}
+    <BottomNav />
+  </div>
+)
 
 const PlaceholderPage = ({ title }: { title: string }) => (
   <div className="p-4"><h1 className="text-2xl">{title}</h1></div>
@@ -24,9 +32,9 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/inventory" element={<ProtectedRoute><PlaceholderPage title="Inventory" /></ProtectedRoute>} />
-            <Route path="/shopping" element={<ProtectedRoute><PlaceholderPage title="Shopping" /></ProtectedRoute>} />
-            <Route path="/household" element={<ProtectedRoute><PlaceholderPage title="Household" /></ProtectedRoute>} />
+            <Route path="/inventory" element={<ProtectedRoute><LayoutWithNav><PlaceholderPage title="Inventory" /></LayoutWithNav></ProtectedRoute>} />
+            <Route path="/shopping" element={<ProtectedRoute><LayoutWithNav><PlaceholderPage title="Shopping" /></LayoutWithNav></ProtectedRoute>} />
+            <Route path="/household" element={<ProtectedRoute><LayoutWithNav><PlaceholderPage title="Household" /></LayoutWithNav></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/shopping" replace />} />
           </Routes>
         </BrowserRouter>
