@@ -11,6 +11,9 @@ import { CreateHouseholdPage } from '@/pages/create-household-page'
 import { JoinHouseholdPage } from '@/pages/join-household-page'
 import { InventoryPage } from '@/pages/inventory-page'
 import { AddInventoryItemPage } from '@/pages/add-inventory-item-page'
+import { ShoppingPage } from '@/pages/shopping-page'
+import { TripDetailPage } from '@/pages/trip-detail-page'
+import { ActiveTripPage } from '@/pages/active-trip-page'
 import { useAuth } from '@/auth/use-auth'
 import { BottomNav } from '@/features/bottom-nav/bottom-nav'
 
@@ -26,9 +29,6 @@ const LayoutWithNav = ({ children }: { children: React.ReactNode }) => (
   </div>
 )
 
-const PlaceholderPage = ({ title }: { title: string }) => (
-  <div className="p-4"><h1 className="text-2xl">{title}</h1></div>
-)
 
 const App = () => {
   return (
@@ -39,7 +39,9 @@ const App = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/inventory" element={<ProtectedRoute><LayoutWithNav><InventoryPage /></LayoutWithNav></ProtectedRoute>} />
             <Route path="/inventory/add" element={<ProtectedRoute><AddInventoryItemPage /></ProtectedRoute>} />
-            <Route path="/shopping" element={<ProtectedRoute><LayoutWithNav><PlaceholderPage title="Shopping" /></LayoutWithNav></ProtectedRoute>} />
+            <Route path="/shopping" element={<ProtectedRoute><LayoutWithNav><ShoppingPage /></LayoutWithNav></ProtectedRoute>} />
+            <Route path="/shopping/:tripId" element={<ProtectedRoute><TripDetailPage /></ProtectedRoute>} />
+            <Route path="/shopping/:tripId/active" element={<ProtectedRoute><ActiveTripPage /></ProtectedRoute>} />
             <Route path="/household" element={<ProtectedRoute><LayoutWithNav><HouseholdPage /></LayoutWithNav></ProtectedRoute>} />
             <Route path="/household/create" element={<ProtectedRoute><CreateHouseholdPage /></ProtectedRoute>} />
             <Route path="/household/join" element={<ProtectedRoute><JoinHouseholdPage /></ProtectedRoute>} />
