@@ -73,5 +73,6 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/utilities/test-setup.ts',
+    exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', '**/.{idea,git,cache,output,temp}/**'],
   },
 })
