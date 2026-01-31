@@ -21,11 +21,11 @@ describe('Authentication Flow', () => {
     const user = userEvent.setup()
 
     // Mock failed login
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 401,
       json: async () => ({ message: 'Invalid credentials' })
-    })
+    }) as typeof fetch
 
     render(<App />)
 
