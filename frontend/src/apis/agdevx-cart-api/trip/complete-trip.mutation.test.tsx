@@ -1,0 +1,121 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { renderHook, waitFor } from '@testing-library/react'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from '@/apis/tanstack-query/query-client'
+import { useCompleteTripMutation } from './complete-trip.mutation'
+import * as apiFetchModule from '../agdevx-cart-api-config'
+import * as useAuthModule from '@/auth/use-auth'
+import type { Trip } from '../models/trip'
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+)
+
+describe('useCompleteTripMutation', () => {
+  beforeEach(() => {
+    queryClient.clear()
+    vi.clearAllMocks()
+  })
+
+  it('completes trip successfully', async () => {
+    const mockTrip: Trip = {
+      id: 'trip1',
+      name: 'Grocery Shopping',
+      householdId: 'household1',
+      createdByUserId: 'user1',
+      isCompleted: true,
+      completedAt: '2024-01-01T12:00:00Z',
+      createdBy: 'user1',
+      createdDate: '2024-01-01',
+      modifiedBy: 'user1',
+      modifiedDate: '2024-01-01',
+    }
+
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      token: 'test-token',
+      isAuthenticated: true,
+      user: null,
+      setAuth: vi.fn(),
+      logout: vi.fn(),
+    })
+
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(mockTrip)
+
+    const { result } = renderHook(() => useCompleteTripMutation(), {
+      wrapper,
+    })
+
+    result.current.mutate('trip1')
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(result.current.data).toEqual(mockTrip)
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trips/trip1/complete', {
+      method: 'POST',
+      token: 'test-token',
+    })
+  })
+
+  it('invalidates trip queries on success', async () => {
+    const mockTrip: Trip = {
+      id: 'trip1',
+      name: 'Personal Trip',
+      householdId: null,
+      createdByUserId: 'user1',
+      isCompleted: true,
+      completedAt: '2024-01-01T12:00:00Z',
+      createdBy: 'user1',
+      createdDate: '2024-01-01',
+      modifiedBy: 'user1',
+      modifiedDate: '2024-01-01',
+    }
+
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      token: 'test-token',
+      isAuthenticated: true,
+      user: null,
+      setAuth: vi.fn(),
+      logout: vi.fn(),
+    })
+
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(mockTrip)
+
+    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries')
+
+    const { result } = renderHook(() => useCompleteTripMutation(), {
+      wrapper,
+    })
+
+    result.current.mutate('trip1')
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: ['trips'],
+    })
+  })
+
+  it('handles completion error', async () => {
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      token: 'test-token',
+      isAuthenticated: true,
+      user: null,
+      setAuth: vi.fn(),
+      logout: vi.fn(),
+    })
+
+    vi.spyOn(apiFetchModule, 'apiFetch').mockRejectedValue(
+      new Error('Network error')
+    )
+
+    const { result } = renderHook(() => useCompleteTripMutation(), {
+      wrapper,
+    })
+
+    result.current.mutate('trip1')
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+
+    expect(result.current.error).toEqual(new Error('Network error'))
+  })
+})
