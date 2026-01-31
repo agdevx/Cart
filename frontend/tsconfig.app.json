@@ -22,7 +22,23 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Path Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@/apis/*": ["src/apis/*"],
+      "@/auth/*": ["src/auth/*"],
+      "@/config/*": ["src/config/*"],
+      "@/features/*": ["src/features/*"],
+      "@/libs/*": ["src/libs/*"],
+      "@/models/*": ["src/models/*"],
+      "@/pages/*": ["src/pages/*"],
+      "@/services/*": ["src/services/*"],
+      "@/state/*": ["src/state/*"],
+      "@/styles/*": ["src/styles/*"],
+      "@/utilities/*": ["src/utilities/*"]
+    }
   },
   "include": ["src"]
 }
