@@ -6,6 +6,9 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 import { AuthProvider } from '@/auth/auth-provider'
 import { LoginPage } from '@/pages/login-page'
+import { HouseholdPage } from '@/pages/household-page'
+import { CreateHouseholdPage } from '@/pages/create-household-page'
+import { JoinHouseholdPage } from '@/pages/join-household-page'
 import { useAuth } from '@/auth/use-auth'
 import { BottomNav } from '@/features/bottom-nav/bottom-nav'
 
@@ -34,7 +37,9 @@ const App = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/inventory" element={<ProtectedRoute><LayoutWithNav><PlaceholderPage title="Inventory" /></LayoutWithNav></ProtectedRoute>} />
             <Route path="/shopping" element={<ProtectedRoute><LayoutWithNav><PlaceholderPage title="Shopping" /></LayoutWithNav></ProtectedRoute>} />
-            <Route path="/household" element={<ProtectedRoute><LayoutWithNav><PlaceholderPage title="Household" /></LayoutWithNav></ProtectedRoute>} />
+            <Route path="/household" element={<ProtectedRoute><LayoutWithNav><HouseholdPage /></LayoutWithNav></ProtectedRoute>} />
+            <Route path="/household/create" element={<ProtectedRoute><CreateHouseholdPage /></ProtectedRoute>} />
+            <Route path="/household/join" element={<ProtectedRoute><JoinHouseholdPage /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/shopping" replace />} />
           </Routes>
         </BrowserRouter>
