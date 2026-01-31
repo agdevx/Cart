@@ -4,7 +4,7 @@
 import { useEffect, useRef } from 'react'
 import { createSSEClient } from '@/libs/sse-client'
 
-export const useSSE = (url: string, token: string, onMessage: (data: any) => void, enabled: boolean = true) => {
+export const useSSE = (url: string, token: string, onMessage: (data: unknown) => void, enabled: boolean = true): void => {
   const clientRef = useRef<ReturnType<typeof createSSEClient> | null>(null)
 
   useEffect(() => {
@@ -12,7 +12,7 @@ export const useSSE = (url: string, token: string, onMessage: (data: any) => voi
       return
     }
 
-    const client = createSSEClient(url, token)
+    const client = createSSEClient(url)
     clientRef.current = client
 
     const unsubscribe = client.subscribe(onMessage)
@@ -27,6 +27,4 @@ export const useSSE = (url: string, token: string, onMessage: (data: any) => voi
       clientRef.current = null
     }
   }, [url, token, onMessage, enabled])
-
-  return clientRef.current
 }

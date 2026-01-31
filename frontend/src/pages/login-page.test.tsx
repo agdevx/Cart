@@ -1,9 +1,8 @@
 // ABOUTME: Tests for LoginPage component
 // ABOUTME: Verifies username input and form submission
 
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { userEvent } from '@testing-library/user-event'
 import { LoginPage } from './login-page'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/apis/tanstack-query/query-client'

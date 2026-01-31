@@ -21,7 +21,7 @@ export const JoinHouseholdPage = () => {
     try {
       await joinMutation.mutateAsync({ inviteCode: inviteCode.trim() })
       navigate('/household')
-    } catch (error) {
+    } catch {
       // Error is handled by mutation state
     }
   }

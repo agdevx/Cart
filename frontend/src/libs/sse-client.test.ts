@@ -1,8 +1,18 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { createSSEClient } from './sse-client'
 
+interface MockEventSource {
+  addEventListener: ReturnType<typeof vi.fn>
+  removeEventListener: ReturnType<typeof vi.fn>
+  close: ReturnType<typeof vi.fn>
+  readyState: number
+  CONNECTING: number
+  OPEN: number
+  CLOSED: number
+}
+
 describe('createSSEClient', () => {
-  let mockEventSource: any
+  let mockEventSource: MockEventSource
 
   beforeEach(() => {
     mockEventSource = {
@@ -15,9 +25,9 @@ describe('createSSEClient', () => {
       CLOSED: 2,
     }
 
-    global.EventSource = function(url: string, config?: any) {
-      return mockEventSource
-    } as any
+    global.EventSource = function() {
+      return mockEventSource as unknown as EventSource
+    } as unknown as typeof EventSource
   })
 
   afterEach(() => {
@@ -25,7 +35,7 @@ describe('createSSEClient', () => {
   })
 
   it('creates EventSource with correct URL', () => {
-    const client = createSSEClient('/api/events', 'test-token')
+    const client = createSSEClient('/api/events')
 
     // EventSource is created successfully
     expect(client).toBeDefined()
@@ -35,7 +45,7 @@ describe('createSSEClient', () => {
 
   it('subscribes to message events', () => {
     const onMessage = vi.fn()
-    const client = createSSEClient('/api/events', 'test-token')
+    const client = createSSEClient('/api/events')
 
     client.subscribe(onMessage)
 
@@ -47,13 +57,13 @@ describe('createSSEClient', () => {
 
   it('handles incoming messages', () => {
     const onMessage = vi.fn()
-    const client = createSSEClient('/api/events', 'test-token')
+    const client = createSSEClient('/api/events')
 
     client.subscribe(onMessage)
 
     const messageHandler = mockEventSource.addEventListener.mock.calls.find(
-      (call: any) => call[0] === 'message'
-    )[1]
+      (call: unknown[]) => call[0] === 'message'
+    )![1]
 
     const mockEvent = {
       data: JSON.stringify({ type: 'update', payload: { id: '1' } }),
@@ -66,7 +76,7 @@ describe('createSSEClient', () => {
 
   it('handles error events', () => {
     const onError = vi.fn()
-    const client = createSSEClient('/api/events', 'test-token')
+    const client = createSSEClient('/api/events')
 
     client.onError(onError)
 
@@ -76,8 +86,8 @@ describe('createSSEClient', () => {
     )
 
     const errorHandler = mockEventSource.addEventListener.mock.calls.find(
-      (call: any) => call[0] === 'error'
-    )[1]
+      (call: unknown[]) => call[0] === 'error'
+    )![1]
 
     errorHandler(new Error('Connection failed'))
 
@@ -85,7 +95,7 @@ describe('createSSEClient', () => {
   })
 
   it('closes connection', () => {
-    const client = createSSEClient('/api/events', 'test-token')
+    const client = createSSEClient('/api/events')
 
     client.close()
 
@@ -94,7 +104,7 @@ describe('createSSEClient', () => {
 
   it('unsubscribes message listener', () => {
     const onMessage = vi.fn()
-    const client = createSSEClient('/api/events', 'test-token')
+    const client = createSSEClient('/api/events')
 
     const unsubscribe = client.subscribe(onMessage)
     unsubscribe()
