@@ -9,6 +9,8 @@ import { LoginPage } from '@/pages/login-page'
 import { HouseholdPage } from '@/pages/household-page'
 import { CreateHouseholdPage } from '@/pages/create-household-page'
 import { JoinHouseholdPage } from '@/pages/join-household-page'
+import { InventoryPage } from '@/pages/inventory-page'
+import { AddInventoryItemPage } from '@/pages/add-inventory-item-page'
 import { useAuth } from '@/auth/use-auth'
 import { BottomNav } from '@/features/bottom-nav/bottom-nav'
 
@@ -35,7 +37,8 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/inventory" element={<ProtectedRoute><LayoutWithNav><PlaceholderPage title="Inventory" /></LayoutWithNav></ProtectedRoute>} />
+            <Route path="/inventory" element={<ProtectedRoute><LayoutWithNav><InventoryPage /></LayoutWithNav></ProtectedRoute>} />
+            <Route path="/inventory/add" element={<ProtectedRoute><AddInventoryItemPage /></ProtectedRoute>} />
             <Route path="/shopping" element={<ProtectedRoute><LayoutWithNav><PlaceholderPage title="Shopping" /></LayoutWithNav></ProtectedRoute>} />
             <Route path="/household" element={<ProtectedRoute><LayoutWithNav><HouseholdPage /></LayoutWithNav></ProtectedRoute>} />
             <Route path="/household/create" element={<ProtectedRoute><CreateHouseholdPage /></ProtectedRoute>} />
