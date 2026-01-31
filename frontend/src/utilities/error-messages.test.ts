@@ -1,0 +1,70 @@
+// ABOUTME: Tests for error message utility
+// ABOUTME: Verifies error code to user-friendly message mapping
+
+import { describe, it, expect } from 'vitest';
+import { getErrorMessage, ERROR_MESSAGES } from './error-messages';
+
+describe('error-messages', () => {
+  describe('ERROR_MESSAGES', () => {
+    it('should have UNKNOWN_ERROR defined', () => {
+      expect(ERROR_MESSAGES.UNKNOWN_ERROR).toBeDefined();
+      expect(ERROR_MESSAGES.UNKNOWN_ERROR).toBe(
+        'An unexpected error occurred. Please try again.'
+      );
+    });
+
+    it('should have NETWORK_ERROR defined', () => {
+      expect(ERROR_MESSAGES.NETWORK_ERROR).toBeDefined();
+      expect(ERROR_MESSAGES.NETWORK_ERROR).toBe(
+        'Network error. Please check your connection and try again.'
+      );
+    });
+
+    it('should have UNAUTHORIZED defined', () => {
+      expect(ERROR_MESSAGES.UNAUTHORIZED).toBeDefined();
+      expect(ERROR_MESSAGES.UNAUTHORIZED).toBe(
+        'You are not authorized to perform this action.'
+      );
+    });
+
+    it('should have INVALID_CREDENTIALS defined', () => {
+      expect(ERROR_MESSAGES.INVALID_CREDENTIALS).toBeDefined();
+      expect(ERROR_MESSAGES.INVALID_CREDENTIALS).toBe(
+        'Invalid email or password.'
+      );
+    });
+  });
+
+  describe('getErrorMessage', () => {
+    it('should return correct message for known error code', () => {
+      expect(getErrorMessage('NETWORK_ERROR')).toBe(
+        ERROR_MESSAGES.NETWORK_ERROR
+      );
+      expect(getErrorMessage('UNAUTHORIZED')).toBe(
+        ERROR_MESSAGES.UNAUTHORIZED
+      );
+      expect(getErrorMessage('INVALID_CREDENTIALS')).toBe(
+        ERROR_MESSAGES.INVALID_CREDENTIALS
+      );
+    });
+
+    it('should return UNKNOWN_ERROR message for unknown error code', () => {
+      expect(getErrorMessage('SOME_RANDOM_ERROR')).toBe(
+        ERROR_MESSAGES.UNKNOWN_ERROR
+      );
+      expect(getErrorMessage('NOT_A_REAL_ERROR')).toBe(
+        ERROR_MESSAGES.UNKNOWN_ERROR
+      );
+    });
+
+    it('should return UNKNOWN_ERROR message when code is undefined', () => {
+      expect(getErrorMessage(undefined as any)).toBe(
+        ERROR_MESSAGES.UNKNOWN_ERROR
+      );
+    });
+
+    it('should return UNKNOWN_ERROR message when code is null', () => {
+      expect(getErrorMessage(null as any)).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
+    });
+  });
+});
