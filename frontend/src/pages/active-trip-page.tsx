@@ -7,15 +7,34 @@ import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.qu
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import { useCheckTripItemMutation } from '@/apis/agdevx-cart-api/trip/check-trip-item.mutation'
 import { useCompleteTripMutation } from '@/apis/agdevx-cart-api/trip/complete-trip.mutation'
+import { useSSE } from '@/hooks/use-sse'
+import { useAuth } from '@/auth/use-auth'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback } from 'react'
 
 export const ActiveTripPage = () => {
   const { tripId } = useParams<{ tripId: string }>()
   const navigate = useNavigate()
+  const { token } = useAuth()
+  const queryClient = useQueryClient()
   const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
   const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!)
   const { data: inventory } = useInventoryQuery()
   const checkMutation = useCheckTripItemMutation()
   const completeMutation = useCompleteTripMutation()
+
+  const handleSSEMessage = useCallback((data: any) => {
+    // Invalidate trip items query to refetch with latest data
+    queryClient.invalidateQueries({ queryKey: ['trips', tripId, 'items'] })
+  }, [queryClient, tripId])
+
+  // Connect to SSE for real-time updates
+  useSSE(
+    `/api/trips/${tripId}/events`,
+    token || '',
+    handleSSEMessage,
+    !!tripId && !!token
+  )
 
   const handleToggleItem = async (tripItemId: string, currentlyChecked: boolean) => {
     if (!tripId) return
