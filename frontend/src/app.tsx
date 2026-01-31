@@ -1,20 +1,8 @@
-import { useState } from 'react'
-
-function App() {
-  const [count, setCount] = useState(0)
-
+const App = () => {
   return (
-    <>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-    </>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <h1 className="text-4xl font-bold text-blue-600">AGDevX Cart</h1>
+    </div>
   )
 }
 
