@@ -23,7 +23,7 @@ export const ActiveTripPage = () => {
   const checkMutation = useCheckTripItemMutation()
   const completeMutation = useCompleteTripMutation()
 
-  const handleSSEMessage = useCallback((data: any) => {
+  const handleSSEMessage = useCallback((_data: unknown) => {
     // Invalidate trip items query to refetch with latest data
     queryClient.invalidateQueries({ queryKey: ['trips', tripId, 'items'] })
   }, [queryClient, tripId])
@@ -45,7 +45,7 @@ export const ActiveTripPage = () => {
         tripItemId,
         isChecked: !currentlyChecked,
       })
-    } catch (error) {
+    } catch {
       // Error handled by mutation state
     }
   }
@@ -63,7 +63,7 @@ export const ActiveTripPage = () => {
     try {
       await completeMutation.mutateAsync(tripId)
       navigate('/shopping')
-    } catch (error) {
+    } catch {
       // Error handled by mutation state
     }
   }

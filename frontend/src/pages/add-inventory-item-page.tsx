@@ -29,7 +29,7 @@ export const AddInventoryItemPage = () => {
         householdId: householdId === 'personal' ? null : householdId,
       })
       navigate('/inventory')
-    } catch (error) {
+    } catch {
       // Error is handled by mutation state
     }
   }

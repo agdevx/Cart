@@ -31,7 +31,7 @@ export const TripDetailPage = () => {
       setSelectedItemId('')
       setQuantity('1')
       setShowAddItem(false)
-    } catch (error) {
+    } catch {
       // Error handled by mutation state
     }
   }

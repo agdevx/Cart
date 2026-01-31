@@ -32,7 +32,7 @@ export const ShoppingPage = () => {
       })
       setTripName('')
       setShowCreateForm(false)
-    } catch (error) {
+    } catch {
       // Error handled by mutation state
     }
   }

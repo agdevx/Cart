@@ -58,13 +58,13 @@ describe('error-messages', () => {
     });
 
     it('should return UNKNOWN_ERROR message when code is undefined', () => {
-      expect(getErrorMessage(undefined as any)).toBe(
+      expect(getErrorMessage(undefined as never)).toBe(
         ERROR_MESSAGES.UNKNOWN_ERROR
       );
     });
 
     it('should return UNKNOWN_ERROR message when code is null', () => {
-      expect(getErrorMessage(null as any)).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
+      expect(getErrorMessage(null as never)).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
     });
   });
 });

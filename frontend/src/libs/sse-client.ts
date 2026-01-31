@@ -2,22 +2,22 @@
 // ABOUTME: Provides type-safe EventSource interface with subscription management
 
 export interface SSEClient {
-  subscribe: (onMessage: (data: any) => void) => () => void
+  subscribe: (onMessage: (data: unknown) => void) => () => void
   onError: (onError: (error: Event) => void) => void
   close: () => void
 }
 
-export const createSSEClient = (url: string, token: string): SSEClient => {
+export const createSSEClient = (url: string): SSEClient => {
   const eventSource = new EventSource(url, {
     withCredentials: true,
   })
 
-  const messageHandlers: ((data: any) => void)[] = []
+  const messageHandlers: ((data: unknown) => void)[] = []
   let errorHandler: ((error: Event) => void) | null = null
 
   const handleMessage = (event: MessageEvent) => {
     try {
-      const data = JSON.parse(event.data)
+      const data: unknown = JSON.parse(event.data)
       messageHandlers.forEach((handler) => handler(data))
     } catch (error) {
       console.error('Failed to parse SSE message:', error)
@@ -34,7 +34,7 @@ export const createSSEClient = (url: string, token: string): SSEClient => {
   eventSource.addEventListener('error', handleError)
 
   return {
-    subscribe: (onMessage: (data: any) => void) => {
+    subscribe: (onMessage: (data: unknown) => void) => {
       messageHandlers.push(onMessage)
 
       return () => {
