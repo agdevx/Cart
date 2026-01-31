@@ -12,7 +12,7 @@ export const useTripQuery = (tripId: string) => {
   return useQuery({
     queryKey: ['trips', tripId],
     queryFn: async (): Promise<Trip> => {
-      return apiFetch<Trip>(`/api/trips/${tripId}`, { token })
+      return apiFetch<Trip>(`/api/trip/${tripId}`, { token })
     },
     enabled: !!token,
   })

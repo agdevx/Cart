@@ -56,14 +56,13 @@ describe('useAddTripItemMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockTripItem)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trips/trip1/items', {
-      method: 'POST',
-      body: JSON.stringify({
-        inventoryItemId: 'item1',
-        quantity: 2,
-      }),
-      token: 'test-token',
-    })
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith(
+      '/api/tripitem?tripId=trip1&inventoryItemId=item1&quantity=2',
+      {
+        method: 'POST',
+        token: 'test-token',
+      }
+    )
   })
 
   it('invalidates trip queries on success', async () => {

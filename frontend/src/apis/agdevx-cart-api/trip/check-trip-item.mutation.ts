@@ -19,9 +19,9 @@ export const useCheckTripItemMutation = () => {
   return useMutation({
     mutationFn: async (request: CheckTripItemRequest): Promise<TripItem> => {
       const { tripId, tripItemId, isChecked } = request
-      return apiFetch<TripItem>(`/api/trips/${tripId}/items/${tripItemId}/check`, {
-        method: 'PATCH',
-        body: JSON.stringify({ isChecked }),
+      const endpoint = isChecked ? 'check' : 'uncheck'
+      return apiFetch<TripItem>(`/api/tripitem/${tripItemId}/${endpoint}`, {
+        method: 'POST',
         token,
       })
     },

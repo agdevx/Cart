@@ -50,7 +50,7 @@ describe('useCompleteTripMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockTrip)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trips/trip1/complete', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trip/trip1/complete', {
       method: 'POST',
       token: 'test-token',
     })

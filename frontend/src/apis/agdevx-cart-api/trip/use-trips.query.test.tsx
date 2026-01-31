@@ -60,7 +60,7 @@ describe('useTripsQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockTrips)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trips', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trip/user', {
       token: 'test-token',
     })
   })
