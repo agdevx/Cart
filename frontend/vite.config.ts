@@ -69,6 +69,9 @@ export default defineConfig({
       '@/utilities': path.resolve(__dirname, './src/utilities'),
     },
   },
+  server: {
+    open: true,
+  },
   test: {
     globals: true,
     environment: 'jsdom',

@@ -24,7 +24,17 @@
       "Bash(git -C \"D:\\\\AGDevX\\\\ws\\\\AGDevX.Cart\" commit -m \"$\\(cat <<''EOF''\nfeat: add InventoryController following established pattern\n\nImplements InventoryController with 7 endpoints following the\npattern established by HouseholdController and StoreController:\n- GET household/{householdId} - GetHouseholdInventory\n- GET personal - GetPersonalInventory\n- GET merged/{householdId} - GetMergedInventory\n- GET {id} - GetById\n- POST - Create\n- PUT {id} - Update\n- DELETE {id} - Delete\n\nUses primary constructor, User.GetUserId\\(\\), structured error\nresponses \\(UNAUTHORIZED, NOT_FOUND\\), ABOUTME headers, and //==\ncomments. All tests pass.\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(npx eslint:*)",
       "Bash(npx playwright:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(taskkill:*)",
+      "Bash(dotnet run:*)",
+      "Bash(curl:*)",
+      "Bash(timeout /t 5 /nobreak)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(ping:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git worktree:*)",
+      "Bash(gh pr:*)"
     ]
   }
 }
