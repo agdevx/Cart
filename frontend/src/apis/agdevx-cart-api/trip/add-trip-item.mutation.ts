@@ -29,10 +29,14 @@ export const useAddTripItemMutation = () => {
       if (storeId) params.append('storeId', storeId)
       if (notes) params.append('notes', notes)
 
-      return apiFetch<TripItem>(`/api/tripitem?${params.toString()}`, {
+      const response = await apiFetch(`/api/tripitem?${params.toString()}`, {
         method: 'POST',
         token,
       })
+      if (!response.ok) {
+        throw new Error('Failed to add trip item')
+      }
+      return response.json() as Promise<TripItem>
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['trips', variables.tripId] })

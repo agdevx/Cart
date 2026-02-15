@@ -19,11 +19,15 @@ export const useCreateInventoryItemMutation = () => {
 
   return useMutation({
     mutationFn: async (request: CreateInventoryItemRequest): Promise<InventoryItem> => {
-      return apiFetch<InventoryItem>('/api/inventory', {
+      const response = await apiFetch('/api/inventory', {
         method: 'POST',
         body: JSON.stringify(request),
         token,
       })
+      if (!response.ok) {
+        throw new Error('Failed to create inventory item')
+      }
+      return response.json() as Promise<InventoryItem>
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] })

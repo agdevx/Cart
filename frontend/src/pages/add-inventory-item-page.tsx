@@ -1,7 +1,7 @@
 // ABOUTME: Add inventory item page
 // ABOUTME: Form for creating household or personal inventory items
 
-import { useState, FormEvent } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCreateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/create-inventory-item.mutation'
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
@@ -15,7 +15,7 @@ export const AddInventoryItemPage = () => {
   const createMutation = useCreateInventoryItemMutation()
   const { data: households } = useHouseholdsQuery()
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!name.trim()) {

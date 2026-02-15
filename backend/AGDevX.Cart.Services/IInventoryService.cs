@@ -8,6 +8,7 @@ namespace AGDevX.Cart.Services;
 public interface IInventoryService
 {
     Task<InventoryItem> CreateInventoryItemAsync(InventoryItem inventoryItem, Guid userId);
+    Task<IEnumerable<InventoryItem>> GetAllUserInventoryAsync(Guid userId);
     Task<IEnumerable<InventoryItem>> GetHouseholdInventoryAsync(Guid householdId, Guid userId);
     Task<IEnumerable<InventoryItem>> GetPersonalInventoryAsync(Guid userId);
     Task<IEnumerable<InventoryItem>> GetMergedInventoryAsync(Guid householdId, Guid userId);

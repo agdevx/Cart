@@ -23,7 +23,11 @@ export const LoginPage = () => {
         {
           id: response.userId,
           email: response.email,
-          displayName: response.displayName
+          displayName: response.displayName,
+          createdBy: null,
+          createdDate: new Date().toISOString(),
+          modifiedBy: null,
+          modifiedDate: null,
         },
         response.accessToken
       )

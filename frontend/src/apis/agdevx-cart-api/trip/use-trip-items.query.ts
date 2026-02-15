@@ -12,7 +12,11 @@ export const useTripItemsQuery = (tripId: string) => {
   return useQuery({
     queryKey: ['trips', tripId, 'items'],
     queryFn: async (): Promise<TripItem[]> => {
-      return apiFetch<TripItem[]>(`/api/tripitem/trip/${tripId}`, { token })
+      const response = await apiFetch(`/api/tripitem/trip/${tripId}`, { token })
+      if (!response.ok) {
+        throw new Error('Failed to fetch trip items')
+      }
+      return response.json() as Promise<TripItem[]>
     },
     enabled: !!token && !!tripId,
   })

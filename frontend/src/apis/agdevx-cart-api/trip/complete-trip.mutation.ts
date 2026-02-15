@@ -12,10 +12,14 @@ export const useCompleteTripMutation = () => {
 
   return useMutation({
     mutationFn: async (tripId: string): Promise<Trip> => {
-      return apiFetch<Trip>(`/api/trip/${tripId}/complete`, {
+      const response = await apiFetch(`/api/trip/${tripId}/complete`, {
         method: 'POST',
         token,
       })
+      if (!response.ok) {
+        throw new Error('Failed to complete trip')
+      }
+      return response.json() as Promise<Trip>
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trips'] })
