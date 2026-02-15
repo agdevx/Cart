@@ -14,7 +14,8 @@ describe('Authentication Flow', () => {
 
   it('shows login page when not authenticated', () => {
     render(<App />)
-    expect(screen.getByPlaceholderText(/username/i)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument()
   })
 
   it('shows error message on login failure', async () => {
@@ -29,10 +30,12 @@ describe('Authentication Flow', () => {
 
     render(<App />)
 
-    const input = screen.getByPlaceholderText(/username/i)
+    const emailInput = screen.getByPlaceholderText(/email/i)
+    const passwordInput = screen.getByPlaceholderText(/password/i)
     const button = screen.getByRole('button', { name: /login/i })
 
-    await user.type(input, 'wronguser')
+    await user.type(emailInput, 'wrong@example.com')
+    await user.type(passwordInput, 'wrongpassword')
     await user.click(button)
 
     await waitFor(() => {
@@ -40,21 +43,23 @@ describe('Authentication Flow', () => {
     })
   })
 
-  it('disables login button when username is empty', () => {
+  it('disables login button when email or password is empty', () => {
     render(<App />)
 
     const button = screen.getByRole('button', { name: /login/i })
     expect(button).toBeDisabled()
   })
 
-  it('enables login button when username is entered', async () => {
+  it('enables login button when email and password are entered', async () => {
     const user = userEvent.setup()
     render(<App />)
 
-    const input = screen.getByPlaceholderText(/username/i)
+    const emailInput = screen.getByPlaceholderText(/email/i)
+    const passwordInput = screen.getByPlaceholderText(/password/i)
     const button = screen.getByRole('button', { name: /login/i })
 
-    await user.type(input, 'testuser')
+    await user.type(emailInput, 'test@example.com')
+    await user.type(passwordInput, 'password123')
 
     expect(button).not.toBeDisabled()
   })

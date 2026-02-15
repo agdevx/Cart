@@ -12,7 +12,11 @@ export const useHouseholdsQuery = () => {
   return useQuery({
     queryKey: ['households'],
     queryFn: async (): Promise<Household[]> => {
-      return apiFetch<Household[]>('/api/households', { token })
+      const response = await apiFetch('/api/household', { token });
+      if (!response.ok) {
+        throw new Error('Failed to fetch households');
+      }
+      return response.json();
     },
     enabled: !!token,
   })

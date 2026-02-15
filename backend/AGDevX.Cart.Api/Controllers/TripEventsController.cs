@@ -1,22 +1,28 @@
 // ABOUTME: Server-Sent Events controller for real-time trip updates
 // ABOUTME: Provides SSE endpoint for clients to receive live trip item changes
 
+using System.Reactive.Linq;
 using System.Text.Json;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Shared.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace AGDevX.Cart.Api.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("api/trips/{tripId}/events")]
-public class TripEventsController(ITripEventService tripEventService, ITripRepository tripRepository) : ControllerBase
+public class TripEventsController(
+    ITripEventService tripEventService,
+    ITripRepository tripRepository,
+    IOptions<JsonOptions> jsonOptions) : ControllerBase
 {
     private readonly ITripEventService _tripEventService = tripEventService;
     private readonly ITripRepository _tripRepository = tripRepository;
+    private readonly JsonSerializerOptions _jsonSerializerOptions = jsonOptions.Value.JsonSerializerOptions;
 
     [HttpGet]
     public async Task GetEvents(Guid tripId, CancellationToken cancellationToken)
@@ -43,7 +49,7 @@ public class TripEventsController(ITripEventService tripEventService, ITripRepos
 
             await foreach (var tripEvent in subscription.ToAsyncEnumerable().WithCancellation(cancellationToken))
             {
-                var eventData = $"data: {JsonSerializer.Serialize(tripEvent)}\n\n";
+                var eventData = $"data: {JsonSerializer.Serialize(tripEvent, _jsonSerializerOptions)}\n\n";
                 await Response.WriteAsync(eventData, cancellationToken);
                 await Response.Body.FlushAsync(cancellationToken);
             }

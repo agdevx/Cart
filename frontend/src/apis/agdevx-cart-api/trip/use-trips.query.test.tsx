@@ -53,7 +53,10 @@ describe('useTripsQuery', () => {
       logout: vi.fn(),
     })
 
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(mockTrips)
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
+      ok: true,
+      json: async () => mockTrips,
+    } as Response)
 
     const { result } = renderHook(() => useTripsQuery(), { wrapper })
 

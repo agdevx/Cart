@@ -53,7 +53,10 @@ describe('useInventoryQuery', () => {
       logout: vi.fn(),
     })
 
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(mockInventory)
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
+      ok: true,
+      json: async () => mockInventory,
+    } as Response)
 
     const { result } = renderHook(() => useInventoryQuery(), { wrapper })
 

@@ -34,7 +34,10 @@ describe('useCreateHouseholdMutation', () => {
       logout: vi.fn(),
     })
 
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(mockHousehold)
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
+      ok: true,
+      json: async () => mockHousehold,
+    } as Response)
 
     const { result } = renderHook(() => useCreateHouseholdMutation(), { wrapper })
 
@@ -43,9 +46,10 @@ describe('useCreateHouseholdMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockHousehold)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/households', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household', {
       method: 'POST',
-      body: JSON.stringify({ name: 'New Household' }),
+      body: JSON.stringify('New Household'),
+      headers: { 'Content-Type': 'application/json' },
       token: 'test-token',
     })
   })
@@ -67,7 +71,10 @@ describe('useCreateHouseholdMutation', () => {
       logout: vi.fn(),
     })
 
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(mockHousehold)
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
+      ok: true,
+      json: async () => mockHousehold,
+    } as Response)
 
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
 
