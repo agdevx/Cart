@@ -20,10 +20,14 @@ export const useCheckTripItemMutation = () => {
     mutationFn: async (request: CheckTripItemRequest): Promise<TripItem> => {
       const { tripItemId, isChecked } = request
       const endpoint = isChecked ? 'check' : 'uncheck'
-      return apiFetch<TripItem>(`/api/tripitem/${tripItemId}/${endpoint}`, {
+      const response = await apiFetch(`/api/tripitem/${tripItemId}/${endpoint}`, {
         method: 'POST',
         token,
       })
+      if (!response.ok) {
+        throw new Error('Failed to check trip item')
+      }
+      return response.json() as Promise<TripItem>
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['trips', variables.tripId] })

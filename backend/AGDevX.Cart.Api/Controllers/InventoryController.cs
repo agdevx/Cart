@@ -14,6 +14,22 @@ namespace AGDevX.Cart.Api.Controllers;
 [Route("api/[controller]")]
 public class InventoryController(IInventoryService inventoryService) : ControllerBase
 {
+    //== Get all inventory items for the authenticated user (personal + all households)
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var items = await inventoryService.GetAllUserInventoryAsync(userId);
+            return Ok(items);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
+        }
+    }
+
     //== Get all inventory items for a specific household
     [HttpGet("household/{householdId}")]
     public async Task<IActionResult> GetHouseholdInventory(Guid householdId)

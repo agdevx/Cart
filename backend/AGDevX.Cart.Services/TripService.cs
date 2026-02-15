@@ -26,7 +26,8 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
             CreatedByUserId = userId,
             HouseholdId = householdId,
             IsCompleted = false,
-            CompletedAt = null
+            CompletedAt = null,
+            CreatedDate = DateTime.UtcNow
         };
 
         return await tripRepository.CreateAsync(trip);

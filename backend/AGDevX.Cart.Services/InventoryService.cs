@@ -24,20 +24,33 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
                 throw new UnauthorizedAccessException("User is not a member of the household");
             }
         }
-        else if (inventoryItem.OwnerUserId.HasValue)
-        {
-            //== Personal item: verify user owns it
-            if (inventoryItem.OwnerUserId.Value != userId)
-            {
-                throw new UnauthorizedAccessException("User cannot create items for another user");
-            }
-        }
         else
         {
-            throw new ArgumentException("InventoryItem must have either HouseholdId or OwnerUserId");
+            //== Personal item: automatically set owner to current user
+            inventoryItem.OwnerUserId = userId;
         }
 
         return await inventoryRepository.CreateAsync(inventoryItem);
+    }
+
+    public async Task<IEnumerable<InventoryItem>> GetAllUserInventoryAsync(Guid userId)
+    {
+        //== Get all households the user is a member of
+        var userHouseholds = await householdRepository.GetUserHouseholdsAsync(userId);
+
+        //== Get personal items
+        var personalItems = await inventoryRepository.GetPersonalItemsAsync(userId);
+
+        //== Get items from all user's households
+        var householdItems = new List<InventoryItem>();
+        foreach (var household in userHouseholds)
+        {
+            var items = await inventoryRepository.GetHouseholdItemsAsync(household.Id);
+            householdItems.AddRange(items);
+        }
+
+        //== Combine and return all items
+        return personalItems.Concat(householdItems);
     }
 
     public async Task<IEnumerable<InventoryItem>> GetHouseholdInventoryAsync(Guid householdId, Guid userId)

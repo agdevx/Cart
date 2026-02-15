@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
-import { useState, FormEvent } from 'react'
+import { useState } from 'react'
 
 export const ShoppingPage = () => {
   const { data: trips, isLoading } = useTripsQuery()
@@ -18,7 +18,7 @@ export const ShoppingPage = () => {
   const activeTrips = trips?.filter((trip) => !trip.isCompleted) || []
   const completedTrips = trips?.filter((trip) => trip.isCompleted) || []
 
-  const handleCreateTrip = async (e: FormEvent) => {
+  const handleCreateTrip = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!tripName.trim()) {

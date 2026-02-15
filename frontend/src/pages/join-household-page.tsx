@@ -1,7 +1,7 @@
 // ABOUTME: Join household page
 // ABOUTME: Form for joining an existing household via invite code
 
-import { useState, FormEvent } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useJoinHouseholdMutation } from '@/apis/agdevx-cart-api/household/join-household.mutation'
 import { getErrorMessage } from '@/utilities/error-messages'
@@ -11,7 +11,7 @@ export const JoinHouseholdPage = () => {
   const navigate = useNavigate()
   const joinMutation = useJoinHouseholdMutation()
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!inviteCode.trim()) {

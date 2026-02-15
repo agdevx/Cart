@@ -26,12 +26,33 @@ export async function apiFetch(
   const { token: tokenInOptions, ...fetchOptions } = options;
   const token = tokenInOptions || tokenParam;
 
-  const headers: HeadersInit = {
-    ...fetchOptions.headers,
-  };
+  const headers: Record<string, string> = {};
+
+  // Copy existing headers if they exist
+  if (fetchOptions.headers) {
+    const existingHeaders = fetchOptions.headers;
+    if (existingHeaders instanceof Headers) {
+      existingHeaders.forEach((value, key) => {
+        headers[key] = value;
+      });
+    } else if (Array.isArray(existingHeaders)) {
+      existingHeaders.forEach(([key, value]) => {
+        headers[key] = value;
+      });
+    } else {
+      Object.entries(existingHeaders).forEach(([key, value]) => {
+        headers[key] = value;
+      });
+    }
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Set Content-Type to application/json if body is present and Content-Type not already set
+  if (fetchOptions.body && !headers['Content-Type'] && !headers['content-type']) {
+    headers['Content-Type'] = 'application/json';
   }
 
   const url = `${API_BASE_URL}${endpoint}`;
