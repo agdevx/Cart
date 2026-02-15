@@ -50,7 +50,8 @@
       "mcp__chrome-devtools__fill_form",
       "mcp__chrome-devtools__fill",
       "mcp__chrome-devtools__wait_for",
-      "mcp__chrome-devtools__take_screenshot"
+      "mcp__chrome-devtools__take_screenshot",
+      "Bash(find:*)"
     ]
   }
 }

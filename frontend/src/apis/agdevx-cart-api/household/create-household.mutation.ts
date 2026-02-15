@@ -18,7 +18,7 @@ export const useCreateHouseholdMutation = () => {
     mutationFn: async (request: CreateHouseholdRequest): Promise<Household> => {
       const response = await apiFetch('/api/household', {
         method: 'POST',
-        body: JSON.stringify(request),
+        body: JSON.stringify(request.name),
         token,
       });
       if (!response.ok) {
