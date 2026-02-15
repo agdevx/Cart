@@ -36,14 +36,17 @@ describe('useHouseholdsQuery', () => {
       logout: vi.fn(),
     })
 
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(mockHouseholds)
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
+      ok: true,
+      json: async () => mockHouseholds,
+    } as Response)
 
     const { result } = renderHook(() => useHouseholdsQuery(), { wrapper })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockHouseholds)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/households', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household', {
       token: 'test-token',
     })
   })

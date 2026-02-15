@@ -5,6 +5,6 @@ import App from './app'
 describe('App', () => {
   it('renders login page by default (unauthenticated)', () => {
     render(<App />)
-    expect(screen.getByPlaceholderText(/username/i)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument()
   })
 })

@@ -12,7 +12,11 @@ export const useInventoryQuery = () => {
   return useQuery({
     queryKey: ['inventory'],
     queryFn: async (): Promise<InventoryItem[]> => {
-      return apiFetch<InventoryItem[]>('/api/inventory', { token })
+      const response = await apiFetch('/api/inventory', { token });
+      if (!response.ok) {
+        throw new Error('Failed to fetch inventory');
+      }
+      return response.json();
     },
     enabled: !!token,
   })
