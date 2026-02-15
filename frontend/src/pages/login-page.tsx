@@ -2,7 +2,7 @@
 // ABOUTME: Simple username-only authentication for MVP
 
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useLoginMutation } from '@/apis/agdevx-cart-api/auth/login.mutation'
 import { useAuth } from '@/auth/use-auth'
 
@@ -81,6 +81,13 @@ export const LoginPage = () => {
             </p>
           )}
         </form>
+        {/* Link to Register */}
+        <p className="mt-4 text-center text-sm text-gray-600">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+            Sign up
+          </Link>
+        </p>
       </div>
     </div>
   )
