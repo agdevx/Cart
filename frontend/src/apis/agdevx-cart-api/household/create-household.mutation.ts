@@ -16,11 +16,16 @@ export const useCreateHouseholdMutation = () => {
 
   return useMutation({
     mutationFn: async (request: CreateHouseholdRequest): Promise<Household> => {
-      return apiFetch<Household>('/api/households', {
+      const response = await apiFetch('/api/household', {
         method: 'POST',
-        body: JSON.stringify(request),
+        body: JSON.stringify(request.name),
+        headers: { 'Content-Type': 'application/json' },
         token,
-      })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create household');
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['households'] })

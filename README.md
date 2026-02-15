@@ -5,17 +5,18 @@ Self-hosted grocery shopping list application with real-time collaboration.
 ## Status
 
 - ✅ **Backend API** - Complete with 115 tests passing
-- ✅ **Frontend PWA** - Complete with 118 tests passing
-- 🔄 **Integration** - Not yet connected (frontend uses mocked API)
+- ✅ **Frontend PWA** - Complete with 100 unit tests passing
+- ✅ **Integration** - Fully connected with 9 integration tests passing (100%)
 - 📋 **Docker** - Planned but not started
 - 📋 **Deployment** - Planned but not started
 
-**Next Step**: Connect frontend to backend and create true end-to-end integration tests.
+**Latest**: Frontend-backend integration complete! Full authentication flow, CORS, session persistence, and all API operations working. See [INTEGRATION-SUMMARY.md](INTEGRATION-SUMMARY.md) for details.
 
 ## Features
 
 ### Current (Implemented)
-- JWT-based authentication (username-only for MVP)
+- JWT-based authentication with email + password (BCrypt hashing)
+- Session persistence across page reloads
 - Household management (create/join with invite codes)
 - Personal and household inventory items
 - Shopping trip workflow (draft → active → completed)
@@ -76,7 +77,8 @@ AGDevX.Cart/                          # Monorepo root
 │   │   ├── pages/                   # Page components
 │   │   ├── state/                   # Jotai atoms
 │   │   └── utilities/               # Helpers
-│   ├── e2e/                         # Playwright tests
+│   ├── e2e/                         # Playwright E2E tests (mocked API)
+│   ├── e2e-integration/             # Integration tests (real backend)
 │   └── public/                      # Static assets
 ├── docs/
 │   └── plans/                       # Design & implementation docs
@@ -85,47 +87,42 @@ AGDevX.Cart/                          # Monorepo root
 
 ## Getting Started
 
-### Prerequisites
-- .NET 10 SDK
-- Node.js 20+
-- npm
+**For complete development setup and workflow, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)**
 
-### Backend (Standalone)
+### Quick Start
 
-```bash
-cd backend
-dotnet restore
-dotnet run --project AGDevX.Cart.Api
-```
+1. **Backend:**
+   ```bash
+   cd backend
+   dotnet run --project AGDevX.Cart.Api
+   # API at http://localhost:5000
+   ```
 
-API runs at: `http://localhost:5000`
+2. **Frontend:**
+   ```bash
+   cd frontend
+   cp .env.example .env.local
+   npm install
+   npm run dev
+   # Frontend at http://localhost:5173
+   ```
 
-### Frontend (Standalone with Mocked API)
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Frontend runs at: `http://localhost:5173`
-
-**Note:** Frontend currently uses mocked API responses for development and testing. Not yet connected to real backend.
+3. **Open browser:** Navigate to `http://localhost:5173`
 
 ### Running Tests
 
-**Backend tests:**
+**Backend (115 tests):**
 ```bash
 cd backend
 dotnet test
 ```
-115 tests: unit + integration for all services, repositories, and controllers
 
-**Frontend tests:**
+**Frontend (136+ tests):**
 ```bash
 cd frontend
-npm test              # Vitest unit/integration (101 tests)
-npx playwright test   # Playwright E2E (17 tests)
+npm test                      # Vitest unit/integration (101 tests)
+npm run test:e2e              # Playwright E2E with mocks (17 tests)
+npm run test:integration      # Integration tests with real backend
 ```
 
 ## Development
@@ -198,10 +195,10 @@ npx tsc --noEmit     # TypeScript check
 
 ## Documentation
 
-See `docs/plans/` for detailed design and implementation documentation:
-- Design documents
-- Implementation plans
-- Architecture decisions
+- **[Development Guide](docs/DEVELOPMENT.md)** - Setup, running, testing, troubleshooting
+- **[Integration Tests](frontend/e2e-integration/README.md)** - Full-stack integration testing
+- **`docs/plans/`** - Design documents and implementation plans
+- **`.claude/NOTES.md`** - Project status and history
 
 ## Contributing
 
