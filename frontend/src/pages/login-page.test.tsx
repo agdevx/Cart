@@ -28,4 +28,10 @@ describe('LoginPage', () => {
     render(createElement(LoginPage), { wrapper })
     expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument()
   })
+
+  it('renders link to registration page', () => {
+    render(createElement(LoginPage), { wrapper })
+    expect(screen.getByText(/don't have an account/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /sign up/i })).toBeInTheDocument()
+  })
 })
