@@ -1,6 +1,7 @@
 // ABOUTME: useAuth hook for managing authentication state
 // ABOUTME: Provides methods to set/clear auth state and persist token to localStorage
 
+import { useCallback } from 'react';
 import { useAtom } from 'jotai';
 import { currentUserAtom, authTokenAtom } from '@/state/auth-atoms';
 import type { User } from '@/apis/agdevx-cart-api/models/user';
@@ -20,7 +21,7 @@ export function useAuth() {
    * Sets the authenticated user and token
    * Persists both to localStorage
    */
-  const setAuth = (user: User, token: string) => {
+  const setAuth = useCallback((user: User, token: string) => {
     setUser(user);
     setTokenAtom(token);
 
@@ -28,13 +29,13 @@ export function useAuth() {
       localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
       localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(user));
     }
-  };
+  }, [setUser, setTokenAtom]);
 
   /**
    * Clears the authenticated user and token
    * Removes both from localStorage
    */
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     setTokenAtom(null);
 
@@ -42,7 +43,7 @@ export function useAuth() {
       localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
       localStorage.removeItem(AUTH_USER_STORAGE_KEY);
     }
-  };
+  }, [setUser, setTokenAtom]);
 
   return {
     user,
