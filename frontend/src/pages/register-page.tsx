@@ -1,7 +1,7 @@
 // ABOUTME: Registration page component
 // ABOUTME: Handles user registration with validation and auto-login
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useRegisterMutation } from '@/apis/agdevx-cart-api/auth/register.mutation';
 import { useAuth } from '@/auth/use-auth';
@@ -10,9 +10,7 @@ export const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [displayNameError, setDisplayNameError] = useState('');
+  const [serverEmailError, setServerEmailError] = useState('');
   const [touched, setTouched] = useState({
     email: false,
     password: false,
@@ -38,45 +36,36 @@ export const RegisterPage = () => {
   // Form validation
   const isFormValid = isEmailValid && isPasswordValid && isDisplayNameValid;
 
-  // Validation effects
-  useEffect(() => {
-    if (!touched.email) return;
-    if (!email.trim()) {
-      setEmailError('Email is required');
-    } else if (!isEmailValid) {
-      setEmailError('Please enter a valid email address');
-    } else {
-      setEmailError('');
-    }
-  }, [email, touched.email, isEmailValid]);
+  // Compute error messages directly from state
+  const emailError = touched.email
+    ? !email.trim()
+      ? 'Email is required'
+      : !isEmailValid
+      ? 'Please enter a valid email address'
+      : serverEmailError
+    : '';
 
-  useEffect(() => {
-    if (!touched.password) return;
-    if (!password) {
-      setPasswordError('Password is required');
-    } else if (!hasMinLength) {
-      setPasswordError('Password must be at least 8 characters');
-    } else if (!hasUppercase) {
-      setPasswordError('Password must contain at least one uppercase letter');
-    } else if (!hasNumber) {
-      setPasswordError('Password must contain at least one number');
-    } else {
-      setPasswordError('');
-    }
-  }, [password, touched.password, hasMinLength, hasUppercase, hasNumber]);
+  const passwordError = touched.password
+    ? !password
+      ? 'Password is required'
+      : !hasMinLength
+      ? 'Password must be at least 8 characters'
+      : !hasUppercase
+      ? 'Password must contain at least one uppercase letter'
+      : !hasNumber
+      ? 'Password must contain at least one number'
+      : ''
+    : '';
 
-  useEffect(() => {
-    if (!touched.displayName) return;
-    if (!displayName.trim()) {
-      setDisplayNameError('Display name is required');
-    } else {
-      setDisplayNameError('');
-    }
-  }, [displayName, touched.displayName]);
+  const displayNameError = touched.displayName && !displayName.trim()
+    ? 'Display name is required'
+    : '';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) return;
+
+    setServerEmailError('');
 
     try {
       const response = await registerMutation.mutateAsync({
@@ -99,9 +88,10 @@ export const RegisterPage = () => {
       );
 
       navigate('/shopping');
-    } catch (error: any) {
-      if (error.message?.includes('already exists') || error.message?.includes('DUPLICATE_EMAIL')) {
-        setEmailError('This email is already registered');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('already exists') || errorMessage.includes('DUPLICATE_EMAIL')) {
+        setServerEmailError('This email is already registered');
       } else {
         console.error('Registration failed:', error);
       }
