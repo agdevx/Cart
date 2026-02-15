@@ -13,7 +13,6 @@ public static class ObservableExtensions
     {
         var queue = new System.Collections.Concurrent.BlockingCollection<T>();
         Exception? error = null;
-        var completed = false;
 
         using var subscription = observable.Subscribe(
             onNext: item => queue.Add(item),
@@ -24,7 +23,6 @@ public static class ObservableExtensions
             },
             onCompleted: () =>
             {
-                completed = true;
                 queue.CompleteAdding();
             }
         );

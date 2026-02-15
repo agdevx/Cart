@@ -2,7 +2,7 @@
 // ABOUTME: Verifies API integration and response handling
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/apis/tanstack-query/query-client';
 import { useRegisterMutation } from './register.mutation';
@@ -28,8 +28,8 @@ describe('useRegisterMutation', () => {
           email: 'test@example.com',
           displayName: 'Test User'
         })
-      })
-    ) as any;
+      } as Response)
+    ) as typeof fetch;
 
     const { result } = renderHook(() => useRegisterMutation(), { wrapper });
 
@@ -56,8 +56,8 @@ describe('useRegisterMutation', () => {
           email: 'test@example.com',
           displayName: 'Test'
         })
-      })
-    ) as any;
+      } as Response)
+    ) as typeof fetch;
     global.fetch = mockFetch;
 
     const { result } = renderHook(() => useRegisterMutation(), { wrapper });
@@ -88,8 +88,8 @@ describe('useRegisterMutation', () => {
           errorCode: 'DUPLICATE_EMAIL',
           message: 'Email already exists'
         })
-      })
-    ) as any;
+      } as Response)
+    ) as typeof fetch;
 
     const { result } = renderHook(() => useRegisterMutation(), { wrapper });
 

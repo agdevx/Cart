@@ -34,7 +34,11 @@
       "Bash(ping:*)",
       "Bash(git check-ignore:*)",
       "Bash(git worktree:*)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(lsof:*)",
+      "mcp__chrome-devtools__new_page",
+      "Bash(where:*)",
+      "Bash(xargs:*)"
     ]
   }
 }
