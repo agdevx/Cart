@@ -2,10 +2,11 @@
 // ABOUTME: Verifies authentication hook behavior including setAuth, logout, and localStorage
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
 import { Provider } from 'jotai';
 import { useAuth } from './use-auth';
+import { AuthProvider } from './auth-provider';
 import type { User } from '@/apis/agdevx-cart-api/models/user';
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -136,11 +137,29 @@ describe('useAuth', () => {
     expect(localStorageMock['authToken']).toBeUndefined();
   });
 
-  it('should load token from localStorage on initialization', () => {
+  it('should load token from localStorage on initialization', async () => {
     localStorageMock['authToken'] = 'stored-token-456';
+    localStorageMock['authUser'] = JSON.stringify({
+      id: '456',
+      email: 'stored@example.com',
+      displayName: 'Stored User',
+      createdBy: null,
+      createdDate: '2024-01-01T00:00:00Z',
+      modifiedBy: null,
+      modifiedDate: null,
+    });
 
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    // Use AuthProvider which loads from localStorage
+    const wrapperWithAuthProvider = ({ children }: { children: React.ReactNode }) =>
+      createElement(Provider, {},
+        createElement(AuthProvider, {}, children)
+      );
 
-    expect(result.current.token).toBe('stored-token-456');
+    const { result } = renderHook(() => useAuth(), { wrapper: wrapperWithAuthProvider });
+
+    // Wait for useEffect in AuthProvider to run
+    await waitFor(() => {
+      expect(result.current.token).toBe('stored-token-456');
+    });
   });
 });
