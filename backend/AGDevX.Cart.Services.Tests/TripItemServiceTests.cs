@@ -69,8 +69,6 @@ public class TripItemServiceTests
             Quantity = 1,
             IsChecked = false,
             CheckedAt = null,
-            Trip = null!,
-            InventoryItem = null!
         };
 
         _mockTripItemRepository
@@ -109,8 +107,6 @@ public class TripItemServiceTests
             Quantity = 1,
             IsChecked = true,
             CheckedAt = DateTime.UtcNow,
-            Trip = null!,
-            InventoryItem = null!
         };
 
         _mockTripItemRepository
@@ -165,8 +161,6 @@ public class TripItemServiceTests
             InventoryItemId = Guid.NewGuid(),
             Quantity = 1,
             IsChecked = false,
-            Trip = null!,
-            InventoryItem = null!
         };
 
         _mockTripItemRepository
@@ -222,8 +216,6 @@ public class TripItemServiceTests
             TripId = tripId,
             InventoryItemId = Guid.NewGuid(),
             Quantity = 1,
-            Trip = null!,
-            InventoryItem = null!
         };
 
         _mockTripItemRepository
@@ -262,8 +254,6 @@ public class TripItemServiceTests
             Quantity = 1,
             IsChecked = false,
             CheckedAt = null,
-            Trip = null!,
-            InventoryItem = null!
         };
 
         _mockTripItemRepository
@@ -300,8 +290,6 @@ public class TripItemServiceTests
             TripId = tripId,
             InventoryItemId = Guid.NewGuid(),
             Quantity = 1,
-            Trip = null!,
-            InventoryItem = null!
         };
 
         _mockTripItemRepository

@@ -112,4 +112,80 @@ describe('RegisterPage', () => {
       expect(screen.getByText(/display name is required/i)).toBeInTheDocument();
     });
   });
+
+  it('renders confirm password input', () => {
+    render(createElement(RegisterPage), { wrapper });
+    expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
+  });
+
+  it('shows error when confirm password is empty on blur', async () => {
+    render(createElement(RegisterPage), { wrapper });
+    const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
+
+    fireEvent.focus(confirmPasswordInput);
+    fireEvent.blur(confirmPasswordInput);
+
+    await waitFor(() => {
+      expect(screen.getByText(/please confirm your password/i)).toBeInTheDocument();
+    });
+  });
+
+  it('shows mismatch error when passwords do not match', async () => {
+    render(createElement(RegisterPage), { wrapper });
+    const passwordInput = screen.getByLabelText(/^password$/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
+
+    fireEvent.change(passwordInput, { target: { value: 'Password1' } });
+    fireEvent.change(confirmPasswordInput, { target: { value: 'Password2' } });
+    fireEvent.blur(confirmPasswordInput);
+
+    await waitFor(() => {
+      expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
+    });
+  });
+
+  it('shows no error when passwords match', async () => {
+    render(createElement(RegisterPage), { wrapper });
+    const passwordInput = screen.getByLabelText(/^password$/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
+
+    fireEvent.change(passwordInput, { target: { value: 'Password1' } });
+    fireEvent.change(confirmPasswordInput, { target: { value: 'Password1' } });
+    fireEvent.blur(confirmPasswordInput);
+
+    await waitFor(() => {
+      expect(screen.queryByText(/passwords do not match/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/please confirm your password/i)).not.toBeInTheDocument();
+    });
+  });
+
+  it('disables submit when passwords do not match', () => {
+    render(createElement(RegisterPage), { wrapper });
+    const emailInput = screen.getByLabelText(/email/i);
+    const passwordInput = screen.getByLabelText(/^password$/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
+    const displayNameInput = screen.getByLabelText(/display name/i);
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'Password1' } });
+    fireEvent.change(confirmPasswordInput, { target: { value: 'Password2' } });
+    fireEvent.change(displayNameInput, { target: { value: 'Test User' } });
+
+    expect(screen.getByRole('button', { name: /sign up/i })).toBeDisabled();
+  });
+
+  it('enables submit when all fields valid and passwords match', () => {
+    render(createElement(RegisterPage), { wrapper });
+    const emailInput = screen.getByLabelText(/email/i);
+    const passwordInput = screen.getByLabelText(/^password$/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
+    const displayNameInput = screen.getByLabelText(/display name/i);
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'Password1' } });
+    fireEvent.change(confirmPasswordInput, { target: { value: 'Password1' } });
+    fireEvent.change(displayNameInput, { target: { value: 'Test User' } });
+
+    expect(screen.getByRole('button', { name: /sign up/i })).toBeEnabled();
+  });
 });
