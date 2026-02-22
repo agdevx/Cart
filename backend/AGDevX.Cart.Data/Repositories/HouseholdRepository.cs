@@ -16,6 +16,14 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
             .FirstOrDefaultAsync(h => h.Id == householdId);
     }
 
+    //== Find household by invite code
+    public async Task<Household?> GetByInviteCode(string inviteCode)
+    {
+        return await context.Households
+            .Include(h => h.Members)
+            .FirstOrDefaultAsync(h => h.InviteCode == inviteCode);
+    }
+
     //== Get all households where the user is a member
     public async Task<IEnumerable<Household>> GetUserHouseholdsAsync(Guid userId)
     {
@@ -57,5 +65,36 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
     {
         return await context.HouseholdMembers
             .AnyAsync(m => m.HouseholdId == householdId && m.UserId == userId);
+    }
+
+    //== Add a member to a household
+    public async Task AddMember(HouseholdMember member)
+    {
+        context.HouseholdMembers.Add(member);
+        await context.SaveChangesAsync();
+    }
+
+    //== Remove a member from a household
+    public async Task RemoveMember(Guid householdId, Guid userId)
+    {
+        var member = await context.HouseholdMembers
+            .FirstOrDefaultAsync(m => m.HouseholdId == householdId && m.UserId == userId);
+        if (member != null)
+        {
+            context.HouseholdMembers.Remove(member);
+            await context.SaveChangesAsync();
+        }
+    }
+
+    //== Update a member's role
+    public async Task UpdateMemberRole(Guid householdId, Guid userId, string role)
+    {
+        var member = await context.HouseholdMembers
+            .FirstOrDefaultAsync(m => m.HouseholdId == householdId && m.UserId == userId);
+        if (member != null)
+        {
+            member.Role = role;
+            await context.SaveChangesAsync();
+        }
     }
 }
