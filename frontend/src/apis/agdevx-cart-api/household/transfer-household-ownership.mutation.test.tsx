@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
-import { useDeleteInventoryItemMutation } from './delete-inventory-item.mutation'
+import { useTransferHouseholdOwnershipMutation } from './transfer-household-ownership.mutation'
 import * as apiFetchModule from '../agdevx-cart-api-config'
 import * as useAuthModule from '@/auth/use-auth'
 
@@ -10,13 +10,13 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 )
 
-describe('useDeleteInventoryItemMutation', () => {
+describe('useTransferHouseholdOwnershipMutation', () => {
   beforeEach(() => {
     queryClient.clear()
     vi.clearAllMocks()
   })
 
-  it('deletes inventory item successfully', async () => {
+  it('transfers ownership successfully', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
@@ -27,23 +27,22 @@ describe('useDeleteInventoryItemMutation', () => {
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
       ok: true,
-    } as Response)
+    } as unknown as Response)
 
-    const { result } = renderHook(() => useDeleteInventoryItemMutation(), {
-      wrapper,
-    })
+    const { result } = renderHook(() => useTransferHouseholdOwnershipMutation(), { wrapper })
 
-    result.current.mutate('1')
+    result.current.mutate({ householdId: 'h1', userId: 'u2' })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/inventory/1', {
-      method: 'DELETE',
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1/owner', {
+      method: 'PUT',
+      body: JSON.stringify({ userId: 'u2' }),
       token: 'test-token',
     })
   })
 
-  it('invalidates inventory query on success', async () => {
+  it('invalidates members query on success', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
@@ -54,24 +53,20 @@ describe('useDeleteInventoryItemMutation', () => {
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
       ok: true,
-    } as Response)
+    } as unknown as Response)
 
-    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
 
-    const { result } = renderHook(() => useDeleteInventoryItemMutation(), {
-      wrapper,
-    })
+    const { result } = renderHook(() => useTransferHouseholdOwnershipMutation(), { wrapper })
 
-    result.current.mutate('1')
+    result.current.mutate({ householdId: 'h1', userId: 'u2' })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
-      queryKey: ['inventory'],
-    })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['household', 'h1', 'members'] })
   })
 
-  it('handles deletion error', async () => {
+  it('handles transfer error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
@@ -81,17 +76,15 @@ describe('useDeleteInventoryItemMutation', () => {
     })
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockRejectedValue(
-      new Error('Network error')
+      new Error('Failed to transfer ownership')
     )
 
-    const { result } = renderHook(() => useDeleteInventoryItemMutation(), {
-      wrapper,
-    })
+    const { result } = renderHook(() => useTransferHouseholdOwnershipMutation(), { wrapper })
 
-    result.current.mutate('1')
+    result.current.mutate({ householdId: 'h1', userId: 'u2' })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 
-    expect(result.current.error).toEqual(new Error('Network error'))
+    expect(result.current.error).toEqual(new Error('Failed to transfer ownership'))
   })
 })

@@ -30,7 +30,8 @@ describe('useCreateHouseholdMutation', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
-      login: vi.fn(),
+      user: null,
+      setAuth: vi.fn(),
       logout: vi.fn(),
     })
 
@@ -49,7 +50,6 @@ describe('useCreateHouseholdMutation', () => {
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household', {
       method: 'POST',
       body: JSON.stringify('New Household'),
-      headers: { 'Content-Type': 'application/json' },
       token: 'test-token',
     })
   })
@@ -67,7 +67,8 @@ describe('useCreateHouseholdMutation', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
-      login: vi.fn(),
+      user: null,
+      setAuth: vi.fn(),
       logout: vi.fn(),
     })
 
@@ -91,7 +92,8 @@ describe('useCreateHouseholdMutation', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
-      login: vi.fn(),
+      user: null,
+      setAuth: vi.fn(),
       logout: vi.fn(),
     })
 

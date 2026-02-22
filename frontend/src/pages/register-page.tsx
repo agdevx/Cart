@@ -9,11 +9,13 @@ import { useAuth } from '@/auth/use-auth';
 export const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [serverEmailError, setServerEmailError] = useState('');
   const [touched, setTouched] = useState({
     email: false,
     password: false,
+    confirmPassword: false,
     displayName: false,
   });
 
@@ -30,11 +32,14 @@ export const RegisterPage = () => {
   // Email validation
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+  // Confirm password validation
+  const passwordsMatch = password === confirmPassword;
+
   // Display name validation
   const isDisplayNameValid = displayName.trim().length > 0;
 
   // Form validation
-  const isFormValid = isEmailValid && isPasswordValid && isDisplayNameValid;
+  const isFormValid = isEmailValid && isPasswordValid && passwordsMatch && confirmPassword.length > 0 && isDisplayNameValid;
 
   // Compute error messages directly from state
   const emailError = touched.email
@@ -54,6 +59,14 @@ export const RegisterPage = () => {
       ? 'Password must contain at least one uppercase letter'
       : !hasNumber
       ? 'Password must contain at least one number'
+      : ''
+    : '';
+
+  const confirmPasswordError = touched.confirmPassword
+    ? !confirmPassword
+      ? 'Please confirm your password'
+      : !passwordsMatch
+      ? 'Passwords do not match'
       : ''
     : '';
 
@@ -163,6 +176,28 @@ export const RegisterPage = () => {
 
             {passwordError && (
               <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+            )}
+          </div>
+
+          {/* Confirm Password Field */}
+          <div className="mb-4">
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              Confirm Password
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              onBlur={() => setTouched({ ...touched, confirmPassword: true })}
+              placeholder="Confirm your password"
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                confirmPasswordError ? 'border-red-500' : 'border-gray-300'
+              }`}
+              autoComplete="new-password"
+            />
+            {confirmPasswordError && (
+              <p className="mt-1 text-sm text-red-600">{confirmPasswordError}</p>
             )}
           </div>
 

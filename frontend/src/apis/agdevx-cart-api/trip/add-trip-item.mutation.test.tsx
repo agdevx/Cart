@@ -41,7 +41,10 @@ describe('useAddTripItemMutation', () => {
       logout: vi.fn(),
     })
 
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(mockTripItem)
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
+      ok: true,
+      json: async () => mockTripItem,
+    } as unknown as Response)
 
     const { result } = renderHook(() => useAddTripItemMutation(), {
       wrapper,
@@ -89,7 +92,10 @@ describe('useAddTripItemMutation', () => {
       logout: vi.fn(),
     })
 
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(mockTripItem)
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
+      ok: true,
+      json: async () => mockTripItem,
+    } as unknown as Response)
 
     const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries')
 

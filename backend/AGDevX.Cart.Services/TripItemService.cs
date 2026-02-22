@@ -29,8 +29,6 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
             StoreId = storeId,
             IsChecked = false,
             CheckedAt = null,
-            Trip = null!,
-            InventoryItem = null!
         };
 
         var created = await _tripItemRepository.CreateAsync(tripItem);

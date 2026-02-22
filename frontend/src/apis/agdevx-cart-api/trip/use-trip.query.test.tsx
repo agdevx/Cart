@@ -39,7 +39,10 @@ describe('useTripQuery', () => {
       logout: vi.fn(),
     })
 
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(mockTrip)
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
+      ok: true,
+      json: async () => mockTrip,
+    } as unknown as Response)
 
     const { result } = renderHook(() => useTripQuery('1'), { wrapper })
 

@@ -2,21 +2,36 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
-import { useDeleteInventoryItemMutation } from './delete-inventory-item.mutation'
+import { useHouseholdMembersQuery } from './use-household-members.query'
 import * as apiFetchModule from '../agdevx-cart-api-config'
 import * as useAuthModule from '@/auth/use-auth'
+import type { HouseholdMember } from '../models/household'
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 )
 
-describe('useDeleteInventoryItemMutation', () => {
+describe('useHouseholdMembersQuery', () => {
   beforeEach(() => {
     queryClient.clear()
     vi.clearAllMocks()
   })
 
-  it('deletes inventory item successfully', async () => {
+  it('fetches household members successfully', async () => {
+    const mockMembers: HouseholdMember[] = [
+      {
+        id: '1',
+        householdId: 'h1',
+        userId: 'u1',
+        joinedAt: '2024-01-01',
+        role: 'owner',
+        createdBy: 'u1',
+        createdDate: '2024-01-01',
+        modifiedBy: null,
+        modifiedDate: null,
+      },
+    ]
+
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
@@ -27,51 +42,37 @@ describe('useDeleteInventoryItemMutation', () => {
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
       ok: true,
-    } as Response)
+      json: async () => mockMembers,
+    } as unknown as Response)
 
-    const { result } = renderHook(() => useDeleteInventoryItemMutation(), {
-      wrapper,
-    })
-
-    result.current.mutate('1')
+    const { result } = renderHook(() => useHouseholdMembersQuery('h1'), { wrapper })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/inventory/1', {
-      method: 'DELETE',
+    expect(result.current.data).toEqual(mockMembers)
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1/members', {
       token: 'test-token',
     })
   })
 
-  it('invalidates inventory query on success', async () => {
+  it('does not fetch when token is not available', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
-      isAuthenticated: true,
+      token: null,
+      isAuthenticated: false,
       user: null,
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
 
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
-      ok: true,
-    } as Response)
+    const apiFetchSpy = vi.spyOn(apiFetchModule, 'apiFetch')
 
-    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const { result } = renderHook(() => useHouseholdMembersQuery('h1'), { wrapper })
 
-    const { result } = renderHook(() => useDeleteInventoryItemMutation(), {
-      wrapper,
-    })
-
-    result.current.mutate('1')
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
-      queryKey: ['inventory'],
-    })
+    expect(result.current.isPending).toBe(true)
+    expect(apiFetchSpy).not.toHaveBeenCalled()
   })
 
-  it('handles deletion error', async () => {
+  it('handles fetch error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
@@ -84,13 +85,12 @@ describe('useDeleteInventoryItemMutation', () => {
       new Error('Network error')
     )
 
-    const { result } = renderHook(() => useDeleteInventoryItemMutation(), {
-      wrapper,
-    })
+    const { result } = renderHook(() => useHouseholdMembersQuery('h1'), { wrapper })
 
-    result.current.mutate('1')
-
-    await waitFor(() => expect(result.current.isError).toBe(true))
+    await waitFor(
+      () => expect(result.current.isError).toBe(true),
+      { timeout: 3000 }
+    )
 
     expect(result.current.error).toEqual(new Error('Network error'))
   })

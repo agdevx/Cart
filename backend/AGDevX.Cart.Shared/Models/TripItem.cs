@@ -6,11 +6,11 @@ public class TripItem : BaseEntity
 {
     //== Trip this item belongs to
     public required Guid TripId { get; set; }
-    public required Trip Trip { get; set; }
+    public Trip? Trip { get; set; }
 
     //== Inventory item being purchased
     public required Guid InventoryItemId { get; set; }
-    public required InventoryItem InventoryItem { get; set; }
+    public InventoryItem? InventoryItem { get; set; }
 
     //== Quantity to purchase
     public int Quantity { get; set; }

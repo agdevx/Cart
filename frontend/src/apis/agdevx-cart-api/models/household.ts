@@ -4,6 +4,7 @@
 export interface Household {
   id: string;
   name: string | null;
+  inviteCode?: string;
   createdBy: string | null;
   createdDate: string;
   modifiedBy: string | null;

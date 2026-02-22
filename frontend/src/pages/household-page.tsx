@@ -32,9 +32,10 @@ export const HouseholdPage = () => {
       {households && households.length > 0 ? (
         <div className="space-y-2 mb-4">
           {households.map((household) => (
-            <div
+            <Link
               key={household.id}
-              className="p-4 bg-white border rounded shadow-sm"
+              to={`/household/${household.id}`}
+              className="block p-4 bg-white border rounded shadow-sm hover:shadow-md transition-shadow"
             >
               <h2 className="text-lg font-semibold">
                 {household.name || 'Unnamed Household'}
@@ -42,7 +43,7 @@ export const HouseholdPage = () => {
               <p className="text-sm text-gray-600">
                 Created: {new Date(household.createdDate).toLocaleDateString()}
               </p>
-            </div>
+            </Link>
           ))}
         </div>
       ) : (

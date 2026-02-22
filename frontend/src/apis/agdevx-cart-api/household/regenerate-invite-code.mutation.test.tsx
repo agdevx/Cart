@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
-import { useDeleteInventoryItemMutation } from './delete-inventory-item.mutation'
+import { useRegenerateInviteCodeMutation } from './regenerate-invite-code.mutation'
 import * as apiFetchModule from '../agdevx-cart-api-config'
 import * as useAuthModule from '@/auth/use-auth'
 
@@ -10,13 +10,13 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 )
 
-describe('useDeleteInventoryItemMutation', () => {
+describe('useRegenerateInviteCodeMutation', () => {
   beforeEach(() => {
     queryClient.clear()
     vi.clearAllMocks()
   })
 
-  it('deletes inventory item successfully', async () => {
+  it('regenerates invite code successfully', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
@@ -27,23 +27,23 @@ describe('useDeleteInventoryItemMutation', () => {
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
       ok: true,
-    } as Response)
+      json: async () => ({ inviteCode: 'NEW456' }),
+    } as unknown as Response)
 
-    const { result } = renderHook(() => useDeleteInventoryItemMutation(), {
-      wrapper,
-    })
+    const { result } = renderHook(() => useRegenerateInviteCodeMutation(), { wrapper })
 
-    result.current.mutate('1')
+    result.current.mutate('h1')
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/inventory/1', {
-      method: 'DELETE',
+    expect(result.current.data).toEqual('NEW456')
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1/invite-code', {
+      method: 'POST',
       token: 'test-token',
     })
   })
 
-  it('invalidates inventory query on success', async () => {
+  it('invalidates invite code query on success', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
@@ -54,24 +54,21 @@ describe('useDeleteInventoryItemMutation', () => {
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
       ok: true,
-    } as Response)
+      json: async () => ({ inviteCode: 'NEW456' }),
+    } as unknown as Response)
 
-    const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
 
-    const { result } = renderHook(() => useDeleteInventoryItemMutation(), {
-      wrapper,
-    })
+    const { result } = renderHook(() => useRegenerateInviteCodeMutation(), { wrapper })
 
-    result.current.mutate('1')
+    result.current.mutate('h1')
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
-      queryKey: ['inventory'],
-    })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['household', 'h1', 'invite-code'] })
   })
 
-  it('handles deletion error', async () => {
+  it('handles regenerate error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
@@ -81,17 +78,15 @@ describe('useDeleteInventoryItemMutation', () => {
     })
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockRejectedValue(
-      new Error('Network error')
+      new Error('Failed to regenerate invite code')
     )
 
-    const { result } = renderHook(() => useDeleteInventoryItemMutation(), {
-      wrapper,
-    })
+    const { result } = renderHook(() => useRegenerateInviteCodeMutation(), { wrapper })
 
-    result.current.mutate('1')
+    result.current.mutate('h1')
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 
-    expect(result.current.error).toEqual(new Error('Network error'))
+    expect(result.current.error).toEqual(new Error('Failed to regenerate invite code'))
   })
 })

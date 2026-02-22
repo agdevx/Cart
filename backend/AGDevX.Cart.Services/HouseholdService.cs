@@ -8,6 +8,14 @@ namespace AGDevX.Cart.Services;
 
 public class HouseholdService(IHouseholdRepository repository) : IHouseholdService
 {
+    private static readonly char[] InviteCodeChars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789".ToCharArray();
+
+    private static string GenerateInviteCode()
+    {
+        var random = new Random();
+        return new string(Enumerable.Range(0, 6).Select(_ => InviteCodeChars[random.Next(InviteCodeChars.Length)]).ToArray());
+    }
+
     //== Create a new household and add the creator as an owner member
     public async Task<Household> CreateHouseholdAsync(Guid userId, string name)
     {
@@ -15,6 +23,7 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
         {
             Id = Guid.NewGuid(),
             Name = name,
+            InviteCode = GenerateInviteCode(),
             CreatedBy = userId.ToString(),
             CreatedDate = DateTime.UtcNow,
             ModifiedBy = userId.ToString(),
@@ -99,5 +108,130 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
         }
 
         await repository.DeleteAsync(householdId);
+    }
+
+    //== Join a household via invite code
+    public async Task<Household> JoinHousehold(Guid userId, string inviteCode)
+    {
+        var household = await repository.GetByInviteCode(inviteCode)
+            ?? throw new ArgumentException("Invalid invite code");
+
+        if (household.Members.Any(m => m.UserId == userId))
+        {
+            throw new InvalidOperationException("User is already a member of this household");
+        }
+
+        var member = new HouseholdMember
+        {
+            Id = Guid.NewGuid(),
+            HouseholdId = household.Id,
+            UserId = userId,
+            Role = "member",
+            JoinedAt = DateTime.UtcNow,
+            CreatedBy = userId.ToString(),
+            CreatedDate = DateTime.UtcNow,
+            ModifiedBy = userId.ToString(),
+            ModifiedDate = DateTime.UtcNow
+        };
+
+        await repository.AddMember(member);
+        return household;
+    }
+
+    //== Remove a member (owner removes other, or member removes self)
+    public async Task RemoveMember(Guid requestingUserId, Guid householdId, Guid targetUserId)
+    {
+        var household = await repository.GetByIdAsync(householdId)
+            ?? throw new ArgumentException("Household not found");
+
+        var requestingMember = household.Members.FirstOrDefault(m => m.UserId == requestingUserId)
+            ?? throw new UnauthorizedAccessException("User is not a member of this household");
+
+        var isOwner = requestingMember.Role == "owner";
+        var isSelf = requestingUserId == targetUserId;
+
+        //== Owner can't remove self (must transfer ownership first or delete household)
+        if (isOwner && isSelf)
+        {
+            throw new InvalidOperationException("Owner cannot remove themselves. Transfer ownership first or delete the household.");
+        }
+
+        //== Non-owners can only remove themselves
+        if (!isOwner && !isSelf)
+        {
+            throw new UnauthorizedAccessException("Only the owner can remove other members");
+        }
+
+        await repository.RemoveMember(householdId, targetUserId);
+    }
+
+    //== Transfer ownership to another member
+    public async Task TransferOwnership(Guid requestingUserId, Guid householdId, Guid newOwnerUserId)
+    {
+        var household = await repository.GetByIdAsync(householdId)
+            ?? throw new ArgumentException("Household not found");
+
+        var isOwner = household.Members.Any(m => m.UserId == requestingUserId && m.Role == "owner");
+        if (!isOwner)
+        {
+            throw new UnauthorizedAccessException("Only the owner can transfer ownership");
+        }
+
+        var newOwnerIsMember = household.Members.Any(m => m.UserId == newOwnerUserId);
+        if (!newOwnerIsMember)
+        {
+            throw new ArgumentException("Target user is not a member of this household");
+        }
+
+        await repository.UpdateMemberRole(householdId, requestingUserId, "member");
+        await repository.UpdateMemberRole(householdId, newOwnerUserId, "owner");
+    }
+
+    //== Regenerate invite code (owner only)
+    public async Task<string> RegenerateInviteCode(Guid requestingUserId, Guid householdId)
+    {
+        var household = await repository.GetByIdAsync(householdId)
+            ?? throw new ArgumentException("Household not found");
+
+        var isOwner = household.Members.Any(m => m.UserId == requestingUserId && m.Role == "owner");
+        if (!isOwner)
+        {
+            throw new UnauthorizedAccessException("Only the owner can regenerate the invite code");
+        }
+
+        household.InviteCode = GenerateInviteCode();
+        household.ModifiedBy = requestingUserId.ToString();
+        household.ModifiedDate = DateTime.UtcNow;
+        await repository.UpdateAsync(household);
+
+        return household.InviteCode;
+    }
+
+    //== Get household members (member access)
+    public async Task<IEnumerable<HouseholdMember>> GetMembers(Guid userId, Guid householdId)
+    {
+        var household = await repository.GetByIdAsync(householdId)
+            ?? throw new ArgumentException("Household not found");
+
+        if (!await repository.IsUserMemberAsync(householdId, userId))
+        {
+            throw new UnauthorizedAccessException("User is not a member of this household");
+        }
+
+        return household.Members;
+    }
+
+    //== Get invite code (member access)
+    public async Task<string> GetInviteCode(Guid userId, Guid householdId)
+    {
+        var household = await repository.GetByIdAsync(householdId)
+            ?? throw new ArgumentException("Household not found");
+
+        if (!await repository.IsUserMemberAsync(householdId, userId))
+        {
+            throw new UnauthorizedAccessException("User is not a member of this household");
+        }
+
+        return household.InviteCode;
     }
 }

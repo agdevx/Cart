@@ -83,7 +83,7 @@ export const AddInventoryItemPage = () => {
             <option value="personal">Personal Item</option>
             {households?.map((household) => (
               <option key={household.id} value={household.id}>
-                {household.name}
+                {household.name} (Household)
               </option>
             ))}
           </select>
