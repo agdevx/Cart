@@ -30,11 +30,15 @@ describe('useJoinHouseholdMutation', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
-      login: vi.fn(),
+      user: null,
+      setAuth: vi.fn(),
       logout: vi.fn(),
     })
 
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(mockHousehold)
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
+      ok: true,
+      json: async () => mockHousehold,
+    } as unknown as Response)
 
     const { result } = renderHook(() => useJoinHouseholdMutation(), { wrapper })
 
@@ -63,11 +67,15 @@ describe('useJoinHouseholdMutation', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
-      login: vi.fn(),
+      user: null,
+      setAuth: vi.fn(),
       logout: vi.fn(),
     })
 
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(mockHousehold)
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
+      ok: true,
+      json: async () => mockHousehold,
+    } as unknown as Response)
 
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
 
@@ -84,7 +92,8 @@ describe('useJoinHouseholdMutation', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       token: 'test-token',
       isAuthenticated: true,
-      login: vi.fn(),
+      user: null,
+      setAuth: vi.fn(),
       logout: vi.fn(),
     })
 
