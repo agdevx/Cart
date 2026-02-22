@@ -25,7 +25,9 @@ describe('useDeleteInventoryItemMutation', () => {
       logout: vi.fn(),
     })
 
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(undefined)
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
+      ok: true,
+    } as Response)
 
     const { result } = renderHook(() => useDeleteInventoryItemMutation(), {
       wrapper,
@@ -50,7 +52,9 @@ describe('useDeleteInventoryItemMutation', () => {
       logout: vi.fn(),
     })
 
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue(undefined)
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
+      ok: true,
+    } as Response)
 
     const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries')
 
