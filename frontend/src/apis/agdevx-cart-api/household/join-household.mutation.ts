@@ -16,11 +16,15 @@ export const useJoinHouseholdMutation = () => {
 
   return useMutation({
     mutationFn: async (request: JoinHouseholdRequest): Promise<Household> => {
-      return apiFetch<Household>('/api/households/join', {
+      const response = await apiFetch('/api/households/join', {
         method: 'POST',
         body: JSON.stringify(request),
         token,
       })
+      if (!response.ok) {
+        throw new Error('Failed to join household')
+      }
+      return response.json() as Promise<Household>
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['households'] })

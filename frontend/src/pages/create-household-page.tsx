@@ -1,7 +1,7 @@
 // ABOUTME: Create household page
 // ABOUTME: Form for creating a new household
 
-import { useState, FormEvent } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCreateHouseholdMutation } from '@/apis/agdevx-cart-api/household/create-household.mutation'
 import { getErrorMessage } from '@/utilities/error-messages'
@@ -11,7 +11,7 @@ export const CreateHouseholdPage = () => {
   const navigate = useNavigate()
   const createMutation = useCreateHouseholdMutation()
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!name.trim()) {

@@ -11,10 +11,13 @@ export const useDeleteInventoryItemMutation = () => {
 
   return useMutation({
     mutationFn: async (id: string): Promise<void> => {
-      return apiFetch<void>(`/api/inventory/${id}`, {
+      const response = await apiFetch(`/api/inventory/${id}`, {
         method: 'DELETE',
         token,
       })
+      if (!response.ok) {
+        throw new Error('Failed to delete inventory item')
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] })

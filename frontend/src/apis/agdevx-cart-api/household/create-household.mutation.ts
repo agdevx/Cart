@@ -19,13 +19,12 @@ export const useCreateHouseholdMutation = () => {
       const response = await apiFetch('/api/household', {
         method: 'POST',
         body: JSON.stringify(request.name),
-        headers: { 'Content-Type': 'application/json' },
         token,
       });
       if (!response.ok) {
         throw new Error('Failed to create household');
       }
-      return response.json();
+      return response.json() as Promise<Household>;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['households'] })

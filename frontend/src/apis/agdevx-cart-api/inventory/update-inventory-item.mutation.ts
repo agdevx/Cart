@@ -20,11 +20,15 @@ export const useUpdateInventoryItemMutation = () => {
   return useMutation({
     mutationFn: async (request: UpdateInventoryItemRequest): Promise<InventoryItem> => {
       const { id, ...updateData } = request
-      return apiFetch<InventoryItem>(`/api/inventory/${id}`, {
+      const response = await apiFetch(`/api/inventory/${id}`, {
         method: 'PUT',
         body: JSON.stringify(updateData),
         token,
       })
+      if (!response.ok) {
+        throw new Error('Failed to update inventory item')
+      }
+      return response.json() as Promise<InventoryItem>
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] })
