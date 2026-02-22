@@ -274,4 +274,216 @@ public class HouseholdControllerTests
         // Assert
         result.Should().BeOfType<UnauthorizedObjectResult>();
     }
+
+    //== Join household tests
+
+    [Fact]
+    public async Task Should_ReturnOk_When_JoinHouseholdSuccessful()
+    {
+        // Arrange
+        var mockService = new Mock<IHouseholdService>();
+        var controller = new HouseholdController(mockService.Object);
+        var userId = Guid.NewGuid();
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        ]));
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        var household = new Household { Id = Guid.NewGuid(), Name = "Test" };
+        mockService.Setup(s => s.JoinHousehold(userId, "ABC123")).ReturnsAsync(household);
+
+        // Act
+        var result = await controller.JoinHousehold(new JoinHouseholdRequest { InviteCode = "ABC123" });
+
+        // Assert
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().BeEquivalentTo(household);
+    }
+
+    [Fact]
+    public async Task Should_ReturnBadRequest_When_InvalidInviteCode()
+    {
+        // Arrange
+        var mockService = new Mock<IHouseholdService>();
+        var controller = new HouseholdController(mockService.Object);
+        var userId = Guid.NewGuid();
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        ]));
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        mockService.Setup(s => s.JoinHousehold(userId, "INVALID"))
+            .ThrowsAsync(new ArgumentException("Invalid invite code"));
+
+        // Act
+        var result = await controller.JoinHousehold(new JoinHouseholdRequest { InviteCode = "INVALID" });
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    //== Get members test
+
+    [Fact]
+    public async Task Should_ReturnOk_When_GetMembersSuccessful()
+    {
+        // Arrange
+        var mockService = new Mock<IHouseholdService>();
+        var controller = new HouseholdController(mockService.Object);
+        var userId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        ]));
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        var members = new List<HouseholdMember>
+        {
+            new HouseholdMember { UserId = userId, HouseholdId = householdId, Role = "owner" }
+        };
+
+        mockService.Setup(s => s.GetMembers(userId, householdId)).ReturnsAsync(members);
+
+        // Act
+        var result = await controller.GetMembers(householdId);
+
+        // Assert
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().BeEquivalentTo(members);
+    }
+
+    //== Remove member test
+
+    [Fact]
+    public async Task Should_ReturnNoContent_When_RemoveMemberSuccessful()
+    {
+        // Arrange
+        var mockService = new Mock<IHouseholdService>();
+        var controller = new HouseholdController(mockService.Object);
+        var userId = Guid.NewGuid();
+        var targetUserId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        ]));
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        mockService.Setup(s => s.RemoveMember(userId, householdId, targetUserId)).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await controller.RemoveMember(householdId, targetUserId);
+
+        // Assert
+        result.Should().BeOfType<NoContentResult>();
+    }
+
+    //== Transfer ownership test
+
+    [Fact]
+    public async Task Should_ReturnNoContent_When_TransferOwnershipSuccessful()
+    {
+        // Arrange
+        var mockService = new Mock<IHouseholdService>();
+        var controller = new HouseholdController(mockService.Object);
+        var userId = Guid.NewGuid();
+        var newOwnerId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        ]));
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        mockService.Setup(s => s.TransferOwnership(userId, householdId, newOwnerId)).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await controller.TransferOwnership(householdId, new TransferOwnershipRequest { UserId = newOwnerId });
+
+        // Assert
+        result.Should().BeOfType<NoContentResult>();
+    }
+
+    //== Get invite code test
+
+    [Fact]
+    public async Task Should_ReturnOk_When_GetInviteCodeSuccessful()
+    {
+        // Arrange
+        var mockService = new Mock<IHouseholdService>();
+        var controller = new HouseholdController(mockService.Object);
+        var userId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        ]));
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        mockService.Setup(s => s.GetInviteCode(userId, householdId)).ReturnsAsync("XK7M2P");
+
+        // Act
+        var result = await controller.GetInviteCode(householdId);
+
+        // Assert
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().BeEquivalentTo(new { inviteCode = "XK7M2P" });
+    }
+
+    //== Regenerate invite code test
+
+    [Fact]
+    public async Task Should_ReturnOk_When_RegenerateInviteCodeSuccessful()
+    {
+        // Arrange
+        var mockService = new Mock<IHouseholdService>();
+        var controller = new HouseholdController(mockService.Object);
+        var userId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        ]));
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        mockService.Setup(s => s.RegenerateInviteCode(userId, householdId)).ReturnsAsync("NEW456");
+
+        // Act
+        var result = await controller.RegenerateInviteCode(householdId);
+
+        // Assert
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().BeEquivalentTo(new { inviteCode = "NEW456" });
+    }
 }
