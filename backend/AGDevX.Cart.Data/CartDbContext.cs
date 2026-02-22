@@ -49,6 +49,13 @@ public class CartDbContext(DbContextOptions<CartDbContext> options) : DbContext(
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+        //== Configure Household invite code
+        modelBuilder.Entity<Household>(entity =>
+        {
+            entity.Property(h => h.InviteCode).HasMaxLength(8);
+            entity.HasIndex(h => h.InviteCode).IsUnique();
+        });
+
         //== Configure User unique index on Email
         modelBuilder.Entity<User>(entity =>
         {
