@@ -1,15 +1,17 @@
 // ABOUTME: Active trip page for shopping mode
 // ABOUTME: Shows checklist of items to purchase with check/uncheck functionality
 
-import { useParams, useNavigate } from 'react-router-dom'
-import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
-import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
+import { useCallback } from 'react'
+import { useNavigate,useParams } from 'react-router-dom'
+
+import { useQueryClient } from '@tanstack/react-query'
+
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import { useCheckTripItemMutation } from '@/apis/agdevx-cart-api/trip/check-trip-item.mutation'
 import { useCompleteTripMutation } from '@/apis/agdevx-cart-api/trip/complete-trip.mutation'
+import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
+import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { useSSE } from '@/hooks/use-sse'
-import { useQueryClient } from '@tanstack/react-query'
-import { useCallback } from 'react'
 
 export const ActiveTripPage = () => {
   const { tripId } = useParams<{ tripId: string }>()

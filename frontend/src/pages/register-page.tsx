@@ -2,7 +2,8 @@
 // ABOUTME: Handles user registration with validation and auto-login
 
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
+
 import { useRegisterMutation } from '@/apis/agdevx-cart-api/auth/register.mutation';
 import { useAuth } from '@/auth/use-auth';
 

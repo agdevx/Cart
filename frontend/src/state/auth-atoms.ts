@@ -2,6 +2,7 @@
 // ABOUTME: Manages current user state, initialized from localStorage by AuthProvider
 
 import { atom } from 'jotai';
+
 import type { User } from '@/apis/agdevx-cart-api/models/user';
 
 const AUTH_USER_STORAGE_KEY = 'authUser';

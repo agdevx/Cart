@@ -2,6 +2,7 @@
 // ABOUTME: Handles lifecycle of SSE client with cleanup on unmount
 
 import { useEffect, useRef } from 'react'
+
 import { createSSEClient } from '@/libs/sse-client'
 
 export const useSSE = (url: string, onMessage: (data: unknown) => void, enabled: boolean = true): void => {

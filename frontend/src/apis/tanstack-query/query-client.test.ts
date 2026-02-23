@@ -1,7 +1,8 @@
 // ABOUTME: Tests for Tanstack Query client configuration
 // ABOUTME: Verifies query client is properly configured with default options
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect,it } from 'vitest';
+
 import { queryClient } from './query-client';
 
 describe('queryClient', () => {

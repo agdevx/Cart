@@ -2,6 +2,7 @@
 // ABOUTME: Displays user's households with options to create or join new ones
 
 import { Link } from 'react-router-dom'
+
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useAuth } from '@/auth/use-auth'
 

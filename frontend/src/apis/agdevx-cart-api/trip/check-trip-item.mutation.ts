@@ -2,6 +2,7 @@
 // ABOUTME: Updates checked status of trip item and invalidates trip cache
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+
 import { apiFetch } from '../agdevx-cart-api-config'
 import type { TripItem } from '../models/trip-item'
 

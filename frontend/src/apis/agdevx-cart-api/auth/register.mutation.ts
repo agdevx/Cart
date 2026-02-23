@@ -2,6 +2,7 @@
 // ABOUTME: Handles user registration via API and returns tokens and user data
 
 import { useMutation } from '@tanstack/react-query';
+
 import { apiFetch } from '../agdevx-cart-api-config';
 
 export interface RegisterRequest {

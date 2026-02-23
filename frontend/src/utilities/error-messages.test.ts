@@ -1,8 +1,9 @@
 // ABOUTME: Tests for error message utility
 // ABOUTME: Verifies error code to user-friendly message mapping
 
-import { describe, it, expect } from 'vitest';
-import { getErrorMessage, ERROR_MESSAGES } from './error-messages';
+import { describe, expect,it } from 'vitest';
+
+import { ERROR_MESSAGES,getErrorMessage } from './error-messages';
 
 describe('error-messages', () => {
   describe('ERROR_MESSAGES', () => {

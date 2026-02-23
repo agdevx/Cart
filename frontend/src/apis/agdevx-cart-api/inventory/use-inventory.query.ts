@@ -2,9 +2,11 @@
 // ABOUTME: Returns combined list of household and personal inventory items
 
 import { useQuery } from '@tanstack/react-query'
+
+import { useAuth } from '@/auth/use-auth'
+
 import { apiFetch } from '../agdevx-cart-api-config'
 import type { InventoryItem } from '../models/inventory-item'
-import { useAuth } from '@/auth/use-auth'
 
 export const useInventoryQuery = () => {
   const { isAuthenticated } = useAuth()

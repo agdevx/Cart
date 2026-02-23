@@ -1,12 +1,13 @@
 // ABOUTME: Trip detail page for planning mode
 // ABOUTME: Allows adding items to trip and starting shopping session
 
-import { useParams, useNavigate } from 'react-router-dom'
-import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
-import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
+import { useState } from 'react'
+import { useNavigate,useParams } from 'react-router-dom'
+
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
-import { useState } from 'react'
+import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
+import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 
 export const TripDetailPage = () => {
   const { tripId } = useParams<{ tripId: string }>()

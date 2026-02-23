@@ -1,10 +1,12 @@
 // ABOUTME: Integration tests for household management
 // ABOUTME: Tests household page routing and basic structure
 
-import { describe, it, expect } from 'vitest'
-import { render } from '@testing-library/react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+
 import { QueryClientProvider } from '@tanstack/react-query'
+import { render } from '@testing-library/react'
+import { describe, expect,it } from 'vitest'
+
 import { queryClient } from '@/apis/tanstack-query/query-client'
 import { HouseholdPage } from '@/pages/household-page'
 

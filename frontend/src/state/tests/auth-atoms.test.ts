@@ -1,10 +1,12 @@
 // ABOUTME: Tests for authentication state atoms
 // ABOUTME: Verifies currentUserAtom behavior
 
-import { describe, it, expect } from 'vitest';
 import { createStore } from 'jotai';
-import { currentUserAtom } from '../auth-atoms';
+import { describe, expect,it } from 'vitest';
+
 import type { User } from '@/apis/agdevx-cart-api/models/user';
+
+import { currentUserAtom } from '../auth-atoms';
 
 describe('auth-atoms', () => {
   describe('currentUserAtom', () => {

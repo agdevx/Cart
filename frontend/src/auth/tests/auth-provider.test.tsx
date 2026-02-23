@@ -1,11 +1,13 @@
 // ABOUTME: Tests for AuthProvider component
 // ABOUTME: Verifies user restoration and context provision
 
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { createElement } from 'react'
+
 import { render, screen, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { AuthProvider } from '../auth-provider'
 import { useAuth } from '../use-auth'
-import { createElement } from 'react'
 
 const TestComponent = () => {
   const { isAuthenticated, user } = useAuth()

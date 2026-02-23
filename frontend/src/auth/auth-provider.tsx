@@ -1,11 +1,13 @@
 // ABOUTME: Authentication provider component
 // ABOUTME: Wraps app and restores auth state from cookie session on mount
 
-import { useSetAtom } from 'jotai'
 import { useEffect } from 'react'
-import { currentUserAtom } from '@/state/auth-atoms'
+
+import { useSetAtom } from 'jotai'
+
 import { apiFetch } from '@/apis/agdevx-cart-api/agdevx-cart-api-config'
 import type { User } from '@/apis/agdevx-cart-api/models/user'
+import { currentUserAtom } from '@/state/auth-atoms'
 
 const AUTH_USER_STORAGE_KEY = 'authUser'
 

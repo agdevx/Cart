@@ -1,10 +1,12 @@
 // ABOUTME: Integration tests for navigation
 // ABOUTME: Tests routing and bottom nav functionality
 
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import { BottomNav } from '@/features/bottom-nav/bottom-nav'
 import { BrowserRouter } from 'react-router-dom'
+
+import { render, screen } from '@testing-library/react'
+import { describe, expect,it } from 'vitest'
+
+import { BottomNav } from '@/features/bottom-nav/bottom-nav'
 
 describe('Navigation', () => {
   it('renders all three navigation tabs', () => {
