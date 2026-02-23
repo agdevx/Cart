@@ -28,14 +28,14 @@ public class CartDbContext(DbContextOptions<CartDbContext> options) : DbContext(
             entity.HasKey(hm => new { hm.HouseholdId, hm.UserId });
 
             entity.HasOne(hm => hm.Household)
-                .WithMany(h => h.Members)
-                .HasForeignKey(hm => hm.HouseholdId)
-                .OnDelete(DeleteBehavior.Cascade);
+                  .WithMany(h => h.Members)
+                  .HasForeignKey(hm => hm.HouseholdId)
+                  .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(hm => hm.User)
-                .WithMany(u => u.HouseholdMemberships)
-                .HasForeignKey(hm => hm.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                  .WithMany(u => u.HouseholdMemberships)
+                  .HasForeignKey(hm => hm.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         //== Configure TripCollaborator composite key and relationships
@@ -44,9 +44,9 @@ public class CartDbContext(DbContextOptions<CartDbContext> options) : DbContext(
             entity.HasKey(tc => new { tc.TripId, tc.UserId });
 
             entity.HasOne(tc => tc.Trip)
-                .WithMany(t => t.Collaborators)
-                .HasForeignKey(tc => tc.TripId)
-                .OnDelete(DeleteBehavior.Cascade);
+                  .WithMany(t => t.Collaborators)
+                  .HasForeignKey(tc => tc.TripId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         //== Configure Household invite code
@@ -59,8 +59,7 @@ public class CartDbContext(DbContextOptions<CartDbContext> options) : DbContext(
         //== Configure User unique index on Email
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasIndex(u => u.Email)
-                .IsUnique();
+            entity.HasIndex(u => u.Email).IsUnique();
         });
     }
 }

@@ -46,13 +46,11 @@ public class InventoryServiceTests
             HouseholdId = householdId
         };
 
-        _mockHouseholdRepository
-            .Setup(r => r.GetById(householdId))
-            .ReturnsAsync(household);
+        _mockHouseholdRepository.Setup(r => r.GetById(householdId))
+                                .ReturnsAsync(household);
 
-        _mockInventoryRepository
-            .Setup(r => r.Create(It.IsAny<InventoryItem>()))
-            .ReturnsAsync((InventoryItem item) => { item.Id = Guid.NewGuid(); return item; });
+        _mockInventoryRepository.Setup(r => r.Create(It.IsAny<InventoryItem>()))
+                                .ReturnsAsync((InventoryItem item) => { item.Id = Guid.NewGuid(); return item; });
 
         //== Act
         var result = await _inventoryService.CreateInventoryItem(inventoryItem, userId);
@@ -75,9 +73,8 @@ public class InventoryServiceTests
             new InventoryItem { Id = Guid.NewGuid(), Name = "Personal Item 2", OwnerUserId = userId }
         };
 
-        _mockInventoryRepository
-            .Setup(r => r.GetPersonalItems(userId))
-            .ReturnsAsync(personalItems);
+        _mockInventoryRepository.Setup(r => r.GetPersonalItems(userId))
+                                .ReturnsAsync(personalItems);
 
         //== Act
         var result = await _inventoryService.GetPersonalInventory(userId);

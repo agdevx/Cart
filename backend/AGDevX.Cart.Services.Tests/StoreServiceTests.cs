@@ -44,13 +44,11 @@ public class StoreServiceTests
             }
         };
 
-        _mockHouseholdRepository
-            .Setup(x => x.GetById(householdId))
-            .ReturnsAsync(household);
+        _mockHouseholdRepository.Setup(x => x.GetById(householdId))
+                                .ReturnsAsync(household);
 
-        _mockStoreRepository
-            .Setup(x => x.Create(It.IsAny<Store>()))
-            .ReturnsAsync(store);
+        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>()))
+                            .ReturnsAsync(store);
 
         // Act
         var result = await _storeService.CreateStore(store, userId);
@@ -73,9 +71,8 @@ public class StoreServiceTests
             UserId = userId
         };
 
-        _mockStoreRepository
-            .Setup(x => x.Create(It.IsAny<Store>()))
-            .ReturnsAsync(store);
+        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>()))
+                            .ReturnsAsync(store);
 
         // Act
         var result = await _storeService.CreateStore(store, userId);

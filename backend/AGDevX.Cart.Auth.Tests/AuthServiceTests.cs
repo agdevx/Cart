@@ -15,8 +15,8 @@ public class AuthServiceTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<CartDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
 
         using var context = new CartDbContext(options);
         var authService = new AuthService(context);
@@ -43,8 +43,8 @@ public class AuthServiceTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<CartDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
 
         using var context = new CartDbContext(options);
         var authService = new AuthService(context);
@@ -78,8 +78,8 @@ public class AuthServiceTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<CartDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
 
         using var context = new CartDbContext(options);
         var authService = new AuthService(context);
@@ -110,8 +110,8 @@ public class AuthServiceTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<CartDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
 
         using var context = new CartDbContext(options);
         var authService = new AuthService(context);

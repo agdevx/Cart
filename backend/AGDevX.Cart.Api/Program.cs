@@ -13,10 +13,10 @@ var builder = WebApplication.CreateBuilder(args);
 //== Service Configuration
 builder.Services.AddOpenApi();
 builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-    });
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+                });
 
 //== CORS Configuration
 builder.Services.AddCors(options =>
@@ -37,27 +37,27 @@ builder.Services.AddSingleton<ICookieSettings>(cookieSettings);
 
 //== Authentication Configuration
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.Cookie.Name = ".Cart.Auth";
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-        options.SlidingExpiration = true;
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(cookieSettings.SessionTimeoutMinutes);
+                .AddCookie(options =>
+                {
+                    options.Cookie.Name = ".Cart.Auth";
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                    options.SlidingExpiration = true;
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(cookieSettings.SessionTimeoutMinutes);
 
-        //== Return 401/403 JSON for SPA instead of redirect
-        options.Events.OnRedirectToLogin = context =>
-        {
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            return Task.CompletedTask;
-        };
-        options.Events.OnRedirectToAccessDenied = context =>
-        {
-            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-            return Task.CompletedTask;
-        };
-    });
+                    //== Return 401/403 JSON for SPA instead of redirect
+                    options.Events.OnRedirectToLogin = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return Task.CompletedTask;
+                    };
+                    options.Events.OnRedirectToAccessDenied = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        return Task.CompletedTask;
+                    };
+                });
 
 builder.Services.AddAuthorization();
 

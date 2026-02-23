@@ -10,25 +10,22 @@ public class StoreRepository(CartDbContext context) : IStoreRepository
 {
     public async Task<Store?> GetById(Guid id)
     {
-        return await context.Stores
-            .Include(s => s.Household)
-            .FirstOrDefaultAsync(s => s.Id == id);
+        return await context.Stores.Include(s => s.Household)
+                                   .FirstOrDefaultAsync(s => s.Id == id);
     }
 
     public async Task<IEnumerable<Store>> GetHouseholdStores(Guid householdId)
     {
-        return await context.Stores
-            .Where(s => s.HouseholdId == householdId)
-            .OrderBy(s => s.Name)
-            .ToListAsync();
+        return await context.Stores.Where(s => s.HouseholdId == householdId)
+                                   .OrderBy(s => s.Name)
+                                   .ToListAsync();
     }
 
     public async Task<IEnumerable<Store>> GetPersonalStores(Guid userId)
     {
-        return await context.Stores
-            .Where(s => s.UserId == userId)
-            .OrderBy(s => s.Name)
-            .ToListAsync();
+        return await context.Stores.Where(s => s.UserId == userId)
+                                   .OrderBy(s => s.Name)
+                                   .ToListAsync();
     }
 
     public async Task<Store> Create(Store store)
