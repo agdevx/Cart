@@ -87,11 +87,8 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
 
     public async Task<TripItem> UpdateTripItem(Guid id, int quantity, Guid userId, string? notes = null, Guid? storeId = null)
     {
-        var tripItem = await _tripItemRepository.GetById(id);
-        if (tripItem == null)
-        {
-            throw new KeyNotFoundException("Trip item not found");
-        }
+        var tripItem = await _tripItemRepository.GetById(id)
+                            ?? throw new KeyNotFoundException("Trip item not found");
 
         //== Verify user is collaborator before updating trip item
         var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId);
@@ -122,11 +119,8 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
 
     public async Task DeleteTripItem(Guid id, Guid userId)
     {
-        var tripItem = await _tripItemRepository.GetById(id);
-        if (tripItem == null)
-        {
-            throw new KeyNotFoundException("Trip item not found");
-        }
+        var tripItem = await _tripItemRepository.GetById(id)
+                            ?? throw new KeyNotFoundException("Trip item not found");
 
         //== Verify user is collaborator before deleting trip item
         var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId);
@@ -150,11 +144,8 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
 
     public async Task<TripItem> CheckItem(Guid id, bool isChecked, Guid userId)
     {
-        var tripItem = await _tripItemRepository.GetById(id);
-        if (tripItem == null)
-        {
-            throw new KeyNotFoundException("Trip item not found");
-        }
+        var tripItem = await _tripItemRepository.GetById(id)
+                            ?? throw new KeyNotFoundException("Trip item not found");
 
         //== Verify user is collaborator before checking/unchecking trip item
         var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId);

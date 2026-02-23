@@ -13,11 +13,8 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
         //== Household-scoped store: verify user is a member
         if (store.HouseholdId.HasValue)
         {
-            var household = await householdRepository.GetById(store.HouseholdId.Value);
-            if (household == null)
-            {
-                throw new UnauthorizedAccessException("Household not found");
-            }
+            var household = await householdRepository.GetById(store.HouseholdId.Value)
+                                ?? throw new UnauthorizedAccessException("Household not found");
 
             if (!household.Members.Any(m => m.UserId == userId))
             {
@@ -79,11 +76,8 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
     public async Task<Store> UpdateStore(Store store, Guid userId)
     {
         //== Verify access before updating
-        var existingStore = await GetById(store.Id, userId);
-        if (existingStore == null)
-        {
-            throw new UnauthorizedAccessException("Store not found or access denied");
-        }
+        var existingStore = await GetById(store.Id, userId)
+                                ?? throw new UnauthorizedAccessException("Store not found or access denied");
 
         return await storeRepository.Update(store);
     }
@@ -91,11 +85,8 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
     public async Task DeleteStore(Guid id, Guid userId)
     {
         //== Verify access before deleting
-        var store = await GetById(id, userId);
-        if (store == null)
-        {
-            throw new UnauthorizedAccessException("Store not found or access denied");
-        }
+        var store = await GetById(id, userId)
+                        ?? throw new UnauthorizedAccessException("Store not found or access denied");
 
         await storeRepository.Delete(id);
     }

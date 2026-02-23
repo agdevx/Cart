@@ -72,11 +72,8 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
     //== Update household with authorization check
     public async Task<Household> UpdateHousehold(Guid userId, Guid householdId, string name)
     {
-        var household = await repository.GetById(householdId);
-        if (household == null)
-        {
-            throw new ArgumentException("Household not found");
-        }
+        var household = await repository.GetById(householdId)
+                             ?? throw new ArgumentException("Household not found");
 
         //== Verify user is a member
         if (!await repository.IsUserMember(householdId, userId))
@@ -94,11 +91,8 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
     //== Delete household with authorization check (owner only)
     public async Task DeleteHousehold(Guid userId, Guid householdId)
     {
-        var household = await repository.GetById(householdId);
-        if (household == null)
-        {
-            throw new ArgumentException("Household not found");
-        }
+        var household = await repository.GetById(householdId)
+                            ?? throw new ArgumentException("Household not found");
 
         //== Verify user is the owner
         var isOwner = household.Members.Any(m => m.UserId == userId && m.Role == "owner");
@@ -114,7 +108,7 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
     public async Task<Household> JoinHousehold(Guid userId, string inviteCode)
     {
         var household = await repository.GetByInviteCode(inviteCode)
-            ?? throw new ArgumentException("Invalid invite code");
+                            ?? throw new ArgumentException("Invalid invite code");
 
         if (household.Members.Any(m => m.UserId == userId))
         {
@@ -142,10 +136,10 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
     public async Task RemoveMember(Guid requestingUserId, Guid householdId, Guid targetUserId)
     {
         var household = await repository.GetById(householdId)
-            ?? throw new ArgumentException("Household not found");
+                            ?? throw new ArgumentException("Household not found");
 
         var requestingMember = household.Members.FirstOrDefault(m => m.UserId == requestingUserId)
-            ?? throw new UnauthorizedAccessException("User is not a member of this household");
+                            ?? throw new UnauthorizedAccessException("User is not a member of this household");
 
         var isOwner = requestingMember.Role == "owner";
         var isSelf = requestingUserId == targetUserId;
@@ -169,7 +163,7 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
     public async Task TransferOwnership(Guid requestingUserId, Guid householdId, Guid newOwnerUserId)
     {
         var household = await repository.GetById(householdId)
-            ?? throw new ArgumentException("Household not found");
+                            ?? throw new ArgumentException("Household not found");
 
         var isOwner = household.Members.Any(m => m.UserId == requestingUserId && m.Role == "owner");
         if (!isOwner)
@@ -191,7 +185,7 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
     public async Task<string> RegenerateInviteCode(Guid requestingUserId, Guid householdId)
     {
         var household = await repository.GetById(householdId)
-            ?? throw new ArgumentException("Household not found");
+                            ?? throw new ArgumentException("Household not found");
 
         var isOwner = household.Members.Any(m => m.UserId == requestingUserId && m.Role == "owner");
         if (!isOwner)
@@ -211,7 +205,7 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
     public async Task<IEnumerable<HouseholdMember>> GetMembers(Guid userId, Guid householdId)
     {
         var household = await repository.GetById(householdId)
-            ?? throw new ArgumentException("Household not found");
+                            ?? throw new ArgumentException("Household not found");
 
         if (!await repository.IsUserMember(householdId, userId))
         {
@@ -225,7 +219,7 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
     public async Task<string> GetInviteCode(Guid userId, Guid householdId)
     {
         var household = await repository.GetById(householdId)
-            ?? throw new ArgumentException("Household not found");
+                            ?? throw new ArgumentException("Household not found");
 
         if (!await repository.IsUserMember(householdId, userId))
         {
