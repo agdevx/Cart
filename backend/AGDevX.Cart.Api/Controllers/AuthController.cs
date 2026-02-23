@@ -1,8 +1,12 @@
-// ABOUTME: Controller for authentication operations including user registration, login, and token refresh
-// ABOUTME: Uses primary constructor pattern for IAuthService dependency injection
+// ABOUTME: Controller for authentication operations including user registration, login, logout, and session check
+// ABOUTME: Uses HttpContext.SignInAsync/SignOutAsync for cookie-based session management
 
+using System.Security.Claims;
 using AGDevX.Cart.Auth;
 using AGDevX.Cart.Shared.DTOs;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AGDevX.Cart.Api.Controllers;
@@ -17,6 +21,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         try
         {
             var response = await authService.RegisterAsync(request);
+            await SignInUser(response);
             return Ok(response);
         }
         catch (InvalidOperationException ex)
@@ -31,6 +36,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         try
         {
             var response = await authService.LoginAsync(request);
+            await SignInUser(response);
             return Ok(response);
         }
         catch (UnauthorizedAccessException ex)
@@ -39,17 +45,49 @@ public class AuthController(IAuthService authService) : ControllerBase
         }
     }
 
-    [HttpPost("refresh")]
-    public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
     {
-        try
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var email = User.FindFirst(ClaimTypes.Email)?.Value;
+        var displayName = User.FindFirst(ClaimTypes.Name)?.Value;
+
+        if (userId == null)
         {
-            var response = await authService.RefreshTokenAsync(request.RefreshToken);
-            return Ok(response);
+            return Unauthorized();
         }
-        catch (UnauthorizedAccessException ex)
+
+        return Ok(new AuthResponse
         {
-            return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
-        }
+            UserId = Guid.Parse(userId),
+            Email = email ?? string.Empty,
+            DisplayName = displayName ?? string.Empty
+        });
+    }
+
+    //== Private helper to create cookie session from auth response
+    private async Task SignInUser(AuthResponse response)
+    {
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, response.UserId.ToString()),
+            new Claim(ClaimTypes.Email, response.Email),
+            new Claim(ClaimTypes.Name, response.DisplayName)
+        };
+
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal);
     }
 }
