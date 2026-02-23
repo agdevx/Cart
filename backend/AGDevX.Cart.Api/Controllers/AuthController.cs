@@ -4,7 +4,7 @@
 using System.Security.Claims;
 using AGDevX.Cart.Auth;
 using AGDevX.Cart.Shared.DTOs;
-using AGDevX.Cart.Shared.Extensions;
+using AGDevX.Cart.Auth.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;

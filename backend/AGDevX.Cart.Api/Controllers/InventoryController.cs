@@ -2,7 +2,7 @@
 // ABOUTME: Provides endpoints for creating, reading, updating, deleting household and personal inventory items
 
 using AGDevX.Cart.Services;
-using AGDevX.Cart.Shared.Extensions;
+using AGDevX.Cart.Auth.Extensions;
 using AGDevX.Cart.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

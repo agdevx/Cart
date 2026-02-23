@@ -2,7 +2,7 @@
 // ABOUTME: Provides endpoints for CRUD operations and item status tracking during shopping
 
 using AGDevX.Cart.Services;
-using AGDevX.Cart.Shared.Extensions;
+using AGDevX.Cart.Auth.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

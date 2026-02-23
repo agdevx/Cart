@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Text.Json;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
+using AGDevX.Cart.Auth.Extensions;
 using AGDevX.Cart.Shared.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
