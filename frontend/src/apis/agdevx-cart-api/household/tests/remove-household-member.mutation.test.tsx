@@ -2,31 +2,21 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
-import { useCreateHouseholdMutation } from './create-household.mutation'
-import * as apiFetchModule from '../agdevx-cart-api-config'
+import { useRemoveHouseholdMemberMutation } from '../remove-household-member.mutation'
+import * as apiFetchModule from '../../agdevx-cart-api-config'
 import * as useAuthModule from '@/auth/use-auth'
-import type { Household } from '../models/household'
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 )
 
-describe('useCreateHouseholdMutation', () => {
+describe('useRemoveHouseholdMemberMutation', () => {
   beforeEach(() => {
     queryClient.clear()
     vi.clearAllMocks()
   })
 
-  it('creates household successfully', async () => {
-    const mockHousehold: Household = {
-      id: '1',
-      name: 'New Household',
-      createdBy: 'user1',
-      createdDate: '2024-01-01',
-      modifiedBy: null,
-      modifiedDate: null,
-    }
-
+  it('removes member successfully', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
       user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
@@ -36,32 +26,20 @@ describe('useCreateHouseholdMutation', () => {
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
       ok: true,
-      json: async () => mockHousehold,
-    } as Response)
+    } as unknown as Response)
 
-    const { result } = renderHook(() => useCreateHouseholdMutation(), { wrapper })
+    const { result } = renderHook(() => useRemoveHouseholdMemberMutation(), { wrapper })
 
-    result.current.mutate({ name: 'New Household' })
+    result.current.mutate({ householdId: 'h1', userId: 'u1' })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(result.current.data).toEqual(mockHousehold)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household', {
-      method: 'POST',
-      body: JSON.stringify('New Household'),
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1/members/u1', {
+      method: 'DELETE',
     })
   })
 
-  it('invalidates households query on success', async () => {
-    const mockHousehold: Household = {
-      id: '1',
-      name: 'New Household',
-      createdBy: 'user1',
-      createdDate: '2024-01-01',
-      modifiedBy: null,
-      modifiedDate: null,
-    }
-
+  it('invalidates queries on success', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
       user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
@@ -71,21 +49,21 @@ describe('useCreateHouseholdMutation', () => {
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
       ok: true,
-      json: async () => mockHousehold,
-    } as Response)
+    } as unknown as Response)
 
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
 
-    const { result } = renderHook(() => useCreateHouseholdMutation(), { wrapper })
+    const { result } = renderHook(() => useRemoveHouseholdMemberMutation(), { wrapper })
 
-    result.current.mutate({ name: 'New Household' })
+    result.current.mutate({ householdId: 'h1', userId: 'u1' })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['household', 'h1', 'members'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['households'] })
   })
 
-  it('handles create error', async () => {
+  it('handles remove error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
       user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
@@ -94,15 +72,15 @@ describe('useCreateHouseholdMutation', () => {
     })
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockRejectedValue(
-      new Error('Create failed')
+      new Error('Failed to remove member')
     )
 
-    const { result } = renderHook(() => useCreateHouseholdMutation(), { wrapper })
+    const { result } = renderHook(() => useRemoveHouseholdMemberMutation(), { wrapper })
 
-    result.current.mutate({ name: 'New Household' })
+    result.current.mutate({ householdId: 'h1', userId: 'u1' })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 
-    expect(result.current.error).toEqual(new Error('Create failed'))
+    expect(result.current.error).toEqual(new Error('Failed to remove member'))
   })
 })

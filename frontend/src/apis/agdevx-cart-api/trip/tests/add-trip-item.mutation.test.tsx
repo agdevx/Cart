@@ -2,68 +2,22 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
-import { useCheckTripItemMutation } from './check-trip-item.mutation'
-import * as apiFetchModule from '../agdevx-cart-api-config'
+import { useAddTripItemMutation } from '../add-trip-item.mutation'
+import * as apiFetchModule from '../../agdevx-cart-api-config'
 import * as useAuthModule from '@/auth/use-auth'
-import type { TripItem } from '../models/trip-item'
+import type { TripItem } from '../../models/trip-item'
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 )
 
-describe('useCheckTripItemMutation', () => {
+describe('useAddTripItemMutation', () => {
   beforeEach(() => {
     queryClient.clear()
     vi.clearAllMocks()
   })
 
-  it('checks trip item successfully', async () => {
-    const mockTripItem: TripItem = {
-      id: '1',
-      tripId: 'trip1',
-      inventoryItemId: 'item1',
-      quantity: 2,
-      storeId: null,
-      notes: null,
-      isChecked: true,
-      checkedAt: '2024-01-01T10:00:00Z',
-      createdBy: 'user1',
-      createdDate: '2024-01-01',
-      modifiedBy: 'user1',
-      modifiedDate: '2024-01-01',
-    }
-
-    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      isAuthenticated: true,
-      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
-      setAuth: vi.fn(),
-      logout: vi.fn(),
-    })
-
-    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
-      ok: true,
-      json: async () => mockTripItem,
-    } as unknown as Response)
-
-    const { result } = renderHook(() => useCheckTripItemMutation(), {
-      wrapper,
-    })
-
-    result.current.mutate({
-      tripId: 'trip1',
-      tripItemId: '1',
-      isChecked: true,
-    })
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-
-    expect(result.current.data).toEqual(mockTripItem)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/tripitem/1/check', {
-      method: 'POST',
-    })
-  })
-
-  it('unchecks trip item successfully', async () => {
+  it('adds trip item successfully', async () => {
     const mockTripItem: TripItem = {
       id: '1',
       tripId: 'trip1',
@@ -75,8 +29,8 @@ describe('useCheckTripItemMutation', () => {
       checkedAt: null,
       createdBy: 'user1',
       createdDate: '2024-01-01',
-      modifiedBy: 'user1',
-      modifiedDate: '2024-01-01',
+      modifiedBy: null,
+      modifiedDate: null,
     }
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
@@ -91,22 +45,25 @@ describe('useCheckTripItemMutation', () => {
       json: async () => mockTripItem,
     } as unknown as Response)
 
-    const { result } = renderHook(() => useCheckTripItemMutation(), {
+    const { result } = renderHook(() => useAddTripItemMutation(), {
       wrapper,
     })
 
     result.current.mutate({
       tripId: 'trip1',
-      tripItemId: '1',
-      isChecked: false,
+      inventoryItemId: 'item1',
+      quantity: 2,
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockTripItem)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/tripitem/1/uncheck', {
-      method: 'POST',
-    })
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith(
+      '/api/tripitem?tripId=trip1&inventoryItemId=item1&quantity=2',
+      {
+        method: 'POST',
+      }
+    )
   })
 
   it('invalidates trip queries on success', async () => {
@@ -117,12 +74,12 @@ describe('useCheckTripItemMutation', () => {
       quantity: 1,
       storeId: null,
       notes: null,
-      isChecked: true,
-      checkedAt: '2024-01-01T10:00:00Z',
+      isChecked: false,
+      checkedAt: null,
       createdBy: 'user1',
       createdDate: '2024-01-01',
-      modifiedBy: 'user1',
-      modifiedDate: '2024-01-01',
+      modifiedBy: null,
+      modifiedDate: null,
     }
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
@@ -139,14 +96,14 @@ describe('useCheckTripItemMutation', () => {
 
     const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries')
 
-    const { result } = renderHook(() => useCheckTripItemMutation(), {
+    const { result } = renderHook(() => useAddTripItemMutation(), {
       wrapper,
     })
 
     result.current.mutate({
       tripId: 'trip1',
-      tripItemId: '1',
-      isChecked: true,
+      inventoryItemId: 'item1',
+      quantity: 1,
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -156,7 +113,7 @@ describe('useCheckTripItemMutation', () => {
     })
   })
 
-  it('handles check error', async () => {
+  it('handles add error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
       user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
@@ -168,14 +125,14 @@ describe('useCheckTripItemMutation', () => {
       new Error('Network error')
     )
 
-    const { result } = renderHook(() => useCheckTripItemMutation(), {
+    const { result } = renderHook(() => useAddTripItemMutation(), {
       wrapper,
     })
 
     result.current.mutate({
       tripId: 'trip1',
-      tripItemId: '1',
-      isChecked: true,
+      inventoryItemId: 'item1',
+      quantity: 1,
     })
 
     await waitFor(() => expect(result.current.isError).toBe(true))

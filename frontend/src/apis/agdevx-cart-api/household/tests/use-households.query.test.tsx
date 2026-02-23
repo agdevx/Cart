@@ -2,42 +2,26 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
-import { useInventoryQuery } from './use-inventory.query'
-import * as apiFetchModule from '../agdevx-cart-api-config'
+import { useHouseholdsQuery } from '../use-households.query'
+import * as apiFetchModule from '../../agdevx-cart-api-config'
 import * as useAuthModule from '@/auth/use-auth'
-import type { InventoryItem } from '../models/inventory-item'
+import type { Household } from '../../models/household'
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 )
 
-describe('useInventoryQuery', () => {
+describe('useHouseholdsQuery', () => {
   beforeEach(() => {
     queryClient.clear()
     vi.clearAllMocks()
   })
 
-  it('fetches inventory items successfully', async () => {
-    const mockInventory: InventoryItem[] = [
+  it('fetches households successfully', async () => {
+    const mockHouseholds: Household[] = [
       {
         id: '1',
-        name: 'Milk',
-        defaultStoreId: 'store1',
-        notes: 'Organic',
-        ownerUserId: null,
-        householdId: 'household1',
-        createdBy: 'user1',
-        createdDate: '2024-01-01',
-        modifiedBy: null,
-        modifiedDate: null,
-      },
-      {
-        id: '2',
-        name: 'Personal Item',
-        defaultStoreId: null,
-        notes: null,
-        ownerUserId: 'user1',
-        householdId: null,
+        name: 'Test Household',
         createdBy: 'user1',
         createdDate: '2024-01-01',
         modifiedBy: null,
@@ -54,15 +38,15 @@ describe('useInventoryQuery', () => {
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
       ok: true,
-      json: async () => mockInventory,
+      json: async () => mockHouseholds,
     } as Response)
 
-    const { result } = renderHook(() => useInventoryQuery(), { wrapper })
+    const { result } = renderHook(() => useHouseholdsQuery(), { wrapper })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(result.current.data).toEqual(mockInventory)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/inventory')
+    expect(result.current.data).toEqual(mockHouseholds)
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household')
   })
 
   it('does not fetch when not authenticated', () => {
@@ -75,7 +59,7 @@ describe('useInventoryQuery', () => {
 
     const apiFetchSpy = vi.spyOn(apiFetchModule, 'apiFetch')
 
-    const { result } = renderHook(() => useInventoryQuery(), { wrapper })
+    const { result } = renderHook(() => useHouseholdsQuery(), { wrapper })
 
     expect(result.current.isPending).toBe(true)
     expect(apiFetchSpy).not.toHaveBeenCalled()
@@ -93,7 +77,7 @@ describe('useInventoryQuery', () => {
       new Error('Network error')
     )
 
-    const { result } = renderHook(() => useInventoryQuery(), { wrapper })
+    const { result } = renderHook(() => useHouseholdsQuery(), { wrapper })
 
     await waitFor(
       () => expect(result.current.isError).toBe(true),

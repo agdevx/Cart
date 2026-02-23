@@ -6,7 +6,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/apis/tanstack-query/query-client';
-import { useLoginMutation } from './login.mutation';
+import { useLoginMutation } from '../login.mutation';
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   createElement(QueryClientProvider, { client: queryClient }, children);

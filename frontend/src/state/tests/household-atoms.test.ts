@@ -3,7 +3,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createStore } from 'jotai';
-import { selectedHouseholdIdAtom } from './household-atoms';
+import { selectedHouseholdIdAtom } from '../household-atoms';
 
 describe('household-atoms', () => {
   let localStorageMock: { [key: string]: string };

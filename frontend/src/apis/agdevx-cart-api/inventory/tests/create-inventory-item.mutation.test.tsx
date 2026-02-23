@@ -2,33 +2,33 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
-import { useUpdateInventoryItemMutation } from './update-inventory-item.mutation'
-import * as apiFetchModule from '../agdevx-cart-api-config'
+import { useCreateInventoryItemMutation } from '../create-inventory-item.mutation'
+import * as apiFetchModule from '../../agdevx-cart-api-config'
 import * as useAuthModule from '@/auth/use-auth'
-import type { InventoryItem } from '../models/inventory-item'
+import type { InventoryItem } from '../../models/inventory-item'
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 )
 
-describe('useUpdateInventoryItemMutation', () => {
+describe('useCreateInventoryItemMutation', () => {
   beforeEach(() => {
     queryClient.clear()
     vi.clearAllMocks()
   })
 
-  it('updates inventory item successfully', async () => {
+  it('creates inventory item successfully', async () => {
     const mockInventoryItem: InventoryItem = {
       id: '1',
-      name: 'Whole Milk',
-      defaultStoreId: 'store2',
-      notes: 'Updated notes',
+      name: 'Milk',
+      defaultStoreId: 'store1',
+      notes: 'Organic',
       ownerUserId: null,
       householdId: 'household1',
       createdBy: 'user1',
       createdDate: '2024-01-01',
-      modifiedBy: 'user1',
-      modifiedDate: '2024-01-02',
+      modifiedBy: null,
+      modifiedDate: null,
     }
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
@@ -43,26 +43,27 @@ describe('useUpdateInventoryItemMutation', () => {
       json: async () => mockInventoryItem,
     } as unknown as Response)
 
-    const { result } = renderHook(() => useUpdateInventoryItemMutation(), {
+    const { result } = renderHook(() => useCreateInventoryItemMutation(), {
       wrapper,
     })
 
     result.current.mutate({
-      id: '1',
-      name: 'Whole Milk',
-      defaultStoreId: 'store2',
-      notes: 'Updated notes',
+      name: 'Milk',
+      defaultStoreId: 'store1',
+      notes: 'Organic',
+      householdId: 'household1',
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockInventoryItem)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/inventory/1', {
-      method: 'PUT',
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/inventory', {
+      method: 'POST',
       body: JSON.stringify({
-        name: 'Whole Milk',
-        defaultStoreId: 'store2',
-        notes: 'Updated notes',
+        name: 'Milk',
+        defaultStoreId: 'store1',
+        notes: 'Organic',
+        householdId: 'household1',
       }),
     })
   })
@@ -77,8 +78,8 @@ describe('useUpdateInventoryItemMutation', () => {
       householdId: null,
       createdBy: 'user1',
       createdDate: '2024-01-01',
-      modifiedBy: 'user1',
-      modifiedDate: '2024-01-02',
+      modifiedBy: null,
+      modifiedDate: null,
     }
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
@@ -95,12 +96,11 @@ describe('useUpdateInventoryItemMutation', () => {
 
     const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries')
 
-    const { result } = renderHook(() => useUpdateInventoryItemMutation(), {
+    const { result } = renderHook(() => useCreateInventoryItemMutation(), {
       wrapper,
     })
 
     result.current.mutate({
-      id: '1',
       name: 'Milk',
     })
 
@@ -111,7 +111,7 @@ describe('useUpdateInventoryItemMutation', () => {
     })
   })
 
-  it('handles update error', async () => {
+  it('handles creation error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
       user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
@@ -123,12 +123,11 @@ describe('useUpdateInventoryItemMutation', () => {
       new Error('Network error')
     )
 
-    const { result } = renderHook(() => useUpdateInventoryItemMutation(), {
+    const { result } = renderHook(() => useCreateInventoryItemMutation(), {
       wrapper,
     })
 
     result.current.mutate({
-      id: '1',
       name: 'Milk',
     })
 
