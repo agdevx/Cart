@@ -2,7 +2,7 @@
 // ABOUTME: Validates property initialization and assignment behavior
 namespace AGDevX.Cart.Data.Tests.Models;
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using FluentAssertions;
 using Xunit;
 

@@ -1,6 +1,6 @@
 // ABOUTME: InventoryItem model representing household-shared or user-private items
 // ABOUTME: Household items are visible to all household members, user items are private to owner
-namespace AGDevX.Cart.Shared.Models;
+namespace AGDevX.Cart.Data.Models;
 
 public class InventoryItem : BaseEntity
 {

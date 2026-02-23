@@ -1,7 +1,7 @@
 // ABOUTME: Tests for Trip model behavior and properties
 // ABOUTME: Validates trip creation, completion tracking, and state management
 using FluentAssertions;
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 
 namespace AGDevX.Cart.Data.Tests.Models;
 

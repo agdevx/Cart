@@ -1,7 +1,7 @@
 // ABOUTME: Repository implementation for InventoryItem data access with privacy enforcement
 // ABOUTME: Handles household and personal inventory queries with proper authorization filtering and DefaultStore inclusion
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AGDevX.Cart.Data.Repositories;

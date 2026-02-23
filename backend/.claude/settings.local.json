@@ -4,7 +4,9 @@
       "Bash(git stash:*)",
       "Bash(cd D:/AGDevX/ws/Cart/backend && dotnet test AGDevX.Cart.Auth.Tests/AGDevX.Cart.Auth.Tests.csproj --nologo -v q 2>&1)",
       "Bash(tail:*)",
-      "Bash(cd D:/AGDevX/ws/Cart/backend && dotnet test --no-build 2>&1)"
+      "Bash(cd D:/AGDevX/ws/Cart/backend && dotnet test --no-build 2>&1)",
+      "Bash(cd:*)",
+      "Bash(cd D:/AGDevX/ws/Cart/backend && dotnet test 2>&1)"
     ]
   }
 }

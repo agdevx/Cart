@@ -1,6 +1,6 @@
 // ABOUTME: Household entity representing a shared shopping group
 // ABOUTME: Contains household details and navigation to member relationships
-namespace AGDevX.Cart.Shared.Models;
+namespace AGDevX.Cart.Data.Models;
 
 public class Household : BaseEntity
 {

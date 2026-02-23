@@ -1,7 +1,7 @@
 // ABOUTME: Service interface for InventoryItem business logic with strict privacy and authorization
 // ABOUTME: Defines operations for creating, retrieving, updating, and deleting inventory items with household membership validation
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 
 namespace AGDevX.Cart.Services;
 

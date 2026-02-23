@@ -1,7 +1,7 @@
 // ABOUTME: Unit tests for StoreService covering household-scoped and personal store operations.
 // ABOUTME: Tests verify authorization checks for household membership and user ownership.
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using Moq;

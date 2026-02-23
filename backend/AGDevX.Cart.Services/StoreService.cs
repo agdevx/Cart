@@ -1,7 +1,7 @@
 // ABOUTME: Service implementation for Store business logic.
 // ABOUTME: Validates household membership for household stores and user ownership for personal stores.
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 
 namespace AGDevX.Cart.Services;

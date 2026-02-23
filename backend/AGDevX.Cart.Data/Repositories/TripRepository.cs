@@ -1,6 +1,6 @@
 // ABOUTME: Repository implementation for Trip entities with EF Core including navigation property loading
 // ABOUTME: and collaborator management with authorization checks for creator and collaborator access
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AGDevX.Cart.Data.Repositories;

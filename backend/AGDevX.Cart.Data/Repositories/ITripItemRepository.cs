@@ -1,6 +1,6 @@
 // ABOUTME: Repository interface for managing trip items within specific trips
 // ABOUTME: Provides CRUD operations for items that users plan to purchase on shopping trips
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 
 namespace AGDevX.Cart.Data.Repositories;
 

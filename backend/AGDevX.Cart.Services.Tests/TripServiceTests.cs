@@ -1,6 +1,6 @@
 // ABOUTME: Unit tests for TripService covering trip lifecycle management (create, complete, reopen)
 // ABOUTME: and collaborator functionality with authorization checks for household membership
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using Moq;

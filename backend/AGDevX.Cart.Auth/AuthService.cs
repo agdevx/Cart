@@ -2,7 +2,7 @@
 // ABOUTME: Uses BCrypt for password hashing. Cookie session management is handled by the controller.
 using AGDevX.Cart.Data;
 using AGDevX.Cart.Shared.DTOs;
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AGDevX.Cart.Auth;

@@ -1,6 +1,6 @@
 // ABOUTME: Links inventory items to specific trips with shopping details
 // ABOUTME: Tracks quantity, store preference, notes, and checked status for each item
-namespace AGDevX.Cart.Shared.Models;
+namespace AGDevX.Cart.Data.Models;
 
 public class TripItem : BaseEntity
 {

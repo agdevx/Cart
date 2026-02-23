@@ -1,7 +1,7 @@
 // ABOUTME: Repository interface for Store entity operations.
 // ABOUTME: Supports household-scoped and personal (user-scoped) store queries.
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 
 namespace AGDevX.Cart.Data.Repositories;
 

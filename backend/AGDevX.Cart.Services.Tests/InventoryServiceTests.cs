@@ -1,7 +1,7 @@
 // ABOUTME: Tests for InventoryService verifying privacy enforcement and authorization for inventory items
 // ABOUTME: Validates household membership checks and user ownership for both household and personal inventory items
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using Moq;

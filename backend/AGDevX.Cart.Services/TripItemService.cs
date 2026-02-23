@@ -2,8 +2,9 @@
 // ABOUTME: and check/uncheck functionality with authorization checks ensuring user is trip collaborator
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
+using AGDevX.Cart.Shared.Models;
 
 namespace AGDevX.Cart.Services;
 

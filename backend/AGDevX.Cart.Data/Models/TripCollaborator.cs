@@ -1,6 +1,6 @@
 // ABOUTME: Join table linking trips to users for collaboration
 // ABOUTME: Enables many-to-many relationship between Trip and ApplicationUser
-namespace AGDevX.Cart.Shared.Models;
+namespace AGDevX.Cart.Data.Models;
 
 public class TripCollaborator : BaseEntity
 {
