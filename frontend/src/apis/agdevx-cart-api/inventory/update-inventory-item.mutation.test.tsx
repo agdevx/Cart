@@ -32,9 +32,8 @@ describe('useUpdateInventoryItemMutation', () => {
     }
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -65,7 +64,6 @@ describe('useUpdateInventoryItemMutation', () => {
         defaultStoreId: 'store2',
         notes: 'Updated notes',
       }),
-      token: 'test-token',
     })
   })
 
@@ -84,9 +82,8 @@ describe('useUpdateInventoryItemMutation', () => {
     }
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -116,9 +113,8 @@ describe('useUpdateInventoryItemMutation', () => {
 
   it('handles update error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })

@@ -19,8 +19,6 @@ describe('useLoginMutation', () => {
 
   it('should successfully login with valid credentials', async () => {
     const mockResponse = {
-      accessToken: 'test-access-token',
-      refreshToken: 'test-refresh-token',
       userId: '123e4567-e89b-12d3-a456-426614174000',
       email: 'test@example.com',
       displayName: 'Test User',
@@ -52,6 +50,7 @@ describe('useLoginMutation', () => {
           email: 'test@example.com',
           password: 'password123',
         }),
+        credentials: 'include',
       })
     );
   });

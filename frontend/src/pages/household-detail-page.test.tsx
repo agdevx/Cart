@@ -56,7 +56,6 @@ describe('HouseholdDetailPage', () => {
 
   it('renders loading state', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
       user: { id: 'owner-id', email: 'test@test.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
@@ -80,7 +79,6 @@ describe('HouseholdDetailPage', () => {
 
   it('renders member list with roles', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
       user: { id: 'owner-id', email: 'test@test.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
@@ -106,7 +104,6 @@ describe('HouseholdDetailPage', () => {
 
   it('displays invite code', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
       user: { id: 'owner-id', email: 'test@test.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
@@ -131,7 +128,6 @@ describe('HouseholdDetailPage', () => {
 
   it('shows owner controls when user is owner', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
       user: { id: 'owner-id', email: 'test@test.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
@@ -159,7 +155,6 @@ describe('HouseholdDetailPage', () => {
 
   it('shows leave button for non-owner member', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
       user: { id: 'member-id', email: 'test@test.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
