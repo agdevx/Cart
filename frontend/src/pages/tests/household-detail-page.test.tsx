@@ -1,14 +1,17 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from '@/apis/tanstack-query/query-client'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { HouseholdDetailPage } from '../household-detail-page'
-import * as useAuthModule from '@/auth/use-auth'
+
+import type { UseQueryResult } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { render, screen } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
 import * as membersQueryModule from '@/apis/agdevx-cart-api/household/use-household-members.query'
 import * as inviteCodeQueryModule from '@/apis/agdevx-cart-api/household/use-invite-code.query'
 import type { HouseholdMember } from '@/apis/agdevx-cart-api/models/household'
-import type { UseQueryResult } from '@tanstack/react-query'
+import { queryClient } from '@/apis/tanstack-query/query-client'
+import * as useAuthModule from '@/auth/use-auth'
+
+import { HouseholdDetailPage } from '../household-detail-page'
 
 const renderWithRouter = (householdId: string) => {
   return render(

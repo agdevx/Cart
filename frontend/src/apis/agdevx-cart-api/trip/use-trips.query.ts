@@ -2,9 +2,11 @@
 // ABOUTME: Returns list of trips for the authenticated user
 
 import { useQuery } from '@tanstack/react-query'
+
+import { useAuth } from '@/auth/use-auth'
+
 import { apiFetch } from '../agdevx-cart-api-config'
 import type { Trip } from '../models/trip'
-import { useAuth } from '@/auth/use-auth'
 
 export const useTripsQuery = () => {
   const { isAuthenticated } = useAuth()

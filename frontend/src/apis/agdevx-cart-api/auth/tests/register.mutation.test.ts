@@ -1,12 +1,15 @@
 // ABOUTME: Tests for registration mutation hook
 // ABOUTME: Verifies API integration and response handling
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook } from '@testing-library/react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '@/apis/tanstack-query/query-client';
-import { useRegisterMutation } from '../register.mutation';
 import { createElement } from 'react';
+
+import { QueryClientProvider } from '@tanstack/react-query';
+import { renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { queryClient } from '@/apis/tanstack-query/query-client';
+
+import { useRegisterMutation } from '../register.mutation';
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   createElement(QueryClientProvider, { client: queryClient }, children);

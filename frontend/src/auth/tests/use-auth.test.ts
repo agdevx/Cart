@@ -1,13 +1,16 @@
 // ABOUTME: Tests for useAuth hook
 // ABOUTME: Verifies authentication hook behavior including setAuth, logout, and localStorage
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
+
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { Provider } from 'jotai';
-import { useAuth } from '../use-auth';
-import { AuthProvider } from '../auth-provider';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import type { User } from '@/apis/agdevx-cart-api/models/user';
+
+import { AuthProvider } from '../auth-provider';
+import { useAuth } from '../use-auth';
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   createElement(Provider, {}, children);

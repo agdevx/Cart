@@ -2,6 +2,7 @@
 // ABOUTME: Creates new household and returns it with invite code
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+
 import { apiFetch } from '../agdevx-cart-api-config'
 import type { Household } from '../models/household'
 

@@ -1,4 +1,5 @@
 import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers'
+
 import 'vitest'
 
 declare module 'vitest' {

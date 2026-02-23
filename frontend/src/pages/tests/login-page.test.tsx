@@ -1,13 +1,16 @@
 // ABOUTME: Tests for LoginPage component
 // ABOUTME: Verifies email/password inputs and form submission
 
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import { LoginPage } from '../login-page'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from '@/apis/tanstack-query/query-client'
-import { BrowserRouter } from 'react-router-dom'
 import { createElement } from 'react'
+import { BrowserRouter } from 'react-router-dom'
+
+import { QueryClientProvider } from '@tanstack/react-query'
+import { render, screen } from '@testing-library/react'
+import { describe, expect,it } from 'vitest'
+
+import { queryClient } from '@/apis/tanstack-query/query-client'
+
+import { LoginPage } from '../login-page'
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   createElement(BrowserRouter, {},

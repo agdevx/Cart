@@ -1,11 +1,12 @@
 // ABOUTME: Shopping page displaying active trip and trip history
 // ABOUTME: Shows current trip in progress and completed trips list
 
-import { Link } from 'react-router-dom'
-import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
-import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
-import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+
+import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
+import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
+import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
 
 export const ShoppingPage = () => {
   const { data: trips, isLoading } = useTripsQuery()

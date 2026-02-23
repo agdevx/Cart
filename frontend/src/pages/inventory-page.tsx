@@ -2,8 +2,9 @@
 // ABOUTME: Displays household and personal inventory items with add/delete actions
 
 import { Link } from 'react-router-dom'
-import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
+
 import { useDeleteInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/delete-inventory-item.mutation'
+import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 
 export const InventoryPage = () => {
   const { data: inventory, isLoading } = useInventoryQuery()

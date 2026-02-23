@@ -2,9 +2,11 @@
 // ABOUTME: Returns trip details including items for the specified trip
 
 import { useQuery } from '@tanstack/react-query'
+
+import { useAuth } from '@/auth/use-auth'
+
 import { apiFetch } from '../agdevx-cart-api-config'
 import type { Trip } from '../models/trip'
-import { useAuth } from '@/auth/use-auth'
 
 export const useTripQuery = (tripId: string) => {
   const { isAuthenticated } = useAuth()

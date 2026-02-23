@@ -1,8 +1,9 @@
 // ABOUTME: Tests for household state atoms with localStorage persistence
 // ABOUTME: Verifies selectedHouseholdIdAtom behavior and localStorage sync
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createStore } from 'jotai';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { selectedHouseholdIdAtom } from '../household-atoms';
 
 describe('household-atoms', () => {
