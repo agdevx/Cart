@@ -1,6 +1,7 @@
 // ABOUTME: Household detail page with member management
 // ABOUTME: Shows invite code, member list, and role-based actions (remove, transfer, leave)
 
+import { ArrowLeft, Copy, RefreshCw } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
@@ -76,58 +77,64 @@ export const HouseholdDetailPage = () => {
 
   if (membersLoading || codeLoading) {
     return (
-      <div className="p-4">
-        <p>Loading household...</p>
+      <div className="px-5 pt-14">
+        <p className="text-text-secondary">Loading household...</p>
       </div>
     )
   }
 
   return (
-    <div className="p-4">
+    <div className="bg-bg min-h-screen px-5 pt-14 pb-8">
       {/* Header */}
-      <div className="mb-4">
+      <div className="mb-6">
         <button
           onClick={() => navigate('/household')}
-          className="text-blue-600 hover:text-blue-800 mb-2"
+          className="text-teal hover:text-teal-light font-semibold text-sm flex items-center gap-1 mb-3"
         >
-          &larr; Back to Households
+          <ArrowLeft className="w-4 h-4" />
+          Back to Households
         </button>
-        <h1 className="text-2xl font-bold">Household Details</h1>
+        <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">Household Details</h1>
       </div>
 
       {/* Invite Code Card */}
-      <div className="mb-6 p-4 bg-white border rounded shadow-sm">
-        <h2 className="text-lg font-semibold mb-2">Invite Code</h2>
+      <div className="mb-6 p-5 bg-surface rounded-2xl shadow-sm">
+        <h2 className="font-display text-sm font-semibold uppercase tracking-[1.5px] text-text-tertiary mb-3">Invite Code</h2>
         <div className="flex items-center gap-3">
-          <span className="text-2xl font-mono font-bold tracking-widest text-blue-700">
+          <span className="text-2xl font-mono font-bold tracking-widest text-navy">
             {inviteCode || '------'}
           </span>
           <button
             onClick={handleCopyCode}
-            className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-teal bg-teal/8 rounded-lg hover:bg-teal/15 transition-colors"
           >
+            <Copy className="w-3.5 h-3.5" />
             {codeCopied ? 'Copied!' : 'Copy'}
           </button>
           {isOwner && (
             <button
               onClick={handleRegenerateCode}
               disabled={regenerateCodeMutation.isPending}
-              className="px-3 py-1 text-sm bg-amber-100 text-amber-800 rounded hover:bg-amber-200 disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-amber bg-amber/10 rounded-lg hover:bg-amber/20 disabled:opacity-50 transition-colors"
             >
+              <RefreshCw className="w-3.5 h-3.5" />
               {regenerateCodeMutation.isPending ? 'Regenerating...' : 'Regenerate'}
             </button>
           )}
         </div>
-        <p className="text-sm text-gray-500 mt-2">
+        <p className="text-sm text-text-tertiary mt-3">
           Share this code with others to let them join your household.
         </p>
       </div>
 
       {/* Members List */}
       <div className="mb-4">
-        <h2 className="text-lg font-semibold mb-2">
-          Members ({members?.length || 0})
-        </h2>
+        <div className="flex items-center gap-2.5 mb-3">
+          <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">
+            Members ({members?.length || 0})
+          </span>
+          <span className="flex-1 h-px bg-navy/8" />
+        </div>
         <div className="space-y-2">
           {members?.map((member) => {
             const isSelf = member.userId === user?.id
@@ -136,73 +143,75 @@ export const HouseholdDetailPage = () => {
             return (
               <div
                 key={member.userId}
-                className="p-4 bg-white border rounded shadow-sm flex justify-between items-center"
+                className="p-4 bg-surface rounded-xl shadow-sm"
               >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">
-                      {member.userId === user?.id ? 'You' : member.userId}
-                    </span>
-                    <span
-                      className={`px-2 py-0.5 text-xs rounded-full font-medium ${
-                        memberIsOwner
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}
-                    >
-                      {member.role}
-                    </span>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-navy">
+                        {member.userId === user?.id ? 'You' : member.userId}
+                      </span>
+                      <span
+                        className={`px-2.5 py-0.5 text-xs rounded-full font-bold ${
+                          memberIsOwner
+                            ? 'bg-teal/15 text-teal'
+                            : 'bg-bg-warm text-text-tertiary'
+                        }`}
+                      >
+                        {member.role}
+                      </span>
+                    </div>
+                    <p className="text-sm text-text-tertiary mt-0.5">
+                      Joined: {new Date(member.joinedAt).toLocaleDateString()}
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-500">
-                    Joined: {new Date(member.joinedAt).toLocaleDateString()}
-                  </p>
-                </div>
 
-                <div className="flex gap-2">
-                  {/* Owner can remove non-owner members */}
-                  {isOwner && !isSelf && (
-                    <>
+                  <div className="flex gap-2">
+                    {/* Owner can remove non-owner members */}
+                    {isOwner && !isSelf && (
+                      <>
+                        <button
+                          onClick={() =>
+                            setConfirmAction({
+                              type: 'transfer',
+                              userId: member.userId,
+                              displayName: member.userId,
+                            })
+                          }
+                          className="px-3 py-1.5 text-xs font-bold text-teal bg-teal/8 rounded-lg hover:bg-teal/15 transition-colors"
+                        >
+                          Transfer
+                        </button>
+                        <button
+                          onClick={() =>
+                            setConfirmAction({
+                              type: 'remove',
+                              userId: member.userId,
+                              displayName: member.userId,
+                            })
+                          }
+                          className="px-3 py-1.5 text-xs font-bold text-coral bg-coral/8 rounded-lg hover:bg-coral/15 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </>
+                    )}
+                    {/* Non-owner can leave */}
+                    {!isOwner && isSelf && (
                       <button
                         onClick={() =>
                           setConfirmAction({
-                            type: 'transfer',
+                            type: 'leave',
                             userId: member.userId,
-                            displayName: member.userId,
+                            displayName: 'yourself',
                           })
                         }
-                        className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+                        className="px-3 py-1.5 text-xs font-bold text-coral bg-coral/8 rounded-lg hover:bg-coral/15 transition-colors"
                       >
-                        Transfer Ownership
+                        Leave
                       </button>
-                      <button
-                        onClick={() =>
-                          setConfirmAction({
-                            type: 'remove',
-                            userId: member.userId,
-                            displayName: member.userId,
-                          })
-                        }
-                        className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
-                      >
-                        Remove
-                      </button>
-                    </>
-                  )}
-                  {/* Non-owner can leave */}
-                  {!isOwner && isSelf && (
-                    <button
-                      onClick={() =>
-                        setConfirmAction({
-                          type: 'leave',
-                          userId: member.userId,
-                          displayName: 'yourself',
-                        })
-                      }
-                      className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
-                    >
-                      Leave Household
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             )
@@ -213,13 +222,13 @@ export const HouseholdDetailPage = () => {
       {/* Confirmation Dialog */}
       {confirmAction && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 mx-4 max-w-sm w-full shadow-lg">
-            <h3 className="text-lg font-bold mb-2">
+          <div className="bg-surface rounded-2xl p-6 mx-4 max-w-sm w-full shadow-lg">
+            <h3 className="font-display text-lg font-bold text-navy mb-2">
               {confirmAction.type === 'remove' && 'Remove Member'}
               {confirmAction.type === 'transfer' && 'Transfer Ownership'}
               {confirmAction.type === 'leave' && 'Leave Household'}
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-text-secondary mb-5">
               {confirmAction.type === 'remove' &&
                 `Are you sure you want to remove ${confirmAction.displayName} from this household?`}
               {confirmAction.type === 'transfer' &&
@@ -230,14 +239,18 @@ export const HouseholdDetailPage = () => {
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setConfirmAction(null)}
-                className="px-4 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300"
+                className="px-4 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmAction}
                 disabled={removeMemberMutation.isPending || transferOwnershipMutation.isPending}
-                className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                className={`px-4 py-2.5 text-sm font-bold text-white rounded-xl disabled:opacity-50 transition-colors ${
+                  confirmAction.type === 'transfer'
+                    ? 'bg-teal hover:bg-teal-light'
+                    : 'bg-coral hover:bg-coral/90'
+                }`}
               >
                 {(removeMemberMutation.isPending || transferOwnershipMutation.isPending)
                   ? 'Processing...'

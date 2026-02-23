@@ -153,7 +153,7 @@ describe('HouseholdDetailPage', () => {
     expect(screen.getByText('Regenerate')).toBeInTheDocument()
     //== Owner sees remove and transfer buttons for other members
     expect(screen.getByText('Remove')).toBeInTheDocument()
-    expect(screen.getByText('Transfer Ownership')).toBeInTheDocument()
+    expect(screen.getByText('Transfer')).toBeInTheDocument()
   })
 
   it('shows leave button for non-owner member', () => {
@@ -176,10 +176,10 @@ describe('HouseholdDetailPage', () => {
 
     renderWithRouter('h1')
 
-    expect(screen.getByText('Leave Household')).toBeInTheDocument()
-    //== Non-owner should NOT see Remove or Transfer Ownership buttons
+    expect(screen.getByText('Leave')).toBeInTheDocument()
+    //== Non-owner should NOT see Remove or Transfer buttons
     expect(screen.queryByText('Remove')).not.toBeInTheDocument()
-    expect(screen.queryByText('Transfer Ownership')).not.toBeInTheDocument()
+    expect(screen.queryByText('Transfer')).not.toBeInTheDocument()
     //== Non-owner should NOT see Regenerate button
     expect(screen.queryByText('Regenerate')).not.toBeInTheDocument()
   })

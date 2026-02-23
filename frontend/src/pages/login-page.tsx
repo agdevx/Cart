@@ -36,14 +36,15 @@ export const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">
-          AGDevX Cart
+    <div className="min-h-screen bg-bg flex items-center justify-center px-4">
+      <div className="bg-surface p-8 rounded-2xl shadow-md w-full max-w-md">
+        <h1 className="font-display text-2xl font-extrabold text-navy mb-1">
+          AGDevX <span className="text-teal">Cart</span>
         </h1>
+        <p className="text-text-secondary text-sm mb-6">Sign in to continue</p>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-sm font-semibold text-navy-soft mb-2">
               Email
             </label>
             <input
@@ -52,12 +53,12 @@ export const LoginPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
               autoComplete="email"
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-6">
+            <label htmlFor="password" className="block text-sm font-semibold text-navy-soft mb-2">
               Password
             </label>
             <input
@@ -66,27 +67,27 @@ export const LoginPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
               autoComplete="current-password"
             />
           </div>
           <button
             type="submit"
             disabled={loginMutation.isPending || !email.trim() || !password.trim()}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full bg-teal text-white py-3 px-4 rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
           >
             {loginMutation.isPending ? 'Logging in...' : 'Login'}
           </button>
           {loginMutation.isError && (
-            <p className="mt-4 text-sm text-red-600">
+            <p className="mt-4 text-sm text-coral">
               Login failed. Please try again.
             </p>
           )}
         </form>
         {/* Link to Register */}
-        <p className="mt-4 text-center text-sm text-gray-600">
+        <p className="mt-4 text-center text-sm text-text-secondary">
           Don't have an account?{' '}
-          <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+          <Link to="/register" className="text-teal hover:text-teal-light font-semibold">
             Sign up
           </Link>
         </p>

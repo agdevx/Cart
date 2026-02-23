@@ -1,6 +1,7 @@
 // ABOUTME: PWA install prompt component
 // ABOUTME: Shows "Add to Home Screen" prompt for installable PWAs
 
+import { X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -45,32 +46,32 @@ export const PwaInstallPrompt = () => {
   if (!showPrompt) return null
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 bg-white p-4 rounded-lg shadow-lg border border-gray-200 z-50">
+    <div className="fixed bottom-24 left-4 right-4 bg-surface p-5 rounded-2xl shadow-lg border border-navy/8 z-50">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="font-semibold text-gray-900">Install AGDevX Cart</h3>
-          <p className="text-sm text-gray-600 mt-1">
+          <h3 className="font-display font-bold text-navy">Install AGDevX Cart</h3>
+          <p className="text-sm text-text-secondary mt-1">
             Add to home screen for quick access and offline support
           </p>
         </div>
         <button
           onClick={handleDismiss}
-          className="text-gray-400 hover:text-gray-600"
+          className="text-text-tertiary hover:text-navy-soft transition-colors"
           aria-label="Dismiss"
         >
-          ×
+          <X className="w-5 h-5" />
         </button>
       </div>
       <div className="flex gap-2 mt-4">
         <button
           onClick={handleInstall}
-          className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+          className="flex-1 bg-teal text-white py-2.5 px-4 rounded-xl font-display font-bold hover:bg-teal-light transition-colors"
         >
           Install
         </button>
         <button
           onClick={handleDismiss}
-          className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-200"
+          className="flex-1 bg-bg-warm text-navy-soft py-2.5 px-4 rounded-xl font-semibold hover:bg-navy/10 transition-colors"
         >
           Not Now
         </button>
