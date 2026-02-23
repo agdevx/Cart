@@ -27,9 +27,8 @@ public class HouseholdServiceTests
         var userId = Guid.NewGuid();
         var householdName = "Test Household";
 
-        _mockRepository
-            .Setup(r => r.Create(It.IsAny<Household>()))
-            .ReturnsAsync((Household h) => h);
+        _mockRepository.Setup(r => r.Create(It.IsAny<Household>()))
+                       .ReturnsAsync((Household h) => h);
 
         // Act
         var result = await _service.CreateHousehold(userId, householdName);

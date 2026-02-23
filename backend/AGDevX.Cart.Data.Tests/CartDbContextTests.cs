@@ -14,8 +14,8 @@ public class CartDbContextTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<CartDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDb_ConfigureEntities")
-            .Options;
+                      .UseInMemoryDatabase(databaseName: "TestDb_ConfigureEntities")
+                      .Options;
 
         // Act
         using var context = new CartDbContext(options);
@@ -37,8 +37,8 @@ public class CartDbContextTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<CartDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDb_CreateUser")
-            .Options;
+                      .UseInMemoryDatabase(databaseName: "TestDb_CreateUser")
+                      .Options;
 
         var user = new User
         {

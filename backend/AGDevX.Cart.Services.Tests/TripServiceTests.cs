@@ -29,13 +29,11 @@ public class TripServiceTests
         var householdId = Guid.NewGuid();
         var tripName = "Weekly Grocery Run";
 
-        _mockHouseholdRepository
-            .Setup(x => x.IsUserMember(householdId, userId))
-            .ReturnsAsync(true);
+        _mockHouseholdRepository.Setup(x => x.IsUserMember(householdId, userId))
+                                .ReturnsAsync(true);
 
-        _mockTripRepository
-            .Setup(x => x.Create(It.IsAny<Trip>()))
-            .ReturnsAsync((Trip t) => t);
+        _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>()))
+                           .ReturnsAsync((Trip t) => t);
 
         // Act
         var result = await _tripService.CreateTrip(tripName, userId, householdId);
@@ -63,17 +61,14 @@ public class TripServiceTests
             IsCompleted = false
         };
 
-        _mockTripRepository
-            .Setup(x => x.GetById(tripId))
-            .ReturnsAsync(trip);
+        _mockTripRepository.Setup(x => x.GetById(tripId))
+                           .ReturnsAsync(trip);
 
-        _mockTripRepository
-            .Setup(x => x.IsUserCollaborator(tripId, userId))
-            .ReturnsAsync(true);
+        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId))
+                           .ReturnsAsync(true);
 
-        _mockTripRepository
-            .Setup(x => x.Update(It.IsAny<Trip>()))
-            .ReturnsAsync((Trip t) => t);
+        _mockTripRepository.Setup(x => x.Update(It.IsAny<Trip>()))
+                           .ReturnsAsync((Trip t) => t);
 
         // Act
         var result = await _tripService.CompleteTrip(tripId, userId);
@@ -92,9 +87,8 @@ public class TripServiceTests
         var householdId = Guid.NewGuid();
         var tripName = "Weekly Grocery Run";
 
-        _mockHouseholdRepository
-            .Setup(x => x.IsUserMember(householdId, userId))
-            .ReturnsAsync(false);
+        _mockHouseholdRepository.Setup(x => x.IsUserMember(householdId, userId))
+                                .ReturnsAsync(false);
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
@@ -115,13 +109,11 @@ public class TripServiceTests
             IsCompleted = false
         };
 
-        _mockTripRepository
-            .Setup(x => x.GetById(tripId))
-            .ReturnsAsync(trip);
+        _mockTripRepository.Setup(x => x.GetById(tripId))
+                           .ReturnsAsync(trip);
 
-        _mockTripRepository
-            .Setup(x => x.IsUserCollaborator(tripId, userId))
-            .ReturnsAsync(false);
+        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId))
+                           .ReturnsAsync(false);
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>

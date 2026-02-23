@@ -11,26 +11,23 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
     //== Get household by ID with member relationships
     public async Task<Household?> GetById(Guid householdId)
     {
-        return await context.Households
-            .Include(h => h.Members)
-            .FirstOrDefaultAsync(h => h.Id == householdId);
+        return await context.Households.Include(h => h.Members)
+                                       .FirstOrDefaultAsync(h => h.Id == householdId);
     }
 
     //== Find household by invite code
     public async Task<Household?> GetByInviteCode(string inviteCode)
     {
-        return await context.Households
-            .Include(h => h.Members)
-            .FirstOrDefaultAsync(h => h.InviteCode == inviteCode);
+        return await context.Households.Include(h => h.Members)
+                                       .FirstOrDefaultAsync(h => h.InviteCode == inviteCode);
     }
 
     //== Get all households where the user is a member
     public async Task<IEnumerable<Household>> GetUserHouseholds(Guid userId)
     {
-        return await context.Households
-            .Include(h => h.Members)
-            .Where(h => h.Members.Any(m => m.UserId == userId))
-            .ToListAsync();
+        return await context.Households.Include(h => h.Members)
+                                       .Where(h => h.Members.Any(m => m.UserId == userId))
+                                       .ToListAsync();
     }
 
     //== Create a new household
@@ -63,8 +60,7 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
     //== Check if a user is a member of a household
     public async Task<bool> IsUserMember(Guid householdId, Guid userId)
     {
-        return await context.HouseholdMembers
-            .AnyAsync(m => m.HouseholdId == householdId && m.UserId == userId);
+        return await context.HouseholdMembers.AnyAsync(m => m.HouseholdId == householdId && m.UserId == userId);
     }
 
     //== Add a member to a household
@@ -77,8 +73,7 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
     //== Remove a member from a household
     public async Task RemoveMember(Guid householdId, Guid userId)
     {
-        var member = await context.HouseholdMembers
-            .FirstOrDefaultAsync(m => m.HouseholdId == householdId && m.UserId == userId);
+        var member = await context.HouseholdMembers.FirstOrDefaultAsync(m => m.HouseholdId == householdId && m.UserId == userId);
         if (member != null)
         {
             context.HouseholdMembers.Remove(member);
@@ -89,8 +84,7 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
     //== Update a member's role
     public async Task UpdateMemberRole(Guid householdId, Guid userId, string role)
     {
-        var member = await context.HouseholdMembers
-            .FirstOrDefaultAsync(m => m.HouseholdId == householdId && m.UserId == userId);
+        var member = await context.HouseholdMembers.FirstOrDefaultAsync(m => m.HouseholdId == householdId && m.UserId == userId);
         if (member != null)
         {
             member.Role = role;
