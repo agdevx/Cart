@@ -2,33 +2,33 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
-import { useCompleteTripMutation } from './complete-trip.mutation'
-import * as apiFetchModule from '../agdevx-cart-api-config'
+import { useUpdateInventoryItemMutation } from '../update-inventory-item.mutation'
+import * as apiFetchModule from '../../agdevx-cart-api-config'
 import * as useAuthModule from '@/auth/use-auth'
-import type { Trip } from '../models/trip'
+import type { InventoryItem } from '../../models/inventory-item'
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 )
 
-describe('useCompleteTripMutation', () => {
+describe('useUpdateInventoryItemMutation', () => {
   beforeEach(() => {
     queryClient.clear()
     vi.clearAllMocks()
   })
 
-  it('completes trip successfully', async () => {
-    const mockTrip: Trip = {
-      id: 'trip1',
-      name: 'Grocery Shopping',
+  it('updates inventory item successfully', async () => {
+    const mockInventoryItem: InventoryItem = {
+      id: '1',
+      name: 'Whole Milk',
+      defaultStoreId: 'store2',
+      notes: 'Updated notes',
+      ownerUserId: null,
       householdId: 'household1',
-      createdByUserId: 'user1',
-      isCompleted: true,
-      completedAt: '2024-01-01T12:00:00Z',
       createdBy: 'user1',
       createdDate: '2024-01-01',
       modifiedBy: 'user1',
-      modifiedDate: '2024-01-01',
+      modifiedDate: '2024-01-02',
     }
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
@@ -40,35 +40,45 @@ describe('useCompleteTripMutation', () => {
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
       ok: true,
-      json: async () => mockTrip,
+      json: async () => mockInventoryItem,
     } as unknown as Response)
 
-    const { result } = renderHook(() => useCompleteTripMutation(), {
+    const { result } = renderHook(() => useUpdateInventoryItemMutation(), {
       wrapper,
     })
 
-    result.current.mutate('trip1')
+    result.current.mutate({
+      id: '1',
+      name: 'Whole Milk',
+      defaultStoreId: 'store2',
+      notes: 'Updated notes',
+    })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(result.current.data).toEqual(mockTrip)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trip/trip1/complete', {
-      method: 'POST',
+    expect(result.current.data).toEqual(mockInventoryItem)
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/inventory/1', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: 'Whole Milk',
+        defaultStoreId: 'store2',
+        notes: 'Updated notes',
+      }),
     })
   })
 
-  it('invalidates trip queries on success', async () => {
-    const mockTrip: Trip = {
-      id: 'trip1',
-      name: 'Personal Trip',
+  it('invalidates inventory query on success', async () => {
+    const mockInventoryItem: InventoryItem = {
+      id: '1',
+      name: 'Milk',
+      defaultStoreId: null,
+      notes: null,
+      ownerUserId: 'user1',
       householdId: null,
-      createdByUserId: 'user1',
-      isCompleted: true,
-      completedAt: '2024-01-01T12:00:00Z',
       createdBy: 'user1',
       createdDate: '2024-01-01',
       modifiedBy: 'user1',
-      modifiedDate: '2024-01-01',
+      modifiedDate: '2024-01-02',
     }
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
@@ -80,25 +90,28 @@ describe('useCompleteTripMutation', () => {
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
       ok: true,
-      json: async () => mockTrip,
+      json: async () => mockInventoryItem,
     } as unknown as Response)
 
     const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries')
 
-    const { result } = renderHook(() => useCompleteTripMutation(), {
+    const { result } = renderHook(() => useUpdateInventoryItemMutation(), {
       wrapper,
     })
 
-    result.current.mutate('trip1')
+    result.current.mutate({
+      id: '1',
+      name: 'Milk',
+    })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
-      queryKey: ['trips'],
+      queryKey: ['inventory'],
     })
   })
 
-  it('handles completion error', async () => {
+  it('handles update error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
       user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
@@ -110,11 +123,14 @@ describe('useCompleteTripMutation', () => {
       new Error('Network error')
     )
 
-    const { result } = renderHook(() => useCompleteTripMutation(), {
+    const { result } = renderHook(() => useUpdateInventoryItemMutation(), {
       wrapper,
     })
 
-    result.current.mutate('trip1')
+    result.current.mutate({
+      id: '1',
+      name: 'Milk',
+    })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 

@@ -5,8 +5,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
 import { Provider } from 'jotai';
-import { useAuth } from './use-auth';
-import { AuthProvider } from './auth-provider';
+import { useAuth } from '../use-auth';
+import { AuthProvider } from '../auth-provider';
 import type { User } from '@/apis/agdevx-cart-api/models/user';
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>

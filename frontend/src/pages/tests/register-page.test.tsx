@@ -3,7 +3,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { RegisterPage } from './register-page';
+import { RegisterPage } from '../register-page';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/apis/tanstack-query/query-client';
 import { BrowserRouter } from 'react-router-dom';

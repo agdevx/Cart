@@ -3,7 +3,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { createStore } from 'jotai';
-import { currentUserAtom } from './auth-atoms';
+import { currentUserAtom } from '../auth-atoms';
 import type { User } from '@/apis/agdevx-cart-api/models/user';
 
 describe('auth-atoms', () => {

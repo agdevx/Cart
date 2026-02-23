@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/apis/tanstack-query/query-client';
-import { useRegisterMutation } from './register.mutation';
+import { useRegisterMutation } from '../register.mutation';
 import { createElement } from 'react';
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
