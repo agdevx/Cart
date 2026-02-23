@@ -7,17 +7,17 @@ import type { Trip } from '../models/trip'
 import { useAuth } from '@/auth/use-auth'
 
 export const useTripsQuery = () => {
-  const { token } = useAuth()
+  const { isAuthenticated } = useAuth()
 
   return useQuery({
     queryKey: ['trips'],
     queryFn: async (): Promise<Trip[]> => {
-      const response = await apiFetch('/api/trip/user', { token });
+      const response = await apiFetch('/api/trip/user');
       if (!response.ok) {
         throw new Error('Failed to fetch trips');
       }
       return response.json();
     },
-    enabled: !!token,
+    enabled: isAuthenticated,
   })
 }

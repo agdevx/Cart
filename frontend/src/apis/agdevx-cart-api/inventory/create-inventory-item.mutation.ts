@@ -4,7 +4,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../agdevx-cart-api-config'
 import type { InventoryItem } from '../models/inventory-item'
-import { useAuth } from '@/auth/use-auth'
 
 interface CreateInventoryItemRequest {
   name: string
@@ -14,7 +13,6 @@ interface CreateInventoryItemRequest {
 }
 
 export const useCreateInventoryItemMutation = () => {
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -22,7 +20,6 @@ export const useCreateInventoryItemMutation = () => {
       const response = await apiFetch('/api/inventory', {
         method: 'POST',
         body: JSON.stringify(request),
-        token,
       })
       if (!response.ok) {
         throw new Error('Failed to create inventory item')

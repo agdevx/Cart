@@ -7,17 +7,17 @@ import type { Household } from '../models/household'
 import { useAuth } from '@/auth/use-auth'
 
 export const useHouseholdsQuery = () => {
-  const { token } = useAuth()
+  const { isAuthenticated } = useAuth()
 
   return useQuery({
     queryKey: ['households'],
     queryFn: async (): Promise<Household[]> => {
-      const response = await apiFetch('/api/household', { token });
+      const response = await apiFetch('/api/household');
       if (!response.ok) {
         throw new Error('Failed to fetch households');
       }
       return response.json();
     },
-    enabled: !!token,
+    enabled: isAuthenticated,
   })
 }

@@ -4,14 +4,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../agdevx-cart-api-config'
 import type { Household } from '../models/household'
-import { useAuth } from '@/auth/use-auth'
 
 interface JoinHouseholdRequest {
   inviteCode: string
 }
 
 export const useJoinHouseholdMutation = () => {
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -19,7 +17,6 @@ export const useJoinHouseholdMutation = () => {
       const response = await apiFetch('/api/households/join', {
         method: 'POST',
         body: JSON.stringify(request),
-        token,
       })
       if (!response.ok) {
         throw new Error('Failed to join household')

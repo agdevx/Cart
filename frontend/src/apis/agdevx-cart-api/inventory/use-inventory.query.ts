@@ -7,17 +7,17 @@ import type { InventoryItem } from '../models/inventory-item'
 import { useAuth } from '@/auth/use-auth'
 
 export const useInventoryQuery = () => {
-  const { token } = useAuth()
+  const { isAuthenticated } = useAuth()
 
   return useQuery({
     queryKey: ['inventory'],
     queryFn: async (): Promise<InventoryItem[]> => {
-      const response = await apiFetch('/api/inventory', { token });
+      const response = await apiFetch('/api/inventory');
       if (!response.ok) {
         throw new Error('Failed to fetch inventory');
       }
       return response.json();
     },
-    enabled: !!token,
+    enabled: isAuthenticated,
   })
 }

@@ -1,12 +1,12 @@
 // ABOUTME: useAuth hook for managing authentication state
-// ABOUTME: Provides methods to set/clear auth state and persist token to localStorage
+// ABOUTME: Provides methods to set/clear auth state and persist user to localStorage
 
 import { useCallback } from 'react';
 import { useAtom } from 'jotai';
-import { currentUserAtom, authTokenAtom } from '@/state/auth-atoms';
+import { currentUserAtom } from '@/state/auth-atoms';
 import type { User } from '@/apis/agdevx-cart-api/models/user';
+import { apiFetch } from '@/apis/agdevx-cart-api/agdevx-cart-api-config';
 
-const AUTH_TOKEN_STORAGE_KEY = 'authToken';
 const AUTH_USER_STORAGE_KEY = 'authUser';
 
 /**
@@ -15,39 +15,39 @@ const AUTH_USER_STORAGE_KEY = 'authUser';
  */
 export function useAuth() {
   const [user, setUser] = useAtom(currentUserAtom);
-  const [token, setTokenAtom] = useAtom(authTokenAtom);
 
   /**
-   * Sets the authenticated user and token
-   * Persists both to localStorage
+   * Sets the authenticated user
+   * Persists to localStorage for fast initial render
    */
-  const setAuth = useCallback((user: User, token: string) => {
+  const setAuth = useCallback((user: User) => {
     setUser(user);
-    setTokenAtom(token);
 
     if (typeof window !== 'undefined') {
-      localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
       localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(user));
     }
-  }, [setUser, setTokenAtom]);
+  }, [setUser]);
 
   /**
-   * Clears the authenticated user and token
-   * Removes both from localStorage
+   * Clears the authenticated user and calls logout API to clear cookie
+   * Removes user from localStorage
    */
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await apiFetch('/api/auth/logout', { method: 'POST' });
+    } catch {
+      // Best-effort logout — clear local state regardless
+    }
+
     setUser(null);
-    setTokenAtom(null);
 
     if (typeof window !== 'undefined') {
-      localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
       localStorage.removeItem(AUTH_USER_STORAGE_KEY);
     }
-  }, [setUser, setTokenAtom]);
+  }, [setUser]);
 
   return {
     user,
-    token,
     isAuthenticated: user !== null,
     setAuth,
     logout,

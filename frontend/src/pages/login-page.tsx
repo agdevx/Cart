@@ -19,8 +19,7 @@ export const LoginPage = () => {
 
     try {
       const response = await loginMutation.mutateAsync({ email, password })
-      setAuth(
-        {
+      setAuth({
           id: response.userId,
           email: response.email,
           displayName: response.displayName,
@@ -28,9 +27,7 @@ export const LoginPage = () => {
           createdDate: new Date().toISOString(),
           modifiedBy: null,
           modifiedDate: null,
-        },
-        response.accessToken
-      )
+        })
       navigate('/shopping')
     } catch (error) {
       console.error('Login failed:', error)
