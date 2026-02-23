@@ -16,8 +16,8 @@ describe('Navigation', () => {
       </BrowserRouter>
     )
 
-    expect(screen.getByText(/^Inventory$/i)).toBeInTheDocument()
-    expect(screen.getByText(/^Shopping$/i)).toBeInTheDocument()
+    expect(screen.getByText(/^Pantry$/i)).toBeInTheDocument()
+    expect(screen.getByText(/^Trips$/i)).toBeInTheDocument()
     expect(screen.getByText(/^Household$/i)).toBeInTheDocument()
   })
 
@@ -28,12 +28,12 @@ describe('Navigation', () => {
       </BrowserRouter>
     )
 
-    const inventoryLink = screen.getByText(/^Inventory$/i)
-    const shoppingLink = screen.getByText(/^Shopping$/i)
+    const pantryLink = screen.getByText(/^Pantry$/i)
+    const tripsLink = screen.getByText(/^Trips$/i)
     const householdLink = screen.getByText(/^Household$/i)
 
-    expect(inventoryLink.closest('a')).toHaveAttribute('href', '/inventory')
-    expect(shoppingLink.closest('a')).toHaveAttribute('href', '/shopping')
+    expect(pantryLink.closest('a')).toHaveAttribute('href', '/inventory')
+    expect(tripsLink.closest('a')).toHaveAttribute('href', '/shopping')
     expect(householdLink.closest('a')).toHaveAttribute('href', '/household')
   })
 
@@ -44,10 +44,10 @@ describe('Navigation', () => {
       </BrowserRouter>
     )
 
-    const inventoryLink = screen.getByText(/^Inventory$/i)
+    const pantryLink = screen.getByText(/^Pantry$/i)
 
-    // Should have gray text by default (not active)
-    expect(inventoryLink.className).toContain('text-gray-600')
+    // Should have muted text by default (not active)
+    expect(pantryLink.closest('a')?.className).toContain('text-text-tertiary')
   })
 
   it('renders in a fixed bottom position', () => {

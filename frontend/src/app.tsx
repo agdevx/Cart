@@ -28,7 +28,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 }
 
 const LayoutWithNav = ({ children }: { children: React.ReactNode }) => (
-  <div className="min-h-screen pb-16">
+  <div className="bg-bg min-h-screen pb-24">
     {children}
     <BottomNav />
   </div>

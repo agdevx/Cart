@@ -1,6 +1,7 @@
 // ABOUTME: Active trip page for shopping mode
 // ABOUTME: Shows checklist of items to purchase with check/uncheck functionality
 
+import { ArrowLeft, Check } from 'lucide-react'
 import { useCallback } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
@@ -69,16 +70,16 @@ export const ActiveTripPage = () => {
 
   if (tripLoading || itemsLoading) {
     return (
-      <div className="p-4">
-        <p>Loading trip...</p>
+      <div className="px-5 pt-14">
+        <p className="text-text-secondary">Loading trip...</p>
       </div>
     )
   }
 
   if (!trip) {
     return (
-      <div className="p-4">
-        <p>Trip not found</p>
+      <div className="px-5 pt-14">
+        <p className="text-text-secondary">Trip not found</p>
       </div>
     )
   }
@@ -88,23 +89,26 @@ export const ActiveTripPage = () => {
   const progressPercent = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0
 
   return (
-    <div className="p-4">
-      <div className="mb-4">
+    <div className="bg-bg min-h-screen px-5 pt-14 pb-8">
+      <div className="mb-6">
         <button
           onClick={() => navigate(`/shopping/${tripId}`)}
-          className="text-blue-600 hover:text-blue-800 mb-2"
+          className="text-teal hover:text-teal-light font-semibold text-sm flex items-center gap-1 mb-3"
         >
-          ← Back to Planning
+          <ArrowLeft className="w-4 h-4" />
+          Back to Planning
         </button>
-        <h1 className="text-2xl font-bold">{trip.name}</h1>
-        <div className="mt-2">
-          <div className="flex justify-between text-sm text-gray-600 mb-1">
-            <span>Progress</span>
-            <span>{checkedCount} of {totalCount} items</span>
+        <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">{trip.name}</h1>
+
+        {/* Progress bar */}
+        <div className="mt-4">
+          <div className="flex justify-between text-sm mb-2">
+            <span className="text-text-tertiary font-semibold">{checkedCount} of {totalCount} items</span>
+            <span className="text-teal font-extrabold">{progressPercent}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-bg-warm rounded-full h-2 overflow-hidden">
             <div
-              className="bg-green-600 h-2 rounded-full transition-all"
+              className="bg-gradient-to-r from-teal to-teal-light h-2 rounded-full transition-all duration-500"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -112,52 +116,57 @@ export const ActiveTripPage = () => {
       </div>
 
       {tripItems && tripItems.length > 0 ? (
-        <div className="space-y-2 mb-4">
+        <div className="space-y-2 mb-6">
           {tripItems.map((item) => {
             const inventoryItem = inventory?.find((i) => i.id === item.inventoryItemId)
             return (
               <div
                 key={item.id}
-                className={`p-4 border rounded shadow-sm cursor-pointer transition-colors ${
+                className={`flex items-center gap-4 p-4 rounded-xl shadow-sm cursor-pointer transition-all min-h-[60px] select-none active:scale-[0.98] ${
                   item.isChecked
-                    ? 'bg-green-50 border-green-300'
-                    : 'bg-white border-gray-300'
+                    ? 'bg-teal/8 shadow-none'
+                    : 'bg-surface'
                 }`}
                 onClick={() => handleToggleItem(item.id, item.isChecked)}
               >
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={item.isChecked}
-                    onChange={() => {}}
-                    className="h-5 w-5 text-green-600 rounded mr-3"
-                  />
-                  <div className="flex-1">
-                    <h3
-                      className={`font-semibold ${
-                        item.isChecked ? 'line-through text-gray-500' : ''
-                      }`}
-                    >
-                      {inventoryItem?.name || 'Unknown Item'}
-                    </h3>
-                    <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                    {item.notes && (
-                      <p className="text-sm text-gray-600">{item.notes}</p>
-                    )}
-                  </div>
+                {/* Custom checkbox */}
+                <div
+                  className={`w-7 h-7 rounded-[10px] flex-shrink-0 flex items-center justify-center transition-all ${
+                    item.isChecked
+                      ? 'bg-teal border-2 border-teal'
+                      : 'border-[2.5px] border-navy/14 bg-transparent'
+                  }`}
+                >
+                  {item.isChecked && (
+                    <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <h3
+                    className={`text-base font-bold ${
+                      item.isChecked ? 'line-through text-text-tertiary' : 'text-navy'
+                    }`}
+                  >
+                    {inventoryItem?.name || 'Unknown Item'}
+                  </h3>
+                  <p className="text-xs text-text-tertiary font-semibold mt-0.5">Qty: {item.quantity}</p>
+                  {item.notes && (
+                    <p className="text-xs text-text-tertiary mt-0.5">{item.notes}</p>
+                  )}
                 </div>
               </div>
             )
           })}
         </div>
       ) : (
-        <p className="text-gray-600 mb-4">No items in this trip.</p>
+        <p className="text-text-secondary mb-6">No items in this trip.</p>
       )}
 
       <button
         onClick={handleCompleteTrip}
         disabled={completeMutation.isPending}
-        className="w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 font-semibold"
+        className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors shadow-[0_3px_0_#148F72] active:translate-y-[3px] active:shadow-none"
       >
         {completeMutation.isPending ? 'Completing...' : 'Complete Trip'}
       </button>
