@@ -7,14 +7,13 @@ namespace AGDevX.Cart.Shared.Extensions;
 
 public static class ObservableExtensions
 {
-    public static async IAsyncEnumerable<T> ToAsyncEnumerable<T>(
-        this IObservable<T> observable,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public static async IAsyncEnumerable<T> ToAsyncEnumerable<T>(this IObservable<T> observable, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var queue = new System.Collections.Concurrent.BlockingCollection<T>();
         Exception? error = null;
 
-        using var subscription = observable.Subscribe(
+        using var subscription = observable.Subscribe
+        (
             onNext: item => queue.Add(item),
             onError: ex =>
             {

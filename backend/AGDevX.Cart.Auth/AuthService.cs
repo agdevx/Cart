@@ -12,8 +12,7 @@ public class AuthService(CartDbContext context) : IAuthService
     public async Task<AuthResponse> Register(RegisterRequest request)
     {
         //== Check for duplicate email
-        var existingUser = await context.Users
-            .FirstOrDefaultAsync(u => u.Email == request.Email);
+        var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
         if (existingUser != null)
         {
@@ -48,13 +47,8 @@ public class AuthService(CartDbContext context) : IAuthService
     public async Task<AuthResponse> Login(LoginRequest request)
     {
         //== Find user by email
-        var user = await context.Users
-            .FirstOrDefaultAsync(u => u.Email == request.Email);
-
-        if (user == null)
-        {
-            throw new UnauthorizedAccessException("Invalid email or password.");
-        }
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email)
+                        ?? throw new UnauthorizedAccessException("Invalid email or password.");
 
         //== Verify password with BCrypt
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))

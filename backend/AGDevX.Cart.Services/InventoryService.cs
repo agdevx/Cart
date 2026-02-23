@@ -13,11 +13,8 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
         //== Authorization: validate household membership OR user ownership
         if (inventoryItem.HouseholdId.HasValue)
         {
-            var household = await householdRepository.GetById(inventoryItem.HouseholdId.Value);
-            if (household == null)
-            {
-                throw new UnauthorizedAccessException("Household not found");
-            }
+            var household = await householdRepository.GetById(inventoryItem.HouseholdId.Value)
+                                ?? throw new UnauthorizedAccessException("Household not found");
 
             if (!household.Members.Any(m => m.UserId == userId))
             {
@@ -56,11 +53,8 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
     public async Task<IEnumerable<InventoryItem>> GetHouseholdInventory(Guid householdId, Guid userId)
     {
         //== Authorization: verify user is household member
-        var household = await householdRepository.GetById(householdId);
-        if (household == null)
-        {
-            throw new UnauthorizedAccessException("Household not found");
-        }
+        var household = await householdRepository.GetById(householdId)
+                            ?? throw new UnauthorizedAccessException("Household not found");
 
         if (!household.Members.Any(m => m.UserId == userId))
         {
@@ -79,11 +73,8 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
     public async Task<IEnumerable<InventoryItem>> GetMergedInventory(Guid householdId, Guid userId)
     {
         //== Authorization: verify user is household member
-        var household = await householdRepository.GetById(householdId);
-        if (household == null)
-        {
-            throw new UnauthorizedAccessException("Household not found");
-        }
+        var household = await householdRepository.GetById(householdId)
+                            ?? throw new UnauthorizedAccessException("Household not found");
 
         if (!household.Members.Any(m => m.UserId == userId))
         {
@@ -121,11 +112,8 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
     public async Task<InventoryItem> UpdateInventoryItem(InventoryItem inventoryItem, Guid userId)
     {
         //== Authorization: verify access before update
-        var existing = await GetById(inventoryItem.Id, userId);
-        if (existing == null)
-        {
-            throw new UnauthorizedAccessException("Inventory item not found or user not authorized");
-        }
+        var existing = await GetById(inventoryItem.Id, userId)
+                            ?? throw new UnauthorizedAccessException("Inventory item not found or user not authorized");
 
         return await inventoryRepository.Update(inventoryItem);
     }
@@ -133,11 +121,8 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
     public async Task DeleteInventoryItem(Guid id, Guid userId)
     {
         //== Authorization: verify access before delete
-        var existing = await GetById(id, userId);
-        if (existing == null)
-        {
-            throw new UnauthorizedAccessException("Inventory item not found or user not authorized");
-        }
+        var existing = await GetById(id, userId)
+                            ?? throw new UnauthorizedAccessException("Inventory item not found or user not authorized");
 
         await inventoryRepository.Delete(id);
     }

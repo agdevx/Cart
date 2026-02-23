@@ -56,11 +56,8 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
     public async Task DeleteTrip(Guid tripId, Guid userId)
     {
         //== Only creator can delete trip
-        var trip = await tripRepository.GetById(tripId);
-        if (trip == null)
-        {
-            throw new KeyNotFoundException("Trip not found");
-        }
+        var trip = await tripRepository.GetById(tripId)
+                        ?? throw new KeyNotFoundException("Trip not found");
 
         if (trip.CreatedByUserId != userId)
         {
@@ -79,11 +76,8 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
             throw new UnauthorizedAccessException("User is not a collaborator on this trip");
         }
 
-        var trip = await tripRepository.GetById(tripId);
-        if (trip == null)
-        {
-            throw new KeyNotFoundException("Trip not found");
-        }
+        var trip = await tripRepository.GetById(tripId)
+                        ?? throw new KeyNotFoundException("Trip not found");
 
         //== Set IsCompleted and CompletedAt timestamp
         trip.IsCompleted = true;
@@ -101,11 +95,8 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
             throw new UnauthorizedAccessException("User is not a collaborator on this trip");
         }
 
-        var trip = await tripRepository.GetById(tripId);
-        if (trip == null)
-        {
-            throw new KeyNotFoundException("Trip not found");
-        }
+        var trip = await tripRepository.GetById(tripId)
+                        ?? throw new KeyNotFoundException("Trip not found");
 
         //== Set IsCompleted to false and clear CompletedAt timestamp
         trip.IsCompleted = false;
@@ -123,11 +114,8 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
             throw new UnauthorizedAccessException("User is not a collaborator on this trip");
         }
 
-        var trip = await tripRepository.GetById(tripId);
-        if (trip == null)
-        {
-            throw new KeyNotFoundException("Trip not found");
-        }
+        var trip = await tripRepository.GetById(tripId)
+                        ?? throw new KeyNotFoundException("Trip not found");
 
         //== Verify household membership for household trips
         if (trip.HouseholdId.HasValue)
