@@ -28,16 +28,16 @@ public class HouseholdServiceTests
         var householdName = "Test Household";
 
         _mockRepository
-            .Setup(r => r.CreateAsync(It.IsAny<Household>()))
+            .Setup(r => r.Create(It.IsAny<Household>()))
             .ReturnsAsync((Household h) => h);
 
         // Act
-        var result = await _service.CreateHouseholdAsync(userId, householdName);
+        var result = await _service.CreateHousehold(userId, householdName);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal(householdName, result.Name);
-        _mockRepository.Verify(r => r.CreateAsync(It.IsAny<Household>()), Times.Once);
+        _mockRepository.Verify(r => r.Create(It.IsAny<Household>()), Times.Once);
     }
 
     //== JoinHousehold tests
@@ -120,7 +120,7 @@ public class HouseholdServiceTests
             }
         };
 
-        _mockRepository.Setup(r => r.GetByIdAsync(householdId)).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
         _mockRepository.Setup(r => r.RemoveMember(householdId, memberId)).Returns(Task.CompletedTask);
 
         // Act
@@ -147,7 +147,7 @@ public class HouseholdServiceTests
             }
         };
 
-        _mockRepository.Setup(r => r.GetByIdAsync(householdId)).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
         _mockRepository.Setup(r => r.RemoveMember(householdId, memberId)).Returns(Task.CompletedTask);
 
         // Act
@@ -173,7 +173,7 @@ public class HouseholdServiceTests
             }
         };
 
-        _mockRepository.Setup(r => r.GetByIdAsync(householdId)).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -199,7 +199,7 @@ public class HouseholdServiceTests
             }
         };
 
-        _mockRepository.Setup(r => r.GetByIdAsync(householdId)).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
@@ -226,7 +226,7 @@ public class HouseholdServiceTests
             }
         };
 
-        _mockRepository.Setup(r => r.GetByIdAsync(householdId)).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
         _mockRepository.Setup(r => r.UpdateMemberRole(householdId, ownerId, "member")).Returns(Task.CompletedTask);
         _mockRepository.Setup(r => r.UpdateMemberRole(householdId, newOwnerId, "owner")).Returns(Task.CompletedTask);
 
@@ -255,7 +255,7 @@ public class HouseholdServiceTests
             }
         };
 
-        _mockRepository.Setup(r => r.GetByIdAsync(householdId)).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
@@ -279,7 +279,7 @@ public class HouseholdServiceTests
             }
         };
 
-        _mockRepository.Setup(r => r.GetByIdAsync(householdId)).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() =>
@@ -305,8 +305,8 @@ public class HouseholdServiceTests
             }
         };
 
-        _mockRepository.Setup(r => r.GetByIdAsync(householdId)).ReturnsAsync(household);
-        _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<Household>())).ReturnsAsync((Household h) => h);
+        _mockRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.Update(It.IsAny<Household>())).ReturnsAsync((Household h) => h);
 
         // Act
         var newCode = await _service.RegenerateInviteCode(ownerId, householdId);
@@ -334,7 +334,7 @@ public class HouseholdServiceTests
             }
         };
 
-        _mockRepository.Setup(r => r.GetByIdAsync(householdId)).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
@@ -355,8 +355,8 @@ public class HouseholdServiceTests
         };
         var household = new Household { Id = householdId, Name = "Test", Members = members };
 
-        _mockRepository.Setup(r => r.GetByIdAsync(householdId)).ReturnsAsync(household);
-        _mockRepository.Setup(r => r.IsUserMemberAsync(householdId, userId)).ReturnsAsync(true);
+        _mockRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.IsUserMember(householdId, userId)).ReturnsAsync(true);
 
         // Act
         var result = await _service.GetMembers(userId, householdId);
@@ -373,8 +373,8 @@ public class HouseholdServiceTests
         var householdId = Guid.NewGuid();
         var household = new Household { Id = householdId, Name = "Test", InviteCode = "ABC123", Members = [] };
 
-        _mockRepository.Setup(r => r.GetByIdAsync(householdId)).ReturnsAsync(household);
-        _mockRepository.Setup(r => r.IsUserMemberAsync(householdId, userId)).ReturnsAsync(true);
+        _mockRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.IsUserMember(householdId, userId)).ReturnsAsync(true);
 
         // Act
         var result = await _service.GetInviteCode(userId, householdId);

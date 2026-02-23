@@ -8,12 +8,12 @@ namespace AGDevX.Cart.Services;
 
 public class StoreService(IStoreRepository storeRepository, IHouseholdRepository householdRepository) : IStoreService
 {
-    public async Task<Store> CreateStoreAsync(Store store, Guid userId)
+    public async Task<Store> CreateStore(Store store, Guid userId)
     {
         //== Household-scoped store: verify user is a member
         if (store.HouseholdId.HasValue)
         {
-            var household = await householdRepository.GetByIdAsync(store.HouseholdId.Value);
+            var household = await householdRepository.GetById(store.HouseholdId.Value);
             if (household == null)
             {
                 throw new UnauthorizedAccessException("Household not found");
@@ -30,29 +30,29 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
             throw new UnauthorizedAccessException("Cannot create store for another user");
         }
 
-        return await storeRepository.CreateAsync(store);
+        return await storeRepository.Create(store);
     }
 
-    public async Task<IEnumerable<Store>> GetHouseholdStoresAsync(Guid householdId, Guid userId)
+    public async Task<IEnumerable<Store>> GetHouseholdStores(Guid householdId, Guid userId)
     {
         //== Verify user is a member of the household
-        var household = await householdRepository.GetByIdAsync(householdId);
+        var household = await householdRepository.GetById(householdId);
         if (household == null || !household.Members.Any(m => m.UserId == userId))
         {
             throw new UnauthorizedAccessException("User is not a member of this household");
         }
 
-        return await storeRepository.GetHouseholdStoresAsync(householdId);
+        return await storeRepository.GetHouseholdStores(householdId);
     }
 
-    public async Task<IEnumerable<Store>> GetPersonalStoresAsync(Guid userId)
+    public async Task<IEnumerable<Store>> GetPersonalStores(Guid userId)
     {
-        return await storeRepository.GetPersonalStoresAsync(userId);
+        return await storeRepository.GetPersonalStores(userId);
     }
 
-    public async Task<Store?> GetByIdAsync(Guid id, Guid userId)
+    public async Task<Store?> GetById(Guid id, Guid userId)
     {
-        var store = await storeRepository.GetByIdAsync(id);
+        var store = await storeRepository.GetById(id);
         if (store == null)
         {
             return null;
@@ -61,7 +61,7 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
         //== Household store: verify user is a member
         if (store.HouseholdId.HasValue)
         {
-            var household = await householdRepository.GetByIdAsync(store.HouseholdId.Value);
+            var household = await householdRepository.GetById(store.HouseholdId.Value);
             if (household == null || !household.Members.Any(m => m.UserId == userId))
             {
                 throw new UnauthorizedAccessException("User is not a member of this household");
@@ -76,27 +76,27 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
         return store;
     }
 
-    public async Task<Store> UpdateStoreAsync(Store store, Guid userId)
+    public async Task<Store> UpdateStore(Store store, Guid userId)
     {
         //== Verify access before updating
-        var existingStore = await GetByIdAsync(store.Id, userId);
+        var existingStore = await GetById(store.Id, userId);
         if (existingStore == null)
         {
             throw new UnauthorizedAccessException("Store not found or access denied");
         }
 
-        return await storeRepository.UpdateAsync(store);
+        return await storeRepository.Update(store);
     }
 
-    public async Task DeleteStoreAsync(Guid id, Guid userId)
+    public async Task DeleteStore(Guid id, Guid userId)
     {
         //== Verify access before deleting
-        var store = await GetByIdAsync(id, userId);
+        var store = await GetById(id, userId);
         if (store == null)
         {
             throw new UnauthorizedAccessException("Store not found or access denied");
         }
 
-        await storeRepository.DeleteAsync(id);
+        await storeRepository.Delete(id);
     }
 }

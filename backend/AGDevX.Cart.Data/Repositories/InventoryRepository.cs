@@ -8,14 +8,14 @@ namespace AGDevX.Cart.Data.Repositories;
 
 public class InventoryRepository(CartDbContext context) : IInventoryRepository
 {
-    public async Task<InventoryItem?> GetByIdAsync(Guid id)
+    public async Task<InventoryItem?> GetById(Guid id)
     {
         return await context.InventoryItems
             .Include(i => i.DefaultStore)
             .FirstOrDefaultAsync(i => i.Id == id);
     }
 
-    public async Task<IEnumerable<InventoryItem>> GetHouseholdItemsAsync(Guid householdId)
+    public async Task<IEnumerable<InventoryItem>> GetHouseholdItems(Guid householdId)
     {
         //== Filter for household items only
         return await context.InventoryItems
@@ -24,7 +24,7 @@ public class InventoryRepository(CartDbContext context) : IInventoryRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<InventoryItem>> GetPersonalItemsAsync(Guid userId)
+    public async Task<IEnumerable<InventoryItem>> GetPersonalItems(Guid userId)
     {
         //== Filter for personal items owned by user only
         return await context.InventoryItems
@@ -33,7 +33,7 @@ public class InventoryRepository(CartDbContext context) : IInventoryRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<InventoryItem>> GetMergedInventoryAsync(Guid householdId, Guid userId)
+    public async Task<IEnumerable<InventoryItem>> GetMergedInventory(Guid householdId, Guid userId)
     {
         //== Privacy enforcement: return items from household OR owned by user
         return await context.InventoryItems
@@ -42,25 +42,25 @@ public class InventoryRepository(CartDbContext context) : IInventoryRepository
             .ToListAsync();
     }
 
-    public async Task<InventoryItem> CreateAsync(InventoryItem inventoryItem)
+    public async Task<InventoryItem> Create(InventoryItem inventoryItem)
     {
         context.InventoryItems.Add(inventoryItem);
         await context.SaveChangesAsync();
 
         //== Reload to include navigation properties
-        return (await GetByIdAsync(inventoryItem.Id))!;
+        return (await GetById(inventoryItem.Id))!;
     }
 
-    public async Task<InventoryItem> UpdateAsync(InventoryItem inventoryItem)
+    public async Task<InventoryItem> Update(InventoryItem inventoryItem)
     {
         context.InventoryItems.Update(inventoryItem);
         await context.SaveChangesAsync();
 
         //== Reload to include navigation properties
-        return (await GetByIdAsync(inventoryItem.Id))!;
+        return (await GetById(inventoryItem.Id))!;
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task Delete(Guid id)
     {
         var inventoryItem = await context.InventoryItems.FindAsync(id);
         if (inventoryItem != null)

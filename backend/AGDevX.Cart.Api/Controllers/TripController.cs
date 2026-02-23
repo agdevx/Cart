@@ -22,7 +22,7 @@ public class TripController(ITripService tripService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            var trips = await tripService.GetUserTripsAsync(userId);
+            var trips = await tripService.GetUserTrips(userId);
             return Ok(trips);
         }
         catch (UnauthorizedAccessException ex)
@@ -37,7 +37,7 @@ public class TripController(ITripService tripService) : ControllerBase
     {
         try
         {
-            var trips = await tripService.GetHouseholdTripsAsync(householdId);
+            var trips = await tripService.GetHouseholdTrips(householdId);
             return Ok(trips);
         }
         catch (UnauthorizedAccessException ex)
@@ -52,7 +52,7 @@ public class TripController(ITripService tripService) : ControllerBase
     {
         try
         {
-            var trip = await tripService.GetByIdAsync(id);
+            var trip = await tripService.GetById(id);
 
             if (trip == null)
             {
@@ -74,7 +74,7 @@ public class TripController(ITripService tripService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            var trip = await tripService.CreateTripAsync(request.Name, userId, request.HouseholdId);
+            var trip = await tripService.CreateTrip(request.Name, userId, request.HouseholdId);
             return CreatedAtAction(nameof(GetById), new { id = trip.Id }, trip);
         }
         catch (UnauthorizedAccessException ex)
@@ -89,7 +89,7 @@ public class TripController(ITripService tripService) : ControllerBase
     {
         try
         {
-            await tripService.UpdateTripAsync(trip);
+            await tripService.UpdateTrip(trip);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -109,7 +109,7 @@ public class TripController(ITripService tripService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            await tripService.DeleteTripAsync(id, userId);
+            await tripService.DeleteTrip(id, userId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -129,7 +129,7 @@ public class TripController(ITripService tripService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            var trip = await tripService.CompleteTripAsync(id, userId);
+            var trip = await tripService.CompleteTrip(id, userId);
             return Ok(trip);
         }
         catch (UnauthorizedAccessException ex)
@@ -149,7 +149,7 @@ public class TripController(ITripService tripService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            var trip = await tripService.ReopenTripAsync(id, userId);
+            var trip = await tripService.ReopenTrip(id, userId);
             return Ok(trip);
         }
         catch (UnauthorizedAccessException ex)
@@ -169,7 +169,7 @@ public class TripController(ITripService tripService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            await tripService.AddCollaboratorAsync(id, userId, request.UserId);
+            await tripService.AddCollaborator(id, userId, request.UserId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -189,7 +189,7 @@ public class TripController(ITripService tripService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            await tripService.RemoveCollaboratorAsync(id, userId, collaboratorUserId);
+            await tripService.RemoveCollaborator(id, userId, collaboratorUserId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

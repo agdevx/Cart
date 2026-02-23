@@ -29,7 +29,7 @@ public class AuthServiceTests
         };
 
         // Act
-        var result = await authService.RegisterAsync(registerRequest);
+        var result = await authService.Register(registerRequest);
 
         // Assert
         Assert.NotNull(result);
@@ -56,7 +56,7 @@ public class AuthServiceTests
             DisplayName = "Test User"
         };
 
-        await authService.RegisterAsync(registerRequest);
+        await authService.Register(registerRequest);
 
         var loginRequest = new LoginRequest
         {
@@ -65,7 +65,7 @@ public class AuthServiceTests
         };
 
         // Act
-        var result = await authService.LoginAsync(loginRequest);
+        var result = await authService.Login(loginRequest);
 
         // Assert
         Assert.NotNull(result);
@@ -91,7 +91,7 @@ public class AuthServiceTests
             DisplayName = "First User"
         };
 
-        await authService.RegisterAsync(registerRequest);
+        await authService.Register(registerRequest);
 
         var duplicateRequest = new RegisterRequest
         {
@@ -102,7 +102,7 @@ public class AuthServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => authService.RegisterAsync(duplicateRequest));
+            () => authService.Register(duplicateRequest));
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class AuthServiceTests
             DisplayName = "Test User"
         };
 
-        await authService.RegisterAsync(registerRequest);
+        await authService.Register(registerRequest);
 
         var loginRequest = new LoginRequest
         {
@@ -133,6 +133,6 @@ public class AuthServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => authService.LoginAsync(loginRequest));
+            () => authService.Login(loginRequest));
     }
 }

@@ -20,7 +20,7 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
         try
         {
             var userId = User.GetUserId();
-            var tripItems = await tripItemService.GetTripItemsAsync(tripId, userId);
+            var tripItems = await tripItemService.GetTripItems(tripId, userId);
             return Ok(tripItems);
         }
         catch (UnauthorizedAccessException ex)
@@ -36,7 +36,7 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
         try
         {
             var userId = User.GetUserId();
-            var tripItem = await tripItemService.GetByIdAsync(id, userId);
+            var tripItem = await tripItemService.GetById(id, userId);
 
             if (tripItem == null)
             {
@@ -63,7 +63,7 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
         try
         {
             var userId = User.GetUserId();
-            var tripItem = await tripItemService.AddTripItemAsync(tripId, inventoryItemId, quantity, userId, notes, storeId);
+            var tripItem = await tripItemService.AddTripItem(tripId, inventoryItemId, quantity, userId, notes, storeId);
             return CreatedAtAction(nameof(GetById), new { id = tripItem.Id }, tripItem);
         }
         catch (UnauthorizedAccessException ex)
@@ -87,7 +87,7 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
         try
         {
             var userId = User.GetUserId();
-            await tripItemService.UpdateTripItemAsync(id, quantity, userId, notes, storeId);
+            await tripItemService.UpdateTripItem(id, quantity, userId, notes, storeId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -107,7 +107,7 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
         try
         {
             var userId = User.GetUserId();
-            await tripItemService.DeleteTripItemAsync(id, userId);
+            await tripItemService.DeleteTripItem(id, userId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -127,7 +127,7 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
         try
         {
             var userId = User.GetUserId();
-            var tripItem = await tripItemService.CheckItemAsync(id, true, userId);
+            var tripItem = await tripItemService.CheckItem(id, true, userId);
             return Ok(tripItem);
         }
         catch (UnauthorizedAccessException ex)
@@ -147,7 +147,7 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
         try
         {
             var userId = User.GetUserId();
-            var tripItem = await tripItemService.CheckItemAsync(id, false, userId);
+            var tripItem = await tripItemService.CheckItem(id, false, userId);
             return Ok(tripItem);
         }
         catch (UnauthorizedAccessException ex)

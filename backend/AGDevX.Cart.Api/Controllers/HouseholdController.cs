@@ -31,7 +31,7 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            var households = await householdService.GetUserHouseholdsAsync(userId);
+            var households = await householdService.GetUserHouseholds(userId);
             return Ok(households);
         }
         catch (UnauthorizedAccessException ex)
@@ -47,7 +47,7 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            var household = await householdService.GetByIdAsync(userId, id);
+            var household = await householdService.GetById(userId, id);
 
             if (household == null)
             {
@@ -69,7 +69,7 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            var created = await householdService.CreateHouseholdAsync(userId, name);
+            var created = await householdService.CreateHousehold(userId, name);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
         catch (UnauthorizedAccessException ex)
@@ -85,7 +85,7 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            await householdService.UpdateHouseholdAsync(userId, id, name);
+            await householdService.UpdateHousehold(userId, id, name);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -105,7 +105,7 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            await householdService.DeleteHouseholdAsync(userId, id);
+            await householdService.DeleteHousehold(userId, id);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

@@ -6,14 +6,14 @@ namespace AGDevX.Cart.Services;
 
 public interface ITripService
 {
-    Task<Trip> CreateTripAsync(string name, Guid userId, Guid? householdId = null);
-    Task<IEnumerable<Trip>> GetUserTripsAsync(Guid userId);
-    Task<IEnumerable<Trip>> GetHouseholdTripsAsync(Guid householdId);
-    Task<Trip?> GetByIdAsync(Guid id);
-    Task<Trip> UpdateTripAsync(Trip trip);
-    Task DeleteTripAsync(Guid tripId, Guid userId);
-    Task<Trip> CompleteTripAsync(Guid tripId, Guid userId);
-    Task<Trip> ReopenTripAsync(Guid tripId, Guid userId);
-    Task AddCollaboratorAsync(Guid tripId, Guid userId, Guid collaboratorUserId);
-    Task RemoveCollaboratorAsync(Guid tripId, Guid userId, Guid collaboratorUserId);
+    Task<Trip> CreateTrip(string name, Guid userId, Guid? householdId = null);
+    Task<IEnumerable<Trip>> GetUserTrips(Guid userId);
+    Task<IEnumerable<Trip>> GetHouseholdTrips(Guid householdId);
+    Task<Trip?> GetById(Guid id);
+    Task<Trip> UpdateTrip(Trip trip);
+    Task DeleteTrip(Guid tripId, Guid userId);
+    Task<Trip> CompleteTrip(Guid tripId, Guid userId);
+    Task<Trip> ReopenTrip(Guid tripId, Guid userId);
+    Task AddCollaborator(Guid tripId, Guid userId, Guid collaboratorUserId);
+    Task RemoveCollaborator(Guid tripId, Guid userId, Guid collaboratorUserId);
 }

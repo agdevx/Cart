@@ -34,15 +34,15 @@ public class TripItemServiceTests
         var notes = "Get the organic brand";
 
         _mockTripRepository
-            .Setup(x => x.IsUserCollaboratorAsync(tripId, userId))
+            .Setup(x => x.IsUserCollaborator(tripId, userId))
             .ReturnsAsync(true);
 
         _mockTripItemRepository
-            .Setup(x => x.CreateAsync(It.IsAny<TripItem>()))
+            .Setup(x => x.Create(It.IsAny<TripItem>()))
             .ReturnsAsync((TripItem ti) => ti);
 
         // Act
-        var result = await _tripItemService.AddTripItemAsync(tripId, inventoryItemId, quantity, userId, notes, null);
+        var result = await _tripItemService.AddTripItem(tripId, inventoryItemId, quantity, userId, notes, null);
 
         // Assert
         Assert.NotNull(result);
@@ -72,19 +72,19 @@ public class TripItemServiceTests
         };
 
         _mockTripItemRepository
-            .Setup(x => x.GetByIdAsync(tripItemId))
+            .Setup(x => x.GetById(tripItemId))
             .ReturnsAsync(tripItem);
 
         _mockTripRepository
-            .Setup(x => x.IsUserCollaboratorAsync(tripId, userId))
+            .Setup(x => x.IsUserCollaborator(tripId, userId))
             .ReturnsAsync(true);
 
         _mockTripItemRepository
-            .Setup(x => x.UpdateAsync(It.IsAny<TripItem>()))
+            .Setup(x => x.Update(It.IsAny<TripItem>()))
             .ReturnsAsync((TripItem ti) => ti);
 
         // Act
-        var result = await _tripItemService.CheckItemAsync(tripItemId, true, userId);
+        var result = await _tripItemService.CheckItem(tripItemId, true, userId);
 
         // Assert
         Assert.NotNull(result);
@@ -110,19 +110,19 @@ public class TripItemServiceTests
         };
 
         _mockTripItemRepository
-            .Setup(x => x.GetByIdAsync(tripItemId))
+            .Setup(x => x.GetById(tripItemId))
             .ReturnsAsync(tripItem);
 
         _mockTripRepository
-            .Setup(x => x.IsUserCollaboratorAsync(tripId, userId))
+            .Setup(x => x.IsUserCollaborator(tripId, userId))
             .ReturnsAsync(true);
 
         _mockTripItemRepository
-            .Setup(x => x.UpdateAsync(It.IsAny<TripItem>()))
+            .Setup(x => x.Update(It.IsAny<TripItem>()))
             .ReturnsAsync((TripItem ti) => ti);
 
         // Act
-        var result = await _tripItemService.CheckItemAsync(tripItemId, false, userId);
+        var result = await _tripItemService.CheckItem(tripItemId, false, userId);
 
         // Assert
         Assert.NotNull(result);
@@ -139,12 +139,12 @@ public class TripItemServiceTests
         var inventoryItemId = Guid.NewGuid();
 
         _mockTripRepository
-            .Setup(x => x.IsUserCollaboratorAsync(tripId, userId))
+            .Setup(x => x.IsUserCollaborator(tripId, userId))
             .ReturnsAsync(false);
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _tripItemService.AddTripItemAsync(tripId, inventoryItemId, 1, userId, null, null));
+            _tripItemService.AddTripItem(tripId, inventoryItemId, 1, userId, null, null));
     }
 
     [Fact]
@@ -164,16 +164,16 @@ public class TripItemServiceTests
         };
 
         _mockTripItemRepository
-            .Setup(x => x.GetByIdAsync(tripItemId))
+            .Setup(x => x.GetById(tripItemId))
             .ReturnsAsync(tripItem);
 
         _mockTripRepository
-            .Setup(x => x.IsUserCollaboratorAsync(tripId, userId))
+            .Setup(x => x.IsUserCollaborator(tripId, userId))
             .ReturnsAsync(false);
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _tripItemService.CheckItemAsync(tripItemId, true, userId));
+            _tripItemService.CheckItem(tripItemId, true, userId));
     }
 
     [Fact]
@@ -187,15 +187,15 @@ public class TripItemServiceTests
         var quantity = 2;
 
         _mockTripRepository
-            .Setup(x => x.IsUserCollaboratorAsync(tripId, userId))
+            .Setup(x => x.IsUserCollaborator(tripId, userId))
             .ReturnsAsync(true);
 
         _mockTripItemRepository
-            .Setup(x => x.CreateAsync(It.IsAny<TripItem>()))
+            .Setup(x => x.Create(It.IsAny<TripItem>()))
             .ReturnsAsync((TripItem ti) => { ti.Id = itemId; return ti; });
 
         // Act
-        await _tripItemService.AddTripItemAsync(tripId, inventoryItemId, quantity, userId, null, null);
+        await _tripItemService.AddTripItem(tripId, inventoryItemId, quantity, userId, null, null);
 
         // Assert
         _mockTripEventService.Verify(x => x.PublishEvent(
@@ -219,19 +219,19 @@ public class TripItemServiceTests
         };
 
         _mockTripItemRepository
-            .Setup(x => x.GetByIdAsync(tripItemId))
+            .Setup(x => x.GetById(tripItemId))
             .ReturnsAsync(tripItem);
 
         _mockTripRepository
-            .Setup(x => x.IsUserCollaboratorAsync(tripId, userId))
+            .Setup(x => x.IsUserCollaborator(tripId, userId))
             .ReturnsAsync(true);
 
         _mockTripItemRepository
-            .Setup(x => x.UpdateAsync(It.IsAny<TripItem>()))
+            .Setup(x => x.Update(It.IsAny<TripItem>()))
             .ReturnsAsync((TripItem ti) => ti);
 
         // Act
-        await _tripItemService.UpdateTripItemAsync(tripItemId, 5, userId, "Updated notes", null);
+        await _tripItemService.UpdateTripItem(tripItemId, 5, userId, "Updated notes", null);
 
         // Assert
         _mockTripEventService.Verify(x => x.PublishEvent(
@@ -257,19 +257,19 @@ public class TripItemServiceTests
         };
 
         _mockTripItemRepository
-            .Setup(x => x.GetByIdAsync(tripItemId))
+            .Setup(x => x.GetById(tripItemId))
             .ReturnsAsync(tripItem);
 
         _mockTripRepository
-            .Setup(x => x.IsUserCollaboratorAsync(tripId, userId))
+            .Setup(x => x.IsUserCollaborator(tripId, userId))
             .ReturnsAsync(true);
 
         _mockTripItemRepository
-            .Setup(x => x.UpdateAsync(It.IsAny<TripItem>()))
+            .Setup(x => x.Update(It.IsAny<TripItem>()))
             .ReturnsAsync((TripItem ti) => ti);
 
         // Act
-        await _tripItemService.CheckItemAsync(tripItemId, true, userId);
+        await _tripItemService.CheckItem(tripItemId, true, userId);
 
         // Assert
         _mockTripEventService.Verify(x => x.PublishEvent(
@@ -293,19 +293,19 @@ public class TripItemServiceTests
         };
 
         _mockTripItemRepository
-            .Setup(x => x.GetByIdAsync(tripItemId))
+            .Setup(x => x.GetById(tripItemId))
             .ReturnsAsync(tripItem);
 
         _mockTripRepository
-            .Setup(x => x.IsUserCollaboratorAsync(tripId, userId))
+            .Setup(x => x.IsUserCollaborator(tripId, userId))
             .ReturnsAsync(true);
 
         _mockTripItemRepository
-            .Setup(x => x.DeleteAsync(tripItemId))
+            .Setup(x => x.Delete(tripItemId))
             .Returns(Task.CompletedTask);
 
         // Act
-        await _tripItemService.DeleteTripItemAsync(tripItemId, userId);
+        await _tripItemService.DeleteTripItem(tripItemId, userId);
 
         // Assert
         _mockTripEventService.Verify(x => x.PublishEvent(

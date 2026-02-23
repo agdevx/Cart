@@ -7,7 +7,7 @@ namespace AGDevX.Cart.Data.Repositories;
 
 public class TripRepository(CartDbContext context) : ITripRepository
 {
-    public async Task<Trip?> GetByIdAsync(Guid id)
+    public async Task<Trip?> GetById(Guid id)
     {
         return await context.Trips
             .Include(t => t.Items)
@@ -18,7 +18,7 @@ public class TripRepository(CartDbContext context) : ITripRepository
             .FirstOrDefaultAsync(t => t.Id == id);
     }
 
-    public async Task<IEnumerable<Trip>> GetUserTripsAsync(Guid userId)
+    public async Task<IEnumerable<Trip>> GetUserTrips(Guid userId)
     {
         return await context.Trips
             .Include(t => t.Items)
@@ -27,7 +27,7 @@ public class TripRepository(CartDbContext context) : ITripRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Trip>> GetHouseholdTripsAsync(Guid householdId)
+    public async Task<IEnumerable<Trip>> GetHouseholdTrips(Guid householdId)
     {
         return await context.Trips
             .Include(t => t.Items)
@@ -36,21 +36,21 @@ public class TripRepository(CartDbContext context) : ITripRepository
             .ToListAsync();
     }
 
-    public async Task<Trip> CreateAsync(Trip trip)
+    public async Task<Trip> Create(Trip trip)
     {
         context.Trips.Add(trip);
         await context.SaveChangesAsync();
         return trip;
     }
 
-    public async Task<Trip> UpdateAsync(Trip trip)
+    public async Task<Trip> Update(Trip trip)
     {
         context.Trips.Update(trip);
         await context.SaveChangesAsync();
         return trip;
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task Delete(Guid id)
     {
         var trip = await context.Trips.FindAsync(id);
         if (trip != null)
@@ -60,7 +60,7 @@ public class TripRepository(CartDbContext context) : ITripRepository
         }
     }
 
-    public async Task<bool> IsUserCollaboratorAsync(Guid tripId, Guid userId)
+    public async Task<bool> IsUserCollaborator(Guid tripId, Guid userId)
     {
         //== Check if user is creator OR in collaborators collection
         var trip = await context.Trips
@@ -76,7 +76,7 @@ public class TripRepository(CartDbContext context) : ITripRepository
                trip.Collaborators.Any(c => c.UserId == userId);
     }
 
-    public async Task AddCollaboratorAsync(Guid tripId, Guid userId)
+    public async Task AddCollaborator(Guid tripId, Guid userId)
     {
         var collaborator = new TripCollaborator
         {
@@ -90,7 +90,7 @@ public class TripRepository(CartDbContext context) : ITripRepository
         await context.SaveChangesAsync();
     }
 
-    public async Task RemoveCollaboratorAsync(Guid tripId, Guid userId)
+    public async Task RemoveCollaborator(Guid tripId, Guid userId)
     {
         var collaborator = await context.TripCollaborators
             .FirstOrDefaultAsync(c => c.TripId == tripId && c.UserId == userId);

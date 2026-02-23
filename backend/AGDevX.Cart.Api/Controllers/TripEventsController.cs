@@ -32,7 +32,7 @@ public class TripEventsController(
             var userId = User.GetUserId();
 
             //== Verify user is a collaborator on this trip
-            var isCollaborator = await _tripRepository.IsUserCollaboratorAsync(tripId, userId);
+            var isCollaborator = await _tripRepository.IsUserCollaborator(tripId, userId);
             if (!isCollaborator)
             {
                 Response.StatusCode = 403;

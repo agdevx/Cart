@@ -36,7 +36,7 @@ public class HouseholdControllerTests
             new Household { Id = Guid.NewGuid(), Name = "Test Household" }
         };
 
-        mockService.Setup(s => s.GetUserHouseholdsAsync(userId))
+        mockService.Setup(s => s.GetUserHouseholds(userId))
             .ReturnsAsync(households);
 
         // Act
@@ -67,7 +67,7 @@ public class HouseholdControllerTests
         var householdName = "New Household";
         var created = new Household { Id = Guid.NewGuid(), Name = householdName };
 
-        mockService.Setup(s => s.CreateHouseholdAsync(userId, householdName))
+        mockService.Setup(s => s.CreateHousehold(userId, householdName))
             .ReturnsAsync(created);
 
         // Act
@@ -98,7 +98,7 @@ public class HouseholdControllerTests
 
         var household = new Household { Id = householdId, Name = "Test Household" };
 
-        mockService.Setup(s => s.GetByIdAsync(userId, householdId))
+        mockService.Setup(s => s.GetById(userId, householdId))
             .ReturnsAsync(household);
 
         // Act
@@ -127,7 +127,7 @@ public class HouseholdControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.GetByIdAsync(userId, householdId))
+        mockService.Setup(s => s.GetById(userId, householdId))
             .ReturnsAsync((Household?)null);
 
         // Act
@@ -179,7 +179,7 @@ public class HouseholdControllerTests
 
         var updated = new Household { Id = householdId, Name = householdName };
 
-        mockService.Setup(s => s.UpdateHouseholdAsync(userId, householdId, householdName))
+        mockService.Setup(s => s.UpdateHousehold(userId, householdId, householdName))
             .ReturnsAsync(updated);
 
         // Act
@@ -207,7 +207,7 @@ public class HouseholdControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteHouseholdAsync(userId, householdId))
+        mockService.Setup(s => s.DeleteHousehold(userId, householdId))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -236,7 +236,7 @@ public class HouseholdControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.UpdateHouseholdAsync(userId, householdId, householdName))
+        mockService.Setup(s => s.UpdateHousehold(userId, householdId, householdName))
             .ThrowsAsync(new ArgumentException("Household not found"));
 
         // Act
@@ -265,7 +265,7 @@ public class HouseholdControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.UpdateHouseholdAsync(userId, householdId, householdName))
+        mockService.Setup(s => s.UpdateHousehold(userId, householdId, householdName))
             .ThrowsAsync(new UnauthorizedAccessException("User is not a member of this household"));
 
         // Act
