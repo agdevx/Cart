@@ -1,6 +1,6 @@
 // ABOUTME: Represents a discrete shopping session or trip
 // ABOUTME: Tracks items to purchase, collaborators, and completion status
-namespace AGDevX.Cart.Shared.Models;
+namespace AGDevX.Cart.Data.Models;
 
 public class Trip : BaseEntity
 {

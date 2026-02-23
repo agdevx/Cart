@@ -3,7 +3,7 @@
 
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using Moq;
 using Xunit;
 

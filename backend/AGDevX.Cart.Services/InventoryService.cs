@@ -1,7 +1,7 @@
 // ABOUTME: Service implementation for InventoryItem business logic with strict privacy enforcement
 // ABOUTME: Validates household membership and user ownership before allowing operations on inventory items
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 
 namespace AGDevX.Cart.Services;

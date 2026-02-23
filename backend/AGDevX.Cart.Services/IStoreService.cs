@@ -1,7 +1,7 @@
 // ABOUTME: Service interface for Store business logic.
 // ABOUTME: All methods accept userId for authorization of household membership or user ownership.
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 
 namespace AGDevX.Cart.Services;
 

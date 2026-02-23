@@ -1,6 +1,6 @@
 // ABOUTME: Service interface for trip item operations including add, update, delete
 // ABOUTME: and check/uncheck functionality for tracking item completion during shopping
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 
 namespace AGDevX.Cart.Services;
 

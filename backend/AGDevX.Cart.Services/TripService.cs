@@ -1,6 +1,6 @@
 // ABOUTME: Service implementation for Trip business logic including lifecycle management (create, complete, reopen)
 // ABOUTME: and collaborator functionality with authorization checks for household membership and trip access
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 
 namespace AGDevX.Cart.Services;

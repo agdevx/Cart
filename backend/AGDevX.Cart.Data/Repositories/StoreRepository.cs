@@ -1,7 +1,7 @@
 // ABOUTME: Repository implementation for Store entity operations.
 // ABOUTME: Handles CRUD operations for both household-scoped and personal stores.
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AGDevX.Cart.Data.Repositories;

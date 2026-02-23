@@ -1,6 +1,6 @@
 // ABOUTME: Store model representing either household-scoped or user-scoped stores
 // ABOUTME: Household stores are shared across household, user stores are private to individual users
-namespace AGDevX.Cart.Shared.Models;
+namespace AGDevX.Cart.Data.Models;
 
 public class Store : BaseEntity
 {

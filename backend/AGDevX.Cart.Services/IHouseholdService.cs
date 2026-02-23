@@ -1,7 +1,7 @@
 // ABOUTME: Service interface for household business logic.
 // ABOUTME: Provides methods for household operations with user authorization.
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 
 namespace AGDevX.Cart.Services;
 

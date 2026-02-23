@@ -1,6 +1,6 @@
 // ABOUTME: Join table entity representing a user's membership in a household
 // ABOUTME: Contains foreign keys and role information for the many-to-many relationship
-namespace AGDevX.Cart.Shared.Models;
+namespace AGDevX.Cart.Data.Models;
 
 public class HouseholdMember : BaseEntity
 {

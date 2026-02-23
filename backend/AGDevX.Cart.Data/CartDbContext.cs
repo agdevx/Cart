@@ -1,7 +1,7 @@
 // ABOUTME: EF Core DbContext for the Cart application with entity configurations.
 // ABOUTME: Configures all database entities, relationships, composite keys, and constraints.
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AGDevX.Cart.Data;

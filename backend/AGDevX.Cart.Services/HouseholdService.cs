@@ -2,7 +2,7 @@
 // ABOUTME: Handles household operations with authorization and audit trail management.
 
 using AGDevX.Cart.Data.Repositories;
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 
 namespace AGDevX.Cart.Services;
 

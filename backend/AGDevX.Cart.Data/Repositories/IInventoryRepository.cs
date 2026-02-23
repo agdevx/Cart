@@ -1,7 +1,7 @@
 // ABOUTME: Repository interface for InventoryItem data access with privacy filtering
 // ABOUTME: Defines methods for household and personal inventory queries with authorization enforcement
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 
 namespace AGDevX.Cart.Data.Repositories;
 

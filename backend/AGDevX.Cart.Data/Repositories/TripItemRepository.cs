@@ -1,6 +1,6 @@
 // ABOUTME: Repository implementation for TripItem entities with EF Core
 // ABOUTME: Loads related InventoryItem and Store navigation properties for complete item details
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AGDevX.Cart.Data.Repositories;

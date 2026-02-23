@@ -1,8 +1,9 @@
 // ABOUTME: Unit tests for TripItemService covering trip item operations (add, check/uncheck)
 // ABOUTME: with authorization checks ensuring users are collaborators on the trip
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
+using AGDevX.Cart.Shared.Models;
 using Moq;
 using Xunit;
 

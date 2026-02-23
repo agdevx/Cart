@@ -1,6 +1,6 @@
 // ABOUTME: User entity representing an authenticated user account
 // ABOUTME: Contains authentication details and navigation to household memberships
-namespace AGDevX.Cart.Shared.Models;
+namespace AGDevX.Cart.Data.Models;
 
 public class User : BaseEntity
 {

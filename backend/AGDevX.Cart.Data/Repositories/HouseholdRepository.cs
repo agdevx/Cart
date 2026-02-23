@@ -1,7 +1,7 @@
 // ABOUTME: Repository implementation for household data access operations.
 // ABOUTME: Uses Entity Framework Core for database operations with member relationships.
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AGDevX.Cart.Data.Repositories;

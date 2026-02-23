@@ -1,7 +1,7 @@
 // ABOUTME: Repository interface for household data access operations.
 // ABOUTME: Provides methods for CRUD operations and membership verification.
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 
 namespace AGDevX.Cart.Data.Repositories;
 

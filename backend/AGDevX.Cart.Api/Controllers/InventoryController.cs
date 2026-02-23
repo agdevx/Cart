@@ -3,7 +3,7 @@
 
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Shared.Extensions;
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
