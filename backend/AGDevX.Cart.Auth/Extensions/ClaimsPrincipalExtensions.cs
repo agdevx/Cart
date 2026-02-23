@@ -3,17 +3,19 @@
 
 using System.Security.Claims;
 
-namespace AGDevX.Cart.Shared.Extensions;
+namespace AGDevX.Cart.Auth.Extensions;
 
 public static class ClaimsPrincipalExtensions
 {
     public static Guid GetUserId(this ClaimsPrincipal principal)
     {
         var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
         if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
         {
             throw new UnauthorizedAccessException("User ID not found in claims");
         }
+
         return userId;
     }
 }

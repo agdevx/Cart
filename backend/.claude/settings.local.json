@@ -6,7 +6,8 @@
       "Bash(tail:*)",
       "Bash(cd D:/AGDevX/ws/Cart/backend && dotnet test --no-build 2>&1)",
       "Bash(cd:*)",
-      "Bash(cd D:/AGDevX/ws/Cart/backend && dotnet test 2>&1)"
+      "Bash(cd D:/AGDevX/ws/Cart/backend && dotnet test 2>&1)",
+      "Bash(mkdir:*)"
     ]
   }
 }
