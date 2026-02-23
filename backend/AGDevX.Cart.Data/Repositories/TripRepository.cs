@@ -19,9 +19,10 @@ public class TripRepository(CartDbContext context) : ITripRepository
 
     public async Task<IEnumerable<Trip>> GetUserTrips(Guid userId)
     {
+        var userIdString = userId.ToString();
         return await context.Trips.Include(t => t.Items)
                                   .Include(t => t.Collaborators)
-                                  .Where(t => t.CreatedByUserId == userId || t.Collaborators.Any(c => c.UserId == userId))
+                                  .Where(t => t.CreatedBy == userIdString || t.Collaborators.Any(c => c.UserId == userId))
                                   .ToListAsync();
     }
 
@@ -68,7 +69,8 @@ public class TripRepository(CartDbContext context) : ITripRepository
             return false;
         }
 
-        return trip.CreatedByUserId == userId ||
+        var userIdString = userId.ToString();
+        return trip.CreatedBy == userIdString ||
                trip.Collaborators.Any(c => c.UserId == userId);
     }
 

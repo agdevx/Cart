@@ -23,11 +23,7 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
         {
             Id = Guid.NewGuid(),
             Name = name,
-            InviteCode = GenerateInviteCode(),
-            CreatedBy = userId.ToString(),
-            CreatedDate = DateTime.UtcNow,
-            ModifiedBy = userId.ToString(),
-            ModifiedDate = DateTime.UtcNow
+            InviteCode = GenerateInviteCode()
         };
 
         //== Add creator as owner member
@@ -37,11 +33,7 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
             HouseholdId = household.Id,
             UserId = userId,
             Role = "owner",
-            JoinedAt = DateTime.UtcNow,
-            CreatedBy = userId.ToString(),
-            CreatedDate = DateTime.UtcNow,
-            ModifiedBy = userId.ToString(),
-            ModifiedDate = DateTime.UtcNow
+            JoinedAt = DateTime.UtcNow
         };
 
         household.Members.Add(ownerMember);
@@ -82,8 +74,6 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
         }
 
         household.Name = name;
-        household.ModifiedBy = userId.ToString();
-        household.ModifiedDate = DateTime.UtcNow;
 
         return await repository.Update(household);
     }
@@ -121,11 +111,7 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
             HouseholdId = household.Id,
             UserId = userId,
             Role = "member",
-            JoinedAt = DateTime.UtcNow,
-            CreatedBy = userId.ToString(),
-            CreatedDate = DateTime.UtcNow,
-            ModifiedBy = userId.ToString(),
-            ModifiedDate = DateTime.UtcNow
+            JoinedAt = DateTime.UtcNow
         };
 
         await repository.AddMember(member);
@@ -194,8 +180,6 @@ public class HouseholdService(IHouseholdRepository repository) : IHouseholdServi
         }
 
         household.InviteCode = GenerateInviteCode();
-        household.ModifiedBy = requestingUserId.ToString();
-        household.ModifiedDate = DateTime.UtcNow;
         await repository.Update(household);
 
         return household.InviteCode;

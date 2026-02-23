@@ -13,8 +13,7 @@ public class TripTests
         // Arrange & Act
         var trip = new Trip
         {
-            Name = "Grocery Shopping",
-            CreatedByUserId = Guid.NewGuid()
+            Name = "Grocery Shopping"
         };
 
         // Assert
@@ -28,8 +27,7 @@ public class TripTests
         // Arrange
         var trip = new Trip
         {
-            Name = "Grocery Shopping",
-            CreatedByUserId = Guid.NewGuid()
+            Name = "Grocery Shopping"
         };
 
         // Act

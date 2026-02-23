@@ -34,7 +34,7 @@ public class TripControllerTests
 
         var trips = new List<Trip>
         {
-            new Trip { Id = Guid.NewGuid(), Name = "Weekly Grocery", CreatedByUserId = userId }
+            new Trip { Id = Guid.NewGuid(), Name = "Weekly Grocery" }
         };
 
         mockService.Setup(s => s.GetUserTrips(userId))
@@ -68,7 +68,7 @@ public class TripControllerTests
 
         var trips = new List<Trip>
         {
-            new Trip { Id = Guid.NewGuid(), Name = "Household Trip", CreatedByUserId = userId, HouseholdId = householdId }
+            new Trip { Id = Guid.NewGuid(), Name = "Household Trip", HouseholdId = householdId }
         };
 
         mockService.Setup(s => s.GetHouseholdTrips(householdId))
@@ -100,7 +100,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var trip = new Trip { Id = tripId, Name = "Test Trip", CreatedByUserId = userId };
+        var trip = new Trip { Id = tripId, Name = "Test Trip" };
 
         mockService.Setup(s => s.GetById(tripId))
                    .ReturnsAsync(trip);
@@ -159,7 +159,7 @@ public class TripControllerTests
         };
 
         var createRequest = new CreateTripRequest { Name = "New Trip", HouseholdId = null };
-        var trip = new Trip { Id = Guid.NewGuid(), Name = "New Trip", CreatedByUserId = userId };
+        var trip = new Trip { Id = Guid.NewGuid(), Name = "New Trip" };
 
         mockService.Setup(s => s.CreateTrip(createRequest.Name, userId, createRequest.HouseholdId))
                    .ReturnsAsync(trip);
@@ -211,7 +211,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var trip = new Trip { Id = tripId, Name = "Updated Trip", CreatedByUserId = userId };
+        var trip = new Trip { Id = tripId, Name = "Updated Trip" };
 
         mockService.Setup(s => s.UpdateTrip(It.IsAny<Trip>()))
                    .ReturnsAsync(trip);
@@ -241,7 +241,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var trip = new Trip { Id = tripId, Name = "Updated Trip", CreatedByUserId = userId };
+        var trip = new Trip { Id = tripId, Name = "Updated Trip" };
 
         mockService.Setup(s => s.UpdateTrip(It.IsAny<Trip>()))
                    .ThrowsAsync(new ArgumentException("Trip not found"));
@@ -271,7 +271,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var trip = new Trip { Id = tripId, Name = "Updated Trip", CreatedByUserId = userId };
+        var trip = new Trip { Id = tripId, Name = "Updated Trip" };
 
         mockService.Setup(s => s.UpdateTrip(It.IsAny<Trip>()))
                    .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this trip"));
@@ -389,7 +389,6 @@ public class TripControllerTests
         {
             Id = tripId,
             Name = "Completed Trip",
-            CreatedByUserId = userId,
             IsCompleted = true,
             CompletedAt = DateTime.UtcNow
         };
@@ -483,7 +482,6 @@ public class TripControllerTests
         {
             Id = tripId,
             Name = "Reopened Trip",
-            CreatedByUserId = userId,
             IsCompleted = false,
             CompletedAt = null
         };

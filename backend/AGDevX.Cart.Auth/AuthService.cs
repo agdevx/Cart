@@ -22,15 +22,12 @@ public class AuthService(CartDbContext context) : IAuthService
         //== Hash password with BCrypt
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-        //== Create User with system user (Guid.Empty) as creator
         var user = new User
         {
             Id = Guid.NewGuid(),
             Email = request.Email,
             PasswordHash = passwordHash,
-            DisplayName = request.DisplayName,
-            CreatedBy = Guid.Empty.ToString(),
-            CreatedDate = DateTime.UtcNow
+            DisplayName = request.DisplayName
         };
 
         context.Users.Add(user);
