@@ -44,6 +44,8 @@ export default tseslint.config(
             ['^\\.\\.'],
             // Sibling imports
             ['^\\.'],
+            // CSS imports
+            ['\\.css$'],
           ],
         },
       ],
