@@ -25,7 +25,7 @@ describe('AuthProvider', () => {
     // Create a mock localStorage
     localStorageMock = {}
 
-    global.localStorage = {
+    globalThis.localStorage = {
       getItem: vi.fn((key: string) => localStorageMock[key] || null),
       setItem: vi.fn((key: string, value: string) => {
         localStorageMock[key] = value
@@ -43,7 +43,7 @@ describe('AuthProvider', () => {
 
   it('provides auth context to children', () => {
     // Mock fetch for /api/auth/me — no stored user, so session validation returns 401
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 401,
     }) as typeof fetch
@@ -68,7 +68,7 @@ describe('AuthProvider', () => {
     })
 
     // Mock fetch for /api/auth/me session validation
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
         userId: '1',

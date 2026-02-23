@@ -26,7 +26,7 @@ describe('createSSEClient', () => {
       CLOSED: 2,
     }
 
-    global.EventSource = function() {
+    globalThis.EventSource = function() {
       return mockEventSource as unknown as EventSource
     } as unknown as typeof EventSource
   })

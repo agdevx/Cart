@@ -17,14 +17,26 @@ export const ERROR_MESSAGES = {
 export type ErrorCode = keyof typeof ERROR_MESSAGES;
 
 /**
- * Gets a user-friendly error message for a given error code
- * @param code - Error code to look up
- * @returns User-friendly error message, or UNKNOWN_ERROR message if code not found
+ * Gets a user-friendly error message from an error code string, Error object, or unknown value.
+ * - String: looks up as error code, returns the mapped message or UNKNOWN_ERROR
+ * - Error object: extracts .message, tries it as an error code, otherwise returns .message directly
+ * - Anything else: returns UNKNOWN_ERROR
  */
-export function getErrorMessage(code: string): string {
-  if (!code || !(code in ERROR_MESSAGES)) {
+export function getErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : typeof error === 'string' ? error : null;
+
+  if (!message) {
     return ERROR_MESSAGES.UNKNOWN_ERROR;
   }
 
-  return ERROR_MESSAGES[code as ErrorCode];
+  if (message in ERROR_MESSAGES) {
+    return ERROR_MESSAGES[message as ErrorCode];
+  }
+
+  // For Error objects with non-code messages, return the message directly
+  if (error instanceof Error) {
+    return message;
+  }
+
+  return ERROR_MESSAGES.UNKNOWN_ERROR;
 }

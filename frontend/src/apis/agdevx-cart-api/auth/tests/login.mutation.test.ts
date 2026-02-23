@@ -27,7 +27,7 @@ describe('useLoginMutation', () => {
       displayName: 'Test User',
     };
 
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => mockResponse,
     });
@@ -42,7 +42,7 @@ describe('useLoginMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toEqual(mockResponse);
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('/api/auth/login'),
       expect.objectContaining({
         method: 'POST',
@@ -59,7 +59,7 @@ describe('useLoginMutation', () => {
   });
 
   it('should handle login failure with invalid credentials', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 401,
       json: async () => ({
@@ -81,7 +81,7 @@ describe('useLoginMutation', () => {
   });
 
   it('should handle network errors', async () => {
-    global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useLoginMutation(), { wrapper });
 

@@ -24,7 +24,7 @@ describe('useAuth', () => {
     // Create a mock localStorage
     localStorageMock = {};
 
-    global.localStorage = {
+    globalThis.localStorage = {
       getItem: vi.fn((key: string) => localStorageMock[key] || null),
       setItem: vi.fn((key: string, value: string) => {
         localStorageMock[key] = value;
@@ -90,7 +90,7 @@ describe('useAuth', () => {
 
   it('should clear user when logout is called', async () => {
     // Mock fetch for the logout API call
-    global.fetch = vi.fn().mockResolvedValue({ ok: true }) as typeof fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue({ ok: true }) as typeof fetch;
 
     const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -118,7 +118,7 @@ describe('useAuth', () => {
 
   it('should remove user from localStorage when logout is called', async () => {
     // Mock fetch for the logout API call
-    global.fetch = vi.fn().mockResolvedValue({ ok: true }) as typeof fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue({ ok: true }) as typeof fetch;
 
     const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -155,7 +155,7 @@ describe('useAuth', () => {
     });
 
     // Mock fetch for the /api/auth/me validation call in AuthProvider
-    global.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
         userId: '456',
@@ -167,7 +167,7 @@ describe('useAuth', () => {
     // Use AuthProvider which loads from localStorage
     const wrapperWithAuthProvider = ({ children }: { children: React.ReactNode }) =>
       createElement(Provider, {},
-        createElement(AuthProvider, {}, children)
+        createElement(AuthProvider, { children })
       );
 
     const { result } = renderHook(() => useAuth(), { wrapper: wrapperWithAuthProvider });
