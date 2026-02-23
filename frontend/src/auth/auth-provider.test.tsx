@@ -1,5 +1,5 @@
 // ABOUTME: Tests for AuthProvider component
-// ABOUTME: Verifies token restoration and context provision
+// ABOUTME: Verifies user restoration and context provision
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -8,9 +8,9 @@ import { useAuth } from './use-auth'
 import { createElement } from 'react'
 
 const TestComponent = () => {
-  const { isAuthenticated, user, token } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   return createElement('div', null,
-    `Auth: ${isAuthenticated}, User: ${user?.displayName || 'none'}, Token: ${token || 'none'}`
+    `Auth: ${isAuthenticated}, User: ${user?.displayName || 'none'}`
   )
 }
 
@@ -40,6 +40,12 @@ describe('AuthProvider', () => {
   })
 
   it('provides auth context to children', () => {
+    // Mock fetch for /api/auth/me — no stored user, so session validation returns 401
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+    }) as typeof fetch
+
     render(
       createElement(AuthProvider, null,
         createElement(TestComponent)
@@ -48,8 +54,26 @@ describe('AuthProvider', () => {
     expect(screen.getByText(/Auth: false/)).toBeInTheDocument()
   })
 
-  it('restores token from localStorage on mount', async () => {
-    localStorageMock['authToken'] = 'test-token'
+  it('restores user from localStorage on mount', async () => {
+    localStorageMock['authUser'] = JSON.stringify({
+      id: '1',
+      email: 'test@example.com',
+      displayName: 'Test User',
+      createdBy: null,
+      createdDate: '2024-01-01T00:00:00Z',
+      modifiedBy: null,
+      modifiedDate: null,
+    })
+
+    // Mock fetch for /api/auth/me session validation
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        userId: '1',
+        email: 'test@example.com',
+        displayName: 'Test User',
+      }),
+    }) as typeof fetch
 
     render(
       createElement(AuthProvider, null,
@@ -58,7 +82,7 @@ describe('AuthProvider', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText(/Token: test-token/)).toBeInTheDocument()
+      expect(screen.getByText(/User: Test User/)).toBeInTheDocument()
     })
   })
 })

@@ -46,9 +46,8 @@ describe('useTripsQuery', () => {
     ]
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -63,14 +62,11 @@ describe('useTripsQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockTrips)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trip/user', {
-      token: 'test-token',
-    })
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trip/user')
   })
 
-  it('does not fetch when token is not available', () => {
+  it('does not fetch when not authenticated', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: null,
       isAuthenticated: false,
       user: null,
       setAuth: vi.fn(),
@@ -87,9 +83,8 @@ describe('useTripsQuery', () => {
 
   it('handles fetch error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })

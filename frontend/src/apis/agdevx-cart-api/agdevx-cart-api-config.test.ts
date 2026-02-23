@@ -1,5 +1,5 @@
 // ABOUTME: Tests for API configuration and base fetch wrapper
-// ABOUTME: Verifies auth token injection and proper request handling
+// ABOUTME: Verifies cookie-based auth via credentials: 'include' and proper request handling
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { apiFetch } from './agdevx-cart-api-config';
@@ -10,27 +10,24 @@ describe('apiFetch', () => {
     vi.clearAllMocks();
   });
 
-  it('should add Authorization header when token is provided', async () => {
+  it('should include credentials for cookie-based auth', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ data: 'test' }),
     });
     global.fetch = mockFetch;
 
-    const token = 'test-token-123';
-    await apiFetch('/test-endpoint', { method: 'GET' }, token);
+    await apiFetch('/test-endpoint', { method: 'GET' });
 
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/test-endpoint'),
       expect.objectContaining({
-        headers: expect.objectContaining({
-          Authorization: `Bearer ${token}`,
-        }),
+        credentials: 'include',
       })
     );
   });
 
-  it('should not add Authorization header when token is not provided', async () => {
+  it('should not include Authorization header', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ data: 'test' }),
@@ -43,14 +40,36 @@ describe('apiFetch', () => {
     expect(callArgs.headers).not.toHaveProperty('Authorization');
   });
 
-  it('should merge custom headers with auth header', async () => {
+  it('should set Content-Type to application/json when body is present', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ data: 'test' }),
     });
     global.fetch = mockFetch;
 
-    const token = 'test-token-123';
+    await apiFetch('/test-endpoint', {
+      method: 'POST',
+      body: JSON.stringify({ key: 'value' }),
+    });
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/test-endpoint'),
+      expect.objectContaining({
+        credentials: 'include',
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json',
+        }),
+      })
+    );
+  });
+
+  it('should merge custom headers', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: 'test' }),
+    });
+    global.fetch = mockFetch;
+
     await apiFetch(
       '/test-endpoint',
       {
@@ -58,22 +77,22 @@ describe('apiFetch', () => {
         headers: {
           'Content-Type': 'application/json',
         },
-      },
-      token
+        body: JSON.stringify({ key: 'value' }),
+      }
     );
 
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/test-endpoint'),
       expect.objectContaining({
+        credentials: 'include',
         headers: expect.objectContaining({
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         }),
       })
     );
   });
 
-  it('should construct full URL from API base and endpoint', async () => {
+  it('should construct full URL from endpoint', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ data: 'test' }),

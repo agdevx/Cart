@@ -28,9 +28,8 @@ describe('useJoinHouseholdMutation', () => {
     }
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -50,7 +49,6 @@ describe('useJoinHouseholdMutation', () => {
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/households/join', {
       method: 'POST',
       body: JSON.stringify({ inviteCode: 'ABC123' }),
-      token: 'test-token',
     })
   })
 
@@ -65,9 +63,8 @@ describe('useJoinHouseholdMutation', () => {
     }
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -90,9 +87,8 @@ describe('useJoinHouseholdMutation', () => {
 
   it('handles join error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })

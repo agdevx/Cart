@@ -18,9 +18,8 @@ describe('useRemoveHouseholdMemberMutation', () => {
 
   it('removes member successfully', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -37,15 +36,13 @@ describe('useRemoveHouseholdMemberMutation', () => {
 
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1/members/u1', {
       method: 'DELETE',
-      token: 'test-token',
     })
   })
 
   it('invalidates queries on success', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -68,9 +65,8 @@ describe('useRemoveHouseholdMemberMutation', () => {
 
   it('handles remove error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
