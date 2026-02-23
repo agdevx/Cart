@@ -1,5 +1,7 @@
 // ABOUTME: Service implementation for TripItem business logic including add, update, delete operations
 // ABOUTME: and check/uncheck functionality with authorization checks ensuring user is trip collaborator
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using AGDevX.Cart.Shared.Models;
 using AGDevX.Cart.Data.Repositories;
 
@@ -10,6 +12,12 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
     private readonly ITripItemRepository _tripItemRepository = tripItemRepository;
     private readonly ITripRepository _tripRepository = tripRepository;
     private readonly ITripEventService _tripEventService = tripEventService;
+
+    //== Serializer options that handle EF Core circular navigation properties
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        ReferenceHandler = ReferenceHandler.IgnoreCycles
+    };
     public async Task<TripItem> AddTripItemAsync(Guid tripId, Guid inventoryItemId, int quantity, Guid userId, string? notes = null, Guid? storeId = null)
     {
         //== Verify user is collaborator before adding item to trip
@@ -39,7 +47,7 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
             TripId = tripId,
             EventType = "ItemAdded",
             TripItemId = created.Id,
-            Data = System.Text.Json.JsonSerializer.Serialize(created),
+            Data = JsonSerializer.Serialize(created, _jsonOptions),
             Timestamp = DateTime.UtcNow
         });
 
@@ -104,7 +112,7 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
             TripId = tripItem.TripId,
             EventType = "ItemUpdated",
             TripItemId = updated.Id,
-            Data = System.Text.Json.JsonSerializer.Serialize(updated),
+            Data = JsonSerializer.Serialize(updated, _jsonOptions),
             Timestamp = DateTime.UtcNow
         });
 
@@ -134,7 +142,7 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
             TripId = tripItem.TripId,
             EventType = "ItemRemoved",
             TripItemId = id,
-            Data = System.Text.Json.JsonSerializer.Serialize(new { id, tripId = tripItem.TripId }),
+            Data = JsonSerializer.Serialize(new { id, tripId = tripItem.TripId }),
             Timestamp = DateTime.UtcNow
         });
     }
@@ -174,7 +182,7 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
             TripId = tripItem.TripId,
             EventType = "ItemChecked",
             TripItemId = id,
-            Data = System.Text.Json.JsonSerializer.Serialize(new { isChecked, checkedAt = tripItem.CheckedAt }),
+            Data = JsonSerializer.Serialize(new { isChecked, checkedAt = tripItem.CheckedAt }),
             Timestamp = DateTime.UtcNow
         });
 

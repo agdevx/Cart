@@ -19,17 +19,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    //== Optimistic: restore user from localStorage for fast render
-    try {
-      const storedUser = localStorage.getItem(AUTH_USER_STORAGE_KEY)
-      if (storedUser) {
-        setUser(JSON.parse(storedUser) as User)
-      }
-    } catch {
-      // Invalid stored data, ignore
-    }
-
     //== Validate session with backend (cookie is sent automatically)
+    //== Note: initial user restore is handled synchronously by currentUserAtom
     const validateSession = async () => {
       try {
         const response = await apiFetch('/api/auth/me')
