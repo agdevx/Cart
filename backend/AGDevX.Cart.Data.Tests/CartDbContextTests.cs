@@ -1,7 +1,7 @@
 // ABOUTME: Tests for CartDbContext to verify entity configuration and database operations.
 // ABOUTME: Uses InMemory database provider to test DbContext without requiring actual database.
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,8 +14,8 @@ public class CartDbContextTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<CartDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDb_ConfigureEntities")
-            .Options;
+                      .UseInMemoryDatabase(databaseName: "TestDb_ConfigureEntities")
+                      .Options;
 
         // Act
         using var context = new CartDbContext(options);
@@ -37,8 +37,8 @@ public class CartDbContextTests
     {
         // Arrange
         var options = new DbContextOptionsBuilder<CartDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDb_CreateUser")
-            .Options;
+                      .UseInMemoryDatabase(databaseName: "TestDb_CreateUser")
+                      .Options;
 
         var user = new User
         {

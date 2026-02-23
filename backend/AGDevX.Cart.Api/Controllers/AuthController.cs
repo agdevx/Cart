@@ -4,7 +4,7 @@
 using System.Security.Claims;
 using AGDevX.Cart.Auth;
 using AGDevX.Cart.Shared.DTOs;
-using AGDevX.Cart.Shared.Extensions;
+using AGDevX.Cart.Auth.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +21,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         try
         {
-            var response = await authService.RegisterAsync(request);
+            var response = await authService.Register(request);
             await SignInUser(response);
             return Ok(response);
         }
@@ -36,7 +36,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         try
         {
-            var response = await authService.LoginAsync(request);
+            var response = await authService.Login(request);
             await SignInUser(response);
             return Ok(response);
         }

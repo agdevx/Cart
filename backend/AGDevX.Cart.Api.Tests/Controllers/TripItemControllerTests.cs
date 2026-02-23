@@ -4,7 +4,7 @@
 using System.Security.Claims;
 using AGDevX.Cart.Api.Controllers;
 using AGDevX.Cart.Services;
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -43,8 +43,8 @@ public class TripItemControllerTests
             }
         };
 
-        mockService.Setup(s => s.GetTripItemsAsync(tripId, userId))
-            .ReturnsAsync(tripItems);
+        mockService.Setup(s => s.GetTripItems(tripId, userId))
+                   .ReturnsAsync(tripItems);
 
         // Act
         var result = await controller.GetTripItems(tripId);
@@ -81,8 +81,8 @@ public class TripItemControllerTests
             Quantity = 2
         };
 
-        mockService.Setup(s => s.GetByIdAsync(tripItemId, userId))
-            .ReturnsAsync(tripItem);
+        mockService.Setup(s => s.GetById(tripItemId, userId))
+                   .ReturnsAsync(tripItem);
 
         // Act
         var result = await controller.GetById(tripItemId);
@@ -110,8 +110,8 @@ public class TripItemControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.GetByIdAsync(tripItemId, userId))
-            .ReturnsAsync((TripItem?)null);
+        mockService.Setup(s => s.GetById(tripItemId, userId))
+                   .ReturnsAsync((TripItem?)null);
 
         // Act
         var result = await controller.GetById(tripItemId);
@@ -149,8 +149,8 @@ public class TripItemControllerTests
             Notes = "Test notes"
         };
 
-        mockService.Setup(s => s.AddTripItemAsync(tripId, inventoryItemId, 3, userId, "Test notes", null))
-            .ReturnsAsync(tripItem);
+        mockService.Setup(s => s.AddTripItem(tripId, inventoryItemId, 3, userId, "Test notes", null))
+                   .ReturnsAsync(tripItem);
 
         // Act
         var result = await controller.Add(tripId, inventoryItemId, 3, "Test notes");
@@ -208,8 +208,8 @@ public class TripItemControllerTests
             Quantity = 5
         };
 
-        mockService.Setup(s => s.UpdateTripItemAsync(tripItemId, 5, userId, null, null))
-            .ReturnsAsync(tripItem);
+        mockService.Setup(s => s.UpdateTripItem(tripItemId, 5, userId, null, null))
+                   .ReturnsAsync(tripItem);
 
         // Act
         var result = await controller.Update(tripItemId, 5, null);
@@ -236,8 +236,8 @@ public class TripItemControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.UpdateTripItemAsync(tripItemId, 5, userId, null, null))
-            .ThrowsAsync(new ArgumentException("Trip item not found"));
+        mockService.Setup(s => s.UpdateTripItem(tripItemId, 5, userId, null, null))
+                   .ThrowsAsync(new ArgumentException("Trip item not found"));
 
         // Act
         var result = await controller.Update(tripItemId, 5, null);
@@ -264,8 +264,8 @@ public class TripItemControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.UpdateTripItemAsync(tripItemId, 5, userId, null, null))
-            .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this trip item"));
+        mockService.Setup(s => s.UpdateTripItem(tripItemId, 5, userId, null, null))
+                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this trip item"));
 
         // Act
         var result = await controller.Update(tripItemId, 5, null);
@@ -292,8 +292,8 @@ public class TripItemControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteTripItemAsync(tripItemId, userId))
-            .Returns(Task.CompletedTask);
+        mockService.Setup(s => s.DeleteTripItem(tripItemId, userId))
+                   .Returns(Task.CompletedTask);
 
         // Act
         var result = await controller.Delete(tripItemId);
@@ -320,8 +320,8 @@ public class TripItemControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteTripItemAsync(tripItemId, userId))
-            .ThrowsAsync(new ArgumentException("Trip item not found"));
+        mockService.Setup(s => s.DeleteTripItem(tripItemId, userId))
+                   .ThrowsAsync(new ArgumentException("Trip item not found"));
 
         // Act
         var result = await controller.Delete(tripItemId);
@@ -348,8 +348,8 @@ public class TripItemControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteTripItemAsync(tripItemId, userId))
-            .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to delete this trip item"));
+        mockService.Setup(s => s.DeleteTripItem(tripItemId, userId))
+                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to delete this trip item"));
 
         // Act
         var result = await controller.Delete(tripItemId);
@@ -387,8 +387,8 @@ public class TripItemControllerTests
             CheckedAt = DateTime.UtcNow
         };
 
-        mockService.Setup(s => s.CheckItemAsync(tripItemId, true, userId))
-            .ReturnsAsync(tripItem);
+        mockService.Setup(s => s.CheckItem(tripItemId, true, userId))
+                   .ReturnsAsync(tripItem);
 
         // Act
         var result = await controller.Check(tripItemId);
@@ -416,8 +416,8 @@ public class TripItemControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.CheckItemAsync(tripItemId, true, userId))
-            .ThrowsAsync(new ArgumentException("Trip item not found"));
+        mockService.Setup(s => s.CheckItem(tripItemId, true, userId))
+                   .ThrowsAsync(new ArgumentException("Trip item not found"));
 
         // Act
         var result = await controller.Check(tripItemId);
@@ -444,8 +444,8 @@ public class TripItemControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.CheckItemAsync(tripItemId, true, userId))
-            .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to check this trip item"));
+        mockService.Setup(s => s.CheckItem(tripItemId, true, userId))
+                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to check this trip item"));
 
         // Act
         var result = await controller.Check(tripItemId);
@@ -483,8 +483,8 @@ public class TripItemControllerTests
             CheckedAt = null
         };
 
-        mockService.Setup(s => s.CheckItemAsync(tripItemId, false, userId))
-            .ReturnsAsync(tripItem);
+        mockService.Setup(s => s.CheckItem(tripItemId, false, userId))
+                   .ReturnsAsync(tripItem);
 
         // Act
         var result = await controller.Uncheck(tripItemId);
@@ -512,8 +512,8 @@ public class TripItemControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.CheckItemAsync(tripItemId, false, userId))
-            .ThrowsAsync(new ArgumentException("Trip item not found"));
+        mockService.Setup(s => s.CheckItem(tripItemId, false, userId))
+                   .ThrowsAsync(new ArgumentException("Trip item not found"));
 
         // Act
         var result = await controller.Uncheck(tripItemId);
@@ -540,8 +540,8 @@ public class TripItemControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.CheckItemAsync(tripItemId, false, userId))
-            .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to uncheck this trip item"));
+        mockService.Setup(s => s.CheckItem(tripItemId, false, userId))
+                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to uncheck this trip item"));
 
         // Act
         var result = await controller.Uncheck(tripItemId);

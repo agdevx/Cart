@@ -4,7 +4,7 @@
 using System.Security.Claims;
 using AGDevX.Cart.Api.Controllers;
 using AGDevX.Cart.Services;
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -37,8 +37,8 @@ public class StoreControllerTests
             new Store { Id = Guid.NewGuid(), Name = "Test Store", HouseholdId = householdId }
         };
 
-        mockService.Setup(s => s.GetHouseholdStoresAsync(householdId, userId))
-            .ReturnsAsync(stores);
+        mockService.Setup(s => s.GetHouseholdStores(householdId, userId))
+                   .ReturnsAsync(stores);
 
         // Act
         var result = await controller.GetHouseholdStores(householdId);
@@ -70,8 +70,8 @@ public class StoreControllerTests
             new Store { Id = Guid.NewGuid(), Name = "Personal Store", UserId = userId }
         };
 
-        mockService.Setup(s => s.GetPersonalStoresAsync(userId))
-            .ReturnsAsync(stores);
+        mockService.Setup(s => s.GetPersonalStores(userId))
+                   .ReturnsAsync(stores);
 
         // Act
         var result = await controller.GetPersonalStores();
@@ -101,8 +101,8 @@ public class StoreControllerTests
 
         var store = new Store { Id = storeId, Name = "Test Store" };
 
-        mockService.Setup(s => s.GetByIdAsync(storeId, userId))
-            .ReturnsAsync(store);
+        mockService.Setup(s => s.GetById(storeId, userId))
+                   .ReturnsAsync(store);
 
         // Act
         var result = await controller.GetById(storeId);
@@ -130,8 +130,8 @@ public class StoreControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.GetByIdAsync(storeId, userId))
-            .ReturnsAsync((Store?)null);
+        mockService.Setup(s => s.GetById(storeId, userId))
+                   .ReturnsAsync((Store?)null);
 
         // Act
         var result = await controller.GetById(storeId);
@@ -159,8 +159,8 @@ public class StoreControllerTests
 
         var store = new Store { Id = Guid.NewGuid(), Name = "New Store", UserId = userId };
 
-        mockService.Setup(s => s.CreateStoreAsync(It.IsAny<Store>(), userId))
-            .ReturnsAsync(store);
+        mockService.Setup(s => s.CreateStore(It.IsAny<Store>(), userId))
+                   .ReturnsAsync(store);
 
         // Act
         var result = await controller.Create(store);
@@ -211,8 +211,8 @@ public class StoreControllerTests
 
         var store = new Store { Id = storeId, Name = "Updated Store", UserId = userId };
 
-        mockService.Setup(s => s.UpdateStoreAsync(It.IsAny<Store>(), userId))
-            .ReturnsAsync(store);
+        mockService.Setup(s => s.UpdateStore(It.IsAny<Store>(), userId))
+                   .ReturnsAsync(store);
 
         // Act
         var result = await controller.Update(storeId, store);
@@ -241,8 +241,8 @@ public class StoreControllerTests
 
         var store = new Store { Id = storeId, Name = "Updated Store", UserId = userId };
 
-        mockService.Setup(s => s.UpdateStoreAsync(It.IsAny<Store>(), userId))
-            .ThrowsAsync(new ArgumentException("Store not found"));
+        mockService.Setup(s => s.UpdateStore(It.IsAny<Store>(), userId))
+                   .ThrowsAsync(new ArgumentException("Store not found"));
 
         // Act
         var result = await controller.Update(storeId, store);
@@ -271,8 +271,8 @@ public class StoreControllerTests
 
         var store = new Store { Id = storeId, Name = "Updated Store", UserId = userId };
 
-        mockService.Setup(s => s.UpdateStoreAsync(It.IsAny<Store>(), userId))
-            .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this store"));
+        mockService.Setup(s => s.UpdateStore(It.IsAny<Store>(), userId))
+                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this store"));
 
         // Act
         var result = await controller.Update(storeId, store);
@@ -299,8 +299,8 @@ public class StoreControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteStoreAsync(storeId, userId))
-            .Returns(Task.CompletedTask);
+        mockService.Setup(s => s.DeleteStore(storeId, userId))
+                   .Returns(Task.CompletedTask);
 
         // Act
         var result = await controller.Delete(storeId);
@@ -327,8 +327,8 @@ public class StoreControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteStoreAsync(storeId, userId))
-            .ThrowsAsync(new ArgumentException("Store not found"));
+        mockService.Setup(s => s.DeleteStore(storeId, userId))
+                   .ThrowsAsync(new ArgumentException("Store not found"));
 
         // Act
         var result = await controller.Delete(storeId);
@@ -355,8 +355,8 @@ public class StoreControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteStoreAsync(storeId, userId))
-            .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to delete this store"));
+        mockService.Setup(s => s.DeleteStore(storeId, userId))
+                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to delete this store"));
 
         // Act
         var result = await controller.Delete(storeId);

@@ -1,8 +1,9 @@
 // ABOUTME: Tests for error message utility
 // ABOUTME: Verifies error code to user-friendly message mapping
 
-import { describe, it, expect } from 'vitest';
-import { getErrorMessage, ERROR_MESSAGES } from './error-messages';
+import { describe, expect,it } from 'vitest';
+
+import { ERROR_MESSAGES,getErrorMessage } from './error-messages';
 
 describe('error-messages', () => {
   describe('ERROR_MESSAGES', () => {
@@ -64,7 +65,24 @@ describe('error-messages', () => {
     });
 
     it('should return UNKNOWN_ERROR message when code is null', () => {
-      expect(getErrorMessage(null as never)).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
+      expect(getErrorMessage(null)).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
+    });
+
+    it('should extract message from Error objects with known error code', () => {
+      expect(getErrorMessage(new Error('NETWORK_ERROR'))).toBe(
+        ERROR_MESSAGES.NETWORK_ERROR
+      );
+    });
+
+    it('should return error message from Error objects with unknown code', () => {
+      expect(getErrorMessage(new Error('Something went wrong'))).toBe(
+        'Something went wrong'
+      );
+    });
+
+    it('should return UNKNOWN_ERROR for non-string, non-Error values', () => {
+      expect(getErrorMessage(42)).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
+      expect(getErrorMessage({})).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
     });
   });
 });

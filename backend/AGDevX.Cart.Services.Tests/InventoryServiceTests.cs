@@ -1,7 +1,7 @@
 // ABOUTME: Tests for InventoryService verifying privacy enforcement and authorization for inventory items
 // ABOUTME: Validates household membership checks and user ownership for both household and personal inventory items
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using Moq;
@@ -46,22 +46,20 @@ public class InventoryServiceTests
             HouseholdId = householdId
         };
 
-        _mockHouseholdRepository
-            .Setup(r => r.GetByIdAsync(householdId))
-            .ReturnsAsync(household);
+        _mockHouseholdRepository.Setup(r => r.GetById(householdId))
+                                .ReturnsAsync(household);
 
-        _mockInventoryRepository
-            .Setup(r => r.CreateAsync(It.IsAny<InventoryItem>()))
-            .ReturnsAsync((InventoryItem item) => { item.Id = Guid.NewGuid(); return item; });
+        _mockInventoryRepository.Setup(r => r.Create(It.IsAny<InventoryItem>()))
+                                .ReturnsAsync((InventoryItem item) => { item.Id = Guid.NewGuid(); return item; });
 
         //== Act
-        var result = await _inventoryService.CreateInventoryItemAsync(inventoryItem, userId);
+        var result = await _inventoryService.CreateInventoryItem(inventoryItem, userId);
 
         //== Assert
         Assert.NotNull(result);
         Assert.Equal("Milk", result.Name);
         Assert.Equal(householdId, result.HouseholdId);
-        _mockInventoryRepository.Verify(r => r.CreateAsync(It.IsAny<InventoryItem>()), Times.Once);
+        _mockInventoryRepository.Verify(r => r.Create(It.IsAny<InventoryItem>()), Times.Once);
     }
 
     [Fact]
@@ -75,17 +73,16 @@ public class InventoryServiceTests
             new InventoryItem { Id = Guid.NewGuid(), Name = "Personal Item 2", OwnerUserId = userId }
         };
 
-        _mockInventoryRepository
-            .Setup(r => r.GetPersonalItemsAsync(userId))
-            .ReturnsAsync(personalItems);
+        _mockInventoryRepository.Setup(r => r.GetPersonalItems(userId))
+                                .ReturnsAsync(personalItems);
 
         //== Act
-        var result = await _inventoryService.GetPersonalInventoryAsync(userId);
+        var result = await _inventoryService.GetPersonalInventory(userId);
 
         //== Assert
         Assert.NotNull(result);
         Assert.Equal(2, result.Count());
         Assert.All(result, item => Assert.Equal(userId, item.OwnerUserId));
-        _mockInventoryRepository.Verify(r => r.GetPersonalItemsAsync(userId), Times.Once);
+        _mockInventoryRepository.Verify(r => r.GetPersonalItems(userId), Times.Once);
     }
 }

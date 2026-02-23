@@ -1,7 +1,8 @@
 // ABOUTME: Tests for API configuration and base fetch wrapper
 // ABOUTME: Verifies cookie-based auth via credentials: 'include' and proper request handling
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach,describe, expect, it, vi } from 'vitest';
+
 import { apiFetch } from './agdevx-cart-api-config';
 
 describe('apiFetch', () => {
@@ -15,7 +16,7 @@ describe('apiFetch', () => {
       ok: true,
       json: async () => ({ data: 'test' }),
     });
-    global.fetch = mockFetch;
+    globalThis.fetch = mockFetch;
 
     await apiFetch('/test-endpoint', { method: 'GET' });
 
@@ -32,7 +33,7 @@ describe('apiFetch', () => {
       ok: true,
       json: async () => ({ data: 'test' }),
     });
-    global.fetch = mockFetch;
+    globalThis.fetch = mockFetch;
 
     await apiFetch('/test-endpoint', { method: 'GET' });
 
@@ -45,7 +46,7 @@ describe('apiFetch', () => {
       ok: true,
       json: async () => ({ data: 'test' }),
     });
-    global.fetch = mockFetch;
+    globalThis.fetch = mockFetch;
 
     await apiFetch('/test-endpoint', {
       method: 'POST',
@@ -68,7 +69,7 @@ describe('apiFetch', () => {
       ok: true,
       json: async () => ({ data: 'test' }),
     });
-    global.fetch = mockFetch;
+    globalThis.fetch = mockFetch;
 
     await apiFetch(
       '/test-endpoint',
@@ -97,7 +98,7 @@ describe('apiFetch', () => {
       ok: true,
       json: async () => ({ data: 'test' }),
     });
-    global.fetch = mockFetch;
+    globalThis.fetch = mockFetch;
 
     await apiFetch('/test-endpoint', { method: 'GET' });
 

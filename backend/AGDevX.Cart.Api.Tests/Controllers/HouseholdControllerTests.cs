@@ -4,7 +4,7 @@
 using System.Security.Claims;
 using AGDevX.Cart.Api.Controllers;
 using AGDevX.Cart.Services;
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -36,8 +36,8 @@ public class HouseholdControllerTests
             new Household { Id = Guid.NewGuid(), Name = "Test Household" }
         };
 
-        mockService.Setup(s => s.GetUserHouseholdsAsync(userId))
-            .ReturnsAsync(households);
+        mockService.Setup(s => s.GetUserHouseholds(userId))
+                   .ReturnsAsync(households);
 
         // Act
         var result = await controller.GetUserHouseholds();
@@ -67,8 +67,8 @@ public class HouseholdControllerTests
         var householdName = "New Household";
         var created = new Household { Id = Guid.NewGuid(), Name = householdName };
 
-        mockService.Setup(s => s.CreateHouseholdAsync(userId, householdName))
-            .ReturnsAsync(created);
+        mockService.Setup(s => s.CreateHousehold(userId, householdName))
+                   .ReturnsAsync(created);
 
         // Act
         var result = await controller.CreateHousehold(householdName);
@@ -98,8 +98,8 @@ public class HouseholdControllerTests
 
         var household = new Household { Id = householdId, Name = "Test Household" };
 
-        mockService.Setup(s => s.GetByIdAsync(userId, householdId))
-            .ReturnsAsync(household);
+        mockService.Setup(s => s.GetById(userId, householdId))
+                   .ReturnsAsync(household);
 
         // Act
         var result = await controller.GetById(householdId);
@@ -127,8 +127,8 @@ public class HouseholdControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.GetByIdAsync(userId, householdId))
-            .ReturnsAsync((Household?)null);
+        mockService.Setup(s => s.GetById(userId, householdId))
+                   .ReturnsAsync((Household?)null);
 
         // Act
         var result = await controller.GetById(householdId);
@@ -179,8 +179,8 @@ public class HouseholdControllerTests
 
         var updated = new Household { Id = householdId, Name = householdName };
 
-        mockService.Setup(s => s.UpdateHouseholdAsync(userId, householdId, householdName))
-            .ReturnsAsync(updated);
+        mockService.Setup(s => s.UpdateHousehold(userId, householdId, householdName))
+                   .ReturnsAsync(updated);
 
         // Act
         var result = await controller.UpdateHousehold(householdId, householdName);
@@ -207,8 +207,8 @@ public class HouseholdControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteHouseholdAsync(userId, householdId))
-            .Returns(Task.CompletedTask);
+        mockService.Setup(s => s.DeleteHousehold(userId, householdId))
+                   .Returns(Task.CompletedTask);
 
         // Act
         var result = await controller.DeleteHousehold(householdId);
@@ -236,8 +236,8 @@ public class HouseholdControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.UpdateHouseholdAsync(userId, householdId, householdName))
-            .ThrowsAsync(new ArgumentException("Household not found"));
+        mockService.Setup(s => s.UpdateHousehold(userId, householdId, householdName))
+                   .ThrowsAsync(new ArgumentException("Household not found"));
 
         // Act
         var result = await controller.UpdateHousehold(householdId, householdName);
@@ -265,8 +265,8 @@ public class HouseholdControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.UpdateHouseholdAsync(userId, householdId, householdName))
-            .ThrowsAsync(new UnauthorizedAccessException("User is not a member of this household"));
+        mockService.Setup(s => s.UpdateHousehold(userId, householdId, householdName))
+                   .ThrowsAsync(new UnauthorizedAccessException("User is not a member of this household"));
 
         // Act
         var result = await controller.UpdateHousehold(householdId, householdName);
@@ -323,7 +323,7 @@ public class HouseholdControllerTests
         };
 
         mockService.Setup(s => s.JoinHousehold(userId, "INVALID"))
-            .ThrowsAsync(new ArgumentException("Invalid invite code"));
+                   .ThrowsAsync(new ArgumentException("Invalid invite code"));
 
         // Act
         var result = await controller.JoinHousehold(new JoinHouseholdRequest { InviteCode = "INVALID" });

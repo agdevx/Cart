@@ -2,8 +2,8 @@
 // ABOUTME: Provides endpoints for creating, reading, updating, deleting household and personal inventory items
 
 using AGDevX.Cart.Services;
-using AGDevX.Cart.Shared.Extensions;
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Auth.Extensions;
+using AGDevX.Cart.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,7 +21,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            var items = await inventoryService.GetAllUserInventoryAsync(userId);
+            var items = await inventoryService.GetAllUserInventory(userId);
             return Ok(items);
         }
         catch (UnauthorizedAccessException ex)
@@ -37,7 +37,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            var items = await inventoryService.GetHouseholdInventoryAsync(householdId, userId);
+            var items = await inventoryService.GetHouseholdInventory(householdId, userId);
             return Ok(items);
         }
         catch (UnauthorizedAccessException ex)
@@ -53,7 +53,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            var items = await inventoryService.GetPersonalInventoryAsync(userId);
+            var items = await inventoryService.GetPersonalInventory(userId);
             return Ok(items);
         }
         catch (UnauthorizedAccessException ex)
@@ -69,7 +69,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            var items = await inventoryService.GetMergedInventoryAsync(householdId, userId);
+            var items = await inventoryService.GetMergedInventory(householdId, userId);
             return Ok(items);
         }
         catch (UnauthorizedAccessException ex)
@@ -85,7 +85,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            var item = await inventoryService.GetByIdAsync(id, userId);
+            var item = await inventoryService.GetById(id, userId);
 
             if (item == null)
             {
@@ -107,7 +107,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            var created = await inventoryService.CreateInventoryItemAsync(item, userId);
+            var created = await inventoryService.CreateInventoryItem(item, userId);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
         catch (UnauthorizedAccessException ex)
@@ -123,7 +123,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            await inventoryService.UpdateInventoryItemAsync(item, userId);
+            await inventoryService.UpdateInventoryItem(item, userId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -143,7 +143,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            await inventoryService.DeleteInventoryItemAsync(id, userId);
+            await inventoryService.DeleteInventoryItem(id, userId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

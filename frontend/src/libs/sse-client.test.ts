@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { createSSEClient } from './sse-client'
 
 interface MockEventSource {
@@ -25,7 +26,7 @@ describe('createSSEClient', () => {
       CLOSED: 2,
     }
 
-    global.EventSource = function() {
+    globalThis.EventSource = function() {
       return mockEventSource as unknown as EventSource
     } as unknown as typeof EventSource
   })

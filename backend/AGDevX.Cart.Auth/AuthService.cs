@@ -2,18 +2,17 @@
 // ABOUTME: Uses BCrypt for password hashing. Cookie session management is handled by the controller.
 using AGDevX.Cart.Data;
 using AGDevX.Cart.Shared.DTOs;
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AGDevX.Cart.Auth;
 
 public class AuthService(CartDbContext context) : IAuthService
 {
-    public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
+    public async Task<AuthResponse> Register(RegisterRequest request)
     {
         //== Check for duplicate email
-        var existingUser = await context.Users
-            .FirstOrDefaultAsync(u => u.Email == request.Email);
+        var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
         if (existingUser != null)
         {
@@ -23,15 +22,12 @@ public class AuthService(CartDbContext context) : IAuthService
         //== Hash password with BCrypt
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-        //== Create User with system user (Guid.Empty) as creator
         var user = new User
         {
             Id = Guid.NewGuid(),
             Email = request.Email,
             PasswordHash = passwordHash,
-            DisplayName = request.DisplayName,
-            CreatedBy = Guid.Empty.ToString(),
-            CreatedDate = DateTime.UtcNow
+            DisplayName = request.DisplayName
         };
 
         context.Users.Add(user);
@@ -45,16 +41,11 @@ public class AuthService(CartDbContext context) : IAuthService
         };
     }
 
-    public async Task<AuthResponse> LoginAsync(LoginRequest request)
+    public async Task<AuthResponse> Login(LoginRequest request)
     {
         //== Find user by email
-        var user = await context.Users
-            .FirstOrDefaultAsync(u => u.Email == request.Email);
-
-        if (user == null)
-        {
-            throw new UnauthorizedAccessException("Invalid email or password.");
-        }
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email)
+                        ?? throw new UnauthorizedAccessException("Invalid email or password.");
 
         //== Verify password with BCrypt
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))

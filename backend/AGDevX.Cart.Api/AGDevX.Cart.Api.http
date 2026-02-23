@@ -1,6 +1,0 @@
-@AGDevX.Cart.Api_HostAddress = http://localhost:5131
-
-GET {{AGDevX.Cart.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

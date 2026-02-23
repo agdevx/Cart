@@ -1,9 +1,12 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+
 import { QueryClientProvider } from '@tanstack/react-query'
+import { render, screen } from '@testing-library/react'
+import { describe, expect,it } from 'vitest'
+
 import { queryClient } from '@/apis/tanstack-query/query-client'
 import { AuthProvider } from '@/auth/auth-provider'
+
 import { AppRoutes } from './app'
 
 const createWrapper = (initialRoute: string = '/') => {
@@ -34,7 +37,7 @@ describe('App', () => {
 
   it('renders registration page at /register route', () => {
     render(<AppRoutes />, { wrapper: createWrapper('/register') })
-    expect(screen.getByText(/AGDevX Cart/i)).toBeInTheDocument()
+    expect(screen.getByText((_content, element) => element?.tagName === 'H1' && element?.textContent === 'AGDevX Cart')).toBeInTheDocument()
     expect(screen.getByLabelText(/display name/i)).toBeInTheDocument()
   })
 })

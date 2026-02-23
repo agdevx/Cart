@@ -1,6 +1,6 @@
 // ABOUTME: Test suite for InventoryItem model validation
 // ABOUTME: Verifies household-scoped and user-scoped inventory item configurations
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using FluentAssertions;
 
 namespace AGDevX.Cart.Data.Tests.Models;

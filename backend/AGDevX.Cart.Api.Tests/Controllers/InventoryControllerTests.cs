@@ -4,7 +4,7 @@
 using System.Security.Claims;
 using AGDevX.Cart.Api.Controllers;
 using AGDevX.Cart.Services;
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -37,8 +37,8 @@ public class InventoryControllerTests
             new InventoryItem { Id = Guid.NewGuid(), Name = "Test Item", HouseholdId = householdId }
         };
 
-        mockService.Setup(s => s.GetHouseholdInventoryAsync(householdId, userId))
-            .ReturnsAsync(items);
+        mockService.Setup(s => s.GetHouseholdInventory(householdId, userId))
+                   .ReturnsAsync(items);
 
         // Act
         var result = await controller.GetHouseholdInventory(householdId);
@@ -70,8 +70,8 @@ public class InventoryControllerTests
             new InventoryItem { Id = Guid.NewGuid(), Name = "Personal Item", OwnerUserId = userId }
         };
 
-        mockService.Setup(s => s.GetPersonalInventoryAsync(userId))
-            .ReturnsAsync(items);
+        mockService.Setup(s => s.GetPersonalInventory(userId))
+                   .ReturnsAsync(items);
 
         // Act
         var result = await controller.GetPersonalInventory();
@@ -105,8 +105,8 @@ public class InventoryControllerTests
             new InventoryItem { Id = Guid.NewGuid(), Name = "Personal Item", OwnerUserId = userId }
         };
 
-        mockService.Setup(s => s.GetMergedInventoryAsync(householdId, userId))
-            .ReturnsAsync(items);
+        mockService.Setup(s => s.GetMergedInventory(householdId, userId))
+                   .ReturnsAsync(items);
 
         // Act
         var result = await controller.GetMergedInventory(householdId);
@@ -136,8 +136,8 @@ public class InventoryControllerTests
 
         var item = new InventoryItem { Id = itemId, Name = "Test Item" };
 
-        mockService.Setup(s => s.GetByIdAsync(itemId, userId))
-            .ReturnsAsync(item);
+        mockService.Setup(s => s.GetById(itemId, userId))
+                   .ReturnsAsync(item);
 
         // Act
         var result = await controller.GetById(itemId);
@@ -165,8 +165,8 @@ public class InventoryControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.GetByIdAsync(itemId, userId))
-            .ReturnsAsync((InventoryItem?)null);
+        mockService.Setup(s => s.GetById(itemId, userId))
+                   .ReturnsAsync((InventoryItem?)null);
 
         // Act
         var result = await controller.GetById(itemId);
@@ -194,8 +194,8 @@ public class InventoryControllerTests
 
         var item = new InventoryItem { Id = Guid.NewGuid(), Name = "New Item", OwnerUserId = userId };
 
-        mockService.Setup(s => s.CreateInventoryItemAsync(It.IsAny<InventoryItem>(), userId))
-            .ReturnsAsync(item);
+        mockService.Setup(s => s.CreateInventoryItem(It.IsAny<InventoryItem>(), userId))
+                   .ReturnsAsync(item);
 
         // Act
         var result = await controller.Create(item);
@@ -246,8 +246,8 @@ public class InventoryControllerTests
 
         var item = new InventoryItem { Id = itemId, Name = "Updated Item", OwnerUserId = userId };
 
-        mockService.Setup(s => s.UpdateInventoryItemAsync(It.IsAny<InventoryItem>(), userId))
-            .ReturnsAsync(item);
+        mockService.Setup(s => s.UpdateInventoryItem(It.IsAny<InventoryItem>(), userId))
+                   .ReturnsAsync(item);
 
         // Act
         var result = await controller.Update(itemId, item);
@@ -276,8 +276,8 @@ public class InventoryControllerTests
 
         var item = new InventoryItem { Id = itemId, Name = "Updated Item", OwnerUserId = userId };
 
-        mockService.Setup(s => s.UpdateInventoryItemAsync(It.IsAny<InventoryItem>(), userId))
-            .ThrowsAsync(new ArgumentException("Inventory item not found"));
+        mockService.Setup(s => s.UpdateInventoryItem(It.IsAny<InventoryItem>(), userId))
+                   .ThrowsAsync(new ArgumentException("Inventory item not found"));
 
         // Act
         var result = await controller.Update(itemId, item);
@@ -306,8 +306,8 @@ public class InventoryControllerTests
 
         var item = new InventoryItem { Id = itemId, Name = "Updated Item", OwnerUserId = userId };
 
-        mockService.Setup(s => s.UpdateInventoryItemAsync(It.IsAny<InventoryItem>(), userId))
-            .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this inventory item"));
+        mockService.Setup(s => s.UpdateInventoryItem(It.IsAny<InventoryItem>(), userId))
+                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this inventory item"));
 
         // Act
         var result = await controller.Update(itemId, item);
@@ -334,8 +334,8 @@ public class InventoryControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteInventoryItemAsync(itemId, userId))
-            .Returns(Task.CompletedTask);
+        mockService.Setup(s => s.DeleteInventoryItem(itemId, userId))
+                   .Returns(Task.CompletedTask);
 
         // Act
         var result = await controller.Delete(itemId);
@@ -362,8 +362,8 @@ public class InventoryControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteInventoryItemAsync(itemId, userId))
-            .ThrowsAsync(new ArgumentException("Inventory item not found"));
+        mockService.Setup(s => s.DeleteInventoryItem(itemId, userId))
+                   .ThrowsAsync(new ArgumentException("Inventory item not found"));
 
         // Act
         var result = await controller.Delete(itemId);
@@ -390,8 +390,8 @@ public class InventoryControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteInventoryItemAsync(itemId, userId))
-            .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to delete this inventory item"));
+        mockService.Setup(s => s.DeleteInventoryItem(itemId, userId))
+                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to delete this inventory item"));
 
         // Act
         var result = await controller.Delete(itemId);

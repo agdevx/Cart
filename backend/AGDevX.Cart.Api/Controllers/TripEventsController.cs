@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Text.Json;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
+using AGDevX.Cart.Auth.Extensions;
 using AGDevX.Cart.Shared.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,7 +33,7 @@ public class TripEventsController(
             var userId = User.GetUserId();
 
             //== Verify user is a collaborator on this trip
-            var isCollaborator = await _tripRepository.IsUserCollaboratorAsync(tripId, userId);
+            var isCollaborator = await _tripRepository.IsUserCollaborator(tripId, userId);
             if (!isCollaborator)
             {
                 Response.StatusCode = 403;

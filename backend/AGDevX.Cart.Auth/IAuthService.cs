@@ -6,6 +6,6 @@ namespace AGDevX.Cart.Auth;
 
 public interface IAuthService
 {
-    Task<AuthResponse> RegisterAsync(RegisterRequest request);
-    Task<AuthResponse> LoginAsync(LoginRequest request);
+    Task<AuthResponse> Register(RegisterRequest request);
+    Task<AuthResponse> Login(LoginRequest request);
 }

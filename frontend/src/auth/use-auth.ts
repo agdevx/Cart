@@ -2,10 +2,12 @@
 // ABOUTME: Provides methods to set/clear auth state and persist user to localStorage
 
 import { useCallback } from 'react';
+
 import { useAtom } from 'jotai';
-import { currentUserAtom } from '@/state/auth-atoms';
-import type { User } from '@/apis/agdevx-cart-api/models/user';
+
 import { apiFetch } from '@/apis/agdevx-cart-api/agdevx-cart-api-config';
+import type { User } from '@/apis/agdevx-cart-api/models/user';
+import { currentUserAtom } from '@/state/auth-atoms';
 
 const AUTH_USER_STORAGE_KEY = 'authUser';
 

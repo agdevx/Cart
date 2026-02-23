@@ -41,5 +41,5 @@
       "@/utilities/*": ["src/utilities/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "integration-tests"]
 }

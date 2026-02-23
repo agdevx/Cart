@@ -1,9 +1,11 @@
 // ABOUTME: Inventory management page
 // ABOUTME: Displays household and personal inventory items with add/delete actions
 
+import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
+
 import { useDeleteInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/delete-inventory-item.mutation'
+import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 
 export const InventoryPage = () => {
   const { data: inventory, isLoading } = useInventoryQuery()
@@ -17,8 +19,8 @@ export const InventoryPage = () => {
 
   if (isLoading) {
     return (
-      <div className="p-4">
-        <p>Loading inventory...</p>
+      <div className="px-5 pt-14">
+        <p className="text-text-secondary">Loading inventory...</p>
       </div>
     )
   }
@@ -27,36 +29,42 @@ export const InventoryPage = () => {
   const personalItems = inventory?.filter((item) => item.ownerUserId !== null) || []
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Inventory</h1>
+    <div className="px-5 pt-14 pb-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">
+          Your <span className="text-teal">Pantry</span>
+        </h1>
         <Link
           to="/inventory/add"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-teal text-white rounded-xl font-display font-bold text-sm hover:bg-teal-light transition-colors"
         >
+          <Plus className="w-4 h-4" />
           Add Item
         </Link>
       </div>
 
       {householdItems.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-2">Household Items</h2>
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Household Items</span>
+            <span className="flex-1 h-px bg-navy/8" />
+          </div>
           <div className="space-y-2">
             {householdItems.map((item) => (
               <div
                 key={item.id}
-                className="p-4 bg-white border rounded shadow-sm flex justify-between items-start"
+                className="p-4 bg-surface rounded-xl shadow-sm flex justify-between items-start"
               >
                 <div>
-                  <h3 className="font-semibold">{item.name}</h3>
+                  <h3 className="font-bold text-navy">{item.name}</h3>
                   {item.notes && (
-                    <p className="text-sm text-gray-600">{item.notes}</p>
+                    <p className="text-sm text-text-secondary mt-0.5">{item.notes}</p>
                   )}
                 </div>
                 <button
                   onClick={() => handleDelete(item.id)}
                   disabled={deleteMutation.isPending}
-                  className="text-red-600 hover:text-red-800 text-sm"
+                  className="text-coral hover:text-coral/80 text-sm font-semibold"
                 >
                   Delete
                 </button>
@@ -68,23 +76,26 @@ export const InventoryPage = () => {
 
       {personalItems.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-2">Personal Items</h2>
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Personal Items</span>
+            <span className="flex-1 h-px bg-navy/8" />
+          </div>
           <div className="space-y-2">
             {personalItems.map((item) => (
               <div
                 key={item.id}
-                className="p-4 bg-white border rounded shadow-sm flex justify-between items-start"
+                className="p-4 bg-surface rounded-xl shadow-sm flex justify-between items-start"
               >
                 <div>
-                  <h3 className="font-semibold">{item.name}</h3>
+                  <h3 className="font-bold text-navy">{item.name}</h3>
                   {item.notes && (
-                    <p className="text-sm text-gray-600">{item.notes}</p>
+                    <p className="text-sm text-text-secondary mt-0.5">{item.notes}</p>
                   )}
                 </div>
                 <button
                   onClick={() => handleDelete(item.id)}
                   disabled={deleteMutation.isPending}
-                  className="text-red-600 hover:text-red-800 text-sm"
+                  className="text-coral hover:text-coral/80 text-sm font-semibold"
                 >
                   Delete
                 </button>
@@ -95,7 +106,7 @@ export const InventoryPage = () => {
       )}
 
       {inventory && inventory.length === 0 && (
-        <p className="text-gray-600">No inventory items yet. Add your first item!</p>
+        <p className="text-text-secondary mt-4">No inventory items yet. Add your first item!</p>
       )}
     </div>
   )

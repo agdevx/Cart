@@ -2,9 +2,11 @@
 // ABOUTME: Returns list of households user belongs to
 
 import { useQuery } from '@tanstack/react-query'
+
+import { useAuth } from '@/auth/use-auth'
+
 import { apiFetch } from '../agdevx-cart-api-config'
 import type { Household } from '../models/household'
-import { useAuth } from '@/auth/use-auth'
 
 export const useHouseholdsQuery = () => {
   const { isAuthenticated } = useAuth()

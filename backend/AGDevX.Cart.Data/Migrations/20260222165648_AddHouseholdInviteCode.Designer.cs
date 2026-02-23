@@ -20,7 +20,7 @@ namespace AGDevX.Cart.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.Household", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.Household", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -54,7 +54,7 @@ namespace AGDevX.Cart.Data.Migrations
                     b.ToTable("Households");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.HouseholdMember", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.HouseholdMember", b =>
                 {
                     b.Property<Guid>("HouseholdId")
                         .HasColumnType("TEXT");
@@ -91,7 +91,7 @@ namespace AGDevX.Cart.Data.Migrations
                     b.ToTable("HouseholdMembers");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.InventoryItem", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.InventoryItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -136,7 +136,7 @@ namespace AGDevX.Cart.Data.Migrations
                     b.ToTable("InventoryItems");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.Store", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.Store", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -173,7 +173,7 @@ namespace AGDevX.Cart.Data.Migrations
                     b.ToTable("Stores");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.Trip", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.Trip", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -216,7 +216,7 @@ namespace AGDevX.Cart.Data.Migrations
                     b.ToTable("Trips");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.TripCollaborator", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.TripCollaborator", b =>
                 {
                     b.Property<Guid>("TripId")
                         .HasColumnType("TEXT");
@@ -246,7 +246,7 @@ namespace AGDevX.Cart.Data.Migrations
                     b.ToTable("TripCollaborators");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.TripItem", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.TripItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -296,7 +296,7 @@ namespace AGDevX.Cart.Data.Migrations
                     b.ToTable("TripItems");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.User", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -331,15 +331,15 @@ namespace AGDevX.Cart.Data.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.HouseholdMember", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.HouseholdMember", b =>
                 {
-                    b.HasOne("AGDevX.Cart.Shared.Models.Household", "Household")
+                    b.HasOne("AGDevX.Cart.Data.Models.Household", "Household")
                         .WithMany("Members")
                         .HasForeignKey("HouseholdId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AGDevX.Cart.Shared.Models.User", "User")
+                    b.HasOne("AGDevX.Cart.Data.Models.User", "User")
                         .WithMany("HouseholdMemberships")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -350,17 +350,17 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.InventoryItem", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.InventoryItem", b =>
                 {
-                    b.HasOne("AGDevX.Cart.Shared.Models.Store", "DefaultStore")
+                    b.HasOne("AGDevX.Cart.Data.Models.Store", "DefaultStore")
                         .WithMany()
                         .HasForeignKey("DefaultStoreId");
 
-                    b.HasOne("AGDevX.Cart.Shared.Models.Household", "Household")
+                    b.HasOne("AGDevX.Cart.Data.Models.Household", "Household")
                         .WithMany()
                         .HasForeignKey("HouseholdId");
 
-                    b.HasOne("AGDevX.Cart.Shared.Models.User", "OwnerUser")
+                    b.HasOne("AGDevX.Cart.Data.Models.User", "OwnerUser")
                         .WithMany()
                         .HasForeignKey("OwnerUserId");
 
@@ -371,13 +371,13 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Navigation("OwnerUser");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.Store", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.Store", b =>
                 {
-                    b.HasOne("AGDevX.Cart.Shared.Models.Household", "Household")
+                    b.HasOne("AGDevX.Cart.Data.Models.Household", "Household")
                         .WithMany()
                         .HasForeignKey("HouseholdId");
 
-                    b.HasOne("AGDevX.Cart.Shared.Models.User", "User")
+                    b.HasOne("AGDevX.Cart.Data.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
 
@@ -386,15 +386,15 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.Trip", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.Trip", b =>
                 {
-                    b.HasOne("AGDevX.Cart.Shared.Models.User", "CreatedByUser")
+                    b.HasOne("AGDevX.Cart.Data.Models.User", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AGDevX.Cart.Shared.Models.Household", "Household")
+                    b.HasOne("AGDevX.Cart.Data.Models.Household", "Household")
                         .WithMany()
                         .HasForeignKey("HouseholdId");
 
@@ -403,15 +403,15 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Navigation("Household");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.TripCollaborator", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.TripCollaborator", b =>
                 {
-                    b.HasOne("AGDevX.Cart.Shared.Models.Trip", "Trip")
+                    b.HasOne("AGDevX.Cart.Data.Models.Trip", "Trip")
                         .WithMany("Collaborators")
                         .HasForeignKey("TripId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AGDevX.Cart.Shared.Models.User", "User")
+                    b.HasOne("AGDevX.Cart.Data.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -422,19 +422,19 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.TripItem", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.TripItem", b =>
                 {
-                    b.HasOne("AGDevX.Cart.Shared.Models.InventoryItem", "InventoryItem")
+                    b.HasOne("AGDevX.Cart.Data.Models.InventoryItem", "InventoryItem")
                         .WithMany()
                         .HasForeignKey("InventoryItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AGDevX.Cart.Shared.Models.Store", "Store")
+                    b.HasOne("AGDevX.Cart.Data.Models.Store", "Store")
                         .WithMany()
                         .HasForeignKey("StoreId");
 
-                    b.HasOne("AGDevX.Cart.Shared.Models.Trip", "Trip")
+                    b.HasOne("AGDevX.Cart.Data.Models.Trip", "Trip")
                         .WithMany("Items")
                         .HasForeignKey("TripId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -447,19 +447,19 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Navigation("Trip");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.Household", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.Household", b =>
                 {
                     b.Navigation("Members");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.Trip", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.Trip", b =>
                 {
                     b.Navigation("Collaborators");
 
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Shared.Models.User", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.User", b =>
                 {
                     b.Navigation("HouseholdMemberships");
                 });

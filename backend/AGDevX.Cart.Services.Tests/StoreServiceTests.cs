@@ -1,7 +1,7 @@
 // ABOUTME: Unit tests for StoreService covering household-scoped and personal store operations.
 // ABOUTME: Tests verify authorization checks for household membership and user ownership.
 
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using Moq;
@@ -44,22 +44,20 @@ public class StoreServiceTests
             }
         };
 
-        _mockHouseholdRepository
-            .Setup(x => x.GetByIdAsync(householdId))
-            .ReturnsAsync(household);
+        _mockHouseholdRepository.Setup(x => x.GetById(householdId))
+                                .ReturnsAsync(household);
 
-        _mockStoreRepository
-            .Setup(x => x.CreateAsync(It.IsAny<Store>()))
-            .ReturnsAsync(store);
+        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>()))
+                            .ReturnsAsync(store);
 
         // Act
-        var result = await _storeService.CreateStoreAsync(store, userId);
+        var result = await _storeService.CreateStore(store, userId);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal("Costco", result.Name);
-        _mockHouseholdRepository.Verify(x => x.GetByIdAsync(householdId), Times.Once);
-        _mockStoreRepository.Verify(x => x.CreateAsync(It.IsAny<Store>()), Times.Once);
+        _mockHouseholdRepository.Verify(x => x.GetById(householdId), Times.Once);
+        _mockStoreRepository.Verify(x => x.Create(It.IsAny<Store>()), Times.Once);
     }
 
     [Fact]
@@ -73,18 +71,17 @@ public class StoreServiceTests
             UserId = userId
         };
 
-        _mockStoreRepository
-            .Setup(x => x.CreateAsync(It.IsAny<Store>()))
-            .ReturnsAsync(store);
+        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>()))
+                            .ReturnsAsync(store);
 
         // Act
-        var result = await _storeService.CreateStoreAsync(store, userId);
+        var result = await _storeService.CreateStore(store, userId);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal("My Local Store", result.Name);
         Assert.Equal(userId, result.UserId);
-        _mockStoreRepository.Verify(x => x.CreateAsync(It.IsAny<Store>()), Times.Once);
-        _mockHouseholdRepository.Verify(x => x.GetByIdAsync(It.IsAny<Guid>()), Times.Never);
+        _mockStoreRepository.Verify(x => x.Create(It.IsAny<Store>()), Times.Once);
+        _mockHouseholdRepository.Verify(x => x.GetById(It.IsAny<Guid>()), Times.Never);
     }
 }

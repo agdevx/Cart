@@ -2,8 +2,10 @@
 // ABOUTME: Returns invite code for sharing with potential members
 
 import { useQuery } from '@tanstack/react-query'
-import { apiFetch } from '../agdevx-cart-api-config'
+
 import { useAuth } from '@/auth/use-auth'
+
+import { apiFetch } from '../agdevx-cart-api-config'
 
 export const useInviteCodeQuery = (householdId: string) => {
   const { isAuthenticated } = useAuth()

@@ -1,18 +1,18 @@
 // ABOUTME: Repository interface for Trip entities providing CRUD operations for shopping trips
 // ABOUTME: and collaborator management including authorization checks for trip access
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Data.Models;
 
 namespace AGDevX.Cart.Data.Repositories;
 
 public interface ITripRepository
 {
-    Task<Trip?> GetByIdAsync(Guid id);
-    Task<IEnumerable<Trip>> GetUserTripsAsync(Guid userId);
-    Task<IEnumerable<Trip>> GetHouseholdTripsAsync(Guid householdId);
-    Task<Trip> CreateAsync(Trip trip);
-    Task<Trip> UpdateAsync(Trip trip);
-    Task DeleteAsync(Guid id);
-    Task<bool> IsUserCollaboratorAsync(Guid tripId, Guid userId);
-    Task AddCollaboratorAsync(Guid tripId, Guid userId);
-    Task RemoveCollaboratorAsync(Guid tripId, Guid userId);
+    Task<Trip?> GetById(Guid id);
+    Task<IEnumerable<Trip>> GetUserTrips(Guid userId);
+    Task<IEnumerable<Trip>> GetHouseholdTrips(Guid householdId);
+    Task<Trip> Create(Trip trip);
+    Task<Trip> Update(Trip trip);
+    Task Delete(Guid id);
+    Task<bool> IsUserCollaborator(Guid tripId, Guid userId);
+    Task AddCollaborator(Guid tripId, Guid userId);
+    Task RemoveCollaborator(Guid tripId, Guid userId);
 }

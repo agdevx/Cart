@@ -1,12 +1,14 @@
 // ABOUTME: EF Core DbContext for the Cart application with entity configurations.
 // ABOUTME: Configures all database entities, relationships, composite keys, and constraints.
 
-using AGDevX.Cart.Shared.Models;
+using System.Security.Claims;
+using AGDevX.Cart.Data.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace AGDevX.Cart.Data;
 
-public class CartDbContext(DbContextOptions<CartDbContext> options) : DbContext(options)
+public class CartDbContext(DbContextOptions<CartDbContext> options, IHttpContextAccessor? httpContextAccessor = null) : DbContext(options)
 {
     //== DbSets for all entities
     public DbSet<User> Users { get; set; }
@@ -28,14 +30,14 @@ public class CartDbContext(DbContextOptions<CartDbContext> options) : DbContext(
             entity.HasKey(hm => new { hm.HouseholdId, hm.UserId });
 
             entity.HasOne(hm => hm.Household)
-                .WithMany(h => h.Members)
-                .HasForeignKey(hm => hm.HouseholdId)
-                .OnDelete(DeleteBehavior.Cascade);
+                  .WithMany(h => h.Members)
+                  .HasForeignKey(hm => hm.HouseholdId)
+                  .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(hm => hm.User)
-                .WithMany(u => u.HouseholdMemberships)
-                .HasForeignKey(hm => hm.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                  .WithMany(u => u.HouseholdMemberships)
+                  .HasForeignKey(hm => hm.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         //== Configure TripCollaborator composite key and relationships
@@ -44,9 +46,9 @@ public class CartDbContext(DbContextOptions<CartDbContext> options) : DbContext(
             entity.HasKey(tc => new { tc.TripId, tc.UserId });
 
             entity.HasOne(tc => tc.Trip)
-                .WithMany(t => t.Collaborators)
-                .HasForeignKey(tc => tc.TripId)
-                .OnDelete(DeleteBehavior.Cascade);
+                  .WithMany(t => t.Collaborators)
+                  .HasForeignKey(tc => tc.TripId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         //== Configure Household invite code
@@ -59,8 +61,33 @@ public class CartDbContext(DbContextOptions<CartDbContext> options) : DbContext(
         //== Configure User unique index on Email
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasIndex(u => u.Email)
-                .IsUnique();
+            entity.HasIndex(u => u.Email).IsUnique();
         });
+    }
+
+    //== Automatically populate audit fields on BaseEntity entries
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var userId = httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                     ?? "System";
+        var now = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedBy = userId;
+                entry.Entity.CreatedDate = now;
+                entry.Entity.ModifiedBy = userId;
+                entry.Entity.ModifiedDate = now;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.ModifiedBy = userId;
+                entry.Entity.ModifiedDate = now;
+            }
+        }
+
+        return await base.SaveChangesAsync(cancellationToken);
     }
 }

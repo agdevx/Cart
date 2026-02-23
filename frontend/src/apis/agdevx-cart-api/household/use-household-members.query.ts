@@ -2,9 +2,11 @@
 // ABOUTME: Returns list of members with roles for a specific household
 
 import { useQuery } from '@tanstack/react-query'
+
+import { useAuth } from '@/auth/use-auth'
+
 import { apiFetch } from '../agdevx-cart-api-config'
 import type { HouseholdMember } from '../models/household'
-import { useAuth } from '@/auth/use-auth'
 
 export const useHouseholdMembersQuery = (householdId: string) => {
   const { isAuthenticated } = useAuth()

@@ -26,17 +26,14 @@ public class AuthControllerTests
 
         //== Set up HttpContext with mocked authentication service for cookie SignIn/SignOut
         var authServiceMock = new Mock<IAuthenticationService>();
-        authServiceMock
-            .Setup(x => x.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<System.Security.Claims.ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
-            .Returns(Task.CompletedTask);
-        authServiceMock
-            .Setup(x => x.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<AuthenticationProperties>()))
-            .Returns(Task.CompletedTask);
+        authServiceMock.Setup(x => x.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<System.Security.Claims.ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
+                       .Returns(Task.CompletedTask);
+        authServiceMock.Setup(x => x.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<AuthenticationProperties>()))
+                       .Returns(Task.CompletedTask);
 
         var serviceProviderMock = new Mock<IServiceProvider>();
-        serviceProviderMock
-            .Setup(x => x.GetService(typeof(IAuthenticationService)))
-            .Returns(authServiceMock.Object);
+        serviceProviderMock.Setup(x => x.GetService(typeof(IAuthenticationService)))
+                           .Returns(authServiceMock.Object);
 
         var httpContext = new DefaultHttpContext
         {
@@ -66,9 +63,8 @@ public class AuthControllerTests
             DisplayName = request.DisplayName
         };
 
-        _authServiceMock
-            .Setup(x => x.RegisterAsync(request))
-            .ReturnsAsync(expectedResponse);
+        _authServiceMock.Setup(x => x.Register(request))
+                        .ReturnsAsync(expectedResponse);
 
         // Act
         var result = await _controller.Register(request);
@@ -95,9 +91,8 @@ public class AuthControllerTests
             DisplayName = "Test User"
         };
 
-        _authServiceMock
-            .Setup(x => x.LoginAsync(request))
-            .ReturnsAsync(expectedResponse);
+        _authServiceMock.Setup(x => x.Login(request))
+                        .ReturnsAsync(expectedResponse);
 
         // Act
         var result = await _controller.Login(request);
@@ -119,9 +114,8 @@ public class AuthControllerTests
             DisplayName = "Test User"
         };
 
-        _authServiceMock
-            .Setup(x => x.RegisterAsync(request))
-            .ThrowsAsync(new InvalidOperationException("Email already exists"));
+        _authServiceMock.Setup(x => x.Register(request))
+                        .ThrowsAsync(new InvalidOperationException("Email already exists"));
 
         // Act
         var result = await _controller.Register(request);
@@ -143,9 +137,8 @@ public class AuthControllerTests
             Password = "WrongPassword"
         };
 
-        _authServiceMock
-            .Setup(x => x.LoginAsync(request))
-            .ThrowsAsync(new UnauthorizedAccessException("Invalid credentials"));
+        _authServiceMock.Setup(x => x.Login(request))
+                        .ThrowsAsync(new UnauthorizedAccessException("Invalid credentials"));
 
         // Act
         var result = await _controller.Login(request);

@@ -26,7 +26,7 @@ export const selectedHouseholdIdAtom = atom(
 
     return value;
   },
-  (get, set, newValue: string | null) => {
+  (_get, set, newValue: string | null) => {
     set(baseSelectedHouseholdIdAtom, newValue);
 
     if (typeof window !== 'undefined') {

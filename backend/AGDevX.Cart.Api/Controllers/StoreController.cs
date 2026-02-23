@@ -2,8 +2,8 @@
 // ABOUTME: Provides endpoints for creating, reading, updating, deleting household and personal stores
 
 using AGDevX.Cart.Services;
-using AGDevX.Cart.Shared.Extensions;
-using AGDevX.Cart.Shared.Models;
+using AGDevX.Cart.Auth.Extensions;
+using AGDevX.Cart.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,7 +21,7 @@ public class StoreController(IStoreService storeService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            var stores = await storeService.GetHouseholdStoresAsync(householdId, userId);
+            var stores = await storeService.GetHouseholdStores(householdId, userId);
             return Ok(stores);
         }
         catch (UnauthorizedAccessException ex)
@@ -37,7 +37,7 @@ public class StoreController(IStoreService storeService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            var stores = await storeService.GetPersonalStoresAsync(userId);
+            var stores = await storeService.GetPersonalStores(userId);
             return Ok(stores);
         }
         catch (UnauthorizedAccessException ex)
@@ -53,7 +53,7 @@ public class StoreController(IStoreService storeService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            var store = await storeService.GetByIdAsync(id, userId);
+            var store = await storeService.GetById(id, userId);
 
             if (store == null)
             {
@@ -75,7 +75,7 @@ public class StoreController(IStoreService storeService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            var created = await storeService.CreateStoreAsync(store, userId);
+            var created = await storeService.CreateStore(store, userId);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
         catch (UnauthorizedAccessException ex)
@@ -91,7 +91,7 @@ public class StoreController(IStoreService storeService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            await storeService.UpdateStoreAsync(store, userId);
+            await storeService.UpdateStore(store, userId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -111,7 +111,7 @@ public class StoreController(IStoreService storeService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            await storeService.DeleteStoreAsync(id, userId);
+            await storeService.DeleteStore(id, userId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
