@@ -1,12 +1,14 @@
 // ABOUTME: EF Core DbContext for the Cart application with entity configurations.
 // ABOUTME: Configures all database entities, relationships, composite keys, and constraints.
 
+using System.Security.Claims;
 using AGDevX.Cart.Data.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace AGDevX.Cart.Data;
 
-public class CartDbContext(DbContextOptions<CartDbContext> options) : DbContext(options)
+public class CartDbContext(DbContextOptions<CartDbContext> options, IHttpContextAccessor? httpContextAccessor = null) : DbContext(options)
 {
     //== DbSets for all entities
     public DbSet<User> Users { get; set; }
@@ -61,5 +63,31 @@ public class CartDbContext(DbContextOptions<CartDbContext> options) : DbContext(
         {
             entity.HasIndex(u => u.Email).IsUnique();
         });
+    }
+
+    //== Automatically populate audit fields on BaseEntity entries
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var userId = httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                     ?? "System";
+        var now = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedBy = userId;
+                entry.Entity.CreatedDate = now;
+                entry.Entity.ModifiedBy = userId;
+                entry.Entity.ModifiedDate = now;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.ModifiedBy = userId;
+                entry.Entity.ModifiedDate = now;
+            }
+        }
+
+        return await base.SaveChangesAsync(cancellationToken);
     }
 }

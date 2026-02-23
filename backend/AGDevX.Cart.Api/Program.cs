@@ -60,6 +60,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
                 });
 
 builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
 
 //== Database Configuration
 builder.Services.AddDbContext<CartDbContext>(options =>

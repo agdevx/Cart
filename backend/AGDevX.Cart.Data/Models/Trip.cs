@@ -11,10 +11,6 @@ public class Trip : BaseEntity
     public Guid? HouseholdId { get; set; }
     public Household? Household { get; set; }
 
-    //== User who created this trip
-    public required Guid CreatedByUserId { get; set; }
-    public User? CreatedByUser { get; set; }
-
     //== Whether the trip has been completed
     public bool IsCompleted { get; set; }
 

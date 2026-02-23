@@ -19,15 +19,12 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
             }
         }
 
-        //== Set CreatedByUserId and initialize trip properties
         var trip = new Trip
         {
             Name = name,
-            CreatedByUserId = userId,
             HouseholdId = householdId,
             IsCompleted = false,
-            CompletedAt = null,
-            CreatedDate = DateTime.UtcNow
+            CompletedAt = null
         };
 
         return await tripRepository.Create(trip);
@@ -59,7 +56,7 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
         var trip = await tripRepository.GetById(tripId)
                         ?? throw new KeyNotFoundException("Trip not found");
 
-        if (trip.CreatedByUserId != userId)
+        if (trip.CreatedBy != userId.ToString())
         {
             throw new UnauthorizedAccessException("Only the creator can delete the trip");
         }

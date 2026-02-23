@@ -41,7 +41,6 @@ public class TripServiceTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(tripName, result.Name);
-        Assert.Equal(userId, result.CreatedByUserId);
         Assert.Equal(householdId, result.HouseholdId);
         Assert.False(result.IsCompleted);
         Assert.Null(result.CompletedAt);
@@ -57,7 +56,6 @@ public class TripServiceTests
         {
             Id = tripId,
             Name = "Test Trip",
-            CreatedByUserId = Guid.NewGuid(),
             IsCompleted = false
         };
 
@@ -105,7 +103,6 @@ public class TripServiceTests
         {
             Id = tripId,
             Name = "Test Trip",
-            CreatedByUserId = Guid.NewGuid(),
             IsCompleted = false
         };
 
