@@ -16,7 +16,7 @@ describe('apiFetch', () => {
       ok: true,
       json: async () => ({ data: 'test' }),
     });
-    global.fetch = mockFetch;
+    globalThis.fetch = mockFetch;
 
     await apiFetch('/test-endpoint', { method: 'GET' });
 
@@ -33,7 +33,7 @@ describe('apiFetch', () => {
       ok: true,
       json: async () => ({ data: 'test' }),
     });
-    global.fetch = mockFetch;
+    globalThis.fetch = mockFetch;
 
     await apiFetch('/test-endpoint', { method: 'GET' });
 
@@ -46,7 +46,7 @@ describe('apiFetch', () => {
       ok: true,
       json: async () => ({ data: 'test' }),
     });
-    global.fetch = mockFetch;
+    globalThis.fetch = mockFetch;
 
     await apiFetch('/test-endpoint', {
       method: 'POST',
@@ -69,7 +69,7 @@ describe('apiFetch', () => {
       ok: true,
       json: async () => ({ data: 'test' }),
     });
-    global.fetch = mockFetch;
+    globalThis.fetch = mockFetch;
 
     await apiFetch(
       '/test-endpoint',
@@ -98,7 +98,7 @@ describe('apiFetch', () => {
       ok: true,
       json: async () => ({ data: 'test' }),
     });
-    global.fetch = mockFetch;
+    globalThis.fetch = mockFetch;
 
     await apiFetch('/test-endpoint', { method: 'GET' });
 

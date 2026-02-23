@@ -21,7 +21,7 @@ describe('useRegisterMutation', () => {
   });
 
   it('should successfully register a user', async () => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({
@@ -56,7 +56,7 @@ describe('useRegisterMutation', () => {
         })
       } as Response)
     ) as typeof fetch;
-    global.fetch = mockFetch;
+    globalThis.fetch = mockFetch;
 
     const { result } = renderHook(() => useRegisterMutation(), { wrapper });
 
@@ -80,7 +80,7 @@ describe('useRegisterMutation', () => {
   });
 
   it('should handle registration errors', async () => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: false,
         json: () => Promise.resolve({
