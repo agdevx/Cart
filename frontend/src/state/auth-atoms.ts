@@ -1,17 +1,25 @@
 // ABOUTME: Global authentication state atoms using Jotai
-// ABOUTME: Manages current user and authentication token state, initialized from localStorage by AuthProvider
+// ABOUTME: Manages current user state, initialized from localStorage by AuthProvider
 
 import { atom } from 'jotai';
 import type { User } from '@/apis/agdevx-cart-api/models/user';
 
-/**
- * Atom storing the currently authenticated user
- * Should be initialized by AuthProvider on mount
- */
-export const currentUserAtom = atom<User | null>(null);
+const AUTH_USER_STORAGE_KEY = 'authUser';
+
+//== Synchronously restore user from localStorage so ProtectedRoute
+//== doesn't redirect to /login on the first render before useEffect fires
+const getInitialUser = (): User | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const stored = localStorage.getItem(AUTH_USER_STORAGE_KEY);
+    return stored ? (JSON.parse(stored) as User) : null;
+  } catch {
+    return null;
+  }
+};
 
 /**
- * Atom storing the JWT authentication token
- * Should be initialized by AuthProvider on mount
+ * Atom storing the currently authenticated user
+ * Initialized from localStorage for fast render, validated by AuthProvider on mount
  */
-export const authTokenAtom = atom<string | null>(null);
+export const currentUserAtom = atom<User | null>(getInitialUser());

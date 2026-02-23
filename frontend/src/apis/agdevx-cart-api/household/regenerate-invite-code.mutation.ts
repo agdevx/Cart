@@ -3,17 +3,15 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../agdevx-cart-api-config'
-import { useAuth } from '@/auth/use-auth'
 
 export const useRegenerateInviteCodeMutation = () => {
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (householdId: string): Promise<string> => {
       const response = await apiFetch(
         `/api/household/${householdId}/invite-code`,
-        { method: 'POST', token }
+        { method: 'POST' }
       )
       if (!response.ok) {
         throw new Error('Failed to regenerate invite code')

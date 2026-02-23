@@ -37,15 +37,14 @@ describe('useAuth', () => {
     } as Storage;
   });
 
-  it('should initialize with no user and no token', () => {
+  it('should initialize with no user and not authenticated', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     expect(result.current.user).toBeNull();
-    expect(result.current.token).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
   });
 
-  it('should set user and token when setAuth is called', () => {
+  it('should set user when setAuth is called', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     const mockUser: User = {
@@ -59,15 +58,14 @@ describe('useAuth', () => {
     };
 
     act(() => {
-      result.current.setAuth(mockUser, 'test-token-123');
+      result.current.setAuth(mockUser);
     });
 
     expect(result.current.user).toEqual(mockUser);
-    expect(result.current.token).toBe('test-token-123');
     expect(result.current.isAuthenticated).toBe(true);
   });
 
-  it('should persist token to localStorage when setAuth is called', () => {
+  it('should persist user to localStorage when setAuth is called', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     const mockUser: User = {
@@ -81,13 +79,16 @@ describe('useAuth', () => {
     };
 
     act(() => {
-      result.current.setAuth(mockUser, 'test-token-123');
+      result.current.setAuth(mockUser);
     });
 
-    expect(localStorageMock['authToken']).toBe('test-token-123');
+    expect(localStorageMock['authUser']).toBe(JSON.stringify(mockUser));
   });
 
-  it('should clear user and token when logout is called', () => {
+  it('should clear user when logout is called', async () => {
+    // Mock fetch for the logout API call
+    global.fetch = vi.fn().mockResolvedValue({ ok: true }) as typeof fetch;
+
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     const mockUser: User = {
@@ -101,19 +102,21 @@ describe('useAuth', () => {
     };
 
     act(() => {
-      result.current.setAuth(mockUser, 'test-token-123');
+      result.current.setAuth(mockUser);
     });
 
-    act(() => {
-      result.current.logout();
+    await act(async () => {
+      await result.current.logout();
     });
 
     expect(result.current.user).toBeNull();
-    expect(result.current.token).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
   });
 
-  it('should remove token from localStorage when logout is called', () => {
+  it('should remove user from localStorage when logout is called', async () => {
+    // Mock fetch for the logout API call
+    global.fetch = vi.fn().mockResolvedValue({ ok: true }) as typeof fetch;
+
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     const mockUser: User = {
@@ -127,18 +130,17 @@ describe('useAuth', () => {
     };
 
     act(() => {
-      result.current.setAuth(mockUser, 'test-token-123');
+      result.current.setAuth(mockUser);
     });
 
-    act(() => {
-      result.current.logout();
+    await act(async () => {
+      await result.current.logout();
     });
 
-    expect(localStorageMock['authToken']).toBeUndefined();
+    expect(localStorageMock['authUser']).toBeUndefined();
   });
 
-  it('should load token from localStorage on initialization', async () => {
-    localStorageMock['authToken'] = 'stored-token-456';
+  it('should load user from localStorage on initialization', async () => {
     localStorageMock['authUser'] = JSON.stringify({
       id: '456',
       email: 'stored@example.com',
@@ -148,6 +150,16 @@ describe('useAuth', () => {
       modifiedBy: null,
       modifiedDate: null,
     });
+
+    // Mock fetch for the /api/auth/me validation call in AuthProvider
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        userId: '456',
+        email: 'stored@example.com',
+        displayName: 'Stored User',
+      }),
+    }) as typeof fetch;
 
     // Use AuthProvider which loads from localStorage
     const wrapperWithAuthProvider = ({ children }: { children: React.ReactNode }) =>
@@ -159,7 +171,9 @@ describe('useAuth', () => {
 
     // Wait for useEffect in AuthProvider to run
     await waitFor(() => {
-      expect(result.current.token).toBe('stored-token-456');
+      expect(result.current.user).not.toBeNull();
     });
+
+    expect(result.current.user?.email).toBe('stored@example.com');
   });
 });

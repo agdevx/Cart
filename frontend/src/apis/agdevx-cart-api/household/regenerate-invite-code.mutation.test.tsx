@@ -18,9 +18,8 @@ describe('useRegenerateInviteCodeMutation', () => {
 
   it('regenerates invite code successfully', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -39,15 +38,13 @@ describe('useRegenerateInviteCodeMutation', () => {
     expect(result.current.data).toEqual('NEW456')
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1/invite-code', {
       method: 'POST',
-      token: 'test-token',
     })
   })
 
   it('invalidates invite code query on success', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -70,9 +67,8 @@ describe('useRegenerateInviteCodeMutation', () => {
 
   it('handles regenerate error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })

@@ -18,9 +18,8 @@ describe('useTransferHouseholdOwnershipMutation', () => {
 
   it('transfers ownership successfully', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -38,15 +37,13 @@ describe('useTransferHouseholdOwnershipMutation', () => {
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1/owner', {
       method: 'PUT',
       body: JSON.stringify({ userId: 'u2' }),
-      token: 'test-token',
     })
   })
 
   it('invalidates members query on success', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -68,9 +65,8 @@ describe('useTransferHouseholdOwnershipMutation', () => {
 
   it('handles transfer error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })

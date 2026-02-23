@@ -4,17 +4,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../agdevx-cart-api-config'
 import type { Trip } from '../models/trip'
-import { useAuth } from '@/auth/use-auth'
 
 export const useCompleteTripMutation = () => {
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (tripId: string): Promise<Trip> => {
       const response = await apiFetch(`/api/trip/${tripId}/complete`, {
         method: 'POST',
-        token,
       })
       if (!response.ok) {
         throw new Error('Failed to complete trip')

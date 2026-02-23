@@ -4,11 +4,11 @@
 import { useEffect, useRef } from 'react'
 import { createSSEClient } from '@/libs/sse-client'
 
-export const useSSE = (url: string, token: string, onMessage: (data: unknown) => void, enabled: boolean = true): void => {
+export const useSSE = (url: string, onMessage: (data: unknown) => void, enabled: boolean = true): void => {
   const clientRef = useRef<ReturnType<typeof createSSEClient> | null>(null)
 
   useEffect(() => {
-    if (!enabled || !token) {
+    if (!enabled) {
       return
     }
 
@@ -26,5 +26,5 @@ export const useSSE = (url: string, token: string, onMessage: (data: unknown) =>
       client.close()
       clientRef.current = null
     }
-  }, [url, token, onMessage, enabled])
+  }, [url, onMessage, enabled])
 }

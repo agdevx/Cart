@@ -1,10 +1,14 @@
-// ABOUTME: Tests for AuthController endpoints including register, login, and refresh token operations
-// ABOUTME: Validates controller behavior with mocked IAuthService and proper HTTP response handling
+// ABOUTME: Tests for AuthController endpoints including register, login, logout, and session check operations
+// ABOUTME: Validates controller behavior with mocked IAuthService and proper HTTP context for cookie auth
 
+using System.Security.Claims;
 using AGDevX.Cart.Api.Controllers;
 using AGDevX.Cart.Auth;
 using AGDevX.Cart.Shared.DTOs;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
@@ -19,6 +23,30 @@ public class AuthControllerTests
     {
         _authServiceMock = new Mock<IAuthService>();
         _controller = new AuthController(_authServiceMock.Object);
+
+        //== Set up HttpContext with mocked authentication service for cookie SignIn/SignOut
+        var authServiceMock = new Mock<IAuthenticationService>();
+        authServiceMock
+            .Setup(x => x.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<System.Security.Claims.ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
+            .Returns(Task.CompletedTask);
+        authServiceMock
+            .Setup(x => x.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<AuthenticationProperties>()))
+            .Returns(Task.CompletedTask);
+
+        var serviceProviderMock = new Mock<IServiceProvider>();
+        serviceProviderMock
+            .Setup(x => x.GetService(typeof(IAuthenticationService)))
+            .Returns(authServiceMock.Object);
+
+        var httpContext = new DefaultHttpContext
+        {
+            RequestServices = serviceProviderMock.Object
+        };
+
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = httpContext
+        };
     }
 
     [Fact]
@@ -34,8 +62,6 @@ public class AuthControllerTests
 
         var expectedResponse = new AuthResponse
         {
-            AccessToken = "access-token",
-            RefreshToken = "refresh-token",
             Email = request.Email,
             DisplayName = request.DisplayName
         };
@@ -65,8 +91,6 @@ public class AuthControllerTests
 
         var expectedResponse = new AuthResponse
         {
-            AccessToken = "access-token",
-            RefreshToken = "refresh-token",
             Email = request.Email,
             DisplayName = "Test User"
         };
@@ -134,55 +158,44 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task Should_ReturnOk_When_RefreshingWithValidToken()
+    public async Task Should_ReturnOk_When_LoggingOut()
+    {
+        // Act
+        var result = await _controller.Logout();
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+    }
+
+    [Fact]
+    public void Should_ReturnAuthResponse_When_MeCalledWithAuthenticatedUser()
     {
         // Arrange
-        var request = new RefreshTokenRequest
-        {
-            RefreshToken = "valid-refresh-token"
-        };
+        var userId = Guid.NewGuid();
+        var email = "me@example.com";
+        var displayName = "Me User";
 
-        var expectedResponse = new AuthResponse
+        var claims = new[]
         {
-            AccessToken = "new-access-token",
-            RefreshToken = "new-refresh-token",
-            Email = "test@example.com",
-            DisplayName = "Test User"
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.Name, displayName)
         };
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
 
-        _authServiceMock
-            .Setup(x => x.RefreshTokenAsync(request.RefreshToken))
-            .ReturnsAsync(expectedResponse);
+        _controller.ControllerContext.HttpContext.User = principal;
 
         // Act
-        var result = await _controller.Refresh(request);
+        var result = _controller.Me();
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;
-        okResult.Value.Should().BeEquivalentTo(expectedResponse);
-    }
-
-    [Fact]
-    public async Task Should_ReturnUnauthorized_When_RefreshingWithInvalidToken()
-    {
-        // Arrange
-        var request = new RefreshTokenRequest
-        {
-            RefreshToken = "invalid-refresh-token"
-        };
-
-        _authServiceMock
-            .Setup(x => x.RefreshTokenAsync(request.RefreshToken))
-            .ThrowsAsync(new UnauthorizedAccessException("Invalid refresh token"));
-
-        // Act
-        var result = await _controller.Refresh(request);
-
-        // Assert
-        result.Should().BeOfType<UnauthorizedObjectResult>();
-        var unauthorizedResult = (UnauthorizedObjectResult)result;
-        var errorResponse = unauthorizedResult.Value;
-        errorResponse.Should().NotBeNull();
+        var authResponse = okResult.Value as AuthResponse;
+        authResponse.Should().NotBeNull();
+        authResponse!.UserId.Should().Be(userId);
+        authResponse.Email.Should().Be(email);
+        authResponse.DisplayName.Should().Be(displayName);
     }
 }

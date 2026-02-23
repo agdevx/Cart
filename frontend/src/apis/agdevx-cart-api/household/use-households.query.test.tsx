@@ -30,9 +30,9 @@ describe('useHouseholdsQuery', () => {
     ]
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      login: vi.fn(),
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      setAuth: vi.fn(),
       logout: vi.fn(),
     })
 
@@ -46,16 +46,14 @@ describe('useHouseholdsQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockHouseholds)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household', {
-      token: 'test-token',
-    })
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household')
   })
 
-  it('does not fetch when token is not available', () => {
+  it('does not fetch when not authenticated', () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: null,
       isAuthenticated: false,
-      login: vi.fn(),
+      user: null,
+      setAuth: vi.fn(),
       logout: vi.fn(),
     })
 
@@ -69,9 +67,9 @@ describe('useHouseholdsQuery', () => {
 
   it('handles fetch error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      login: vi.fn(),
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      setAuth: vi.fn(),
       logout: vi.fn(),
     })
 

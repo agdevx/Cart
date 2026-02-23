@@ -4,14 +4,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../agdevx-cart-api-config'
 import type { Household } from '../models/household'
-import { useAuth } from '@/auth/use-auth'
 
 interface CreateHouseholdRequest {
   name: string
 }
 
 export const useCreateHouseholdMutation = () => {
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -19,7 +17,6 @@ export const useCreateHouseholdMutation = () => {
       const response = await apiFetch('/api/household', {
         method: 'POST',
         body: JSON.stringify(request.name),
-        token,
       });
       if (!response.ok) {
         throw new Error('Failed to create household');

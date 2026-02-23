@@ -4,7 +4,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../agdevx-cart-api-config'
 import type { Trip } from '../models/trip'
-import { useAuth } from '@/auth/use-auth'
 
 interface CreateTripRequest {
   name: string
@@ -12,7 +11,6 @@ interface CreateTripRequest {
 }
 
 export const useCreateTripMutation = () => {
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -20,7 +18,6 @@ export const useCreateTripMutation = () => {
       const response = await apiFetch('/api/trip', {
         method: 'POST',
         body: JSON.stringify(request),
-        token,
       })
       if (!response.ok) {
         throw new Error('Failed to create trip')

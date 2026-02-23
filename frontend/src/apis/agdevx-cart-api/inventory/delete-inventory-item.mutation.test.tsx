@@ -18,9 +18,8 @@ describe('useDeleteInventoryItemMutation', () => {
 
   it('deletes inventory item successfully', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -39,15 +38,13 @@ describe('useDeleteInventoryItemMutation', () => {
 
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/inventory/1', {
       method: 'DELETE',
-      token: 'test-token',
     })
   })
 
   it('invalidates inventory query on success', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -73,9 +70,8 @@ describe('useDeleteInventoryItemMutation', () => {
 
   it('handles deletion error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
-      token: 'test-token',
       isAuthenticated: true,
-      user: null,
+      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })

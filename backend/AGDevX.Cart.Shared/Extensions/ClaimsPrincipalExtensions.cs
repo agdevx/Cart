@@ -1,5 +1,5 @@
 // ABOUTME: Extension methods for ClaimsPrincipal to extract user information
-// ABOUTME: Simplifies getting user ID from JWT claims in controllers
+// ABOUTME: Simplifies getting user ID from authentication claims in controllers
 
 using System.Security.Claims;
 

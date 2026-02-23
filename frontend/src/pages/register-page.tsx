@@ -87,8 +87,7 @@ export const RegisterPage = () => {
         displayName,
       });
 
-      setAuth(
-        {
+      setAuth({
           id: response.userId,
           email: response.email,
           displayName: response.displayName,
@@ -96,9 +95,7 @@ export const RegisterPage = () => {
           createdDate: new Date().toISOString(),
           modifiedBy: null,
           modifiedDate: null,
-        },
-        response.accessToken
-      );
+        });
 
       navigate('/shopping');
     } catch (error) {

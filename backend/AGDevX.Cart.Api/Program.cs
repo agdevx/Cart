@@ -1,14 +1,12 @@
 // ABOUTME: Main entry point for the Cart API application
 // ABOUTME: Configures services, database context, authentication, and HTTP pipeline
-using System.Text;
 using AGDevX.Cart.Auth;
 using AGDevX.Cart.Data;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Shared.Configuration;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,31 +30,34 @@ builder.Services.AddCors(options =>
     });
 });
 
-//== JWT Configuration
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()
-    ?? throw new InvalidOperationException("JWT settings not configured");
-builder.Services.AddSingleton<IJwtSettings>(jwtSettings);
+//== Cookie Configuration
+var cookieSettings = builder.Configuration.GetSection("CookieSettings").Get<CookieSettings>()
+    ?? new CookieSettings();
+builder.Services.AddSingleton<ICookieSettings>(cookieSettings);
 
 //== Authentication Configuration
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings.Issuer,
-        ValidAudience = jwtSettings.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
-        ClockSkew = TimeSpan.Zero
-    };
-});
+        options.Cookie.Name = ".Cart.Auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        options.SlidingExpiration = true;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(cookieSettings.SessionTimeoutMinutes);
+
+        //== Return 401/403 JSON for SPA instead of redirect
+        options.Events.OnRedirectToLogin = context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        };
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
+        };
+    });
 
 builder.Services.AddAuthorization();
 
@@ -95,7 +96,10 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();

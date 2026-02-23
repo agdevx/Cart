@@ -22,8 +22,6 @@ describe('useRegisterMutation', () => {
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({
-          accessToken: 'test-access-token',
-          refreshToken: 'test-refresh-token',
           userId: 'test-user-id',
           email: 'test@example.com',
           displayName: 'Test User'
@@ -39,7 +37,6 @@ describe('useRegisterMutation', () => {
       displayName: 'Test User'
     });
 
-    expect(response.accessToken).toBe('test-access-token');
     expect(response.userId).toBe('test-user-id');
     expect(response.email).toBe('test@example.com');
     expect(response.displayName).toBe('Test User');
@@ -50,8 +47,6 @@ describe('useRegisterMutation', () => {
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({
-          accessToken: 'token',
-          refreshToken: 'refresh',
           userId: 'id',
           email: 'test@example.com',
           displayName: 'Test'
@@ -75,7 +70,8 @@ describe('useRegisterMutation', () => {
         headers: expect.objectContaining({
           'Content-Type': 'application/json'
         }),
-        body: expect.stringContaining('test@example.com')
+        body: expect.stringContaining('test@example.com'),
+        credentials: 'include',
       })
     );
   });
