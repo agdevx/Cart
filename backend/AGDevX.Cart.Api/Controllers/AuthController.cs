@@ -4,6 +4,7 @@
 using System.Security.Claims;
 using AGDevX.Cart.Auth;
 using AGDevX.Cart.Shared.DTOs;
+using AGDevX.Cart.Shared.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -56,21 +57,23 @@ public class AuthController(IAuthService authService) : ControllerBase
     [HttpGet("me")]
     public IActionResult Me()
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var email = User.FindFirst(ClaimTypes.Email)?.Value;
-        var displayName = User.FindFirst(ClaimTypes.Name)?.Value;
+        try
+        {
+            var userId = User.GetUserId();
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            var displayName = User.FindFirst(ClaimTypes.Name)?.Value;
 
-        if (userId == null)
+            return Ok(new AuthResponse
+            {
+                UserId = userId,
+                Email = email ?? string.Empty,
+                DisplayName = displayName ?? string.Empty
+            });
+        }
+        catch (UnauthorizedAccessException)
         {
             return Unauthorized();
         }
-
-        return Ok(new AuthResponse
-        {
-            UserId = Guid.Parse(userId),
-            Email = email ?? string.Empty,
-            DisplayName = displayName ?? string.Empty
-        });
     }
 
     //== Private helper to create cookie session from auth response
