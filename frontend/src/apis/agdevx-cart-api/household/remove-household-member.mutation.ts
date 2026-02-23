@@ -3,7 +3,6 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../agdevx-cart-api-config'
-import { useAuth } from '@/auth/use-auth'
 
 interface RemoveMemberRequest {
   householdId: string
@@ -11,14 +10,13 @@ interface RemoveMemberRequest {
 }
 
 export const useRemoveHouseholdMemberMutation = () => {
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (request: RemoveMemberRequest): Promise<void> => {
       const response = await apiFetch(
         `/api/household/${request.householdId}/members/${request.userId}`,
-        { method: 'DELETE', token }
+        { method: 'DELETE' }
       )
       if (!response.ok) {
         throw new Error('Failed to remove member')

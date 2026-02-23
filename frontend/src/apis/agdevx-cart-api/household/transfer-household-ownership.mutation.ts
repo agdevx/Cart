@@ -3,7 +3,6 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../agdevx-cart-api-config'
-import { useAuth } from '@/auth/use-auth'
 
 interface TransferOwnershipRequest {
   householdId: string
@@ -11,7 +10,6 @@ interface TransferOwnershipRequest {
 }
 
 export const useTransferHouseholdOwnershipMutation = () => {
-  const { token } = useAuth()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -21,7 +19,6 @@ export const useTransferHouseholdOwnershipMutation = () => {
         {
           method: 'PUT',
           body: JSON.stringify({ userId: request.userId }),
-          token,
         }
       )
       if (!response.ok) {
