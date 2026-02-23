@@ -9,7 +9,7 @@ namespace AGDevX.Cart.Data.Repositories;
 public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
 {
     //== Get household by ID with member relationships
-    public async Task<Household?> GetByIdAsync(Guid householdId)
+    public async Task<Household?> GetById(Guid householdId)
     {
         return await context.Households
             .Include(h => h.Members)
@@ -25,7 +25,7 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
     }
 
     //== Get all households where the user is a member
-    public async Task<IEnumerable<Household>> GetUserHouseholdsAsync(Guid userId)
+    public async Task<IEnumerable<Household>> GetUserHouseholds(Guid userId)
     {
         return await context.Households
             .Include(h => h.Members)
@@ -34,7 +34,7 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
     }
 
     //== Create a new household
-    public async Task<Household> CreateAsync(Household household)
+    public async Task<Household> Create(Household household)
     {
         context.Households.Add(household);
         await context.SaveChangesAsync();
@@ -42,7 +42,7 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
     }
 
     //== Update an existing household
-    public async Task<Household> UpdateAsync(Household household)
+    public async Task<Household> Update(Household household)
     {
         context.Households.Update(household);
         await context.SaveChangesAsync();
@@ -50,7 +50,7 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
     }
 
     //== Delete a household
-    public async Task DeleteAsync(Guid householdId)
+    public async Task Delete(Guid householdId)
     {
         var household = await context.Households.FindAsync(householdId);
         if (household != null)
@@ -61,7 +61,7 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
     }
 
     //== Check if a user is a member of a household
-    public async Task<bool> IsUserMemberAsync(Guid householdId, Guid userId)
+    public async Task<bool> IsUserMember(Guid householdId, Guid userId)
     {
         return await context.HouseholdMembers
             .AnyAsync(m => m.HouseholdId == householdId && m.UserId == userId);

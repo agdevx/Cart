@@ -6,9 +6,9 @@ namespace AGDevX.Cart.Data.Repositories;
 
 public interface ITripItemRepository
 {
-    Task<TripItem?> GetByIdAsync(Guid id);
-    Task<IEnumerable<TripItem>> GetTripItemsAsync(Guid tripId);
-    Task<TripItem> CreateAsync(TripItem tripItem);
-    Task<TripItem> UpdateAsync(TripItem tripItem);
-    Task DeleteAsync(Guid id);
+    Task<TripItem?> GetById(Guid id);
+    Task<IEnumerable<TripItem>> GetTripItems(Guid tripId);
+    Task<TripItem> Create(TripItem tripItem);
+    Task<TripItem> Update(TripItem tripItem);
+    Task Delete(Guid id);
 }

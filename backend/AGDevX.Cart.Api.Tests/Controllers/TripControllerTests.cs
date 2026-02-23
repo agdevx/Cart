@@ -37,7 +37,7 @@ public class TripControllerTests
             new Trip { Id = Guid.NewGuid(), Name = "Weekly Grocery", CreatedByUserId = userId }
         };
 
-        mockService.Setup(s => s.GetUserTripsAsync(userId))
+        mockService.Setup(s => s.GetUserTrips(userId))
             .ReturnsAsync(trips);
 
         // Act
@@ -71,7 +71,7 @@ public class TripControllerTests
             new Trip { Id = Guid.NewGuid(), Name = "Household Trip", CreatedByUserId = userId, HouseholdId = householdId }
         };
 
-        mockService.Setup(s => s.GetHouseholdTripsAsync(householdId))
+        mockService.Setup(s => s.GetHouseholdTrips(householdId))
             .ReturnsAsync(trips);
 
         // Act
@@ -102,7 +102,7 @@ public class TripControllerTests
 
         var trip = new Trip { Id = tripId, Name = "Test Trip", CreatedByUserId = userId };
 
-        mockService.Setup(s => s.GetByIdAsync(tripId))
+        mockService.Setup(s => s.GetById(tripId))
             .ReturnsAsync(trip);
 
         // Act
@@ -131,7 +131,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.GetByIdAsync(tripId))
+        mockService.Setup(s => s.GetById(tripId))
             .ReturnsAsync((Trip?)null);
 
         // Act
@@ -161,7 +161,7 @@ public class TripControllerTests
         var createRequest = new CreateTripRequest { Name = "New Trip", HouseholdId = null };
         var trip = new Trip { Id = Guid.NewGuid(), Name = "New Trip", CreatedByUserId = userId };
 
-        mockService.Setup(s => s.CreateTripAsync(createRequest.Name, userId, createRequest.HouseholdId))
+        mockService.Setup(s => s.CreateTrip(createRequest.Name, userId, createRequest.HouseholdId))
             .ReturnsAsync(trip);
 
         // Act
@@ -213,7 +213,7 @@ public class TripControllerTests
 
         var trip = new Trip { Id = tripId, Name = "Updated Trip", CreatedByUserId = userId };
 
-        mockService.Setup(s => s.UpdateTripAsync(It.IsAny<Trip>()))
+        mockService.Setup(s => s.UpdateTrip(It.IsAny<Trip>()))
             .ReturnsAsync(trip);
 
         // Act
@@ -243,7 +243,7 @@ public class TripControllerTests
 
         var trip = new Trip { Id = tripId, Name = "Updated Trip", CreatedByUserId = userId };
 
-        mockService.Setup(s => s.UpdateTripAsync(It.IsAny<Trip>()))
+        mockService.Setup(s => s.UpdateTrip(It.IsAny<Trip>()))
             .ThrowsAsync(new ArgumentException("Trip not found"));
 
         // Act
@@ -273,7 +273,7 @@ public class TripControllerTests
 
         var trip = new Trip { Id = tripId, Name = "Updated Trip", CreatedByUserId = userId };
 
-        mockService.Setup(s => s.UpdateTripAsync(It.IsAny<Trip>()))
+        mockService.Setup(s => s.UpdateTrip(It.IsAny<Trip>()))
             .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this trip"));
 
         // Act
@@ -301,7 +301,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteTripAsync(tripId, userId))
+        mockService.Setup(s => s.DeleteTrip(tripId, userId))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -329,7 +329,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteTripAsync(tripId, userId))
+        mockService.Setup(s => s.DeleteTrip(tripId, userId))
             .ThrowsAsync(new ArgumentException("Trip not found"));
 
         // Act
@@ -357,7 +357,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.DeleteTripAsync(tripId, userId))
+        mockService.Setup(s => s.DeleteTrip(tripId, userId))
             .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to delete this trip"));
 
         // Act
@@ -394,7 +394,7 @@ public class TripControllerTests
             CompletedAt = DateTime.UtcNow
         };
 
-        mockService.Setup(s => s.CompleteTripAsync(tripId, userId))
+        mockService.Setup(s => s.CompleteTrip(tripId, userId))
             .ReturnsAsync(trip);
 
         // Act
@@ -423,7 +423,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.CompleteTripAsync(tripId, userId))
+        mockService.Setup(s => s.CompleteTrip(tripId, userId))
             .ThrowsAsync(new ArgumentException("Trip not found"));
 
         // Act
@@ -451,7 +451,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.CompleteTripAsync(tripId, userId))
+        mockService.Setup(s => s.CompleteTrip(tripId, userId))
             .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to complete this trip"));
 
         // Act
@@ -488,7 +488,7 @@ public class TripControllerTests
             CompletedAt = null
         };
 
-        mockService.Setup(s => s.ReopenTripAsync(tripId, userId))
+        mockService.Setup(s => s.ReopenTrip(tripId, userId))
             .ReturnsAsync(trip);
 
         // Act
@@ -517,7 +517,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.ReopenTripAsync(tripId, userId))
+        mockService.Setup(s => s.ReopenTrip(tripId, userId))
             .ThrowsAsync(new ArgumentException("Trip not found"));
 
         // Act
@@ -545,7 +545,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.ReopenTripAsync(tripId, userId))
+        mockService.Setup(s => s.ReopenTrip(tripId, userId))
             .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to reopen this trip"));
 
         // Act
@@ -576,7 +576,7 @@ public class TripControllerTests
 
         var request = new AddCollaboratorRequest { UserId = collaboratorUserId };
 
-        mockService.Setup(s => s.AddCollaboratorAsync(tripId, userId, collaboratorUserId))
+        mockService.Setup(s => s.AddCollaborator(tripId, userId, collaboratorUserId))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -607,7 +607,7 @@ public class TripControllerTests
 
         var request = new AddCollaboratorRequest { UserId = collaboratorUserId };
 
-        mockService.Setup(s => s.AddCollaboratorAsync(tripId, userId, collaboratorUserId))
+        mockService.Setup(s => s.AddCollaborator(tripId, userId, collaboratorUserId))
             .ThrowsAsync(new ArgumentException("Trip not found"));
 
         // Act
@@ -638,7 +638,7 @@ public class TripControllerTests
 
         var request = new AddCollaboratorRequest { UserId = collaboratorUserId };
 
-        mockService.Setup(s => s.AddCollaboratorAsync(tripId, userId, collaboratorUserId))
+        mockService.Setup(s => s.AddCollaborator(tripId, userId, collaboratorUserId))
             .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to add collaborators to this trip"));
 
         // Act
@@ -667,7 +667,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.RemoveCollaboratorAsync(tripId, userId, collaboratorUserId))
+        mockService.Setup(s => s.RemoveCollaborator(tripId, userId, collaboratorUserId))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -696,7 +696,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.RemoveCollaboratorAsync(tripId, userId, collaboratorUserId))
+        mockService.Setup(s => s.RemoveCollaborator(tripId, userId, collaboratorUserId))
             .ThrowsAsync(new ArgumentException("Trip not found"));
 
         // Act
@@ -725,7 +725,7 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        mockService.Setup(s => s.RemoveCollaboratorAsync(tripId, userId, collaboratorUserId))
+        mockService.Setup(s => s.RemoveCollaborator(tripId, userId, collaboratorUserId))
             .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to remove collaborators from this trip"));
 
         // Act

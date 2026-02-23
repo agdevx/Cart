@@ -9,7 +9,7 @@ namespace AGDevX.Cart.Auth;
 
 public class AuthService(CartDbContext context) : IAuthService
 {
-    public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
+    public async Task<AuthResponse> Register(RegisterRequest request)
     {
         //== Check for duplicate email
         var existingUser = await context.Users
@@ -45,7 +45,7 @@ public class AuthService(CartDbContext context) : IAuthService
         };
     }
 
-    public async Task<AuthResponse> LoginAsync(LoginRequest request)
+    public async Task<AuthResponse> Login(LoginRequest request)
     {
         //== Find user by email
         var user = await context.Users

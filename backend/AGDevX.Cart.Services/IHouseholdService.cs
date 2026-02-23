@@ -7,11 +7,11 @@ namespace AGDevX.Cart.Services;
 
 public interface IHouseholdService
 {
-    Task<Household> CreateHouseholdAsync(Guid userId, string name);
-    Task<IEnumerable<Household>> GetUserHouseholdsAsync(Guid userId);
-    Task<Household?> GetByIdAsync(Guid userId, Guid householdId);
-    Task<Household> UpdateHouseholdAsync(Guid userId, Guid householdId, string name);
-    Task DeleteHouseholdAsync(Guid userId, Guid householdId);
+    Task<Household> CreateHousehold(Guid userId, string name);
+    Task<IEnumerable<Household>> GetUserHouseholds(Guid userId);
+    Task<Household?> GetById(Guid userId, Guid householdId);
+    Task<Household> UpdateHousehold(Guid userId, Guid householdId, string name);
+    Task DeleteHousehold(Guid userId, Guid householdId);
     Task<Household> JoinHousehold(Guid userId, string inviteCode);
     Task RemoveMember(Guid requestingUserId, Guid householdId, Guid targetUserId);
     Task TransferOwnership(Guid requestingUserId, Guid householdId, Guid newOwnerUserId);

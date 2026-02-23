@@ -47,21 +47,21 @@ public class InventoryServiceTests
         };
 
         _mockHouseholdRepository
-            .Setup(r => r.GetByIdAsync(householdId))
+            .Setup(r => r.GetById(householdId))
             .ReturnsAsync(household);
 
         _mockInventoryRepository
-            .Setup(r => r.CreateAsync(It.IsAny<InventoryItem>()))
+            .Setup(r => r.Create(It.IsAny<InventoryItem>()))
             .ReturnsAsync((InventoryItem item) => { item.Id = Guid.NewGuid(); return item; });
 
         //== Act
-        var result = await _inventoryService.CreateInventoryItemAsync(inventoryItem, userId);
+        var result = await _inventoryService.CreateInventoryItem(inventoryItem, userId);
 
         //== Assert
         Assert.NotNull(result);
         Assert.Equal("Milk", result.Name);
         Assert.Equal(householdId, result.HouseholdId);
-        _mockInventoryRepository.Verify(r => r.CreateAsync(It.IsAny<InventoryItem>()), Times.Once);
+        _mockInventoryRepository.Verify(r => r.Create(It.IsAny<InventoryItem>()), Times.Once);
     }
 
     [Fact]
@@ -76,16 +76,16 @@ public class InventoryServiceTests
         };
 
         _mockInventoryRepository
-            .Setup(r => r.GetPersonalItemsAsync(userId))
+            .Setup(r => r.GetPersonalItems(userId))
             .ReturnsAsync(personalItems);
 
         //== Act
-        var result = await _inventoryService.GetPersonalInventoryAsync(userId);
+        var result = await _inventoryService.GetPersonalInventory(userId);
 
         //== Assert
         Assert.NotNull(result);
         Assert.Equal(2, result.Count());
         Assert.All(result, item => Assert.Equal(userId, item.OwnerUserId));
-        _mockInventoryRepository.Verify(r => r.GetPersonalItemsAsync(userId), Times.Once);
+        _mockInventoryRepository.Verify(r => r.GetPersonalItems(userId), Times.Once);
     }
 }

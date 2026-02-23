@@ -7,10 +7,10 @@ namespace AGDevX.Cart.Services;
 
 public interface IStoreService
 {
-    Task<Store> CreateStoreAsync(Store store, Guid userId);
-    Task<IEnumerable<Store>> GetHouseholdStoresAsync(Guid householdId, Guid userId);
-    Task<IEnumerable<Store>> GetPersonalStoresAsync(Guid userId);
-    Task<Store?> GetByIdAsync(Guid id, Guid userId);
-    Task<Store> UpdateStoreAsync(Store store, Guid userId);
-    Task DeleteStoreAsync(Guid id, Guid userId);
+    Task<Store> CreateStore(Store store, Guid userId);
+    Task<IEnumerable<Store>> GetHouseholdStores(Guid householdId, Guid userId);
+    Task<IEnumerable<Store>> GetPersonalStores(Guid userId);
+    Task<Store?> GetById(Guid id, Guid userId);
+    Task<Store> UpdateStore(Store store, Guid userId);
+    Task DeleteStore(Guid id, Guid userId);
 }

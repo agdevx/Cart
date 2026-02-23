@@ -67,7 +67,7 @@ public class AuthControllerTests
         };
 
         _authServiceMock
-            .Setup(x => x.RegisterAsync(request))
+            .Setup(x => x.Register(request))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -96,7 +96,7 @@ public class AuthControllerTests
         };
 
         _authServiceMock
-            .Setup(x => x.LoginAsync(request))
+            .Setup(x => x.Login(request))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -120,7 +120,7 @@ public class AuthControllerTests
         };
 
         _authServiceMock
-            .Setup(x => x.RegisterAsync(request))
+            .Setup(x => x.Register(request))
             .ThrowsAsync(new InvalidOperationException("Email already exists"));
 
         // Act
@@ -144,7 +144,7 @@ public class AuthControllerTests
         };
 
         _authServiceMock
-            .Setup(x => x.LoginAsync(request))
+            .Setup(x => x.Login(request))
             .ThrowsAsync(new UnauthorizedAccessException("Invalid credentials"));
 
         // Act

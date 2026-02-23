@@ -8,14 +8,14 @@ namespace AGDevX.Cart.Data.Repositories;
 
 public class StoreRepository(CartDbContext context) : IStoreRepository
 {
-    public async Task<Store?> GetByIdAsync(Guid id)
+    public async Task<Store?> GetById(Guid id)
     {
         return await context.Stores
             .Include(s => s.Household)
             .FirstOrDefaultAsync(s => s.Id == id);
     }
 
-    public async Task<IEnumerable<Store>> GetHouseholdStoresAsync(Guid householdId)
+    public async Task<IEnumerable<Store>> GetHouseholdStores(Guid householdId)
     {
         return await context.Stores
             .Where(s => s.HouseholdId == householdId)
@@ -23,7 +23,7 @@ public class StoreRepository(CartDbContext context) : IStoreRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Store>> GetPersonalStoresAsync(Guid userId)
+    public async Task<IEnumerable<Store>> GetPersonalStores(Guid userId)
     {
         return await context.Stores
             .Where(s => s.UserId == userId)
@@ -31,21 +31,21 @@ public class StoreRepository(CartDbContext context) : IStoreRepository
             .ToListAsync();
     }
 
-    public async Task<Store> CreateAsync(Store store)
+    public async Task<Store> Create(Store store)
     {
         context.Stores.Add(store);
         await context.SaveChangesAsync();
         return store;
     }
 
-    public async Task<Store> UpdateAsync(Store store)
+    public async Task<Store> Update(Store store)
     {
         context.Stores.Update(store);
         await context.SaveChangesAsync();
         return store;
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task Delete(Guid id)
     {
         var store = await context.Stores.FindAsync(id);
         if (store != null)
