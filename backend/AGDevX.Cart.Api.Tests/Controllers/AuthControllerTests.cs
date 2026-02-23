@@ -1,11 +1,13 @@
 // ABOUTME: Tests for AuthController endpoints including register, login, logout, and session check operations
 // ABOUTME: Validates controller behavior with mocked IAuthService and proper HTTP context for cookie auth
 
+using System.Security.Claims;
 using AGDevX.Cart.Api.Controllers;
 using AGDevX.Cart.Auth;
 using AGDevX.Cart.Shared.DTOs;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -163,5 +165,37 @@ public class AuthControllerTests
 
         // Assert
         result.Should().BeOfType<OkResult>();
+    }
+
+    [Fact]
+    public void Should_ReturnAuthResponse_When_MeCalledWithAuthenticatedUser()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var email = "me@example.com";
+        var displayName = "Me User";
+
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.Name, displayName)
+        };
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        _controller.ControllerContext.HttpContext.User = principal;
+
+        // Act
+        var result = _controller.Me();
+
+        // Assert
+        result.Should().BeOfType<OkObjectResult>();
+        var okResult = (OkObjectResult)result;
+        var authResponse = okResult.Value as AuthResponse;
+        authResponse.Should().NotBeNull();
+        authResponse!.UserId.Should().Be(userId);
+        authResponse.Email.Should().Be(email);
+        authResponse.DisplayName.Should().Be(displayName);
     }
 }
