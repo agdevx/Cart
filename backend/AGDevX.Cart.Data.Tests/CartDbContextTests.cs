@@ -63,4 +63,72 @@ public class CartDbContextTests
             savedUser.DisplayName.Should().Be("Test User");
         }
     }
+
+    [Fact]
+    public async Task Should_SetCreatedFields_When_AddingEntity()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+        using var context = new CartDbContext(options);
+        var user = new User { Id = Guid.NewGuid(), Email = "audit@test.com", DisplayName = "Audit" };
+
+        // Act
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+
+        // Assert
+        user.CreatedBy.Should().Be("System");
+        user.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+        user.ModifiedBy.Should().Be("System");
+        user.ModifiedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
+    public async Task Should_SetModifiedFields_When_UpdatingEntity()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+        using var context = new CartDbContext(options);
+        var user = new User { Id = Guid.NewGuid(), Email = "audit@test.com", DisplayName = "Audit" };
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+        var originalCreatedDate = user.CreatedDate;
+        var originalCreatedBy = user.CreatedBy;
+
+        // Act
+        await Task.Delay(10);
+        user.DisplayName = "Updated";
+        context.Users.Update(user);
+        await context.SaveChangesAsync();
+
+        // Assert
+        user.CreatedBy.Should().Be(originalCreatedBy);
+        user.CreatedDate.Should().Be(originalCreatedDate);
+        user.ModifiedBy.Should().Be("System");
+        user.ModifiedDate.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Should_UseSystemAsCreatedBy_When_NoHttpContext()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+        //== No IHttpContextAccessor passed — simulates background or startup scenarios
+        using var context = new CartDbContext(options);
+        var user = new User { Id = Guid.NewGuid(), Email = "system@test.com", DisplayName = "System Test" };
+
+        // Act
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+
+        // Assert
+        user.CreatedBy.Should().Be("System");
+        user.ModifiedBy.Should().Be("System");
+    }
 }
