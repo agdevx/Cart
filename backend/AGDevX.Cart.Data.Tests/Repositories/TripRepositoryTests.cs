@@ -1,10 +1,12 @@
 // ABOUTME: Tests for TripRepository verifying CRUD operations and collaborator management.
 // ABOUTME: Uses InMemory database provider to test trip queries including creator and collaborator access.
 
+using System.Security.Claims;
 using AGDevX.Cart.Data;
 using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace AGDevX.Cart.Data.Tests.Repositories;
@@ -17,6 +19,24 @@ public class TripRepositoryTests
                       .UseInMemoryDatabase(databaseName: dbName)
                       .Options;
         return new CartDbContext(options);
+    }
+
+    //== Creates a context with a mocked HttpContext so the audit hook sets CreatedBy to the given userId
+    private static CartDbContext CreateContextForUser(string dbName, Guid userId)
+    {
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: dbName)
+                      .Options;
+
+        var httpContext = new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity([
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+            ]))
+        };
+
+        var accessor = new HttpContextAccessor { HttpContext = httpContext };
+        return new CartDbContext(options, accessor);
     }
 
     [Fact]
@@ -102,17 +122,25 @@ public class TripRepositoryTests
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
+
+        //== Create myTrip as userId so the audit hook sets CreatedBy naturally
+        using (var ctx = CreateContextForUser(dbName, userId))
+        {
+            ctx.Trips.Add(new Trip { Id = Guid.NewGuid(), Name = "My Trip", IsCompleted = false });
+            await ctx.SaveChangesAsync();
+        }
+
+        //== Create otherTrip as a different user
+        using (var ctx = CreateContextForUser(dbName, otherUserId))
+        {
+            ctx.Trips.Add(new Trip { Id = Guid.NewGuid(), Name = "Other Trip", IsCompleted = false });
+            await ctx.SaveChangesAsync();
+        }
+
         using var context = CreateContext(dbName);
         var repo = new TripRepository(context);
-        var userId = Guid.NewGuid();
-        var myTrip = new Trip { Id = Guid.NewGuid(), Name = "My Trip", IsCompleted = false };
-        var otherTrip = new Trip { Id = Guid.NewGuid(), Name = "Other Trip", IsCompleted = false };
-        context.Trips.AddRange(myTrip, otherTrip);
-        await context.SaveChangesAsync();
-        //== Override audit-populated CreatedBy for test purposes
-        myTrip.CreatedBy = userId.ToString();
-        otherTrip.CreatedBy = Guid.NewGuid().ToString();
-        await context.SaveChangesAsync();
 
         // Act
         var result = await repo.GetUserTrips(userId);
@@ -127,18 +155,21 @@ public class TripRepositoryTests
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
-        using var context = CreateContext(dbName);
-        var repo = new TripRepository(context);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
-        var trip = new Trip { Id = tripId, Name = "Collab Trip", IsCompleted = false };
-        context.Trips.Add(trip);
-        context.TripCollaborators.Add(new TripCollaborator { TripId = tripId, UserId = userId, Trip = null!, User = null! });
-        await context.SaveChangesAsync();
-        //== Override audit-populated CreatedBy so it's not the test userId
-        trip.CreatedBy = Guid.NewGuid().ToString();
-        await context.SaveChangesAsync();
+        var creatorUserId = Guid.NewGuid();
+
+        //== Create trip as a different user so userId is only a collaborator, not the creator
+        using (var ctx = CreateContextForUser(dbName, creatorUserId))
+        {
+            ctx.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
+            ctx.Trips.Add(new Trip { Id = tripId, Name = "Collab Trip", IsCompleted = false });
+            ctx.TripCollaborators.Add(new TripCollaborator { TripId = tripId, UserId = userId, Trip = null!, User = null! });
+            await ctx.SaveChangesAsync();
+        }
+
+        using var context = CreateContext(dbName);
+        var repo = new TripRepository(context);
 
         // Act
         var result = await repo.GetUserTrips(userId);
@@ -173,16 +204,18 @@ public class TripRepositoryTests
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
-        using var context = CreateContext(dbName);
-        var repo = new TripRepository(context);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var trip = new Trip { Id = tripId, Name = "Trip", IsCompleted = false };
-        context.Trips.Add(trip);
-        await context.SaveChangesAsync();
-        //== Override audit-populated CreatedBy for test purposes
-        trip.CreatedBy = userId.ToString();
-        await context.SaveChangesAsync();
+
+        //== Create trip as userId so the audit hook sets CreatedBy naturally
+        using (var ctx = CreateContextForUser(dbName, userId))
+        {
+            ctx.Trips.Add(new Trip { Id = tripId, Name = "Trip", IsCompleted = false });
+            await ctx.SaveChangesAsync();
+        }
+
+        using var context = CreateContext(dbName);
+        var repo = new TripRepository(context);
 
         // Act
         var result = await repo.IsUserCollaborator(tripId, userId);
@@ -196,18 +229,21 @@ public class TripRepositoryTests
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
-        using var context = CreateContext(dbName);
-        var repo = new TripRepository(context);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
-        var trip = new Trip { Id = tripId, Name = "Trip", IsCompleted = false };
-        context.Trips.Add(trip);
-        context.TripCollaborators.Add(new TripCollaborator { TripId = tripId, UserId = userId, Trip = null!, User = null! });
-        await context.SaveChangesAsync();
-        //== Override audit-populated CreatedBy so it's not the test userId
-        trip.CreatedBy = Guid.NewGuid().ToString();
-        await context.SaveChangesAsync();
+        var creatorUserId = Guid.NewGuid();
+
+        //== Create trip as a different user so userId is only an explicit collaborator, not the creator
+        using (var ctx = CreateContextForUser(dbName, creatorUserId))
+        {
+            ctx.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
+            ctx.Trips.Add(new Trip { Id = tripId, Name = "Trip", IsCompleted = false });
+            ctx.TripCollaborators.Add(new TripCollaborator { TripId = tripId, UserId = userId, Trip = null!, User = null! });
+            await ctx.SaveChangesAsync();
+        }
+
+        using var context = CreateContext(dbName);
+        var repo = new TripRepository(context);
 
         // Act
         var result = await repo.IsUserCollaborator(tripId, userId);
@@ -224,11 +260,7 @@ public class TripRepositoryTests
         using var context = CreateContext(dbName);
         var repo = new TripRepository(context);
         var tripId = Guid.NewGuid();
-        var trip = new Trip { Id = tripId, Name = "Trip", IsCompleted = false };
-        context.Trips.Add(trip);
-        await context.SaveChangesAsync();
-        //== Override audit-populated CreatedBy so it's not a random match
-        trip.CreatedBy = Guid.NewGuid().ToString();
+        context.Trips.Add(new Trip { Id = tripId, Name = "Trip", IsCompleted = false });
         await context.SaveChangesAsync();
 
         // Act
