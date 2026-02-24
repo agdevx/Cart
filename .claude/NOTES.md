@@ -140,7 +140,28 @@ Cookie-based authentication (migrated from JWT on 2026-02-22):
 ## What's NOT Ready
 - Docker deployment (Phase 9 plan exists: `2026-01-25-phase9-docker-deployment.md`)
 - Production configuration
-- Store management UI (backend endpoints exist, no frontend pages)
+
+## Backend vs Frontend Gap Analysis (2026-02-23)
+
+**Backend is fully complete and ahead of the frontend.** Every API endpoint the frontend calls has a working backend implementation. No outstanding backend work is needed to support the current frontend.
+
+### Backend endpoints with no frontend UI yet
+
+| Backend Endpoint | Purpose |
+|---|---|
+| `PUT /api/trip/{id}` | Edit trip name |
+| `DELETE /api/trip/{id}` | Delete a trip |
+| `POST /api/trip/{id}/reopen` | Reopen completed trip |
+| `POST /api/trip/{id}/collaborators` | Add trip collaborator |
+| `DELETE /api/trip/{id}/collaborators/{userId}` | Remove trip collaborator |
+| `PUT /api/tripitem/{id}` | Edit trip item (quantity, notes, store) |
+| `DELETE /api/tripitem/{id}` | Remove item from trip |
+| `GET /api/inventory/personal` | Personal inventory only |
+| `GET /api/inventory/household/{id}` | Household inventory only |
+| `GET /api/inventory/merged/{id}` | Merged inventory view |
+| `GET /api/household/{id}` | Get single household |
+| `PUT /api/household/{id}` | Edit household name |
+| `DELETE /api/household/{id}` | Delete household |
 
 ## Running the Project
 
@@ -187,11 +208,21 @@ npm run test:integration
 - [ ] Caddy reverse proxy configuration
 - [ ] Docker Compose orchestration
 
-### Future Enhancements
-- [ ] Store management pages in frontend
+### Frontend features missing backend support (none)
+- [ ] Store management pages in frontend (backend endpoints exist)
+
+### Future Enhancements (frontend — backend already done)
+- [ ] Trip editing (rename) and deletion
+- [ ] Trip reopening (undo complete)
+- [ ] Trip collaborator management (add/remove collaborators)
+- [ ] Trip item editing (quantity, notes, store) and removal
+- [ ] Household editing (rename) and deletion
+- [ ] Store management pages
+- [ ] Filtered inventory views (personal-only, household-only, merged)
+
+### Future Enhancements (full-stack — backend work needed)
 - [ ] Camera/barcode scanning for inventory items
 - [ ] Category support for inventory
-- [ ] Quantity tracking for trip items
 - [ ] Multiple stores per household
 - [ ] User profile management
 - [ ] Auth0 migration (from cookie auth to OAuth)
