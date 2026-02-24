@@ -104,10 +104,9 @@ AGDevX.Cart/                          # Monorepo root
 2. **Frontend:**
    ```bash
    cd frontend
-   cp .env.example .env.local
    npm install
    npm run dev
-   # Frontend at http://localhost:5173
+   # Frontend at http://localhost:5173 (proxies /api to backend)
    ```
 
 3. **Open browser:** Navigate to `http://localhost:5173`
