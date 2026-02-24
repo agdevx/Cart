@@ -4,6 +4,7 @@ using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Shared.Models;
+using FluentAssertions;
 using Moq;
 using Xunit;
 
@@ -290,5 +291,156 @@ public class TripItemServiceTests
         _mockTripEventService.Verify(x => x.PublishEvent(
             It.Is<TripEvent>(e => e.TripId == tripId && e.EventType == "ItemRemoved" && e.TripItemId == tripItemId)),
             Times.Once);
+    }
+
+    [Fact]
+    public async Task Should_ReturnItems_When_GetTripItemsAsCollaborator()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var items = new List<TripItem> { new() { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = Guid.NewGuid(), Quantity = 1 } };
+
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
+        _mockTripItemRepository.Setup(r => r.GetTripItems(tripId)).ReturnsAsync(items);
+
+        // Act
+        var result = await _tripItemService.GetTripItems(tripId, userId);
+
+        // Assert
+        result.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public async Task Should_ThrowUnauthorizedAccessException_When_GetTripItemsAsNonCollaborator()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(false);
+
+        // Act
+        var act = () => _tripItemService.GetTripItems(tripId, userId);
+
+        // Assert
+        await act.Should().ThrowAsync<UnauthorizedAccessException>();
+    }
+
+    [Fact]
+    public async Task Should_ReturnItem_When_GetByIdAsCollaborator()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), Quantity = 2 };
+
+        _mockTripItemRepository.Setup(r => r.GetById(itemId)).ReturnsAsync(tripItem);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
+
+        // Act
+        var result = await _tripItemService.GetById(itemId, userId);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Quantity.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task Should_ReturnNull_When_GetByIdForNonExistingTripItem()
+    {
+        // Arrange
+        _mockTripItemRepository.Setup(r => r.GetById(It.IsAny<Guid>())).ReturnsAsync((TripItem?)null);
+
+        // Act
+        var result = await _tripItemService.GetById(Guid.NewGuid(), Guid.NewGuid());
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Should_ThrowUnauthorizedAccessException_When_GetByIdAsNonCollaborator()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), Quantity = 1 };
+
+        _mockTripItemRepository.Setup(r => r.GetById(itemId)).ReturnsAsync(tripItem);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(false);
+
+        // Act
+        var act = () => _tripItemService.GetById(itemId, userId);
+
+        // Assert
+        await act.Should().ThrowAsync<UnauthorizedAccessException>();
+    }
+
+    [Fact]
+    public async Task Should_ThrowKeyNotFoundException_When_UpdatingNonExistingTripItem()
+    {
+        // Arrange
+        _mockTripItemRepository.Setup(r => r.GetById(It.IsAny<Guid>())).ReturnsAsync((TripItem?)null);
+
+        // Act
+        var act = () => _tripItemService.UpdateTripItem(Guid.NewGuid(), 1, Guid.NewGuid());
+
+        // Assert
+        await act.Should().ThrowAsync<KeyNotFoundException>();
+    }
+
+    [Fact]
+    public async Task Should_DeleteTripItem_When_UserIsCollaborator()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), Quantity = 1 };
+
+        _mockTripItemRepository.Setup(r => r.GetById(itemId)).ReturnsAsync(tripItem);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
+        _mockTripItemRepository.Setup(r => r.Delete(itemId)).Returns(Task.CompletedTask);
+
+        // Act
+        await _tripItemService.DeleteTripItem(itemId, userId);
+
+        // Assert
+        _mockTripItemRepository.Verify(r => r.Delete(itemId), Times.Once);
+    }
+
+    [Fact]
+    public async Task Should_ThrowUnauthorizedAccessException_When_DeletingTripItemAsNonCollaborator()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), Quantity = 1 };
+
+        _mockTripItemRepository.Setup(r => r.GetById(itemId)).ReturnsAsync(tripItem);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(false);
+
+        // Act
+        var act = () => _tripItemService.DeleteTripItem(itemId, userId);
+
+        // Assert
+        await act.Should().ThrowAsync<UnauthorizedAccessException>();
+    }
+
+    [Fact]
+    public async Task Should_ThrowKeyNotFoundException_When_DeletingNonExistingTripItem()
+    {
+        // Arrange
+        _mockTripItemRepository.Setup(r => r.GetById(It.IsAny<Guid>())).ReturnsAsync((TripItem?)null);
+
+        // Act
+        var act = () => _tripItemService.DeleteTripItem(Guid.NewGuid(), Guid.NewGuid());
+
+        // Assert
+        await act.Should().ThrowAsync<KeyNotFoundException>();
     }
 }
