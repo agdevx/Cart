@@ -40,8 +40,8 @@ describe('InventoryPage', () => {
 
     renderPage()
 
-    expect(screen.getByRole('button', { name: 'Items' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Stores' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Items' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Stores' })).toBeInTheDocument()
   })
 
   it('shows items view by default', () => {
@@ -57,7 +57,7 @@ describe('InventoryPage', () => {
 
     renderPage()
 
-    const itemsButton = screen.getByRole('button', { name: 'Items' })
+    const itemsButton = screen.getByRole('tab', { name: 'Items' })
     expect(itemsButton.className).toContain('bg-teal')
   })
 
@@ -74,12 +74,12 @@ describe('InventoryPage', () => {
 
     renderPage()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Stores' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Stores' }))
 
-    const storesButton = screen.getByRole('button', { name: 'Stores' })
+    const storesButton = screen.getByRole('tab', { name: 'Stores' })
     expect(storesButton.className).toContain('bg-teal')
 
-    const itemsButton = screen.getByRole('button', { name: 'Items' })
+    const itemsButton = screen.getByRole('tab', { name: 'Items' })
     expect(itemsButton.className).not.toContain('bg-teal')
   })
 })

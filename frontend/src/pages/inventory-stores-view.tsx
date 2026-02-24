@@ -1,8 +1,9 @@
 // ABOUTME: Store management view with list, create, edit, and delete functionality
 // ABOUTME: Groups stores by household with a personal stores section, inline editing and delete confirmation
 
+import { useMemo,useState } from 'react'
+
 import { Check, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateStoreMutation } from '@/apis/agdevx-cart-api/store/create-store.mutation'
@@ -12,7 +13,7 @@ import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 
 export const InventoryStoresView = () => {
   const { data: households, isLoading: householdsLoading } = useHouseholdsQuery()
-  const householdIds = households?.map((h) => h.id) || []
+  const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores, isLoading: storesLoading } = useStoresQuery(householdIds)
   const createMutation = useCreateStoreMutation()
   const updateMutation = useUpdateStoreMutation()
@@ -117,6 +118,7 @@ export const InventoryStoresView = () => {
             value={editingName}
             onChange={(e) => setEditingName(e.target.value)}
             onKeyDown={handleEditKeyDown}
+            aria-label="Edit store name"
             className="flex-1 px-3 py-1.5 border border-navy/10 rounded-lg bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
             autoFocus
           />

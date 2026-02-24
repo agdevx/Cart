@@ -1,9 +1,10 @@
 // ABOUTME: Inventory management page with Items/Stores segmented control
 // ABOUTME: Displays household and personal inventory items with add/delete actions
 
-import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+
+import { Plus } from 'lucide-react'
 
 import { useDeleteInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/delete-inventory-item.mutation'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
@@ -51,8 +52,10 @@ export const InventoryPage = () => {
       </div>
 
       {/* Segmented Control */}
-      <div className="flex bg-bg-warm rounded-xl p-1 mb-6">
+      <div role="tablist" className="flex bg-bg-warm rounded-xl p-1 mb-6">
         <button
+          role="tab"
+          aria-selected={activeTab === 'items'}
           onClick={() => setActiveTab('items')}
           className={`flex-1 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
             activeTab === 'items'
@@ -63,6 +66,8 @@ export const InventoryPage = () => {
           Items
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === 'stores'}
           onClick={() => setActiveTab('stores')}
           className={`flex-1 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
             activeTab === 'stores'
