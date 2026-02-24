@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom'
 
 import { useDeleteInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/delete-inventory-item.mutation'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
+import { InventoryStoresView } from '@/pages/inventory-stores-view'
 
 type InventoryTab = 'items' | 'stores'
 
@@ -144,10 +145,8 @@ export const InventoryPage = () => {
         </>
       )}
 
-      {/* Stores View - placeholder, replaced by InventoryStoresView component in next task */}
-      {activeTab === 'stores' && (
-        <p className="text-text-secondary">Stores view coming soon.</p>
-      )}
+      {/* Stores View */}
+      {activeTab === 'stores' && <InventoryStoresView />}
     </div>
   )
 }
