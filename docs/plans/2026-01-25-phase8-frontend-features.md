@@ -1,5 +1,7 @@
 # Phase 8: Frontend Features Implementation Plan
 
+> **Status:** SUPERSEDED. This plan was replaced by `2026-01-31-frontend-pwa-implementation.md` which combined phases 7+8 into a unified PWA implementation.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Build all user-facing features including household management, inventory, stores, trip builder, active trip with real-time SSE updates, and collaboration UI.

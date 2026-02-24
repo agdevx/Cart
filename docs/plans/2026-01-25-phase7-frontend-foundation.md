@@ -1,5 +1,7 @@
 # Phase 7: Frontend Foundation Implementation Plan
 
+> **Status:** SUPERSEDED. This plan was replaced by `2026-01-31-frontend-pwa-implementation.md` which combined phases 7+8 into a unified PWA implementation. JWT auth was later migrated to cookie-based (see `2026-02-22-cookie-auth-migration-plan.md`).
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Build the complete React 19 frontend foundation with routing, styling, state management, and authentication.

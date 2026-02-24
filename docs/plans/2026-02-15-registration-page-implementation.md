@@ -1,5 +1,7 @@
 # Registration Page Implementation Plan
 
+> **Status:** COMPLETED (2026-02-15). All 6 tasks implemented. Auth was later migrated from JWT to cookie-based (see `2026-02-22-cookie-auth-migration-plan.md`).
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Add user registration functionality with a dedicated registration page that automatically logs users in after successful signup.

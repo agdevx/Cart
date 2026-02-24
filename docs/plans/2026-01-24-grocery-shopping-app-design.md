@@ -1,7 +1,7 @@
 # Grocery Shopping App Design
 
 **Date:** 2026-01-24
-**Status:** Approved
+**Status:** COMPLETED (original design). Auth later migrated from JWT to cookie-based. See subsequent plans for evolution.
 **Author:** Claude & August
 
 ## Overview
