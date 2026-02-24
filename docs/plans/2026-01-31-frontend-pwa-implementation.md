@@ -1,5 +1,7 @@
 # Frontend PWA Implementation Plan
 
+> **Status:** COMPLETED (2026-01-31). All 31 tasks implemented. Auth was later migrated from JWT to cookie-based (see `2026-02-22-cookie-auth-migration-plan.md`).
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Build a mobile-first Progressive Web App for collaborative grocery shopping with real-time updates via SSE.

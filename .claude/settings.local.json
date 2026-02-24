@@ -54,7 +54,8 @@
       "Bash(find:*)",
       "Bash(cd:*)",
       "mcp__chrome-devtools__select_page",
-      "mcp__chrome-devtools__resize_page"
+      "mcp__chrome-devtools__resize_page",
+      "Bash(tail:*)"
     ]
   }
 }

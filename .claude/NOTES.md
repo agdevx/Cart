@@ -1,10 +1,10 @@
 # Cart Project Notes
 
 ## Project Status
-- **Backend MVP completed**: 2026-01-25 (115 tests passing)
-- **Frontend PWA completed**: 2026-01-31 (118 tests passing)
-- **Current Status**: Both backend and frontend complete independently
-- **Next**: Integration testing (connect frontend to backend), then Docker deployment
+- **Backend**: Complete with 134 tests passing
+- **Frontend PWA**: Complete with 149 tests passing (37 test files)
+- **Full-stack integration**: Frontend connected to backend via Vite proxy and cookie auth
+- **Docker/Deployment**: Planned but not started
 
 ## Project Structure (Monorepo)
 ```
@@ -12,170 +12,186 @@ AGDevX.Cart/
 ├── backend/                          # All .NET API code
 │   ├── AGDevX.Cart.slnx             # Solution file is inside backend/
 │   ├── AGDevX.Cart.Api/             # Controllers, Program.cs, API layer
+│   ├── AGDevX.Cart.Api.Tests/       # Controller tests (89 tests)
 │   ├── AGDevX.Cart.Services/        # Business logic
-│   ├── AGDevX.Cart.Auth/            # Authentication & authorization
-│   ├── AGDevX.Cart.Data/            # EF Core, DbContext, repositories
-│   ├── AGDevX.Cart.Shared/          # Models, DTOs, interfaces, extensions
-│   └── Tests/
-│       ├── AGDevX.Cart.Api.Tests/
-│       ├── AGDevX.Cart.Services.Tests/
-│       ├── AGDevX.Cart.Auth.Tests/
-│       └── AGDevX.Cart.Data.Tests/
+│   ├── AGDevX.Cart.Services.Tests/  # Service tests (33 tests)
+│   ├── AGDevX.Cart.Auth/            # Authentication (BCrypt password hashing)
+│   ├── AGDevX.Cart.Auth.Tests/      # Auth tests (4 tests)
+│   ├── AGDevX.Cart.Data/            # EF Core, DbContext, models, repositories
+│   ├── AGDevX.Cart.Data.Tests/      # Data layer tests (8 tests)
+│   └── AGDevX.Cart.Shared/          # DTOs, configuration
 ├── frontend/                         # React 19 PWA
 │   ├── src/
-│   ├── e2e/                         # Playwright E2E tests
-│   └── public/
-├── docs/plans/                       # Implementation plans
+│   │   ├── apis/                    # API client (TanStack Query hooks)
+│   │   ├── auth/                    # Auth provider + useAuth hook
+│   │   ├── features/                # Feature components (bottom-nav, PWA install)
+│   │   ├── hooks/                   # Custom hooks (useSSE)
+│   │   ├── libs/                    # Third-party wrappers (SSE client)
+│   │   ├── pages/                   # Page components
+│   │   ├── state/                   # Jotai atoms (auth, household)
+│   │   └── utilities/               # Helpers (error messages, test setup)
+│   ├── e2e/                         # Playwright E2E tests (mocked API)
+│   ├── e2e-integration/             # Integration tests (real backend)
+│   └── public/                      # Static assets + PWA icons
+├── docs/
+│   ├── DEVELOPMENT.md               # Full development guide
+│   └── plans/                       # Design & implementation plans
 └── README.md
 ```
 
 ## Tech Stack
-- **Backend**: .NET 10, ASP.NET Core, Entity Framework Core, SQLite, System.Reactive
-- **Frontend**: React 19, TypeScript, Vite, TailwindCSS, TanStack Query, Jotai, PWA
-- **Testing**: xUnit (backend), Vitest + React Testing Library (frontend unit), Playwright (E2E)
-- **Deployment**: Docker, Caddy (planned)
-- **Real-time**: Server-Sent Events (SSE)
+- **Backend**: .NET 10, ASP.NET Core, Entity Framework Core, SQLite, System.Reactive, BCrypt
+- **Frontend**: React 19, TypeScript, Vite, TailwindCSS v4, TanStack Query, Jotai, React Router v7, Lucide Icons, PWA
+- **Auth**: Cookie-based (ASP.NET `CookieAuthentication`, `credentials: 'include'`)
+- **Testing**: xUnit + Moq + FluentAssertions (backend), Vitest + React Testing Library (frontend unit), Playwright (E2E + integration)
+- **Deployment**: Docker + Caddy (planned)
+- **Real-time**: Server-Sent Events (SSE) with System.Reactive
 
-## Implementation Status
+## Authentication Architecture
 
-### ✅ Phase 1-6: Backend MVP (Tasks 1-25) - COMPLETE
-- ✅ Tasks 1-3: Project structure, dependencies
-- ✅ Tasks 4-8: Database models, DbContext, migrations
-- ✅ Tasks 9-12: JWT authentication layer
-- ✅ Tasks 13-17: All services and repositories (Household, Inventory, Trip, TripItem)
-- ✅ Tasks 18-22: All API controllers (Household, Inventory, Trip, TripItem)
-- ✅ Tasks 23-25: SSE infrastructure with System.Reactive
-- **Tests**: 115 backend tests passing
-- **Completed**: 2026-01-25
+Cookie-based authentication (migrated from JWT on 2026-02-22):
+- Backend: `CookieAuthenticationDefaults.AuthenticationScheme` in Program.cs
+- Cookie: `.Cart.Auth` (HttpOnly, SameSite=Lax, SlidingExpiration, 30min timeout)
+- Endpoints: `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
+- Frontend: `credentials: 'include'` on all fetch calls via `apiFetch()` wrapper
+- Session restoration: AuthProvider calls `GET /api/auth/me` on mount, localStorage used for optimistic initial render
+- No JWT tokens, no Bearer headers, no authTokenAtom
 
-### ✅ Phase 7-8: Frontend PWA (Tasks 26-38) - COMPLETE
-- ✅ Task 1-15: Foundation (Vite, routing, auth, protected routes, bottom nav)
-- ✅ Task 16-21: Authentication & Households (login, create/join household)
-- ✅ Task 22-26: Inventory & Trips (CRUD, SSE real-time updates)
-- ✅ Task 27-29: PWA Configuration (manifest, service worker, install prompt)
-- ✅ Task 30-31: Integration & E2E tests
-- **Tests**: 118 frontend tests passing (101 unit/integration + 17 E2E)
-- **Design**: docs/plans/2026-01-31-frontend-pwa-design.md
-- **Implementation**: docs/plans/2026-01-31-frontend-pwa-implementation.md
-- **Completed**: 2026-01-31
-- **Notes**: Frontend tests mock API calls - not yet connected to real backend
+## Implementation History
 
-### 📋 Next Up: Integration & True E2E Testing
-**Goal**: Connect frontend to backend and test the full stack together
+### Phase 1-6: Backend MVP — COMPLETE (2026-01-25)
+- Database models, DbContext, EF Core migrations
+- Repository + Service + Controller layers
+- JWT authentication (later migrated to cookies)
+- All CRUD endpoints: Household, Inventory, Store, Trip, TripItem
+- SSE infrastructure with System.Reactive
 
-**What needs to be done**:
-1. Configure frontend to connect to backend API (update API URLs)
-2. Run backend and frontend together
-3. Create true end-to-end tests (frontend → backend → database)
-4. Test real-time SSE connections between services
-5. Verify authentication flow works across stack
-6. Test all CRUD operations with real database
+### Phase 7-8: Frontend PWA — COMPLETE (2026-01-31)
+- React 19 + Vite + TailwindCSS foundation
+- Bottom navigation (mobile-first design)
+- Login flow (email/password)
+- Household management (create/join)
+- Inventory management (personal + household items)
+- Shopping trip workflow (draft → active → completed)
+- Real-time collaboration via SSE
+- PWA features (installable, service worker, manifest)
+- Plans: `2026-01-31-frontend-pwa-design.md`, `2026-01-31-frontend-pwa-implementation.md`
 
-**Current State**:
-- Frontend currently mocks all API calls for testing
-- Backend and frontend have never run together
-- No cross-stack integration tests exist yet
+### Registration Page — COMPLETE (2026-02-15)
+- Registration form with email, password (with requirements checklist), display name
+- Inline validation (email format, password strength, required fields)
+- Auto-login after successful registration
+- Bidirectional navigation between login/register pages
+- Plans: `2026-02-15-registration-page-design.md`, `2026-02-15-registration-page-implementation.md`
 
-### 📋 Phase 9: Docker & Deployment (Tasks 39-42) - PLANNED
-**Status**: Planned but not started - will do AFTER integration testing
-- Task 39: Backend Dockerfile (multi-stage build)
-- Task 40: Frontend production build + Dockerfile
-- Task 41: Caddy reverse proxy configuration
-- Task 42: Docker Compose orchestration
-- **Plan**: docs/plans/2026-01-25-phase9-docker-deployment.md
+### Cookie Auth Migration — COMPLETE (2026-02-22)
+- Replaced JWT Bearer tokens with ASP.NET cookie authentication
+- Simplified AuthService (removed token generation, refresh tokens)
+- AuthResponse returns only userId/email/displayName (no tokens)
+- Frontend: removed all Bearer header injection, switched to `credentials: 'include'`
+- Removed authTokenAtom, simplified useAuth hook (no token property)
+- useSSE no longer takes a token parameter
+- Added Vite proxy (`/api` → `http://localhost:5000`)
+- Plans: `2026-02-22-cookie-auth-migration-design.md`, `2026-02-22-cookie-auth-migration-plan.md`
 
-### 📋 Phase 10: Additional Testing & Documentation (Task 43+) - PLANNED
-**Status**: Planned but not started
-- Task 43: Backend integration tests (WebApplicationFactory)
-- Task 44+: Additional E2E tests, API docs, deployment docs
-- **Plan**: docs/plans/2026-01-25-phase10-testing-docs.md
+### Household Management — COMPLETE (2026-02-22)
+- InviteCode property on Household model (6-char alphanumeric, unique index)
+- Join household via invite code (`POST /api/households/join`)
+- Member list with roles (`GET /api/household/{id}/members`)
+- Remove member / leave household (`DELETE /api/household/{id}/members/{userId}`)
+- Transfer ownership (`PUT /api/household/{id}/owner`)
+- Regenerate invite code (`POST /api/household/{id}/invite-code`)
+- Household detail page with full member management UI
+- Plans: `2026-02-22-household-management-design.md`, `2026-02-22-household-management-plan.md`
+
+### Database Migrations
+1. `20260125170616_InitialCreate` — Full schema (Users, Households, HouseholdMembers, Stores, Trips, InventoryItems, TripCollaborators, TripItems)
+2. `20260222165648_AddHouseholdInviteCode` — InviteCode column + unique index + backfill
+3. `20260223032152_RemoveCreatedByUserId` — Removed CreatedByUserId FK from Trips
+
+## Frontend Routes
+```
+/login                       → LoginPage (public)
+/register                    → RegisterPage (public)
+/shopping                    → ShoppingPage (protected, default redirect)
+/shopping/:tripId            → TripDetailPage (protected)
+/shopping/:tripId/active     → ActiveTripPage (protected)
+/inventory                   → InventoryPage (protected)
+/inventory/add               → AddInventoryItemPage (protected)
+/household                   → HouseholdPage (protected)
+/household/create            → CreateHouseholdPage (protected)
+/household/join              → JoinHouseholdPage (protected)
+/household/:id               → HouseholdDetailPage (protected)
+/                            → redirects to /shopping
+```
 
 ## What's Ready
+- Full REST API with cookie-based authentication
+- Complete frontend PWA connected to backend
+- User registration and login (email + password)
+- Household management with invite codes and member management
+- Inventory management (personal + household items)
+- Shopping trip workflow
+- Real-time updates via SSE
+- Vite proxy for same-origin API calls in development
+- Comprehensive test suites (134 backend + 149 frontend unit/integration)
+- E2E tests (mocked API) and integration tests (real backend)
 
-### Backend
-- ✅ Full REST API with authentication
-- ✅ JWT-based authentication
-- ✅ Complete data layer with EF Core + SQLite
-- ✅ Real-time updates via Server-Sent Events
-- ✅ Comprehensive test coverage (115 tests)
-
-### Frontend
-- ✅ Complete PWA with offline support
-- ✅ Bottom navigation (mobile-first design)
-- ✅ Authentication flow (username-only)
-- ✅ Household management (create/join with invite codes)
-- ✅ Inventory management (personal + household items)
-- ✅ Shopping trip workflow (draft → active → completed)
-- ✅ Real-time collaboration via SSE (mocked)
-- ✅ PWA features (installable, service worker, manifest)
-- ✅ Comprehensive test coverage (118 tests)
-
-### What's NOT Ready
-- ❌ Frontend connected to backend (still using mocks)
-- ❌ True end-to-end testing across full stack
-- ❌ Docker deployment
-- ❌ Production configuration
-- ❌ Backend integration tests
-
-## Recent Work (2026-01-31)
-
-### Frontend Implementation
-- Used superpowers:brainstorming to design complete PWA
-- Used superpowers:writing-plans to create detailed implementation plan
-- Used superpowers:subagent-driven-development to execute (31 tasks)
-- Followed TDD throughout all 31 implementation tasks
-- Fixed all ESLint errors (31 errors → 0)
-- Fixed TypeScript errors (global.fetch → globalThis.fetch)
-
-### Git Workflow
-- Created feature branch: ag/frontend-pwa
-- Used git worktree for isolated development
-- Merged to main via fast-forward (113 files, 17,034 lines added)
-- All commits follow conventional commit format
+## What's NOT Ready
+- Docker deployment (Phase 9 plan exists: `2026-01-25-phase9-docker-deployment.md`)
+- Production configuration
+- Store management UI (backend endpoints exist, no frontend pages)
 
 ## Running the Project
 
-### Backend (Standalone)
+### Backend
 ```bash
 cd backend
 dotnet run --project AGDevX.Cart.Api
-# API runs at http://localhost:5000
+# API at http://localhost:5000
+# Scalar API docs at http://localhost:5000/scalar/v1
 ```
 
-### Frontend (Standalone with Mocked API)
+### Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
-# Frontend runs at http://localhost:5173
+# Frontend at http://localhost:5173 (auto-proxies /api to backend)
 ```
 
 ### Tests
 ```bash
-# Backend tests
+# Backend (134 tests)
 cd backend
 dotnet test
 
-# Frontend tests
+# Frontend unit/integration (149 tests)
 cd frontend
-npm test              # Unit/integration (Vitest)
-npx playwright test   # E2E (Playwright)
+npm test
+
+# Frontend E2E (mocked API)
+cd frontend
+npm run test:e2e
+
+# Frontend integration (real backend — starts both automatically)
+cd frontend
+npm run test:integration
 ```
 
 ## Items to Address Later
 
-### Integration Phase
-- [ ] Configure frontend API base URL to point to backend
-- [ ] Set up CORS in backend for frontend origin
-- [ ] Test authentication flow across stack
-- [ ] Test SSE connections with real backend
-- [ ] Create integration test suite
-- [ ] Document how to run both services together
+### Deployment
+- [ ] Docker multi-stage build for backend
+- [ ] Frontend production build + static serving
+- [ ] Caddy reverse proxy configuration
+- [ ] Docker Compose orchestration
 
-### Future Enhancements (Post-Deployment)
+### Future Enhancements
+- [ ] Store management pages in frontend
 - [ ] Camera/barcode scanning for inventory items
 - [ ] Category support for inventory
 - [ ] Quantity tracking for trip items
 - [ ] Multiple stores per household
 - [ ] User profile management
-- [ ] Auth0 migration (from simple username to OAuth)
+- [ ] Auth0 migration (from cookie auth to OAuth)

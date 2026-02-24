@@ -1,5 +1,7 @@
 # Grocery Shopping Cart MVP Implementation Plan
 
+> **Status:** COMPLETED (2026-01-25). Backend MVP built per this plan. Auth was later migrated from JWT to cookie-based (see `2026-02-22-cookie-auth-migration-plan.md`). Docker/deployment phases not yet started.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Build a complete self-hosted grocery shopping list application with real-time collaboration capabilities.

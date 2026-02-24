@@ -1,5 +1,7 @@
 # Phase 9: Docker & Deployment Implementation Plan
 
+> **Status:** NOT STARTED. This plan needs review before execution — auth has changed from JWT to cookie-based since this was written.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Containerize backend and frontend, configure Caddy reverse proxy, create Docker Compose setup for easy deployment.

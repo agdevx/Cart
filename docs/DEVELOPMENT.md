@@ -53,12 +53,9 @@ cd frontend
 
 # Install dependencies
 npm install
-
-# Create environment file
-cp .env.example .env.local
-# The .env.local should contain:
-# VITE_API_URL=http://localhost:5000
 ```
+
+No environment file is needed — the Vite dev server proxies `/api` requests to the backend automatically.
 
 ## Running the Application
 
@@ -76,6 +73,7 @@ dotnet run --project AGDevX.Cart.Api
 cd frontend
 npm run dev
 # Frontend will be available at http://localhost:5173
+# All /api requests are proxied to http://localhost:5000
 ```
 
 ### Option B: Run Integration Tests (Starts Both Automatically)
@@ -105,7 +103,7 @@ npm run test:integration
 #### Backend Tests
 ```bash
 cd backend
-dotnet test                                    # Run all backend tests (115 tests)
+dotnet test                                    # Run all backend tests (134 tests)
 dotnet test --filter "Category=Unit"          # Run only unit tests
 dotnet test --logger "console;verbosity=detailed"  # Verbose output
 ```
@@ -113,13 +111,29 @@ dotnet test --logger "console;verbosity=detailed"  # Verbose output
 #### Frontend Tests
 ```bash
 cd frontend
-npm test                           # Run unit/integration tests (101 tests)
+npm test                           # Run unit/integration tests (149 tests)
 npm run test:ui                    # Run with Vitest UI
-npm run test:e2e                   # Run E2E tests with mocked API (17 tests)
+npm run test:e2e                   # Run E2E tests with mocked API
 npm run test:e2e:ui                # Run E2E tests with Playwright UI
 npm run test:integration           # Run integration tests against real backend
 npm run test:integration:ui        # Run integration tests with Playwright UI
 ```
+
+## Authentication
+
+The app uses **cookie-based authentication**. On login or registration, the backend calls `HttpContext.SignInAsync()` to create a session cookie. The cookie is sent automatically on all requests (including SSE `EventSource` connections).
+
+### How It Works
+
+1. User submits login/register form
+2. Backend validates credentials, calls `HttpContext.SignInAsync()` with claims
+3. Browser receives `.Cart.Auth` cookie (HttpOnly, SameSite=Lax)
+4. Frontend `apiFetch()` includes `credentials: 'include'` — cookie sent automatically
+5. On page refresh, `AuthProvider` calls `GET /api/auth/me` to validate the session
+
+### Vite Proxy
+
+The frontend dev server proxies all `/api/*` requests to `http://localhost:5000`. This makes API calls same-origin from the browser's perspective, which is required for cookie-based auth to work in development without complex CORS configuration.
 
 ## API Documentation
 
@@ -134,27 +148,33 @@ The backend uses SQLite with Entity Framework Core:
 - **Migrations:** Applied automatically on startup
 - **Reset database:** Delete `cart.db` file and restart backend
 
-## Environment Variables
+## Configuration
 
-### Backend (`backend/AGDevX.Cart.Api/appsettings.Development.json`)
+### Backend (`backend/AGDevX.Cart.Api/appsettings.json`)
 ```json
 {
   "ConnectionStrings": {
     "DefaultConnection": "Data Source=cart.db"
   },
-  "JwtSettings": {
-    "Secret": "development-secret-key-change-in-production",
-    "Issuer": "AGDevX.Cart",
-    "Audience": "AGDevX.Cart.Client",
-    "AccessTokenExpirationMinutes": 60,
-    "RefreshTokenExpirationMinutes": 10080
+  "CookieSettings": {
+    "SessionTimeoutMinutes": 30
   }
 }
 ```
 
-### Frontend (`.env.local`)
-```env
-VITE_API_URL=http://localhost:5000
+### Frontend
+
+No environment files needed. The Vite proxy in `vite.config.ts` handles routing `/api` requests to the backend:
+
+```typescript
+server: {
+  proxy: {
+    '/api': {
+      target: 'http://localhost:5000',
+      changeOrigin: true,
+    },
+  },
+}
 ```
 
 ## Ports
@@ -176,8 +196,8 @@ VITE_API_URL=http://localhost:5000
 
 ### CORS errors
 - Ensure backend is running and accessible at `http://localhost:5000`
-- Check that frontend's `VITE_API_URL` matches the backend URL
-- Backend CORS is configured to allow `http://localhost:5173`
+- The Vite proxy should handle all `/api` requests — check `vite.config.ts`
+- Backend CORS is configured to allow `http://localhost:5173` as a fallback
 
 ### Database errors
 - Delete `cart.db` file and restart backend to recreate
