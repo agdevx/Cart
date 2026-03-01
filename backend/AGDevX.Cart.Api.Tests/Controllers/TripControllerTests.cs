@@ -211,13 +211,14 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
+        var request = new UpdateTripRequest { Name = "Updated Trip" };
         var trip = new Trip { Id = tripId, Name = "Updated Trip" };
 
-        mockService.Setup(s => s.UpdateTrip(It.IsAny<Trip>()))
+        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, userId))
                    .ReturnsAsync(trip);
 
         // Act
-        var result = await controller.Update(tripId, trip);
+        var result = await controller.Update(tripId, request);
 
         // Assert
         result.Should().BeOfType<NoContentResult>();
@@ -241,13 +242,13 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var trip = new Trip { Id = tripId, Name = "Updated Trip" };
+        var request = new UpdateTripRequest { Name = "Updated Trip" };
 
-        mockService.Setup(s => s.UpdateTrip(It.IsAny<Trip>()))
+        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, userId))
                    .ThrowsAsync(new ArgumentException("Trip not found"));
 
         // Act
-        var result = await controller.Update(tripId, trip);
+        var result = await controller.Update(tripId, request);
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -271,13 +272,13 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var trip = new Trip { Id = tripId, Name = "Updated Trip" };
+        var request = new UpdateTripRequest { Name = "Updated Trip" };
 
-        mockService.Setup(s => s.UpdateTrip(It.IsAny<Trip>()))
+        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, userId))
                    .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this trip"));
 
         // Act
-        var result = await controller.Update(tripId, trip);
+        var result = await controller.Update(tripId, request);
 
         // Assert
         result.Should().BeOfType<UnauthorizedObjectResult>();
