@@ -1,8 +1,8 @@
 # Cart Project Notes
 
 ## Project Status
-- **Backend**: Complete with 134 tests passing
-- **Frontend PWA**: Complete with 149 tests passing (37 test files)
+- **Backend**: Complete with 258 tests passing (69 data + 92 services + 89 api + 8 auth)
+- **Frontend PWA**: Complete with 208 tests passing (49 test files)
 - **Full-stack integration**: Frontend connected to backend via Vite proxy and cookie auth
 - **Docker/Deployment**: Planned but not started
 
