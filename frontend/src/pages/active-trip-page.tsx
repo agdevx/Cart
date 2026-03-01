@@ -1,18 +1,24 @@
 // ABOUTME: Active trip page for shopping mode
 // ABOUTME: Shows checklist of items to purchase with check/uncheck functionality
 
-import { ArrowLeft, Check } from 'lucide-react'
-import { useCallback } from 'react'
+import { ArrowLeft } from 'lucide-react'
+import { useCallback, useMemo } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
 import { useQueryClient } from '@tanstack/react-query'
 
+import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
+import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useCheckTripItemMutation } from '@/apis/agdevx-cart-api/trip/check-trip-item.mutation'
 import { useCompleteTripMutation } from '@/apis/agdevx-cart-api/trip/complete-trip.mutation'
+import { useDeleteTripItemMutation } from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
+import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { useSSE } from '@/hooks/use-sse'
+
+import { TripItemRow } from './components/trip-item-row'
 
 export const ActiveTripPage = () => {
   const { tripId } = useParams<{ tripId: string }>()
@@ -21,8 +27,13 @@ export const ActiveTripPage = () => {
   const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
   const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!)
   const { data: inventory } = useInventoryQuery()
+  const { data: households } = useHouseholdsQuery()
+  const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
+  const { data: stores } = useStoresQuery(householdIds)
   const checkMutation = useCheckTripItemMutation()
   const completeMutation = useCompleteTripMutation()
+  const updateMutation = useUpdateTripItemMutation()
+  const deleteMutation = useDeleteTripItemMutation()
 
   const handleSSEMessage = useCallback((_data: unknown) => {
     // Invalidate trip items query to refetch with latest data
@@ -48,6 +59,16 @@ export const ActiveTripPage = () => {
     } catch {
       // Error handled by mutation state
     }
+  }
+
+  const handleUpdateItem = (tripItemId: string, quantity: number, notes: string | null, storeId: string | null) => {
+    if (!tripId) return
+    updateMutation.mutate({ tripItemId, tripId, quantity, notes, storeId })
+  }
+
+  const handleDeleteItem = (tripItemId: string) => {
+    if (!tripId) return
+    deleteMutation.mutate({ tripItemId, tripId })
   }
 
   const handleCompleteTrip = async () => {
@@ -120,42 +141,17 @@ export const ActiveTripPage = () => {
           {tripItems.map((item) => {
             const inventoryItem = inventory?.find((i) => i.id === item.inventoryItemId)
             return (
-              <div
+              <TripItemRow
                 key={item.id}
-                className={`flex items-center gap-4 p-4 rounded-xl shadow-sm cursor-pointer transition-all min-h-[60px] select-none active:scale-[0.98] ${
-                  item.isChecked
-                    ? 'bg-teal/8 shadow-none'
-                    : 'bg-surface'
-                }`}
-                onClick={() => handleToggleItem(item.id, item.isChecked)}
-              >
-                {/* Custom checkbox */}
-                <div
-                  className={`w-7 h-7 rounded-[10px] flex-shrink-0 flex items-center justify-center transition-all ${
-                    item.isChecked
-                      ? 'bg-teal border-2 border-teal'
-                      : 'border-[2.5px] border-navy/14 bg-transparent'
-                  }`}
-                >
-                  {item.isChecked && (
-                    <Check className="w-4 h-4 text-white" strokeWidth={3} />
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <h3
-                    className={`text-base font-bold ${
-                      item.isChecked ? 'line-through text-text-tertiary' : 'text-navy'
-                    }`}
-                  >
-                    {inventoryItem?.name || 'Unknown Item'}
-                  </h3>
-                  <p className="text-xs text-text-tertiary font-semibold mt-0.5">Qty: {item.quantity}</p>
-                  {item.notes && (
-                    <p className="text-xs text-text-tertiary mt-0.5">{item.notes}</p>
-                  )}
-                </div>
-              </div>
+                tripItem={item}
+                itemName={inventoryItem?.name || 'Unknown Item'}
+                stores={stores || []}
+                onUpdate={handleUpdateItem}
+                onDelete={handleDeleteItem}
+                isUpdating={updateMutation.isPending}
+                showCheckbox
+                onToggleCheck={(id, checked) => handleToggleItem(id, checked)}
+              />
             )
           })}
         </div>
