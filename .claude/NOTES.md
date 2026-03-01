@@ -2,7 +2,7 @@
 
 ## Project Status
 - **Backend**: Complete with 258 tests passing (69 data + 92 services + 89 api + 8 auth)
-- **Frontend PWA**: Complete with 208 tests passing (49 test files)
+- **Frontend PWA**: Complete with 270 tests passing (61 test files)
 - **Full-stack integration**: Frontend connected to backend via Vite proxy and cookie auth
 - **Docker/Deployment**: Planned but not started
 
@@ -104,6 +104,13 @@ Cookie-based authentication (migrated from JWT on 2026-02-22):
 - Household detail page with full member management UI
 - Plans: `2026-02-22-household-management-design.md`, `2026-02-22-household-management-plan.md`
 
+### Filtered Inventory Views — COMPLETE (2026-03-01)
+- Filter dropdown on Inventory page Items tab (All, Personal, per-household, merged)
+- Three new query hooks: usePersonalInventoryQuery, useHouseholdInventoryQuery, useMergedInventoryQuery
+- Extracted InventoryItemsView component with per-household grouping in "All" view
+- Type-safe InventoryFilter union type
+- Plans: `2026-03-01-filtered-inventory-views-design.md`, `2026-03-01-filtered-inventory-views-plan.md`
+
 ### Database Migrations
 1. `20260125170616_InitialCreate` — Full schema (Users, Households, HouseholdMembers, Stores, Trips, InventoryItems, TripCollaborators, TripItems)
 2. `20260222165648_AddHouseholdInviteCode` — InviteCode column + unique index + backfill
@@ -130,7 +137,7 @@ Cookie-based authentication (migrated from JWT on 2026-02-22):
 - Complete frontend PWA connected to backend
 - User registration and login (email + password)
 - Household management with invite codes, member management, rename, delete
-- Inventory management (personal + household items)
+- Inventory management (personal + household items) with filtered views (all, personal, per-household, merged)
 - Store management (CRUD via Inventory page Stores tab)
 - Shopping trip workflow with trip rename, delete, reopen
 - Trip item editing (quantity, notes, store) and removal
@@ -153,9 +160,6 @@ Cookie-based authentication (migrated from JWT on 2026-02-22):
 |---|---|
 | `POST /api/trip/{id}/collaborators` | Add trip collaborator |
 | `DELETE /api/trip/{id}/collaborators/{userId}` | Remove trip collaborator |
-| `GET /api/inventory/personal` | Personal inventory only |
-| `GET /api/inventory/household/{id}` | Household inventory only |
-| `GET /api/inventory/merged/{id}` | Merged inventory view |
 
 ## Running the Project
 
@@ -181,7 +185,7 @@ npm run dev
 cd backend
 dotnet test
 
-# Frontend unit/integration (149 tests)
+# Frontend unit/integration (270 tests)
 cd frontend
 npm test
 
@@ -204,7 +208,6 @@ npm run test:integration
 
 ### Future Enhancements (frontend — backend already done)
 - [ ] Trip collaborator management (add/remove collaborators)
-- [ ] Filtered inventory views (personal-only, household-only, merged)
 
 ### Completed Frontend Features (for reference)
 - [x] Trip editing (rename) and deletion — PR #9
@@ -212,6 +215,7 @@ npm run test:integration
 - [x] Trip item editing (quantity, notes, store) and removal — PR #10
 - [x] Household editing (rename) and deletion — PR #11
 - [x] Store management pages (CRUD on Inventory page Stores tab)
+- [x] Filtered inventory views (all, personal, per-household, merged) — PR #13
 
 ### Future Enhancements (full-stack — backend work needed)
 - [ ] Camera/barcode scanning for inventory items

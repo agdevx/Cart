@@ -4,8 +4,8 @@ Self-hosted grocery shopping list application with real-time collaboration.
 
 ## Status
 
-- ✅ **Backend API** - Complete with 134 tests passing
-- ✅ **Frontend PWA** - Complete with unit, E2E, and integration tests
+- ✅ **Backend API** - Complete with 258 tests passing
+- ✅ **Frontend PWA** - Complete with 270 unit tests, E2E, and integration tests
 - 📋 **Docker** - Planned but not started
 - 📋 **Deployment** - Planned but not started
 
@@ -15,10 +15,12 @@ Self-hosted grocery shopping list application with real-time collaboration.
 - Cookie-based authentication with email + password (BCrypt hashing)
 - Session persistence across page reloads
 - Household management (create/join with invite codes, ownership transfer)
-- Personal and household inventory items
+- Personal and household inventory items with filtered views (all, personal, per-household, merged)
 - Store management (personal and household)
-- Shopping trip workflow (create → complete → reopen)
+- Shopping trip workflow (create → rename → complete → reopen → delete)
+- Trip item editing (quantity, notes, store assignment) and removal
 - Trip collaborators with authorization checks
+- Household rename and delete (owner only)
 - Automatic audit fields (CreatedBy, ModifiedBy, timestamps) via EF Core SaveChanges override
 - Real-time collaboration via Server-Sent Events
 - Progressive Web App (installable, offline support)
