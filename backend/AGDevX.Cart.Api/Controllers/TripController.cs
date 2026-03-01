@@ -85,11 +85,12 @@ public class TripController(ITripService tripService) : ControllerBase
 
     //== Update an existing trip
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] Trip trip)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTripRequest request)
     {
         try
         {
-            await tripService.UpdateTrip(trip);
+            var userId = User.GetUserId();
+            await tripService.UpdateTrip(id, request.Name, userId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
