@@ -129,19 +129,21 @@ Cookie-based authentication (migrated from JWT on 2026-02-22):
 - Full REST API with cookie-based authentication
 - Complete frontend PWA connected to backend
 - User registration and login (email + password)
-- Household management with invite codes and member management
+- Household management with invite codes, member management, rename, delete
 - Inventory management (personal + household items)
-- Shopping trip workflow
+- Store management (CRUD via Inventory page Stores tab)
+- Shopping trip workflow with trip rename, delete, reopen
+- Trip item editing (quantity, notes, store) and removal
 - Real-time updates via SSE
 - Vite proxy for same-origin API calls in development
-- Comprehensive test suites (134 backend + 149 frontend unit/integration)
+- Comprehensive test suites (backend + frontend unit/integration)
 - E2E tests (mocked API) and integration tests (real backend)
 
 ## What's NOT Ready
 - Docker deployment (Phase 9 plan exists: `2026-01-25-phase9-docker-deployment.md`)
 - Production configuration
 
-## Backend vs Frontend Gap Analysis (2026-02-23)
+## Backend vs Frontend Gap Analysis (updated 2026-03-01)
 
 **Backend is fully complete and ahead of the frontend.** Every API endpoint the frontend calls has a working backend implementation. No outstanding backend work is needed to support the current frontend.
 
@@ -149,19 +151,11 @@ Cookie-based authentication (migrated from JWT on 2026-02-22):
 
 | Backend Endpoint | Purpose |
 |---|---|
-| `PUT /api/trip/{id}` | Edit trip name |
-| `DELETE /api/trip/{id}` | Delete a trip |
-| `POST /api/trip/{id}/reopen` | Reopen completed trip |
 | `POST /api/trip/{id}/collaborators` | Add trip collaborator |
 | `DELETE /api/trip/{id}/collaborators/{userId}` | Remove trip collaborator |
-| `PUT /api/tripitem/{id}` | Edit trip item (quantity, notes, store) |
-| `DELETE /api/tripitem/{id}` | Remove item from trip |
 | `GET /api/inventory/personal` | Personal inventory only |
 | `GET /api/inventory/household/{id}` | Household inventory only |
 | `GET /api/inventory/merged/{id}` | Merged inventory view |
-| `GET /api/household/{id}` | Get single household |
-| `PUT /api/household/{id}` | Edit household name |
-| `DELETE /api/household/{id}` | Delete household |
 
 ## Running the Project
 
@@ -208,17 +202,16 @@ npm run test:integration
 - [ ] Caddy reverse proxy configuration
 - [ ] Docker Compose orchestration
 
-### Frontend features missing backend support (none)
-- [ ] Store management pages in frontend (backend endpoints exist)
-
 ### Future Enhancements (frontend — backend already done)
-- [ ] Trip editing (rename) and deletion
-- [ ] Trip reopening (undo complete)
 - [ ] Trip collaborator management (add/remove collaborators)
-- [ ] Trip item editing (quantity, notes, store) and removal
-- [ ] Household editing (rename) and deletion
-- [ ] Store management pages
 - [ ] Filtered inventory views (personal-only, household-only, merged)
+
+### Completed Frontend Features (for reference)
+- [x] Trip editing (rename) and deletion — PR #9
+- [x] Trip reopening (undo complete) — PR #9
+- [x] Trip item editing (quantity, notes, store) and removal — PR #10
+- [x] Household editing (rename) and deletion — PR #11
+- [x] Store management pages (CRUD on Inventory page Stores tab)
 
 ### Future Enhancements (full-stack — backend work needed)
 - [ ] Camera/barcode scanning for inventory items
