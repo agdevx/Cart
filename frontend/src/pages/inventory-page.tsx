@@ -1,38 +1,21 @@
-// ABOUTME: Inventory management page with Items/Stores segmented control
-// ABOUTME: Displays household and personal inventory items with add/delete actions
+// ABOUTME: Inventory management page with Items/Stores segmented control and filter dropdown
+// ABOUTME: Items tab supports filtering by all, personal, household, or merged views
 
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Plus } from 'lucide-react'
 
-import { useDeleteInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/delete-inventory-item.mutation'
-import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
+import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
+import { InventoryItemsView } from '@/pages/inventory-items-view'
 import { InventoryStoresView } from '@/pages/inventory-stores-view'
 
 type InventoryTab = 'items' | 'stores'
 
 export const InventoryPage = () => {
   const [activeTab, setActiveTab] = useState<InventoryTab>('items')
-  const { data: inventory, isLoading } = useInventoryQuery()
-  const deleteMutation = useDeleteInventoryItemMutation()
-
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this item?')) {
-      await deleteMutation.mutateAsync(id)
-    }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="px-5 pt-14">
-        <p className="text-text-secondary">Loading inventory...</p>
-      </div>
-    )
-  }
-
-  const householdItems = inventory?.filter((item) => item.householdId !== null) || []
-  const personalItems = inventory?.filter((item) => item.ownerUserId !== null) || []
+  const [filter, setFilter] = useState('all')
+  const { data: households } = useHouseholdsQuery()
 
   return (
     <div className="px-5 pt-14 pb-4">
@@ -52,7 +35,7 @@ export const InventoryPage = () => {
       </div>
 
       {/* Segmented Control */}
-      <div role="tablist" className="flex bg-bg-warm rounded-xl p-1 mb-6">
+      <div role="tablist" className="flex bg-bg-warm rounded-xl p-1 mb-4">
         <button
           role="tab"
           aria-selected={activeTab === 'items'}
@@ -79,76 +62,27 @@ export const InventoryPage = () => {
         </button>
       </div>
 
-      {/* Items View */}
+      {/* Filter Dropdown — Items tab only */}
       {activeTab === 'items' && (
-        <>
-          {householdItems.length > 0 && (
-            <div className="mb-6">
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Household Items</span>
-                <span className="flex-1 h-px bg-navy/8" />
-              </div>
-              <div className="space-y-2">
-                {householdItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-4 bg-surface rounded-xl shadow-sm flex justify-between items-start"
-                  >
-                    <div>
-                      <h3 className="font-bold text-navy">{item.name}</h3>
-                      {item.notes && (
-                        <p className="text-sm text-text-secondary mt-0.5">{item.notes}</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      disabled={deleteMutation.isPending}
-                      className="text-coral hover:text-coral/80 text-sm font-semibold"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {personalItems.length > 0 && (
-            <div className="mb-6">
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Personal Items</span>
-                <span className="flex-1 h-px bg-navy/8" />
-              </div>
-              <div className="space-y-2">
-                {personalItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-4 bg-surface rounded-xl shadow-sm flex justify-between items-start"
-                  >
-                    <div>
-                      <h3 className="font-bold text-navy">{item.name}</h3>
-                      {item.notes && (
-                        <p className="text-sm text-text-secondary mt-0.5">{item.notes}</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      disabled={deleteMutation.isPending}
-                      className="text-coral hover:text-coral/80 text-sm font-semibold"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {inventory && inventory.length === 0 && (
-            <p className="text-text-secondary mt-4">No inventory items yet. Add your first item!</p>
-          )}
-        </>
+        <select
+          aria-label="Filter inventory"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent mb-4"
+        >
+          <option value="all">All Items</option>
+          <option value="personal">Personal</option>
+          {(households || []).map((household) => (
+            <optgroup key={household.id} label={household.name}>
+              <option value={`household:${household.id}`}>{household.name}</option>
+              <option value={`merged:${household.id}`}>{household.name} + Personal</option>
+            </optgroup>
+          ))}
+        </select>
       )}
+
+      {/* Items View */}
+      {activeTab === 'items' && <InventoryItemsView filter={filter} />}
 
       {/* Stores View */}
       {activeTab === 'stores' && <InventoryStoresView />}
