@@ -3,19 +3,29 @@
 
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
+import { useDeleteTripMutation } from '@/apis/agdevx-cart-api/trip/delete-trip.mutation'
+import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.mutation'
+import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
+
+import { ConfirmDialog } from './components/confirm-dialog'
+import { TripCard } from './components/trip-card'
 
 export const ShoppingPage = () => {
   const { data: trips, isLoading } = useTripsQuery()
   const { data: households } = useHouseholdsQuery()
   const createMutation = useCreateTripMutation()
+  const updateMutation = useUpdateTripMutation()
+  const deleteMutation = useDeleteTripMutation()
+  const reopenMutation = useReopenTripMutation()
+
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [tripName, setTripName] = useState('')
   const [householdId, setHouseholdId] = useState<string>('personal')
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
 
   const activeTrips = trips?.filter((trip) => !trip.isCompleted) || []
   const completedTrips = trips?.filter((trip) => trip.isCompleted) || []
@@ -37,6 +47,25 @@ export const ShoppingPage = () => {
     } catch {
       // Error handled by mutation state
     }
+  }
+
+  const handleRename = (tripId: string, newName: string) => {
+    updateMutation.mutate({ tripId, name: newName })
+  }
+
+  const handleDelete = (tripId: string, tripName: string) => {
+    setDeleteConfirm({ id: tripId, name: tripName })
+  }
+
+  const handleConfirmDelete = () => {
+    if (deleteConfirm) {
+      deleteMutation.mutate(deleteConfirm.id)
+      setDeleteConfirm(null)
+    }
+  }
+
+  const handleReopen = (tripId: string) => {
+    reopenMutation.mutate(tripId)
   }
 
   if (isLoading) {
@@ -119,16 +148,13 @@ export const ShoppingPage = () => {
           </div>
           <div className="space-y-3">
             {activeTrips.map((trip) => (
-              <Link
+              <TripCard
                 key={trip.id}
-                to={`/shopping/${trip.id}`}
-                className="block p-5 bg-surface rounded-2xl shadow-sm border-2 border-transparent hover:shadow-md hover:-translate-y-0.5 transition-all"
-              >
-                <h3 className="font-display text-lg font-bold text-navy">{trip.name}</h3>
-                <p className="text-[13px] text-text-secondary font-medium mt-1">
-                  Started: {new Date(trip.createdDate).toLocaleDateString()}
-                </p>
-              </Link>
+                trip={trip}
+                onRename={handleRename}
+                onDelete={handleDelete}
+                onReopen={handleReopen}
+              />
             ))}
           </div>
         </div>
@@ -142,15 +168,13 @@ export const ShoppingPage = () => {
           </div>
           <div className="space-y-3">
             {completedTrips.map((trip) => (
-              <div
+              <TripCard
                 key={trip.id}
-                className="p-5 bg-surface rounded-2xl shadow-sm opacity-60"
-              >
-                <h3 className="font-display text-lg font-bold text-navy-soft">{trip.name}</h3>
-                <p className="text-[13px] text-text-secondary font-medium mt-1">
-                  Completed: {trip.completedAt ? new Date(trip.completedAt).toLocaleDateString() : 'N/A'}
-                </p>
-              </div>
+                trip={trip}
+                onRename={handleRename}
+                onDelete={handleDelete}
+                onReopen={handleReopen}
+              />
             ))}
           </div>
         </div>
@@ -158,6 +182,18 @@ export const ShoppingPage = () => {
 
       {trips && trips.length === 0 && (
         <p className="text-text-secondary mt-4">No trips yet. Create your first shopping trip!</p>
+      )}
+
+      {/* Delete confirmation dialog */}
+      {deleteConfirm && (
+        <ConfirmDialog
+          title="Delete Trip"
+          message={`Delete "${deleteConfirm.name}"? This can't be undone.`}
+          confirmLabel="Delete"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteConfirm(null)}
+          isPending={deleteMutation.isPending}
+        />
       )}
     </div>
   )
