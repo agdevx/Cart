@@ -1,29 +1,40 @@
 // ABOUTME: Household detail page with member management
 // ABOUTME: Shows invite code, member list, and role-based actions (remove, transfer, leave)
 
-import { ArrowLeft, Copy, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Copy, Pencil, RefreshCw } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate,useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
+import { useDeleteHouseholdMutation } from '@/apis/agdevx-cart-api/household/delete-household.mutation'
 import { useRegenerateInviteCodeMutation } from '@/apis/agdevx-cart-api/household/regenerate-invite-code.mutation'
 import { useRemoveHouseholdMemberMutation } from '@/apis/agdevx-cart-api/household/remove-household-member.mutation'
 import { useTransferHouseholdOwnershipMutation } from '@/apis/agdevx-cart-api/household/transfer-household-ownership.mutation'
+import { useUpdateHouseholdMutation } from '@/apis/agdevx-cart-api/household/update-household.mutation'
+import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-household-members.query'
 import { useInviteCodeQuery } from '@/apis/agdevx-cart-api/household/use-invite-code.query'
 import { useAuth } from '@/auth/use-auth'
+
+import { ConfirmDialog } from './components/confirm-dialog'
 
 export const HouseholdDetailPage = () => {
   const { id: householdId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
 
+  const { data: household, isLoading: householdLoading } = useHouseholdQuery(householdId!)
   const { data: members, isLoading: membersLoading } = useHouseholdMembersQuery(householdId!)
   const { data: inviteCode, isLoading: codeLoading } = useInviteCodeQuery(householdId!)
+  const updateHouseholdMutation = useUpdateHouseholdMutation()
+  const deleteHouseholdMutation = useDeleteHouseholdMutation()
   const removeMemberMutation = useRemoveHouseholdMemberMutation()
   const transferOwnershipMutation = useTransferHouseholdOwnershipMutation()
   const regenerateCodeMutation = useRegenerateInviteCodeMutation()
 
   const [codeCopied, setCodeCopied] = useState(false)
+  const [isRenaming, setIsRenaming] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [confirmAction, setConfirmAction] = useState<{
     type: 'remove' | 'transfer' | 'leave'
     userId: string
@@ -47,6 +58,48 @@ export const HouseholdDetailPage = () => {
   const handleRegenerateCode = () => {
     if (!householdId) return
     regenerateCodeMutation.mutate(householdId)
+  }
+
+  const handleStartRename = () => {
+    setEditName(household?.name || '')
+    setIsRenaming(true)
+  }
+
+  const handleSaveRename = () => {
+    if (!householdId || !editName.trim()) return
+    if (editName.trim() === household?.name) {
+      setIsRenaming(false)
+      return
+    }
+    updateHouseholdMutation.mutate(
+      { householdId, name: editName.trim() },
+      { onSuccess: () => setIsRenaming(false) }
+    )
+  }
+
+  const handleCancelRename = () => {
+    setIsRenaming(false)
+    setEditName(household?.name || '')
+  }
+
+  const handleRenameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleSaveRename()
+    } else if (e.key === 'Escape') {
+      handleCancelRename()
+    }
+  }
+
+  const handleRenameBlur = () => {
+    handleSaveRename()
+  }
+
+  const handleDeleteHousehold = () => {
+    if (!householdId) return
+    deleteHouseholdMutation.mutate(householdId, {
+      onSuccess: () => navigate('/household'),
+    })
   }
 
   const handleConfirmAction = async () => {
@@ -75,7 +128,7 @@ export const HouseholdDetailPage = () => {
     setConfirmAction(null)
   }
 
-  if (membersLoading || codeLoading) {
+  if (membersLoading || codeLoading || householdLoading) {
     return (
       <div className="px-5 pt-14">
         <p className="text-text-secondary">Loading household...</p>
@@ -94,7 +147,33 @@ export const HouseholdDetailPage = () => {
           <ArrowLeft className="w-4 h-4" />
           Back to Households
         </button>
-        <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">Household Details</h1>
+        <div className="flex items-center gap-2">
+          {isRenaming ? (
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              onKeyDown={handleRenameKeyDown}
+              onBlur={handleRenameBlur}
+              autoFocus
+              disabled={updateHouseholdMutation.isPending}
+              className="font-display text-[28px] font-extrabold text-navy tracking-tight bg-transparent border-b-2 border-teal focus:outline-none w-full"
+            />
+          ) : (
+            <>
+              <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">
+                {household?.name || 'Unnamed Household'}
+              </h1>
+              <button
+                onClick={handleStartRename}
+                aria-label="Rename household"
+                className="p-1.5 rounded-lg hover:bg-navy/8 transition-colors"
+              >
+                <Pencil className="w-4 h-4 text-text-secondary" />
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Invite Code Card */}
@@ -218,6 +297,31 @@ export const HouseholdDetailPage = () => {
           })}
         </div>
       </div>
+
+      {/* Danger Zone — owner-only delete section */}
+      {isOwner && (
+        <div className="mt-6 p-5 bg-coral/5 rounded-2xl border border-coral/20">
+          <h2 className="font-display text-sm font-semibold uppercase tracking-[1.5px] text-coral mb-3">Danger Zone</h2>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="w-full py-3 bg-coral text-white rounded-xl font-display font-bold hover:bg-coral/90 transition-colors"
+          >
+            Delete Household
+          </button>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <ConfirmDialog
+          title="Delete Household"
+          message={`Delete "${household?.name}"? This will remove the household and all members. This can't be undone.`}
+          confirmLabel="Delete"
+          onConfirm={handleDeleteHousehold}
+          onCancel={() => setShowDeleteConfirm(false)}
+          isPending={deleteHouseholdMutation.isPending}
+        />
+      )}
 
       {/* Confirmation Dialog */}
       {confirmAction && (
