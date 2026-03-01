@@ -15,6 +15,7 @@ import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item
 import { queryClient } from '@/apis/tanstack-query/query-client'
 
 import { InventoryItemsView } from '../inventory-items-view'
+import type { InventoryFilter } from '../inventory-items-view'
 
 const mockHouseholds: Household[] = [
   { id: 'h1', name: 'Smith Family', createdBy: null, createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
@@ -40,7 +41,7 @@ const mockMergedItems: InventoryItem[] = [
   { id: '3', name: 'My Snacks', defaultStoreId: null, notes: null, ownerUserId: 'user1', householdId: null, createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
 ]
 
-const renderView = (filter = 'all') => {
+const renderView = (filter: InventoryFilter = 'all') => {
   return render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

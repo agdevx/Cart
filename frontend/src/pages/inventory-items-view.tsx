@@ -1,8 +1,6 @@
 // ABOUTME: Inventory items view with filter support for all, personal, household, and merged views
 // ABOUTME: Groups items by household in "all" view, flat list for scoped filters
 
-import { useMemo } from 'react'
-
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useDeleteInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/delete-inventory-item.mutation'
 import { useHouseholdInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-household-inventory.query'
@@ -11,16 +9,20 @@ import { useMergedInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-me
 import { usePersonalInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-personal-inventory.query'
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
 
+export type InventoryFilter = 'all' | 'personal' | `household:${string}` | `merged:${string}`
+
 interface InventoryItemsViewProps {
-  filter: string
+  filter: InventoryFilter
 }
 
-const parseFilter = (filter: string): { type: string; id: string | null } => {
+type FilterType = 'all' | 'personal' | 'household' | 'merged'
+
+const parseFilter = (filter: InventoryFilter): { type: FilterType; id: string | null } => {
   if (filter === 'all' || filter === 'personal') {
     return { type: filter, id: null }
   }
   const [type, id] = filter.split(':')
-  return { type, id }
+  return { type: type as FilterType, id }
 }
 
 export const InventoryItemsView = ({ filter }: InventoryItemsViewProps) => {
@@ -28,12 +30,15 @@ export const InventoryItemsView = ({ filter }: InventoryItemsViewProps) => {
   const { data: households } = useHouseholdsQuery()
   const deleteMutation = useDeleteInventoryItemMutation()
 
+  //== All four hooks are called unconditionally (React rules of hooks). Inactive scoped hooks
+  //== receive null IDs which disables them via `enabled`. The all/personal hooks stay in cache
+  //== when not active — TanStack Query handles this efficiently with no unnecessary refetches.
   const allQuery = useInventoryQuery()
   const personalQuery = usePersonalInventoryQuery()
   const householdQuery = useHouseholdInventoryQuery(filterType === 'household' ? filterId : null)
   const mergedQuery = useMergedInventoryQuery(filterType === 'merged' ? filterId : null)
 
-  const activeQuery = useMemo(() => {
+  const activeQuery = (() => {
     switch (filterType) {
       case 'personal':
         return personalQuery
@@ -44,7 +49,7 @@ export const InventoryItemsView = ({ filter }: InventoryItemsViewProps) => {
       default:
         return allQuery
     }
-  }, [filterType, allQuery, personalQuery, householdQuery, mergedQuery])
+  })()
 
   const items = activeQuery.data
   const isLoading = activeQuery.isLoading

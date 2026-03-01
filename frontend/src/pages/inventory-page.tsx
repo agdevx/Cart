@@ -8,13 +8,14 @@ import { Plus } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { InventoryItemsView } from '@/pages/inventory-items-view'
+import type { InventoryFilter } from '@/pages/inventory-items-view'
 import { InventoryStoresView } from '@/pages/inventory-stores-view'
 
 type InventoryTab = 'items' | 'stores'
 
 export const InventoryPage = () => {
   const [activeTab, setActiveTab] = useState<InventoryTab>('items')
-  const [filter, setFilter] = useState('all')
+  const [filter, setFilter] = useState<InventoryFilter>('all')
   const { data: households } = useHouseholdsQuery()
 
   return (
@@ -67,7 +68,7 @@ export const InventoryPage = () => {
         <select
           aria-label="Filter inventory"
           value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          onChange={(e) => setFilter(e.target.value as InventoryFilter)}
           className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent mb-4"
         >
           <option value="all">All Items</option>
