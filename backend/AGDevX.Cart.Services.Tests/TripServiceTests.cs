@@ -168,18 +168,55 @@ public class TripServiceTests
     }
 
     [Fact]
-    public async Task Should_UpdateTrip_When_ValidTripProvided()
+    public async Task Should_UpdateTripName_When_UserIsCollaborator()
     {
         // Arrange
-        var trip = new Trip { Id = Guid.NewGuid(), Name = "Updated", IsCompleted = false };
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var trip = new Trip { Id = tripId, Name = "Old Name", IsCompleted = false };
 
-        _mockTripRepository.Setup(r => r.Update(trip)).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>())).ReturnsAsync((Trip t) => t);
 
         // Act
-        var result = await _tripService.UpdateTrip(trip);
+        var result = await _tripService.UpdateTrip(tripId, "New Name", userId);
 
         // Assert
-        result.Name.Should().Be("Updated");
+        result.Name.Should().Be("New Name");
+    }
+
+    [Fact]
+    public async Task Should_ThrowUnauthorizedAccessException_When_UpdatingTripAsNonCollaborator()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(false);
+
+        // Act
+        var act = () => _tripService.UpdateTrip(tripId, "New Name", userId);
+
+        // Assert
+        await act.Should().ThrowAsync<UnauthorizedAccessException>();
+    }
+
+    [Fact]
+    public async Task Should_ThrowKeyNotFoundException_When_UpdatingNonExistingTrip()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync((Trip?)null);
+
+        // Act
+        var act = () => _tripService.UpdateTrip(tripId, "New Name", userId);
+
+        // Assert
+        await act.Should().ThrowAsync<KeyNotFoundException>();
     }
 
     [Fact]

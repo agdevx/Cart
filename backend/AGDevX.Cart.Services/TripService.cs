@@ -45,8 +45,19 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
         return await tripRepository.GetById(id);
     }
 
-    public async Task<Trip> UpdateTrip(Trip trip)
+    public async Task<Trip> UpdateTrip(Guid tripId, string name, Guid userId)
     {
+        //== Verify user is collaborator before updating trip
+        var isCollaborator = await tripRepository.IsUserCollaborator(tripId, userId);
+        if (!isCollaborator)
+        {
+            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
+        }
+
+        var trip = await tripRepository.GetById(tripId)
+                        ?? throw new KeyNotFoundException("Trip not found");
+
+        trip.Name = name;
         return await tripRepository.Update(trip);
     }
 
