@@ -73,7 +73,7 @@ export const InventoryPage = () => {
           <option value="all">All Items</option>
           <option value="personal">Personal</option>
           {(households || []).map((household) => (
-            <optgroup key={household.id} label={household.name}>
+            <optgroup key={household.id} label={household.name ?? undefined}>
               <option value={`household:${household.id}`}>{household.name}</option>
               <option value={`merged:${household.id}`}>{household.name} + Personal</option>
             </optgroup>
