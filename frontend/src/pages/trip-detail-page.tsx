@@ -2,13 +2,19 @@
 // ABOUTME: Allows adding items to trip and starting shopping session
 
 import { ArrowLeft, ShoppingCart } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
+import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
+import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
+import { useDeleteTripItemMutation } from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
+import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
+
+import { TripItemRow } from './components/trip-item-row'
 
 export const TripDetailPage = () => {
   const { tripId } = useParams<{ tripId: string }>()
@@ -16,7 +22,12 @@ export const TripDetailPage = () => {
   const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
   const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!)
   const { data: inventory } = useInventoryQuery()
+  const { data: households } = useHouseholdsQuery()
+  const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
+  const { data: stores } = useStoresQuery(householdIds)
   const addItemMutation = useAddTripItemMutation()
+  const updateMutation = useUpdateTripItemMutation()
+  const deleteMutation = useDeleteTripItemMutation()
   const [showAddItem, setShowAddItem] = useState(false)
   const [selectedItemId, setSelectedItemId] = useState('')
   const [quantity, setQuantity] = useState('1')
@@ -40,6 +51,14 @@ export const TripDetailPage = () => {
 
   const handleStartShopping = () => {
     navigate(`/shopping/${tripId}/active`)
+  }
+
+  const handleUpdateItem = (tripItemId: string, quantity: number, notes: string | null, storeId: string | null) => {
+    updateMutation.mutate({ tripItemId, tripId: tripId!, quantity, notes, storeId })
+  }
+
+  const handleDeleteItem = (tripItemId: string) => {
+    deleteMutation.mutate({ tripItemId, tripId: tripId! })
   }
 
   if (tripLoading || itemsLoading) {
@@ -152,20 +171,15 @@ export const TripDetailPage = () => {
             {tripItems.map((item) => {
               const inventoryItem = inventory?.find((i) => i.id === item.inventoryItemId)
               return (
-                <div
+                <TripItemRow
                   key={item.id}
-                  className="p-4 bg-surface rounded-xl shadow-sm"
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-bold text-navy">{inventoryItem?.name || 'Unknown Item'}</h3>
-                      <p className="text-sm text-text-secondary">Quantity: {item.quantity}</p>
-                      {item.notes && (
-                        <p className="text-sm text-text-secondary">{item.notes}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                  tripItem={item}
+                  itemName={inventoryItem?.name || 'Unknown Item'}
+                  stores={stores || []}
+                  onUpdate={handleUpdateItem}
+                  onDelete={handleDeleteItem}
+                  isUpdating={updateMutation.isPending}
+                />
               )
             })}
           </div>
