@@ -6,12 +6,17 @@ import { Link } from 'react-router-dom'
 
 import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-household-members.query'
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
+import { useAuth } from '@/auth/use-auth'
 const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
+  const { user } = useAuth()
   const { data: members } = useHouseholdMembersQuery(householdId)
 
   if (!members || members.length === 0) return null
 
-  const names = members
+  const otherMembers = members.filter((m) => m.userId !== user?.id)
+  if (otherMembers.length === 0) return null
+
+  const names = otherMembers
     .map((m) => m.user?.name || 'Unknown')
     .join(', ')
 
