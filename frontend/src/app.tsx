@@ -27,7 +27,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
 }
 
-const LayoutWithNav = ({ children }: { children: React.ReactNode }) => (
+const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="bg-bg min-h-screen pb-24">
     {children}
     <BottomNav />
@@ -40,15 +40,15 @@ export const AppRoutes = () => (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/pantry" element={<ProtectedRoute><LayoutWithNav><PantryPage /></LayoutWithNav></ProtectedRoute>} />
-      <Route path="/pantry/add" element={<ProtectedRoute><AddPantryItemPage /></ProtectedRoute>} />
-      <Route path="/shopping" element={<ProtectedRoute><LayoutWithNav><ShoppingPage /></LayoutWithNav></ProtectedRoute>} />
-      <Route path="/shopping/:tripId" element={<ProtectedRoute><TripDetailPage /></ProtectedRoute>} />
-      <Route path="/shopping/:tripId/active" element={<ProtectedRoute><ActiveTripPage /></ProtectedRoute>} />
-      <Route path="/household" element={<ProtectedRoute><LayoutWithNav><HouseholdPage /></LayoutWithNav></ProtectedRoute>} />
-      <Route path="/household/create" element={<ProtectedRoute><CreateHouseholdPage /></ProtectedRoute>} />
-      <Route path="/household/join" element={<ProtectedRoute><JoinHouseholdPage /></ProtectedRoute>} />
-      <Route path="/household/:id" element={<ProtectedRoute><HouseholdDetailPage /></ProtectedRoute>} />
+      <Route path="/pantry" element={<ProtectedRoute><AuthenticatedLayout><PantryPage /></AuthenticatedLayout></ProtectedRoute>} />
+      <Route path="/pantry/add" element={<ProtectedRoute><AuthenticatedLayout><AddPantryItemPage /></AuthenticatedLayout></ProtectedRoute>} />
+      <Route path="/shopping" element={<ProtectedRoute><AuthenticatedLayout><ShoppingPage /></AuthenticatedLayout></ProtectedRoute>} />
+      <Route path="/shopping/:tripId" element={<ProtectedRoute><AuthenticatedLayout><TripDetailPage /></AuthenticatedLayout></ProtectedRoute>} />
+      <Route path="/shopping/:tripId/active" element={<ProtectedRoute><AuthenticatedLayout><ActiveTripPage /></AuthenticatedLayout></ProtectedRoute>} />
+      <Route path="/household" element={<ProtectedRoute><AuthenticatedLayout><HouseholdPage /></AuthenticatedLayout></ProtectedRoute>} />
+      <Route path="/household/create" element={<ProtectedRoute><AuthenticatedLayout><CreateHouseholdPage /></AuthenticatedLayout></ProtectedRoute>} />
+      <Route path="/household/join" element={<ProtectedRoute><AuthenticatedLayout><JoinHouseholdPage /></AuthenticatedLayout></ProtectedRoute>} />
+      <Route path="/household/:id" element={<ProtectedRoute><AuthenticatedLayout><HouseholdDetailPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/shopping" replace />} />
     </Routes>
   </>

@@ -82,7 +82,7 @@ export const TripDetailPage = () => {
   ) || []
 
   return (
-    <div className="bg-bg min-h-screen px-5 pt-14 pb-8">
+    <div className="px-5 pt-14 pb-8">
       <div className="mb-6">
         <button
           onClick={() => navigate('/shopping')}
