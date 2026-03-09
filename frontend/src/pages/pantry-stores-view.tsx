@@ -11,6 +11,8 @@ import { useDeleteStoreMutation } from '@/apis/agdevx-cart-api/store/delete-stor
 import { useUpdateStoreMutation } from '@/apis/agdevx-cart-api/store/update-store.mutation'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 
+import { ScopeSelect } from './components/scope-select'
+
 export const PantryStoresView = () => {
   const { data: households, isLoading: householdsLoading } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
@@ -187,20 +189,15 @@ export const PantryStoresView = () => {
             <label htmlFor="storeScope" className="block text-sm font-semibold text-navy-soft mb-1">
               Scope
             </label>
-            <select
-              id="storeScope"
+            <ScopeSelect
               value={storeScope}
-              onChange={(e) => setStoreScope(e.target.value)}
-              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+              onChange={setStoreScope}
+              personalLabel="Personal"
+              households={households}
+              householdDescription="Household"
               disabled={createMutation.isPending}
-            >
-              <option value="personal">Personal</option>
-              {households?.map((household) => (
-                <option key={household.id} value={household.id}>
-                  {household.name}
-                </option>
-              ))}
-            </select>
+              aria-label="Scope"
+            />
           </div>
 
           <button

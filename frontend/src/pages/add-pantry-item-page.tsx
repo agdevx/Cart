@@ -8,6 +8,8 @@ import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-househo
 import { useCreateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/create-inventory-item.mutation'
 import { getErrorMessage } from '@/utilities/error-messages'
 
+import { ScopeSelect } from './components/scope-select'
+
 export const AddPantryItemPage = () => {
   const [name, setName] = useState('')
   const [notes, setNotes] = useState('')
@@ -74,20 +76,15 @@ export const AddPantryItemPage = () => {
           <label htmlFor="household" className="block text-sm font-semibold text-navy-soft mb-1">
             Type
           </label>
-          <select
-            id="household"
+          <ScopeSelect
             value={householdId}
-            onChange={(e) => setHouseholdId(e.target.value)}
-            className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+            onChange={setHouseholdId}
+            personalLabel="Personal Item"
+            households={households}
+            householdDescription="Household"
             disabled={createMutation.isPending}
-          >
-            <option value="personal">Personal Item</option>
-            {households?.map((household) => (
-              <option key={household.id} value={household.id}>
-                {household.name} (Household)
-              </option>
-            ))}
-          </select>
+            aria-label="Type"
+          />
         </div>
 
         {createMutation.isError && (

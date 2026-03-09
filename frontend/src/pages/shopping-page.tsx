@@ -12,6 +12,7 @@ import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.m
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
 
 import { ConfirmDialog } from './components/confirm-dialog'
+import { ScopeSelect } from './components/scope-select'
 import { TripCard } from './components/trip-card'
 
 export const ShoppingPage = () => {
@@ -114,20 +115,15 @@ export const ShoppingPage = () => {
             <label htmlFor="household" className="block text-sm font-semibold text-navy-soft mb-1">
               Type
             </label>
-            <select
-              id="household"
+            <ScopeSelect
               value={householdId}
-              onChange={(e) => setHouseholdId(e.target.value)}
-              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+              onChange={setHouseholdId}
+              personalLabel="Personal Trip"
+              households={households}
+              householdDescription="Household"
               disabled={createMutation.isPending}
-            >
-              <option value="personal">Personal Trip</option>
-              {households?.map((household) => (
-                <option key={household.id} value={household.id}>
-                  {household.name}
-                </option>
-              ))}
-            </select>
+              aria-label="Type"
+            />
           </div>
 
           <button
