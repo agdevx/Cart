@@ -63,6 +63,24 @@ public class CartDbContext(DbContextOptions<CartDbContext> options, IHttpContext
         {
             entity.HasIndex(u => u.Email).IsUnique();
         });
+
+        //== Cascade delete inventory items when household is deleted
+        modelBuilder.Entity<InventoryItem>(entity =>
+        {
+            entity.HasOne(i => i.Household)
+                  .WithMany()
+                  .HasForeignKey(i => i.HouseholdId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        //== Cascade delete stores when household is deleted
+        modelBuilder.Entity<Store>(entity =>
+        {
+            entity.HasOne(s => s.Household)
+                  .WithMany()
+                  .HasForeignKey(s => s.HouseholdId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 
     //== Automatically populate audit fields on BaseEntity entries
