@@ -73,13 +73,15 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
         return store;
     }
 
-    public async Task<Store> UpdateStore(Store store, Guid userId)
+    public async Task<Store> UpdateStore(Guid storeId, string name, Guid userId)
     {
         //== Verify access before updating
-        var existingStore = await GetById(store.Id, userId)
+        var existingStore = await GetById(storeId, userId)
                                 ?? throw new UnauthorizedAccessException("Store not found or access denied");
 
-        return await storeRepository.Update(store);
+        //== Update only the name on the existing entity, preserving all other fields
+        existingStore.Name = name;
+        return await storeRepository.Update(existingStore);
     }
 
     public async Task DeleteStore(Guid id, Guid userId)

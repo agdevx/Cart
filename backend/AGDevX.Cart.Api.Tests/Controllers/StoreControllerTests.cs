@@ -211,7 +211,7 @@ public class StoreControllerTests
 
         var store = new Store { Id = storeId, Name = "Updated Store", UserId = userId };
 
-        mockService.Setup(s => s.UpdateStore(It.IsAny<Store>(), userId))
+        mockService.Setup(s => s.UpdateStore(storeId, store.Name, userId))
                    .ReturnsAsync(store);
 
         // Act
@@ -241,7 +241,7 @@ public class StoreControllerTests
 
         var store = new Store { Id = storeId, Name = "Updated Store", UserId = userId };
 
-        mockService.Setup(s => s.UpdateStore(It.IsAny<Store>(), userId))
+        mockService.Setup(s => s.UpdateStore(storeId, store.Name, userId))
                    .ThrowsAsync(new ArgumentException("Store not found"));
 
         // Act
@@ -271,7 +271,7 @@ public class StoreControllerTests
 
         var store = new Store { Id = storeId, Name = "Updated Store", UserId = userId };
 
-        mockService.Setup(s => s.UpdateStore(It.IsAny<Store>(), userId))
+        mockService.Setup(s => s.UpdateStore(storeId, store.Name, userId))
                    .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this store"));
 
         // Act
