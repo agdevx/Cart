@@ -1,7 +1,7 @@
 // ABOUTME: Bottom tab navigation component
-// ABOUTME: Mobile-first navigation with 3 tabs
+// ABOUTME: Mobile-first navigation with 4 tabs
 
-import { Package, ShoppingCart, Users } from 'lucide-react'
+import { Package, Settings, ShoppingCart, Users } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 
 export const BottomNav = () => {
@@ -13,6 +13,7 @@ export const BottomNav = () => {
     { path: '/pantry', label: 'Pantry', icon: Package },
     { path: '/shopping', label: 'Trips', icon: ShoppingCart },
     { path: '/household', label: 'Household', icon: Users },
+    { path: '/settings', label: 'Settings', icon: Settings },
   ]
 
   return (

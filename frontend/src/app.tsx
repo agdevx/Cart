@@ -20,6 +20,7 @@ import { PantryPage } from '@/pages/pantry-page'
 import { JoinHouseholdPage } from '@/pages/join-household-page'
 import { LoginPage } from '@/pages/login-page'
 import { RegisterPage } from '@/pages/register-page'
+import { SettingsPage } from '@/pages/settings-page'
 import { ShoppingPage } from '@/pages/shopping-page'
 import { TripDetailPage } from '@/pages/trip-detail-page'
 
@@ -51,6 +52,7 @@ export const AppRoutes = () => (
       <Route path="/household/create" element={<ProtectedRoute><AuthenticatedLayout><CreateHouseholdPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path="/household/join" element={<ProtectedRoute><AuthenticatedLayout><JoinHouseholdPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path="/household/:id" element={<ProtectedRoute><AuthenticatedLayout><HouseholdDetailPage /></AuthenticatedLayout></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><AuthenticatedLayout><SettingsPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/shopping" replace />} />
     </Routes>
   </>
