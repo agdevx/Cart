@@ -5,12 +5,13 @@ interface ConfirmDialogProps {
   title: string
   message: string
   confirmLabel: string
+  cancelLabel?: string
   onConfirm: () => void
   onCancel: () => void
   isPending?: boolean
 }
 
-export const ConfirmDialog = ({ title, message, confirmLabel, onConfirm, onCancel, isPending }: ConfirmDialogProps) => {
+export const ConfirmDialog = ({ title, message, confirmLabel, cancelLabel, onConfirm, onCancel, isPending }: ConfirmDialogProps) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-surface rounded-2xl p-6 mx-4 max-w-sm w-full shadow-lg">
@@ -21,7 +22,7 @@ export const ConfirmDialog = ({ title, message, confirmLabel, onConfirm, onCance
             onClick={onCancel}
             className="px-4 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
           >
-            Cancel
+            {cancelLabel || 'Cancel'}
           </button>
           <button
             onClick={onConfirm}

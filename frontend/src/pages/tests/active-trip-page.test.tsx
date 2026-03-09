@@ -280,6 +280,72 @@ describe('ActiveTripPage', () => {
     expect(milkElement).not.toHaveClass('line-through')
   })
 
+  it('shows styled confirmation dialog when completing with unchecked items', () => {
+    setupMocks()
+    render(<ActiveTripPage />, { wrapper })
+
+    //== Click Complete Trip — Milk (ti1) is unchecked so dialog should appear
+    fireEvent.click(screen.getByText('Complete Trip'))
+
+    //== Dialog should show the friendly message
+    expect(screen.getByText('Hold on!')).toBeInTheDocument()
+    expect(screen.getByText('It looks like you may have missed some items. Are you sure you want to complete your trip?')).toBeInTheDocument()
+    expect(screen.getByText('Complete Anyway')).toBeInTheDocument()
+    expect(screen.getByText('Keep Shopping')).toBeInTheDocument()
+
+    //== Complete mutation should NOT have been called yet
+    expect(completeMutateAsyncFn).not.toHaveBeenCalled()
+  })
+
+  it('closes confirmation dialog when clicking Keep Shopping', () => {
+    setupMocks()
+    render(<ActiveTripPage />, { wrapper })
+
+    //== Open the dialog
+    fireEvent.click(screen.getByText('Complete Trip'))
+    expect(screen.getByText('Hold on!')).toBeInTheDocument()
+
+    //== Click Keep Shopping
+    fireEvent.click(screen.getByText('Keep Shopping'))
+
+    //== Dialog should be dismissed
+    expect(screen.queryByText('Hold on!')).not.toBeInTheDocument()
+    expect(completeMutateAsyncFn).not.toHaveBeenCalled()
+  })
+
+  it('calls complete mutation when clicking Complete Anyway', () => {
+    setupMocks()
+    render(<ActiveTripPage />, { wrapper })
+
+    //== Open the dialog
+    fireEvent.click(screen.getByText('Complete Trip'))
+
+    //== Click Complete Anyway
+    fireEvent.click(screen.getByText('Complete Anyway'))
+
+    //== Complete mutation should be called
+    expect(completeMutateAsyncFn).toHaveBeenCalledWith('trip1')
+  })
+
+  it('completes trip directly when all items are checked', () => {
+    setupMocks()
+
+    //== Override trip items so all are checked
+    vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+      data: mockTripItems.map((item) => ({ ...item, isChecked: true })),
+      isLoading: false,
+    } as any)
+
+    render(<ActiveTripPage />, { wrapper })
+
+    //== Click Complete Trip — all items checked, no dialog should appear
+    fireEvent.click(screen.getByText('Complete Trip'))
+
+    //== Should complete directly without showing the dialog
+    expect(screen.queryByText('Hold on!')).not.toBeInTheDocument()
+    expect(completeMutateAsyncFn).toHaveBeenCalledWith('trip1')
+  })
+
   it('does not toggle check when editing', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
