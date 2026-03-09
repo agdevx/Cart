@@ -44,7 +44,7 @@ describe('useStoresQuery', () => {
   it('fetches personal and household stores', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: 'user1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: 'user1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -71,7 +71,7 @@ describe('useStoresQuery', () => {
   it('fetches only personal stores when no household IDs provided', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: 'user1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: 'user1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -109,7 +109,7 @@ describe('useStoresQuery', () => {
   it('handles fetch error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: 'user1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: 'user1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })

@@ -11,11 +11,28 @@ import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 
 import { TripCard } from '../trip-card'
 
+const planningTrip: Trip = {
+  id: 'trip-0',
+  name: 'Planning Trip',
+  householdId: 'h1',
+  createdByUserId: 'user-1',
+  isStarted: false,
+  startedAt: null,
+  isCompleted: false,
+  completedAt: null,
+  createdBy: 'user-1',
+  createdDate: '2026-02-14T10:00:00Z',
+  modifiedBy: null,
+  modifiedDate: null,
+}
+
 const activeTrip: Trip = {
   id: 'trip-1',
   name: 'Weekly Groceries',
   householdId: 'h1',
   createdByUserId: 'user-1',
+  isStarted: true,
+  startedAt: '2026-02-15T10:00:00Z',
   isCompleted: false,
   completedAt: null,
   createdBy: 'user-1',
@@ -29,6 +46,8 @@ const completedTrip: Trip = {
   name: 'Costco Run',
   householdId: 'h1',
   createdByUserId: 'user-1',
+  isStarted: true,
+  startedAt: '2026-02-18T10:00:00Z',
   isCompleted: true,
   completedAt: '2026-02-20T14:30:00Z',
   createdBy: 'user-1',
@@ -53,7 +72,17 @@ describe('TripCard', () => {
     vi.clearAllMocks()
   })
 
-  it('renders active trip with name and started date', () => {
+  it('renders planning trip with name and created date', () => {
+    render(
+      <TripCard trip={planningTrip} onRename={mockOnRename} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      { wrapper }
+    )
+
+    expect(screen.getByText('Planning Trip')).toBeInTheDocument()
+    expect(screen.getByText(/Created:/)).toBeInTheDocument()
+  })
+
+  it('renders started trip with name and started date', () => {
     render(
       <TripCard trip={activeTrip} onRename={mockOnRename} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }

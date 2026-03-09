@@ -17,6 +17,12 @@ public class Trip : BaseEntity
     //== When the trip was marked as completed
     public DateTime? CompletedAt { get; set; }
 
+    //== Whether the trip has been started (moved from planning to active)
+    public bool IsStarted { get; set; }
+
+    //== When the trip was started
+    public DateTime? StartedAt { get; set; }
+
     //== Users who can collaborate on this trip
     public ICollection<TripCollaborator> Collaborators { get; set; } = [];
 

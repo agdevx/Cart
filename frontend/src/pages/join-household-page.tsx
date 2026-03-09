@@ -28,7 +28,7 @@ export const JoinHouseholdPage = () => {
   }
 
   return (
-    <div className="bg-bg min-h-screen px-5 pt-14 pb-8">
+    <div className="px-5 pt-14 pb-8">
       <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight mb-6">Join Household</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">

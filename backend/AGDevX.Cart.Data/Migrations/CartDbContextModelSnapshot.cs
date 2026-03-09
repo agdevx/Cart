@@ -191,6 +191,9 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsStarted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("TEXT");
 
@@ -199,6 +202,9 @@ namespace AGDevX.Cart.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("StartedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -300,9 +306,6 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("DisplayName")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Email")
                         .HasColumnType("TEXT");
 
@@ -310,6 +313,9 @@ namespace AGDevX.Cart.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PasswordHash")
@@ -350,7 +356,8 @@ namespace AGDevX.Cart.Data.Migrations
 
                     b.HasOne("AGDevX.Cart.Data.Models.Household", "Household")
                         .WithMany()
-                        .HasForeignKey("HouseholdId");
+                        .HasForeignKey("HouseholdId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("AGDevX.Cart.Data.Models.User", "OwnerUser")
                         .WithMany()
@@ -367,7 +374,8 @@ namespace AGDevX.Cart.Data.Migrations
                 {
                     b.HasOne("AGDevX.Cart.Data.Models.Household", "Household")
                         .WithMany()
-                        .HasForeignKey("HouseholdId");
+                        .HasForeignKey("HouseholdId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("AGDevX.Cart.Data.Models.User", "User")
                         .WithMany()

@@ -2,7 +2,7 @@
 // ABOUTME: Verifies TripItemRow kebab menus, inline edit, and remove actions
 
 import { QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -15,6 +15,7 @@ import type { Household } from '@/apis/agdevx-cart-api/models/household'
 import * as tripQueryModule from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import * as tripItemsQueryModule from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import * as inventoryQueryModule from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
+import * as startTripModule from '@/apis/agdevx-cart-api/trip/start-trip.mutation'
 import * as addTripItemModule from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
 import * as updateTripItemModule from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
 import * as deleteTripItemModule from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
@@ -23,12 +24,14 @@ import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-hou
 
 import { TripDetailPage } from '../trip-detail-page'
 
+const mockNavigate = vi.fn()
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
   return {
     ...actual,
     useParams: () => ({ tripId: 'trip1' }),
-    useNavigate: () => vi.fn(),
+    useNavigate: () => mockNavigate,
   }
 })
 
@@ -43,6 +46,8 @@ const mockTrip: Trip = {
   name: 'Weekly Groceries',
   householdId: null,
   createdByUserId: 'user1',
+  isStarted: false,
+  startedAt: null,
   isCompleted: false,
   completedAt: null,
   createdBy: 'user1',
@@ -143,6 +148,7 @@ const mockHouseholds: Household[] = [
   },
 ]
 
+const startMutateAsyncFn = vi.fn().mockResolvedValue(mockTrip)
 const updateMutateFn = vi.fn()
 const deleteMutateFn = vi.fn()
 
@@ -160,6 +166,11 @@ const setupMocks = () => {
   vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
     data: mockInventory,
     isLoading: false,
+  } as any)
+
+  vi.spyOn(startTripModule, 'useStartTripMutation').mockReturnValue({
+    mutateAsync: startMutateAsyncFn,
+    isPending: false,
   } as any)
 
   vi.spyOn(addTripItemModule, 'useAddTripItemMutation').mockReturnValue({
@@ -248,6 +259,19 @@ describe('TripDetailPage', () => {
     expect(deleteMutateFn).toHaveBeenCalledWith({
       tripItemId: 'ti1',
       tripId: 'trip1',
+    })
+  })
+
+  it('calls start mutation and navigates when Start Shopping is clicked', async () => {
+    setupMocks()
+    render(<TripDetailPage />, { wrapper })
+
+    //== Click Start Shopping button
+    fireEvent.click(screen.getByText('Start Shopping'))
+
+    await waitFor(() => {
+      expect(startMutateAsyncFn).toHaveBeenCalledWith('trip1')
+      expect(mockNavigate).toHaveBeenCalledWith('/shopping/trip1/active')
     })
   })
 

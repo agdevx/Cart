@@ -12,6 +12,7 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
     public async Task<Household?> GetById(Guid householdId)
     {
         return await context.Households.Include(h => h.Members)
+                                       .ThenInclude(m => m.User)
                                        .FirstOrDefaultAsync(h => h.Id == householdId);
     }
 
@@ -19,6 +20,7 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
     public async Task<Household?> GetByInviteCode(string inviteCode)
     {
         return await context.Households.Include(h => h.Members)
+                                       .ThenInclude(m => m.User)
                                        .FirstOrDefaultAsync(h => h.InviteCode == inviteCode);
     }
 
@@ -26,6 +28,7 @@ public class HouseholdRepository(CartDbContext context) : IHouseholdRepository
     public async Task<IEnumerable<Household>> GetUserHouseholds(Guid userId)
     {
         return await context.Households.Include(h => h.Members)
+                                       .ThenInclude(m => m.User)
                                        .Where(h => h.Members.Any(m => m.UserId == userId))
                                        .ToListAsync();
     }

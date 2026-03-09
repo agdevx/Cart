@@ -38,6 +38,6 @@ describe('App', () => {
   it('renders registration page at /register route', () => {
     render(<AppRoutes />, { wrapper: createWrapper('/register') })
     expect(screen.getByText((_content, element) => element?.tagName === 'H1' && element?.textContent === 'AGDevX Cart')).toBeInTheDocument()
-    expect(screen.getByLabelText(/display name/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/^name$/i)).toBeInTheDocument()
   })
 })

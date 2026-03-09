@@ -8,13 +8,13 @@ import { apiFetch } from '../agdevx-cart-api-config';
 export interface RegisterRequest {
   email: string;
   password: string;
-  displayName: string;
+  name: string;
 }
 
 export interface RegisterResponse {
   userId: string;
   email: string;
-  displayName: string;
+  name: string;
 }
 
 /**

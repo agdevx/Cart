@@ -25,6 +25,8 @@ describe('useReopenTripMutation', () => {
       name: 'Grocery Shopping',
       householdId: 'household1',
       createdByUserId: 'user1',
+      isStarted: false,
+      startedAt: null,
       isCompleted: false,
       completedAt: null,
       createdBy: 'user1',
@@ -35,7 +37,7 @@ describe('useReopenTripMutation', () => {
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -65,6 +67,8 @@ describe('useReopenTripMutation', () => {
       name: 'Personal Trip',
       householdId: null,
       createdByUserId: 'user1',
+      isStarted: false,
+      startedAt: null,
       isCompleted: false,
       completedAt: null,
       createdBy: 'user1',
@@ -75,7 +79,7 @@ describe('useReopenTripMutation', () => {
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -103,7 +107,7 @@ describe('useReopenTripMutation', () => {
   it('handles reopen error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })

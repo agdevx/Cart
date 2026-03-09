@@ -32,7 +32,7 @@ describe('Navigation', () => {
     const tripsLink = screen.getByText(/^Trips$/i)
     const householdLink = screen.getByText(/^Household$/i)
 
-    expect(pantryLink.closest('a')).toHaveAttribute('href', '/inventory')
+    expect(pantryLink.closest('a')).toHaveAttribute('href', '/pantry')
     expect(tripsLink.closest('a')).toHaveAttribute('href', '/shopping')
     expect(householdLink.closest('a')).toHaveAttribute('href', '/household')
   })

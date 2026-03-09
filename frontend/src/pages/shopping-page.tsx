@@ -1,8 +1,9 @@
 // ABOUTME: Shopping page displaying active trip and trip history
 // ABOUTME: Shows current trip in progress and completed trips list
 
-import { Plus } from 'lucide-react'
+import { ChevronDown, Plus } from 'lucide-react'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
@@ -12,9 +13,11 @@ import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.m
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
 
 import { ConfirmDialog } from './components/confirm-dialog'
+import { ScopeSelect } from './components/scope-select'
 import { TripCard } from './components/trip-card'
 
 export const ShoppingPage = () => {
+  const navigate = useNavigate()
   const { data: trips, isLoading } = useTripsQuery()
   const { data: households } = useHouseholdsQuery()
   const createMutation = useCreateTripMutation()
@@ -26,8 +29,10 @@ export const ShoppingPage = () => {
   const [tripName, setTripName] = useState('')
   const [householdId, setHouseholdId] = useState<string>('personal')
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
+  const [showCompleted, setShowCompleted] = useState(false)
 
-  const activeTrips = trips?.filter((trip) => !trip.isCompleted) || []
+  const inProgressTrips = trips?.filter((trip) => trip.isStarted && !trip.isCompleted) || []
+  const planningTrips = trips?.filter((trip) => !trip.isStarted && !trip.isCompleted) || []
   const completedTrips = trips?.filter((trip) => trip.isCompleted) || []
 
   const handleCreateTrip = async (e: React.FormEvent) => {
@@ -38,12 +43,13 @@ export const ShoppingPage = () => {
     }
 
     try {
-      await createMutation.mutateAsync({
+      const newTrip = await createMutation.mutateAsync({
         name: tripName.trim(),
         householdId: householdId === 'personal' ? null : householdId,
       })
       setTripName('')
       setShowCreateForm(false)
+      navigate(`/shopping/${newTrip.id}`)
     } catch {
       // Error handled by mutation state
     }
@@ -114,20 +120,15 @@ export const ShoppingPage = () => {
             <label htmlFor="household" className="block text-sm font-semibold text-navy-soft mb-1">
               Type
             </label>
-            <select
-              id="household"
+            <ScopeSelect
               value={householdId}
-              onChange={(e) => setHouseholdId(e.target.value)}
-              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+              onChange={setHouseholdId}
+              personalLabel="Personal Trip"
+              households={households}
+              householdDescription="Household"
               disabled={createMutation.isPending}
-            >
-              <option value="personal">Personal Trip</option>
-              {households?.map((household) => (
-                <option key={household.id} value={household.id}>
-                  {household.name}
-                </option>
-              ))}
-            </select>
+              aria-label="Type"
+            />
           </div>
 
           <button
@@ -140,43 +141,56 @@ export const ShoppingPage = () => {
         </form>
       )}
 
-      {activeTrips.length > 0 && (
+      {/* In Progress section */}
+      {inProgressTrips.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center gap-2.5 mt-6 mb-3">
             <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">In Progress</span>
             <span className="flex-1 h-px bg-navy/8" />
           </div>
           <div className="space-y-3">
-            {activeTrips.map((trip) => (
-              <TripCard
-                key={trip.id}
-                trip={trip}
-                onRename={handleRename}
-                onDelete={handleDelete}
-                onReopen={handleReopen}
-              />
+            {inProgressTrips.map((trip) => (
+              <TripCard key={trip.id} trip={trip} onRename={handleRename} onDelete={handleDelete} onReopen={handleReopen} />
             ))}
           </div>
         </div>
       )}
 
-      {completedTrips.length > 0 && (
-        <div>
+      {/* Planning section */}
+      {planningTrips.length > 0 && (
+        <div className="mb-6">
           <div className="flex items-center gap-2.5 mt-6 mb-3">
-            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Completed</span>
+            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Planning</span>
             <span className="flex-1 h-px bg-navy/8" />
           </div>
           <div className="space-y-3">
-            {completedTrips.map((trip) => (
-              <TripCard
-                key={trip.id}
-                trip={trip}
-                onRename={handleRename}
-                onDelete={handleDelete}
-                onReopen={handleReopen}
-              />
+            {planningTrips.map((trip) => (
+              <TripCard key={trip.id} trip={trip} onRename={handleRename} onDelete={handleDelete} onReopen={handleReopen} />
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Completed section (accordion) */}
+      {completedTrips.length > 0 && (
+        <div className="mt-6">
+          <button
+            onClick={() => setShowCompleted(!showCompleted)}
+            className="flex items-center gap-2.5 w-full mb-3"
+          >
+            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">
+              Completed ({completedTrips.length})
+            </span>
+            <span className="flex-1 h-px bg-navy/8" />
+            <ChevronDown className={`w-4 h-4 text-text-tertiary transition-transform ${showCompleted ? 'rotate-180' : ''}`} />
+          </button>
+          {showCompleted && (
+            <div className="space-y-3">
+              {completedTrips.map((trip) => (
+                <TripCard key={trip.id} trip={trip} onRename={handleRename} onDelete={handleDelete} onReopen={handleReopen} />
+              ))}
+            </div>
+          )}
         </div>
       )}
 

@@ -21,7 +21,7 @@ describe('useUpdateTripItemMutation', () => {
   it('updates trip item with correct endpoint and query params', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -55,7 +55,7 @@ describe('useUpdateTripItemMutation', () => {
   it('invalidates trip item queries on success', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -86,7 +86,7 @@ describe('useUpdateTripItemMutation', () => {
   it('handles update error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })

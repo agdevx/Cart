@@ -123,6 +123,26 @@ public class TripController(ITripService tripService) : ControllerBase
         }
     }
 
+    //== Start a trip (move from planning to active)
+    [HttpPost("{id}/start")]
+    public async Task<IActionResult> Start(Guid id)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var trip = await tripService.StartTrip(id, userId);
+            return Ok(trip);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { errorCode = "NOT_FOUND", message = ex.Message });
+        }
+    }
+
     //== Mark a trip as completed
     [HttpPost("{id}/complete")]
     public async Task<IActionResult> Complete(Guid id)

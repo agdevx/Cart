@@ -21,7 +21,7 @@ describe('useRegenerateInviteCodeMutation', () => {
   it('regenerates invite code successfully', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -46,7 +46,7 @@ describe('useRegenerateInviteCodeMutation', () => {
   it('invalidates invite code query on success', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -70,7 +70,7 @@ describe('useRegenerateInviteCodeMutation', () => {
   it('handles regenerate error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })

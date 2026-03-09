@@ -1,9 +1,9 @@
 // ABOUTME: Store management view with list, create, edit, and delete functionality
 // ABOUTME: Groups stores by household with a personal stores section, inline editing and delete confirmation
 
-import { useMemo,useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { Check, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Check, MoreVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateStoreMutation } from '@/apis/agdevx-cart-api/store/create-store.mutation'
@@ -11,7 +11,10 @@ import { useDeleteStoreMutation } from '@/apis/agdevx-cart-api/store/delete-stor
 import { useUpdateStoreMutation } from '@/apis/agdevx-cart-api/store/update-store.mutation'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 
-export const InventoryStoresView = () => {
+import { ConfirmDialog } from './components/confirm-dialog'
+import { ScopeSelect } from './components/scope-select'
+
+export const PantryStoresView = () => {
   const { data: households, isLoading: householdsLoading } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores, isLoading: storesLoading } = useStoresQuery(householdIds)
@@ -25,6 +28,19 @@ export const InventoryStoresView = () => {
   const [editingStoreId, setEditingStoreId] = useState<string | null>(null)
   const [editingName, setEditingName] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuOpenId) return
+    const handleMouseDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpenId(null)
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [menuOpenId])
 
   if (storesLoading || householdsLoading) {
     return <p className="text-text-secondary">Loading stores...</p>
@@ -129,25 +145,43 @@ export const InventoryStoresView = () => {
           >
             <Check className="w-5 h-5" />
           </button>
+          <button
+            onClick={handleCancelEdit}
+            aria-label="Cancel editing"
+            className="text-text-tertiary hover:text-coral transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
       ) : (
         <>
           <span className="font-bold text-navy">{store.name}</span>
-          <div className="flex items-center gap-2">
+          <div className="relative" ref={menuOpenId === store.id ? menuRef : undefined}>
             <button
-              onClick={() => handleStartEdit(store.id, store.name)}
-              aria-label="Edit store name"
-              className="text-text-tertiary hover:text-teal transition-colors"
+              onClick={() => setMenuOpenId(menuOpenId === store.id ? null : store.id)}
+              aria-label="Store actions"
+              className="p-1.5 rounded-lg hover:bg-navy/8 transition-colors"
             >
-              <Pencil className="w-4 h-4" />
+              <MoreVertical className="w-5 h-5 text-text-tertiary" />
             </button>
-            <button
-              onClick={() => setDeleteConfirm({ id: store.id, name: store.name })}
-              aria-label="Delete store"
-              className="text-text-tertiary hover:text-coral transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {menuOpenId === store.id && (
+              <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[140px]">
+                <button
+                  onClick={() => { setMenuOpenId(null); handleStartEdit(store.id, store.name) }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Edit
+                </button>
+                <button
+                  onClick={() => { setMenuOpenId(null); setDeleteConfirm({ id: store.id, name: store.name }) }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </button>
+              </div>
+            )}
           </div>
         </>
       )}
@@ -187,20 +221,15 @@ export const InventoryStoresView = () => {
             <label htmlFor="storeScope" className="block text-sm font-semibold text-navy-soft mb-1">
               Scope
             </label>
-            <select
-              id="storeScope"
+            <ScopeSelect
               value={storeScope}
-              onChange={(e) => setStoreScope(e.target.value)}
-              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+              onChange={setStoreScope}
+              personalLabel="Personal"
+              households={households}
+              householdDescription="Household"
               disabled={createMutation.isPending}
-            >
-              <option value="personal">Personal</option>
-              {households?.map((household) => (
-                <option key={household.id} value={household.id}>
-                  {household.name}
-                </option>
-              ))}
-            </select>
+              aria-label="Scope"
+            />
           </div>
 
           <button
@@ -252,27 +281,14 @@ export const InventoryStoresView = () => {
 
       {/* Delete confirmation modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-surface rounded-2xl p-6 mx-4 max-w-sm w-full shadow-lg">
-            <h3 className="font-display text-lg font-bold text-navy mb-2">Delete Store</h3>
-            <p className="text-text-secondary mb-5">Are you sure you want to delete &quot;{deleteConfirm.name}&quot;?</p>
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="px-4 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmDelete}
-                disabled={deleteMutation.isPending}
-                className="px-4 py-2.5 text-sm font-bold text-white rounded-xl bg-coral hover:bg-coral/90 disabled:opacity-50 transition-colors"
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          title="Delete Store"
+          message={`Are you sure you want to delete "${deleteConfirm.name}"?`}
+          confirmLabel="Delete"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteConfirm(null)}
+          isPending={deleteMutation.isPending}
+        />
       )}
     </>
   )

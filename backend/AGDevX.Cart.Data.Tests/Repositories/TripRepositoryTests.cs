@@ -100,7 +100,7 @@ public class TripRepositoryTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var inventoryItemId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
+        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
         context.InventoryItems.Add(new InventoryItem { Id = inventoryItemId, Name = "Milk", OwnerUserId = userId });
         var trip = new Trip { Id = tripId, Name = "Run", IsCompleted = false };
         context.Trips.Add(trip);
@@ -162,7 +162,7 @@ public class TripRepositoryTests
         //== Create trip as a different user so userId is only a collaborator, not the creator
         using (var ctx = CreateContextForUser(dbName, creatorUserId))
         {
-            ctx.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
+            ctx.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
             ctx.Trips.Add(new Trip { Id = tripId, Name = "Collab Trip", IsCompleted = false });
             ctx.TripCollaborators.Add(new TripCollaborator { TripId = tripId, UserId = userId, Trip = null!, User = null! });
             await ctx.SaveChangesAsync();
@@ -236,7 +236,7 @@ public class TripRepositoryTests
         //== Create trip as a different user so userId is only an explicit collaborator, not the creator
         using (var ctx = CreateContextForUser(dbName, creatorUserId))
         {
-            ctx.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
+            ctx.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
             ctx.Trips.Add(new Trip { Id = tripId, Name = "Trip", IsCompleted = false });
             ctx.TripCollaborators.Add(new TripCollaborator { TripId = tripId, UserId = userId, Trip = null!, User = null! });
             await ctx.SaveChangesAsync();
@@ -294,7 +294,7 @@ public class TripRepositoryTests
         var repo = new TripRepository(context);
         var tripId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
+        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
         context.Trips.Add(new Trip { Id = tripId, Name = "Trip", IsCompleted = false });
         await context.SaveChangesAsync();
 
@@ -315,7 +315,7 @@ public class TripRepositoryTests
         var repo = new TripRepository(context);
         var tripId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
+        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
         context.Trips.Add(new Trip { Id = tripId, Name = "Trip", IsCompleted = false });
         context.TripCollaborators.Add(new TripCollaborator { TripId = tripId, UserId = userId, Trip = null!, User = null! });
         await context.SaveChangesAsync();

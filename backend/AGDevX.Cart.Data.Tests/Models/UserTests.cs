@@ -18,7 +18,7 @@ public class UserTests
         user.Id.Should().Be(Guid.Empty);
         user.Email.Should().BeNull();
         user.PasswordHash.Should().BeNull();
-        user.DisplayName.Should().BeNull();
+        user.Name.Should().BeNull();
         user.HouseholdMemberships.Should().NotBeNull();
         user.HouseholdMemberships.Should().BeEmpty();
     }
@@ -30,16 +30,16 @@ public class UserTests
         var user = new User();
         var expectedEmail = "test@example.com";
         var expectedPasswordHash = "hashed_password_123";
-        var expectedDisplayName = "Test User";
+        var expectedName = "Test User";
 
         // Act
         user.Email = expectedEmail;
         user.PasswordHash = expectedPasswordHash;
-        user.DisplayName = expectedDisplayName;
+        user.Name = expectedName;
 
         // Assert
         user.Email.Should().Be(expectedEmail);
         user.PasswordHash.Should().Be(expectedPasswordHash);
-        user.DisplayName.Should().Be(expectedDisplayName);
+        user.Name.Should().Be(expectedName);
     }
 }

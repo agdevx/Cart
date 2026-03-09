@@ -26,6 +26,8 @@ describe('useTripsQuery', () => {
         name: 'Grocery Shopping',
         householdId: 'household1',
         createdByUserId: 'user1',
+        isStarted: false,
+        startedAt: null,
         isCompleted: false,
         completedAt: null,
         createdBy: 'user1',
@@ -38,6 +40,8 @@ describe('useTripsQuery', () => {
         name: 'Weekly Shop',
         householdId: 'household1',
         createdByUserId: 'user1',
+        isStarted: true,
+        startedAt: '2024-01-01',
         isCompleted: true,
         completedAt: '2024-01-02',
         createdBy: 'user1',
@@ -49,7 +53,7 @@ describe('useTripsQuery', () => {
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })
@@ -86,7 +90,7 @@ describe('useTripsQuery', () => {
   it('handles fetch error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
-      user: { id: '1', email: 'test@example.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
       setAuth: vi.fn(),
       logout: vi.fn(),
     })

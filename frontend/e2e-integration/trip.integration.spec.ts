@@ -32,7 +32,7 @@ test.describe('Trip Integration', () => {
 
     // Check that all bottom nav links are present
     await expect(page.locator('a[href="/shopping"]')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('a[href="/inventory"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('a[href="/pantry"]')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('a[href="/household"]')).toBeVisible({ timeout: 10000 });
   });
 });

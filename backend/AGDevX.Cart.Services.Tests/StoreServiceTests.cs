@@ -87,6 +87,30 @@ public class StoreServiceTests
     }
 
     [Fact]
+    public async Task Should_CreatePersonalStore_When_UserIdNotProvided()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var store = new Store
+        {
+            Name = "My Local Store",
+            // No UserId set — simulates what the frontend sends
+        };
+
+        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>()))
+                            .ReturnsAsync(store);
+
+        // Act
+        var result = await _storeService.CreateStore(store, userId);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Name.Should().Be("My Local Store");
+        store.UserId.Should().Be(userId);
+        _mockStoreRepository.Verify(x => x.Create(It.IsAny<Store>()), Times.Once);
+    }
+
+    [Fact]
     public async Task Should_ThrowUnauthorizedAccessException_When_CreatingHouseholdStoreAsNonMember()
     {
         // Arrange
@@ -105,17 +129,22 @@ public class StoreServiceTests
     }
 
     [Fact]
-    public async Task Should_ThrowUnauthorizedAccessException_When_CreatingPersonalStoreForDifferentUser()
+    public async Task Should_OverrideUserId_When_CreatingPersonalStoreWithDifferentUserId()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var store = new Store { Id = Guid.NewGuid(), Name = "My Store", UserId = Guid.NewGuid() };
 
+        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>()))
+                            .ReturnsAsync(store);
+
         // Act
-        var act = () => _storeService.CreateStore(store, userId);
+        var result = await _storeService.CreateStore(store, userId);
 
         // Assert
-        await act.Should().ThrowAsync<UnauthorizedAccessException>();
+        result.Should().NotBeNull();
+        store.UserId.Should().Be(userId);
+        _mockStoreRepository.Verify(x => x.Create(It.IsAny<Store>()), Times.Once);
     }
 
     [Fact]
@@ -255,16 +284,64 @@ public class StoreServiceTests
         var userId = Guid.NewGuid();
         var storeId = Guid.NewGuid();
         var existing = new Store { Id = storeId, Name = "Old", UserId = userId };
-        var updated = new Store { Id = storeId, Name = "New", UserId = userId };
 
         _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
-        _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>())).ReturnsAsync(updated);
+        _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>()))
+                            .ReturnsAsync((Store s) => s);
 
         // Act
-        var result = await _storeService.UpdateStore(updated, userId);
+        var result = await _storeService.UpdateStore(storeId, "New", userId);
 
         // Assert
         result.Name.Should().Be("New");
+    }
+
+    [Fact]
+    public async Task Should_PreserveUserId_When_UpdatingPersonalStore()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var storeId = Guid.NewGuid();
+        var existing = new Store { Id = storeId, Name = "Old", UserId = userId };
+
+        _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
+        _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>()))
+                            .ReturnsAsync((Store s) => s);
+
+        // Act
+        var result = await _storeService.UpdateStore(storeId, "Renamed", userId);
+
+        // Assert
+        result.UserId.Should().Be(userId);
+        result.Id.Should().Be(storeId);
+    }
+
+    [Fact]
+    public async Task Should_PreserveHouseholdId_When_UpdatingHouseholdStore()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var storeId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        var existing = new Store { Id = storeId, Name = "Old", HouseholdId = householdId };
+        var household = new Household
+        {
+            Id = householdId,
+            Name = "Home",
+            Members = new List<HouseholdMember> { new() { UserId = userId, HouseholdId = householdId } }
+        };
+
+        _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
+        _mockHouseholdRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
+        _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>()))
+                            .ReturnsAsync((Store s) => s);
+
+        // Act
+        var result = await _storeService.UpdateStore(storeId, "Renamed", userId);
+
+        // Assert
+        result.Name.Should().Be("Renamed");
+        result.HouseholdId.Should().Be(householdId);
     }
 
     [Fact]
@@ -274,7 +351,25 @@ public class StoreServiceTests
         _mockStoreRepository.Setup(r => r.GetById(It.IsAny<Guid>())).ReturnsAsync((Store?)null);
 
         // Act
-        var act = () => _storeService.UpdateStore(new Store { Id = Guid.NewGuid(), Name = "Ghost" }, Guid.NewGuid());
+        var act = () => _storeService.UpdateStore(Guid.NewGuid(), "Ghost", Guid.NewGuid());
+
+        // Assert
+        await act.Should().ThrowAsync<UnauthorizedAccessException>();
+    }
+
+    [Fact]
+    public async Task Should_ThrowUnauthorizedAccessException_When_UpdatingOtherUsersStore()
+    {
+        // Arrange
+        var ownerId = Guid.NewGuid();
+        var attackerId = Guid.NewGuid();
+        var storeId = Guid.NewGuid();
+        var existing = new Store { Id = storeId, Name = "Not Yours", UserId = ownerId };
+
+        _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
+
+        // Act
+        var act = () => _storeService.UpdateStore(storeId, "Hacked", attackerId);
 
         // Assert
         await act.Should().ThrowAsync<UnauthorizedAccessException>();

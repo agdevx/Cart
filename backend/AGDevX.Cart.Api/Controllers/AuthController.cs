@@ -67,7 +67,7 @@ public class AuthController(IAuthService authService) : ControllerBase
             {
                 UserId = userId,
                 Email = email ?? string.Empty,
-                DisplayName = displayName ?? string.Empty
+                Name = displayName ?? string.Empty
             });
         }
         catch (UnauthorizedAccessException)
@@ -83,7 +83,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         {
             new Claim(ClaimTypes.NameIdentifier, response.UserId.ToString()),
             new Claim(ClaimTypes.Email, response.Email),
-            new Claim(ClaimTypes.Name, response.DisplayName)
+            new Claim(ClaimTypes.Name, response.Name)
         };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

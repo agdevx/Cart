@@ -1,14 +1,14 @@
 // ABOUTME: Trip detail page for planning mode
 // ABOUTME: Allows adding items to trip and starting shopping session
 
-import { ArrowLeft, ShoppingCart } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { ArrowLeft, Plus, ShoppingCart } from 'lucide-react'
+import { useMemo } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
-import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
+import { useStartTripMutation } from '@/apis/agdevx-cart-api/trip/start-trip.mutation'
 import { useDeleteTripItemMutation } from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
 import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
@@ -25,32 +25,17 @@ export const TripDetailPage = () => {
   const { data: households } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores } = useStoresQuery(householdIds)
-  const addItemMutation = useAddTripItemMutation()
+  const startMutation = useStartTripMutation()
   const updateMutation = useUpdateTripItemMutation()
   const deleteMutation = useDeleteTripItemMutation()
-  const [showAddItem, setShowAddItem] = useState(false)
-  const [selectedItemId, setSelectedItemId] = useState('')
-  const [quantity, setQuantity] = useState('1')
 
-  const handleAddItem = async () => {
-    if (!selectedItemId || !tripId) return
-
+  const handleStartShopping = async () => {
     try {
-      await addItemMutation.mutateAsync({
-        tripId,
-        inventoryItemId: selectedItemId,
-        quantity: parseInt(quantity, 10),
-      })
-      setSelectedItemId('')
-      setQuantity('1')
-      setShowAddItem(false)
+      await startMutation.mutateAsync(tripId!)
+      navigate(`/shopping/${tripId}/active`)
     } catch {
       // Error handled by mutation state
     }
-  }
-
-  const handleStartShopping = () => {
-    navigate(`/shopping/${tripId}/active`)
   }
 
   const handleUpdateItem = (tripItemId: string, quantity: number, notes: string | null, storeId: string | null) => {
@@ -77,12 +62,8 @@ export const TripDetailPage = () => {
     )
   }
 
-  const availableItems = inventory?.filter(
-    (item) => !tripItems?.some((ti) => ti.inventoryItemId === item.id)
-  ) || []
-
   return (
-    <div className="bg-bg min-h-screen px-5 pt-14 pb-8">
+    <div className="px-5 pt-14 pb-8">
       <div className="mb-6">
         <button
           onClick={() => navigate('/shopping')}
@@ -97,74 +78,27 @@ export const TripDetailPage = () => {
       <div className="mb-6">
         <button
           onClick={handleStartShopping}
-          disabled={!tripItems || tripItems.length === 0}
+          disabled={!tripItems || tripItems.length === 0 || startMutation.isPending}
           className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors flex items-center justify-center gap-2"
         >
           <ShoppingCart className="w-5 h-5" />
-          Start Shopping
+          {startMutation.isPending ? 'Starting...' : 'Start Shopping'}
         </button>
       </div>
 
       <div className="mb-4">
-        <div className="flex justify-between items-center mb-3">
-          <div className="flex items-center gap-2.5">
-            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Shopping List</span>
-            <span className="flex-1 h-px bg-navy/8" />
-          </div>
-          <button
-            onClick={() => setShowAddItem(!showAddItem)}
-            className="px-4 py-2 text-sm font-display font-semibold text-teal border border-teal/30 rounded-xl hover:bg-teal/8 transition-colors"
-          >
-            {showAddItem ? 'Cancel' : 'Add Item'}
-          </button>
+        <div className="flex items-center gap-2.5 mb-3">
+          <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Shopping List</span>
+          <span className="flex-1 h-px bg-navy/8" />
         </div>
 
-        {showAddItem && (
-          <div className="mb-4 p-5 bg-surface rounded-2xl shadow-sm">
-            <div className="mb-3">
-              <label htmlFor="item" className="block text-sm font-semibold text-navy-soft mb-1">
-                Select Item
-              </label>
-              <select
-                id="item"
-                value={selectedItemId}
-                onChange={(e) => setSelectedItemId(e.target.value)}
-                className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-                disabled={addItemMutation.isPending}
-              >
-                <option value="">Choose an item...</option>
-                {availableItems.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="quantity" className="block text-sm font-semibold text-navy-soft mb-1">
-                Quantity
-              </label>
-              <input
-                id="quantity"
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-                disabled={addItemMutation.isPending}
-              />
-            </div>
-
-            <button
-              onClick={handleAddItem}
-              disabled={addItemMutation.isPending || !selectedItemId}
-              className="w-full py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
-            >
-              {addItemMutation.isPending ? 'Adding...' : 'Add to List'}
-            </button>
-          </div>
-        )}
+        <button
+          onClick={() => navigate(`/shopping/${tripId}/add-items`)}
+          className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
+        >
+          <Plus className="w-5 h-5" />
+          Add Items
+        </button>
 
         {tripItems && tripItems.length > 0 ? (
           <div className="space-y-2">

@@ -1,16 +1,34 @@
 // ABOUTME: Household management page
 // ABOUTME: Displays user's households with options to create or join new ones
 
-import { LogOut, Plus, UserPlus } from 'lucide-react'
+import { Plus, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-household-members.query'
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useAuth } from '@/auth/use-auth'
+const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
+  const { user } = useAuth()
+  const { data: members } = useHouseholdMembersQuery(householdId)
+
+  if (!members || members.length === 0) return null
+
+  const otherMembers = members.filter((m) => m.userId !== user?.id)
+  if (otherMembers.length === 0) return null
+
+  const names = otherMembers
+    .map((m) => m.user?.name || 'Unknown')
+    .join(', ')
+
+  return (
+    <p className="text-[13px] text-text-secondary font-medium mt-1 truncate">
+      {names}
+    </p>
+  )
+}
 
 export const HouseholdPage = () => {
   const { data: households, isLoading } = useHouseholdsQuery()
-  const { logout } = useAuth()
-
   if (isLoading) {
     return (
       <div className="px-5 pt-14">
@@ -21,17 +39,10 @@ export const HouseholdPage = () => {
 
   return (
     <div className="px-5 pt-14 pb-4">
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6">
         <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">
           Your <span className="text-teal">Household</span>
         </h1>
-        <button
-          onClick={logout}
-          className="flex items-center gap-1.5 px-3 py-2 text-sm text-text-secondary hover:text-navy-soft rounded-xl hover:bg-bg-warm transition-colors"
-        >
-          <LogOut className="w-4 h-4" />
-          Logout
-        </button>
       </div>
 
       {households && households.length > 0 ? (
@@ -45,9 +56,7 @@ export const HouseholdPage = () => {
               <h2 className="font-display text-lg font-bold text-navy">
                 {household.name || 'Unnamed Household'}
               </h2>
-              <p className="text-[13px] text-text-secondary font-medium mt-1">
-                Created: {new Date(household.createdDate).toLocaleDateString()}
-              </p>
+              <HouseholdMembersList householdId={household.id} />
             </Link>
           ))}
         </div>

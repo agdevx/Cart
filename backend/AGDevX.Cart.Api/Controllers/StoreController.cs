@@ -91,7 +91,7 @@ public class StoreController(IStoreService storeService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            await storeService.UpdateStore(store, userId);
+            await storeService.UpdateStore(id, store.Name, userId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

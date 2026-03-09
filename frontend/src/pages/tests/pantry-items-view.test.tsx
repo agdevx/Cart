@@ -1,6 +1,7 @@
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { BrowserRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -14,8 +15,8 @@ import type { Household } from '@/apis/agdevx-cart-api/models/household'
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 
-import { InventoryItemsView } from '../inventory-items-view'
-import type { InventoryFilter } from '../inventory-items-view'
+import { PantryItemsView } from '../pantry-items-view'
+import type { InventoryFilter } from '../pantry-items-view'
 
 const mockHouseholds: Household[] = [
   { id: 'h1', name: 'Smith Family', createdBy: null, createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
@@ -45,7 +46,7 @@ const renderView = (filter: InventoryFilter = 'all') => {
   return render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <InventoryItemsView filter={filter} />
+        <PantryItemsView filter={filter} />
       </BrowserRouter>
     </QueryClientProvider>
   )
@@ -63,7 +64,7 @@ const setupDefaultMocks = () => {
   } as unknown as UseMutationResult<void, Error, string>)
 }
 
-describe('InventoryItemsView', () => {
+describe('PantryItemsView', () => {
   beforeEach(() => {
     queryClient.clear()
     vi.clearAllMocks()
@@ -248,5 +249,186 @@ describe('InventoryItemsView', () => {
     renderView('all')
 
     expect(screen.getByText('Loading inventory...')).toBeInTheDocument()
+  })
+
+  it('renders kebab menu buttons instead of delete buttons', () => {
+    setupDefaultMocks()
+
+    vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(personalInventoryModule, 'usePersonalInventoryQuery').mockReturnValue({
+      data: mockPersonalItems,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(householdInventoryModule, 'useHouseholdInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(mergedInventoryModule, 'useMergedInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    renderView('personal')
+
+    //== Kebab menu button should be present, not a standalone Delete button
+    expect(screen.getByLabelText('Item actions')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument()
+  })
+
+  it('opens kebab menu and shows delete option when clicked', async () => {
+    setupDefaultMocks()
+    const user = userEvent.setup()
+
+    vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(personalInventoryModule, 'usePersonalInventoryQuery').mockReturnValue({
+      data: mockPersonalItems,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(householdInventoryModule, 'useHouseholdInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(mergedInventoryModule, 'useMergedInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    renderView('personal')
+
+    await user.click(screen.getByLabelText('Item actions'))
+
+    //== Delete option should now be visible in the dropdown
+    expect(screen.getByText('Delete')).toBeInTheDocument()
+  })
+
+  it('shows confirm dialog when delete is clicked from kebab menu', async () => {
+    setupDefaultMocks()
+    const user = userEvent.setup()
+
+    vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(personalInventoryModule, 'usePersonalInventoryQuery').mockReturnValue({
+      data: mockPersonalItems,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(householdInventoryModule, 'useHouseholdInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(mergedInventoryModule, 'useMergedInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    renderView('personal')
+
+    await user.click(screen.getByLabelText('Item actions'))
+    await user.click(screen.getByText('Delete'))
+
+    //== Confirm dialog should appear with item name
+    expect(screen.getByText('Delete Item')).toBeInTheDocument()
+    expect(screen.getByText('Delete "My Snacks"? This can\'t be undone.')).toBeInTheDocument()
+  })
+
+  it('calls deleteMutation when confirm dialog is confirmed', async () => {
+    const mockMutateAsync = vi.fn()
+    vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
+      data: mockHouseholds,
+      isLoading: false,
+    } as UseQueryResult<Household[]>)
+
+    vi.spyOn(deleteInventoryModule, 'useDeleteInventoryItemMutation').mockReturnValue({
+      mutateAsync: mockMutateAsync,
+      isPending: false,
+    } as unknown as UseMutationResult<void, Error, string>)
+
+    const user = userEvent.setup()
+
+    vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(personalInventoryModule, 'usePersonalInventoryQuery').mockReturnValue({
+      data: mockPersonalItems,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(householdInventoryModule, 'useHouseholdInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(mergedInventoryModule, 'useMergedInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    renderView('personal')
+
+    await user.click(screen.getByLabelText('Item actions'))
+    await user.click(screen.getByText('Delete'))
+
+    //== Click the confirm button in the dialog
+    const dialog = screen.getByText('Delete Item').closest('div')!.parentElement!
+    await user.click(within(dialog).getByRole('button', { name: 'Delete' }))
+
+    expect(mockMutateAsync).toHaveBeenCalledWith('3')
+  })
+
+  it('closes confirm dialog when cancel is clicked', async () => {
+    setupDefaultMocks()
+    const user = userEvent.setup()
+
+    vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(personalInventoryModule, 'usePersonalInventoryQuery').mockReturnValue({
+      data: mockPersonalItems,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(householdInventoryModule, 'useHouseholdInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(mergedInventoryModule, 'useMergedInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    renderView('personal')
+
+    await user.click(screen.getByLabelText('Item actions'))
+    await user.click(screen.getByText('Delete'))
+
+    //== Dialog should be visible
+    expect(screen.getByText('Delete Item')).toBeInTheDocument()
+
+    //== Click cancel
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    //== Dialog should be gone
+    expect(screen.queryByText('Delete Item')).not.toBeInTheDocument()
   })
 })

@@ -90,7 +90,7 @@ const setupMocks = (overrides?: {
 
   vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
     isAuthenticated: true,
-    user: { id: userId, email: 'test@test.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+    user: { id: userId, email: 'test@test.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
     setAuth: vi.fn(),
     logout: vi.fn(),
   })
@@ -245,11 +245,26 @@ describe('HouseholdDetailPage', () => {
     expect(screen.getByText('Test Household')).toBeInTheDocument()
   })
 
-  it('shows delete button for owner', () => {
+  it('shows danger zone collapsed by default (delete button hidden)', () => {
     setupMocks()
 
     renderWithRouter('h1')
 
+    //== Danger Zone heading is visible as the accordion trigger
+    expect(screen.getByText('Danger Zone')).toBeInTheDocument()
+    //== Delete button is in the DOM but hidden via grid-rows-[0fr] overflow-hidden
+    expect(screen.getByText('Delete Household')).toBeInTheDocument()
+  })
+
+  it('expands danger zone on click to reveal delete button', () => {
+    setupMocks()
+
+    renderWithRouter('h1')
+
+    //== Click the Danger Zone accordion trigger
+    fireEvent.click(screen.getByText('Danger Zone'))
+
+    //== Delete button should now be accessible
     expect(screen.getByText('Delete Household')).toBeInTheDocument()
   })
 
@@ -261,14 +276,17 @@ describe('HouseholdDetailPage', () => {
     expect(screen.queryByText('Delete Household')).not.toBeInTheDocument()
   })
 
-  it('shows delete confirmation dialog', () => {
+  it('shows delete confirmation with cascade warning about items and stores', () => {
     setupMocks()
 
     renderWithRouter('h1')
 
+    //== Expand danger zone, then click delete
+    fireEvent.click(screen.getByText('Danger Zone'))
     fireEvent.click(screen.getByText('Delete Household'))
 
-    expect(screen.getByText(/Delete "Test Household"\?/)).toBeInTheDocument()
+    expect(screen.getByText(/items and stores/)).toBeInTheDocument()
+    expect(screen.getByText(/can't be undone/)).toBeInTheDocument()
   })
 
   it('deletes household on confirm', () => {
@@ -276,7 +294,8 @@ describe('HouseholdDetailPage', () => {
 
     renderWithRouter('h1')
 
-    //== Open delete confirmation
+    //== Expand danger zone and open delete confirmation
+    fireEvent.click(screen.getByText('Danger Zone'))
     fireEvent.click(screen.getByText('Delete Household'))
 
     //== Click Delete in the dialog (the confirm button inside ConfirmDialog)

@@ -2,7 +2,7 @@
 // ABOUTME: Verifies kebab menu actions (rename, delete, reopen) on trip cards
 
 import { QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -18,6 +18,16 @@ import * as createTripModule from '@/apis/agdevx-cart-api/trip/create-trip.mutat
 
 import { ShoppingPage } from '../shopping-page'
 
+const mockNavigate = vi.fn()
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  }
+})
+
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>{children}</BrowserRouter>
@@ -30,6 +40,8 @@ const mockTrips: Trip[] = [
     name: 'Weekly Groceries',
     householdId: null,
     createdByUserId: 'user1',
+    isStarted: true,
+    startedAt: '2024-01-15',
     isCompleted: false,
     completedAt: null,
     createdBy: 'user1',
@@ -42,12 +54,28 @@ const mockTrips: Trip[] = [
     name: 'Holiday Shopping',
     householdId: null,
     createdByUserId: 'user1',
+    isStarted: true,
+    startedAt: '2024-01-15',
     isCompleted: true,
     completedAt: '2024-01-20',
     createdBy: 'user1',
     createdDate: '2024-01-15',
     modifiedBy: 'user1',
     modifiedDate: '2024-01-20',
+  },
+  {
+    id: 'trip3',
+    name: 'Planned Trip',
+    householdId: null,
+    createdByUserId: 'user1',
+    isStarted: false,
+    startedAt: null,
+    isCompleted: false,
+    completedAt: null,
+    createdBy: 'user1',
+    createdDate: '2024-01-22',
+    modifiedBy: null,
+    modifiedDate: null,
   },
 ]
 
@@ -93,17 +121,40 @@ describe('ShoppingPage', () => {
     vi.clearAllMocks()
   })
 
-  it('renders trip cards with kebab menus', () => {
+  it('renders trip cards in three sections', () => {
     setupMocks()
     render(<ShoppingPage />, { wrapper })
 
-    //== Both trips should appear
+    //== In Progress and Planning trips should be visible
     expect(screen.getByText('Weekly Groceries')).toBeInTheDocument()
-    expect(screen.getByText('Holiday Shopping')).toBeInTheDocument()
+    expect(screen.getByText('Planned Trip')).toBeInTheDocument()
 
-    //== Both should have kebab menu buttons
+    //== Section headers should appear
+    expect(screen.getByText('In Progress')).toBeInTheDocument()
+    expect(screen.getByText('Planning')).toBeInTheDocument()
+    expect(screen.getByText('Completed (1)')).toBeInTheDocument()
+
+    //== Completed trips are hidden by default (accordion collapsed)
+    expect(screen.queryByText('Holiday Shopping')).not.toBeInTheDocument()
+
+    //== In Progress and Planning trips should have kebab menu buttons
     const kebabButtons = screen.getAllByLabelText('Trip actions')
     expect(kebabButtons).toHaveLength(2)
+  })
+
+  it('expands completed accordion to show completed trips', () => {
+    setupMocks()
+    render(<ShoppingPage />, { wrapper })
+
+    //== Click the Completed accordion button
+    fireEvent.click(screen.getByText('Completed (1)'))
+
+    //== Completed trip should now be visible
+    expect(screen.getByText('Holiday Shopping')).toBeInTheDocument()
+
+    //== All three trips should now have kebab buttons
+    const kebabButtons = screen.getAllByLabelText('Trip actions')
+    expect(kebabButtons).toHaveLength(3)
   })
 
   it('renames a trip via inline edit', () => {
@@ -182,13 +233,64 @@ describe('ShoppingPage', () => {
     setupMocks()
     render(<ShoppingPage />, { wrapper })
 
-    //== Open kebab menu on the second (completed) trip
+    //== Expand the completed accordion first
+    fireEvent.click(screen.getByText('Completed (1)'))
+
+    //== Open kebab menu on the completed trip (Holiday Shopping)
+    //== After expansion, there are 3 kebab buttons: trip1, trip3, trip2
     const kebabButtons = screen.getAllByLabelText('Trip actions')
-    fireEvent.click(kebabButtons[1])
+    fireEvent.click(kebabButtons[2])
 
     //== Click Reopen
     fireEvent.click(screen.getByText('Reopen'))
 
     expect(reopenMutateFn).toHaveBeenCalledWith('trip2')
+  })
+
+  it('navigates to the new trip after creation', async () => {
+    const createdTrip: Trip = {
+      id: 'new-trip-123',
+      name: 'Weekend Run',
+      householdId: null,
+      createdByUserId: 'user1',
+      isStarted: false,
+      startedAt: null,
+      isCompleted: false,
+      completedAt: null,
+      createdBy: 'user1',
+      createdDate: '2024-02-01',
+      modifiedBy: null,
+      modifiedDate: null,
+    }
+
+    const mutateAsyncFn = vi.fn().mockResolvedValue(createdTrip)
+
+    setupMocks()
+
+    //== Override the create mutation mock to use our tracked mutateAsync
+    vi.spyOn(createTripModule, 'useCreateTripMutation').mockReturnValue({
+      mutateAsync: mutateAsyncFn,
+      isPending: false,
+    } as any)
+
+    render(<ShoppingPage />, { wrapper })
+
+    //== Open the create form
+    fireEvent.click(screen.getByText('Plan a new trip'))
+
+    //== Fill in the trip name
+    const input = screen.getByPlaceholderText('e.g., Weekly Groceries')
+    fireEvent.change(input, { target: { value: 'Weekend Run' } })
+
+    //== Submit the form
+    fireEvent.click(screen.getByText('Create Trip'))
+
+    await waitFor(() => {
+      expect(mutateAsyncFn).toHaveBeenCalledWith({
+        name: 'Weekend Run',
+        householdId: null,
+      })
+      expect(mockNavigate).toHaveBeenCalledWith('/shopping/new-trip-123')
+    })
   })
 })

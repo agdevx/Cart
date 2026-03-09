@@ -11,13 +11,13 @@ export const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
+  const [name, setName] = useState('');
   const [serverEmailError, setServerEmailError] = useState('');
   const [touched, setTouched] = useState({
     email: false,
     password: false,
     confirmPassword: false,
-    displayName: false,
+    name: false,
   });
 
   const navigate = useNavigate();
@@ -36,11 +36,11 @@ export const RegisterPage = () => {
   // Confirm password validation
   const passwordsMatch = password === confirmPassword;
 
-  // Display name validation
-  const isDisplayNameValid = displayName.trim().length > 0;
+  // Name validation
+  const isNameValid = name.trim().length > 0;
 
   // Form validation
-  const isFormValid = isEmailValid && isPasswordValid && passwordsMatch && confirmPassword.length > 0 && isDisplayNameValid;
+  const isFormValid = isEmailValid && isPasswordValid && passwordsMatch && confirmPassword.length > 0 && isNameValid;
 
   // Compute error messages directly from state
   const emailError = touched.email
@@ -71,8 +71,8 @@ export const RegisterPage = () => {
       : ''
     : '';
 
-  const displayNameError = touched.displayName && !displayName.trim()
-    ? 'Display name is required'
+  const nameError = touched.name && !name.trim()
+    ? 'Name is required'
     : '';
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,13 +85,13 @@ export const RegisterPage = () => {
       const response = await registerMutation.mutateAsync({
         email,
         password,
-        displayName,
+        name: name.trim(),
       });
 
       setAuth({
           id: response.userId,
           email: response.email,
-          displayName: response.displayName,
+          name: response.name,
           createdBy: null,
           createdDate: new Date().toISOString(),
           modifiedBy: null,
@@ -199,23 +199,23 @@ export const RegisterPage = () => {
             )}
           </div>
 
-          {/* Display Name Field */}
+          {/* Name Field */}
           <div className="mb-6">
-            <label htmlFor="displayName" className="block text-sm font-semibold text-navy-soft mb-2">
-              Display Name
+            <label htmlFor="name" className="block text-sm font-semibold text-navy-soft mb-2">
+              Name
             </label>
             <input
-              id="displayName"
+              id="name"
               type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              onBlur={() => setTouched({ ...touched, displayName: true })}
-              placeholder="Enter your display name"
-              className={inputClass(!!displayNameError)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onBlur={() => setTouched({ ...touched, name: true })}
+              placeholder="Enter your name"
+              className={inputClass(!!nameError)}
               autoComplete="name"
             />
-            {displayNameError && (
-              <p className="mt-1 text-sm text-coral">{displayNameError}</p>
+            {nameError && (
+              <p className="mt-1 text-sm text-coral">{nameError}</p>
             )}
           </div>
 

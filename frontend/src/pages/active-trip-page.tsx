@@ -2,7 +2,7 @@
 // ABOUTME: Shows checklist of items to purchase with check/uncheck functionality
 
 import { ArrowLeft } from 'lucide-react'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
 import { useQueryClient } from '@tanstack/react-query'
@@ -18,6 +18,7 @@ import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { useSSE } from '@/hooks/use-sse'
 
+import { ConfirmDialog } from './components/confirm-dialog'
 import { TripItemRow } from './components/trip-item-row'
 
 export const ActiveTripPage = () => {
@@ -71,15 +72,23 @@ export const ActiveTripPage = () => {
     deleteMutation.mutate({ tripItemId, tripId })
   }
 
+  const [showCompleteConfirm, setShowCompleteConfirm] = useState(false)
+
   const handleCompleteTrip = async () => {
     if (!tripId) return
 
     const allChecked = tripItems?.every((item) => item.isChecked)
 
     if (!allChecked) {
-      const confirmComplete = confirm('Not all items are checked. Are you sure you want to complete this trip?')
-      if (!confirmComplete) return
+      setShowCompleteConfirm(true)
+      return
     }
+
+    await doCompleteTrip()
+  }
+
+  const doCompleteTrip = async () => {
+    if (!tripId) return
 
     try {
       await completeMutation.mutateAsync(tripId)
@@ -110,7 +119,7 @@ export const ActiveTripPage = () => {
   const progressPercent = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0
 
   return (
-    <div className="bg-bg min-h-screen px-5 pt-14 pb-8">
+    <div className="px-5 pt-14 pb-8">
       <div className="mb-6">
         <button
           onClick={() => navigate(`/shopping/${tripId}`)}
@@ -166,6 +175,21 @@ export const ActiveTripPage = () => {
       >
         {completeMutation.isPending ? 'Completing...' : 'Complete Trip'}
       </button>
+
+      {showCompleteConfirm && (
+        <ConfirmDialog
+          title="Hold on!"
+          message="It looks like you may have missed some items. Are you sure you want to complete your trip?"
+          confirmLabel="Complete Anyway"
+          cancelLabel="Keep Shopping"
+          onConfirm={() => {
+            setShowCompleteConfirm(false)
+            doCompleteTrip()
+          }}
+          onCancel={() => setShowCompleteConfirm(false)}
+          isPending={completeMutation.isPending}
+        />
+      )}
     </div>
   )
 }

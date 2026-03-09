@@ -1,0 +1,270 @@
+// ABOUTME: Full-screen page for selecting pantry items to add to a shopping trip
+// ABOUTME: Supports search, source filtering, batch selection, and quantity editing
+
+import { ArrowLeft, Search } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+
+import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
+import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
+import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
+import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
+import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
+
+type SourceFilter = 'all' | 'personal' | string
+
+interface SelectedItem {
+  quantity: number
+}
+
+export const AddTripItemsPage = () => {
+  const { tripId } = useParams<{ tripId: string }>()
+  const navigate = useNavigate()
+  const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
+  const { data: inventory } = useInventoryQuery()
+  const { data: households } = useHouseholdsQuery()
+  const { data: tripItems } = useTripItemsQuery(tripId!)
+  const addTripItemMutation = useAddTripItemMutation()
+
+  const [searchText, setSearchText] = useState('')
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
+  const [selectedItems, setSelectedItems] = useState<Record<string, SelectedItem>>({})
+  const [isAdding, setIsAdding] = useState(false)
+
+  // IDs of items already on the trip
+  const existingItemIds = useMemo(
+    () => new Set(tripItems?.map((ti) => ti.inventoryItemId) || []),
+    [tripItems]
+  )
+
+  // Filter inventory items based on source filter, search text, and existing trip items
+  const filteredItems = useMemo(() => {
+    if (!inventory) return []
+
+    let items = inventory.filter((item) => !existingItemIds.has(item.id))
+
+    // Apply source filter
+    if (sourceFilter === 'personal') {
+      items = items.filter((item) => item.ownerUserId !== null && item.householdId === null)
+    } else if (sourceFilter !== 'all') {
+      // sourceFilter is a household ID
+      items = items.filter((item) => item.householdId === sourceFilter)
+    }
+
+    // Apply search text filter
+    if (searchText.trim()) {
+      const search = searchText.trim().toLowerCase()
+      items = items.filter((item) => item.name.toLowerCase().includes(search))
+    }
+
+    return items
+  }, [inventory, existingItemIds, sourceFilter, searchText])
+
+  const selectedCount = Object.keys(selectedItems).length
+
+  const toggleItem = (itemId: string) => {
+    setSelectedItems((prev) => {
+      if (prev[itemId]) {
+        const { [itemId]: _, ...rest } = prev
+        return rest
+      }
+      return { ...prev, [itemId]: { quantity: 1 } }
+    })
+  }
+
+  const updateQuantity = (itemId: string, quantity: number) => {
+    setSelectedItems((prev) => ({
+      ...prev,
+      [itemId]: { quantity: Math.max(1, quantity) },
+    }))
+  }
+
+  const handleAddItems = async () => {
+    if (!tripId || selectedCount === 0) return
+
+    setIsAdding(true)
+    try {
+      await Promise.all(
+        Object.entries(selectedItems).map(([inventoryItemId, { quantity }]) =>
+          addTripItemMutation.mutateAsync({
+            tripId,
+            inventoryItemId,
+            quantity,
+          })
+        )
+      )
+      navigate(`/shopping/${tripId}`)
+    } catch {
+      // Error handled by mutation state
+      setIsAdding(false)
+    }
+  }
+
+  const getSourceLabel = (householdId: string | null): string => {
+    if (!householdId) return 'Personal'
+    const household = households?.find((h) => h.id === householdId)
+    return household?.name || 'Household'
+  }
+
+  if (tripLoading) {
+    return (
+      <div className="px-5 pt-14">
+        <p className="text-text-secondary">Loading...</p>
+      </div>
+    )
+  }
+
+  if (!trip) {
+    return (
+      <div className="px-5 pt-14">
+        <p className="text-text-secondary">Trip not found</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="px-5 pt-14 pb-28">
+      {/* Back button */}
+      <button
+        onClick={() => navigate(`/shopping/${tripId}`)}
+        className="text-teal hover:text-teal-light font-semibold text-sm flex items-center gap-1 mb-3"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to Trip
+      </button>
+
+      {/* Title */}
+      <div className="mb-4">
+        <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">Add Items</h1>
+        <p className="text-text-secondary text-sm">{trip.name}</p>
+      </div>
+
+      {/* Search bar */}
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
+        <input
+          type="text"
+          placeholder="Search items..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="w-full pl-10 pr-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+        />
+      </div>
+
+      {/* Source filter toggle */}
+      <div role="tablist" className="flex bg-bg-warm rounded-xl p-1 mb-4 overflow-x-auto">
+        <button
+          role="tab"
+          aria-selected={sourceFilter === 'all'}
+          onClick={() => setSourceFilter('all')}
+          className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+            sourceFilter === 'all'
+              ? 'bg-teal text-white shadow-sm'
+              : 'text-text-secondary hover:text-navy'
+          }`}
+        >
+          All
+        </button>
+        <button
+          role="tab"
+          aria-selected={sourceFilter === 'personal'}
+          onClick={() => setSourceFilter('personal')}
+          className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+            sourceFilter === 'personal'
+              ? 'bg-teal text-white shadow-sm'
+              : 'text-text-secondary hover:text-navy'
+          }`}
+        >
+          Personal
+        </button>
+        {(households || []).map((household) => (
+          <button
+            key={household.id}
+            role="tab"
+            aria-selected={sourceFilter === household.id}
+            onClick={() => setSourceFilter(household.id)}
+            className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+              sourceFilter === household.id
+                ? 'bg-teal text-white shadow-sm'
+                : 'text-text-secondary hover:text-navy'
+            }`}
+          >
+            {household.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Item list */}
+      <div className="space-y-2">
+        {filteredItems.map((item) => {
+          const isSelected = !!selectedItems[item.id]
+          return (
+            <div
+              key={item.id}
+              onClick={() => toggleItem(item.id)}
+              className={`p-4 bg-surface rounded-2xl shadow-sm cursor-pointer transition-colors ${
+                isSelected ? 'ring-2 ring-teal' : ''
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                {/* Custom checkbox */}
+                <div
+                  data-testid="item-checkbox"
+                  className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                    isSelected
+                      ? 'bg-teal border-teal text-white'
+                      : 'border-navy/20 bg-transparent'
+                  }`}
+                >
+                  {isSelected && (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+
+                {/* Item info */}
+                <div className="flex-1 min-w-0">
+                  <span className="font-display font-bold text-navy">{item.name}</span>
+                  <span className="ml-2 text-xs text-text-tertiary">{getSourceLabel(item.householdId)}</span>
+                </div>
+
+                {/* Quantity input (when selected) */}
+                {isSelected && (
+                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    <label htmlFor={`qty-${item.id}`} className="text-xs text-text-tertiary mr-1">Qty</label>
+                    <input
+                      id={`qty-${item.id}`}
+                      type="number"
+                      min={1}
+                      value={selectedItems[item.id].quantity}
+                      onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10) || 1)}
+                      className="w-14 px-2 py-1 text-center border border-navy/10 rounded-lg bg-surface text-text text-sm focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })}
+
+        {filteredItems.length === 0 && (
+          <p className="text-text-secondary text-center py-8">No items found</p>
+        )}
+      </div>
+
+      {/* Sticky "Add Items" button */}
+      {selectedCount > 0 && (
+        <div className="fixed bottom-24 left-0 right-0 px-5">
+          <button
+            onClick={handleAddItems}
+            disabled={isAdding}
+            className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors shadow-lg"
+          >
+            {isAdding ? 'Adding Items...' : `Add Items (${selectedCount} ${selectedCount === 1 ? 'item' : 'items'})`}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}

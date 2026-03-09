@@ -6,6 +6,8 @@ export interface Trip {
   name: string;
   householdId: string | null;
   createdByUserId: string;
+  isStarted: boolean;
+  startedAt: string | null;
   isCompleted: boolean;
   completedAt: string | null;
   createdBy: string | null;
