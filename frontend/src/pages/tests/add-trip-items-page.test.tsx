@@ -1,5 +1,5 @@
 // ABOUTME: Tests for AddTripItemsPage batch item selection page
-// ABOUTME: Verifies search, filtering, selection, quantity input, and start shopping button
+// ABOUTME: Verifies search, filtering, selection, quantity input, and add items button
 
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
@@ -219,23 +219,23 @@ describe('AddTripItemsPage', () => {
     expect(screen.getByLabelText('Qty')).toBeInTheDocument()
   })
 
-  it('shows Start Shopping button with selected count when items are selected', () => {
+  it('shows Add Items button with selected count when items are selected', () => {
     setupMocks()
     render(<AddTripItemsPage />, { wrapper })
 
-    //== Button should not be visible initially
-    expect(screen.queryByText(/Start Shopping/)).not.toBeInTheDocument()
+    //== Button should not be visible initially (page title "Add Items" exists, but not the button with count)
+    expect(screen.queryByText(/Add Items \(/)).not.toBeInTheDocument()
 
     //== Select Bread
     fireEvent.click(screen.getByText('Bread'))
 
     //== Button should appear with count
-    expect(screen.getByText('Start Shopping (1 item)')).toBeInTheDocument()
+    expect(screen.getByText('Add Items (1 item)')).toBeInTheDocument()
 
     //== Select Eggs too
     fireEvent.click(screen.getByText('Eggs'))
 
     //== Button should update count
-    expect(screen.getByText('Start Shopping (2 items)')).toBeInTheDocument()
+    expect(screen.getByText('Add Items (2 items)')).toBeInTheDocument()
   })
 })

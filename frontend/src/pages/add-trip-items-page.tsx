@@ -79,7 +79,7 @@ export const AddTripItemsPage = () => {
     }))
   }
 
-  const handleStartShopping = async () => {
+  const handleAddItems = async () => {
     if (!tripId || selectedCount === 0) return
 
     setIsAdding(true)
@@ -93,7 +93,7 @@ export const AddTripItemsPage = () => {
           })
         )
       )
-      navigate(`/shopping/${tripId}/active`)
+      navigate(`/shopping/${tripId}`)
     } catch {
       // Error handled by mutation state
       setIsAdding(false)
@@ -253,15 +253,15 @@ export const AddTripItemsPage = () => {
         )}
       </div>
 
-      {/* Sticky "Start Shopping" button */}
+      {/* Sticky "Add Items" button */}
       {selectedCount > 0 && (
         <div className="fixed bottom-24 left-0 right-0 px-5">
           <button
-            onClick={handleStartShopping}
+            onClick={handleAddItems}
             disabled={isAdding}
             className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors shadow-lg"
           >
-            {isAdding ? 'Adding Items...' : `Start Shopping (${selectedCount} ${selectedCount === 1 ? 'item' : 'items'})`}
+            {isAdding ? 'Adding Items...' : `Add Items (${selectedCount} ${selectedCount === 1 ? 'item' : 'items'})`}
           </button>
         </div>
       )}
