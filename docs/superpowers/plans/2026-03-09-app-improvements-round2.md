@@ -2,15 +2,13 @@
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 12 improvements across backend data integrity, pantry inline forms, trip lifecycle, kebab menus, store grouping, store filtering, household UX, and dual notes display.
+**Goal:** 13 improvements across backend data integrity, pantry inline forms, trip lifecycle, kebab menus, store grouping, store filtering, household UX, and dual notes display.
 
 **Architecture:** Backend-first for schema changes (denormalization, FK behaviors, scope editing support), then frontend tasks grouped by dependency. TripItem gets denormalized `ItemName`/`StoreName` fields with live mirror updates. Frontend gets inline forms, accordion grouping, and UX polish.
 
 **Tech Stack:** .NET 9 / EF Core (backend), React / TypeScript / TanStack Query / Tailwind (frontend), Vitest + React Testing Library (frontend tests), xUnit + Moq (backend tests)
 
 **Spec:** `docs/superpowers/specs/2026-03-09-app-improvements-round2-design.md`
-
-**Note:** Original task 5 (stopPropagation on kebab menus) was dropped — already implemented in the codebase. Task numbering from the spec is preserved; task 5 is skipped.
 
 ---
 
@@ -441,7 +439,71 @@ git add -A && git commit -m "feat: denormalize TripItem, add live mirror, SET NU
 
 ---
 
-## Chunk 2: Kebab Menu Fixes & Trip Lifecycle (Tasks 4, 6)
+## Chunk 2: Kebab Menu Fixes & Trip Lifecycle (Tasks 4, 5, 6)
+
+### Task 5: Kebab Menu Click Should Not Toggle Checkbox (Mobile Touch Fix)
+
+#### File Map
+
+- Modify: `frontend/src/pages/components/trip-item-row.tsx` (kebab area, lines 181-207)
+- Modify: `frontend/src/pages/tests/active-trip-page.test.tsx`
+
+**Context:** `handleKebabClick` already has `e.stopPropagation()` on the `onClick` handler (line 54), but the bug still occurs on mobile. The issue is likely in the touch event chain — on mobile, `touchstart` → `touchend` → `mousedown` → `click`. The row's `onClick={handleRowClick}` may fire from the touch/mousedown phase before the click-level stopPropagation takes effect.
+
+#### Steps
+
+- [ ] **Step 1: Write failing test**
+
+In `frontend/src/pages/tests/active-trip-page.test.tsx`:
+
+```typescript
+it('should not toggle checkbox when kebab menu is tapped', async () => {
+  // Render active trip page with an unchecked item
+  // Find the kebab button (aria-label="Item actions")
+  // Fire touchstart + touchend + click on the kebab button
+  // Assert: check mutation was NOT called
+  // Assert: kebab menu is open
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+```bash
+cd frontend && npx vitest run src/pages/tests/active-trip-page.test.tsx
+```
+
+- [ ] **Step 3: Fix touch event propagation on kebab menu area**
+
+In `frontend/src/pages/components/trip-item-row.tsx`, the kebab menu wrapper div (line 181) needs to stop touch events from reaching the parent row. Add touch event handlers to the kebab container:
+
+```tsx
+{/* Kebab menu */}
+<div
+  className="relative flex-shrink-0 self-start"
+  ref={menuRef}
+  onTouchStart={(e) => e.stopPropagation()}
+  onTouchEnd={(e) => e.stopPropagation()}
+  onMouseDown={(e) => e.stopPropagation()}
+>
+```
+
+This ensures the entire kebab menu area (button + dropdown) stops propagation at the touch/mousedown level, not just at the click level.
+
+- [ ] **Step 4: Run test to verify it passes**
+
+```bash
+cd frontend && npx vitest run src/pages/tests/active-trip-page.test.tsx
+```
+
+Expected: PASS.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add frontend/src/pages/components/trip-item-row.tsx frontend/src/pages/tests/active-trip-page.test.tsx && git commit -m "fix: prevent kebab menu touch from toggling checkbox on active trip page"
+```
+
+---
 
 ### Task 6: Increase Kebab Menu Tap Target Size
 
@@ -1734,7 +1796,8 @@ Expected: no errors.
 2. Edit a pantry item via kebab menu, including scope change (task 2)
 3. Edit a store via kebab menu, including scope change (task 3)
 4. Start a trip → verify "Continue Shopping" on return (task 4)
-5. Verify kebab tap targets are comfortable on mobile (task 6)
+5. Verify kebab menu tap doesn't toggle checkbox on mobile (task 5)
+6. Verify kebab tap targets are comfortable on mobile (task 6)
 6. Verify items grouped by store on trip detail and active pages (task 7)
 7. Add items with store override (task 8)
 8. Filter items by store on add-items page (task 9)
