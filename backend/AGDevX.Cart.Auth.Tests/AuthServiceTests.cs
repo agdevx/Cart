@@ -25,7 +25,7 @@ public class AuthServiceTests
         {
             Email = "test@example.com",
             Password = "SecurePassword123!",
-            DisplayName = "Test User"
+            Name = "Test User"
         };
 
         // Act
@@ -35,7 +35,7 @@ public class AuthServiceTests
         Assert.NotNull(result);
         Assert.NotEqual(Guid.Empty, result.UserId);
         Assert.Equal(registerRequest.Email, result.Email);
-        Assert.Equal(registerRequest.DisplayName, result.DisplayName);
+        Assert.Equal(registerRequest.Name, result.Name);
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class AuthServiceTests
         {
             Email = "test@example.com",
             Password = "SecurePassword123!",
-            DisplayName = "Test User"
+            Name = "Test User"
         };
 
         await authService.Register(registerRequest);
@@ -88,7 +88,7 @@ public class AuthServiceTests
         {
             Email = "duplicate@example.com",
             Password = "SecurePassword123!",
-            DisplayName = "First User"
+            Name = "First User"
         };
 
         await authService.Register(registerRequest);
@@ -97,7 +97,7 @@ public class AuthServiceTests
         {
             Email = "duplicate@example.com",
             Password = "AnotherPassword456!",
-            DisplayName = "Second User"
+            Name = "Second User"
         };
 
         // Act & Assert
@@ -120,7 +120,7 @@ public class AuthServiceTests
         {
             Email = "test@example.com",
             Password = "CorrectPassword123!",
-            DisplayName = "Test User"
+            Name = "Test User"
         };
 
         await authService.Register(registerRequest);

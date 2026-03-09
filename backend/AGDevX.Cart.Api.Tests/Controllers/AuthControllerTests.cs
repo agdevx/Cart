@@ -54,13 +54,13 @@ public class AuthControllerTests
         {
             Email = "test@example.com",
             Password = "Password123!",
-            DisplayName = "Test User"
+            Name = "Test User"
         };
 
         var expectedResponse = new AuthResponse
         {
             Email = request.Email,
-            DisplayName = request.DisplayName
+            Name = request.Name
         };
 
         _authServiceMock.Setup(x => x.Register(request))
@@ -88,7 +88,7 @@ public class AuthControllerTests
         var expectedResponse = new AuthResponse
         {
             Email = request.Email,
-            DisplayName = "Test User"
+            Name = "Test User"
         };
 
         _authServiceMock.Setup(x => x.Login(request))
@@ -111,7 +111,7 @@ public class AuthControllerTests
         {
             Email = "duplicate@example.com",
             Password = "Password123!",
-            DisplayName = "Test User"
+            Name = "Test User"
         };
 
         _authServiceMock.Setup(x => x.Register(request))
@@ -189,6 +189,6 @@ public class AuthControllerTests
         authResponse.Should().NotBeNull();
         authResponse!.UserId.Should().Be(userId);
         authResponse.Email.Should().Be(email);
-        authResponse.DisplayName.Should().Be(displayName);
+        authResponse.Name.Should().Be(displayName);
     }
 }

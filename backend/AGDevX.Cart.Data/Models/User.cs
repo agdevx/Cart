@@ -10,7 +10,7 @@ public class User : BaseEntity
 
     [JsonIgnore]
     public string? PasswordHash { get; set; }
-    public string? DisplayName { get; set; }
+    public string? Name { get; set; }
 
     //== Navigation property to household memberships this user belongs to
     public ICollection<HouseholdMember> HouseholdMemberships { get; set; } = [];

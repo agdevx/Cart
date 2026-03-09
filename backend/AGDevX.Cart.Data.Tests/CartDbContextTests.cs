@@ -43,7 +43,7 @@ public class CartDbContextTests
         var user = new User
         {
             Email = "test@example.com",
-            DisplayName = "Test User",
+            Name = "Test User",
             CreatedDate = DateTime.UtcNow
         };
 
@@ -60,7 +60,7 @@ public class CartDbContextTests
             var savedUser = await context.Users.FindAsync(user.Id);
             savedUser.Should().NotBeNull();
             savedUser!.Email.Should().Be("test@example.com");
-            savedUser.DisplayName.Should().Be("Test User");
+            savedUser.Name.Should().Be("Test User");
         }
     }
 
@@ -72,7 +72,7 @@ public class CartDbContextTests
                       .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                       .Options;
         using var context = new CartDbContext(options);
-        var user = new User { Id = Guid.NewGuid(), Email = "audit@test.com", DisplayName = "Audit" };
+        var user = new User { Id = Guid.NewGuid(), Email = "audit@test.com", Name = "Audit" };
 
         // Act
         context.Users.Add(user);
@@ -93,7 +93,7 @@ public class CartDbContextTests
                       .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                       .Options;
         using var context = new CartDbContext(options);
-        var user = new User { Id = Guid.NewGuid(), Email = "audit@test.com", DisplayName = "Audit" };
+        var user = new User { Id = Guid.NewGuid(), Email = "audit@test.com", Name = "Audit" };
         context.Users.Add(user);
         await context.SaveChangesAsync();
         var originalCreatedDate = user.CreatedDate;
@@ -101,7 +101,7 @@ public class CartDbContextTests
 
         // Act
         await Task.Delay(10);
-        user.DisplayName = "Updated";
+        user.Name = "Updated";
         context.Users.Update(user);
         await context.SaveChangesAsync();
 
@@ -121,7 +121,7 @@ public class CartDbContextTests
                       .Options;
         //== No IHttpContextAccessor passed — simulates background or startup scenarios
         using var context = new CartDbContext(options);
-        var user = new User { Id = Guid.NewGuid(), Email = "system@test.com", DisplayName = "System Test" };
+        var user = new User { Id = Guid.NewGuid(), Email = "system@test.com", Name = "System Test" };
 
         // Act
         context.Users.Add(user);

@@ -27,7 +27,7 @@ public class AuthService(CartDbContext context) : IAuthService
             Id = Guid.NewGuid(),
             Email = request.Email,
             PasswordHash = passwordHash,
-            DisplayName = request.DisplayName
+            Name = request.Name
         };
 
         context.Users.Add(user);
@@ -37,7 +37,7 @@ public class AuthService(CartDbContext context) : IAuthService
         {
             UserId = user.Id,
             Email = user.Email ?? string.Empty,
-            DisplayName = user.DisplayName ?? string.Empty
+            Name = user.Name ?? string.Empty
         };
     }
 
@@ -57,7 +57,7 @@ public class AuthService(CartDbContext context) : IAuthService
         {
             UserId = user.Id,
             Email = user.Email ?? string.Empty,
-            DisplayName = user.DisplayName ?? string.Empty
+            Name = user.Name ?? string.Empty
         };
     }
 }

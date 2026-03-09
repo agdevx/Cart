@@ -82,7 +82,7 @@ public class HouseholdRepositoryTests
         var userId = Guid.NewGuid();
         var household = new Household { Id = householdId, Name = "Test Home", InviteCode = "ABC123" };
         var member = new HouseholdMember { HouseholdId = householdId, UserId = userId, Role = "owner", JoinedAt = DateTime.UtcNow };
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
+        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
         context.Households.Add(household);
         context.HouseholdMembers.Add(member);
         await context.SaveChangesAsync();
@@ -141,8 +141,8 @@ public class HouseholdRepositoryTests
         var otherUserId = Guid.NewGuid();
         var h1 = new Household { Id = Guid.NewGuid(), Name = "My Home", InviteCode = "AAA111" };
         var h2 = new Household { Id = Guid.NewGuid(), Name = "Other Home", InviteCode = "BBB222" };
-        context.Users.Add(new User { Id = userId, Email = "me@test.com", DisplayName = "Me" });
-        context.Users.Add(new User { Id = otherUserId, Email = "other@test.com", DisplayName = "Other" });
+        context.Users.Add(new User { Id = userId, Email = "me@test.com", Name = "Me" });
+        context.Users.Add(new User { Id = otherUserId, Email = "other@test.com", Name = "Other" });
         context.Households.AddRange(h1, h2);
         context.HouseholdMembers.Add(new HouseholdMember { HouseholdId = h1.Id, UserId = userId, Role = "owner", JoinedAt = DateTime.UtcNow });
         context.HouseholdMembers.Add(new HouseholdMember { HouseholdId = h2.Id, UserId = otherUserId, Role = "owner", JoinedAt = DateTime.UtcNow });
@@ -218,7 +218,7 @@ public class HouseholdRepositoryTests
         var repo = new HouseholdRepository(context);
         var householdId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
+        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
         context.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "ABC123" });
         context.HouseholdMembers.Add(new HouseholdMember { HouseholdId = householdId, UserId = userId, Role = "member", JoinedAt = DateTime.UtcNow });
         await context.SaveChangesAsync();
@@ -254,7 +254,7 @@ public class HouseholdRepositoryTests
         var repo = new HouseholdRepository(context);
         var householdId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
+        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
         context.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "ABC123" });
         await context.SaveChangesAsync();
         var member = new HouseholdMember { HouseholdId = householdId, UserId = userId, Role = "member", JoinedAt = DateTime.UtcNow };
@@ -276,7 +276,7 @@ public class HouseholdRepositoryTests
         var repo = new HouseholdRepository(context);
         var householdId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
+        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
         context.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "ABC123" });
         context.HouseholdMembers.Add(new HouseholdMember { HouseholdId = householdId, UserId = userId, Role = "member", JoinedAt = DateTime.UtcNow });
         await context.SaveChangesAsync();
@@ -298,7 +298,7 @@ public class HouseholdRepositoryTests
         var repo = new HouseholdRepository(context);
         var householdId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", DisplayName = "Test" });
+        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
         context.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "ABC123" });
         context.HouseholdMembers.Add(new HouseholdMember { HouseholdId = householdId, UserId = userId, Role = "member", JoinedAt = DateTime.UtcNow });
         await context.SaveChangesAsync();
