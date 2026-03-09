@@ -149,14 +149,17 @@ describe('PantryStoresView', () => {
     })
   })
 
-  it('enables in-place editing when edit icon is clicked', () => {
+  it('enables in-place editing when edit is clicked via kebab menu', () => {
     setupMocks()
 
     renderView()
 
-    //== Click edit on the first store
-    const editButtons = screen.getAllByLabelText('Edit store name')
-    fireEvent.click(editButtons[0])
+    //== Open kebab menu on the first store
+    const kebabButtons = screen.getAllByLabelText('Store actions')
+    fireEvent.click(kebabButtons[0])
+
+    //== Click Edit from the dropdown menu
+    fireEvent.click(screen.getByText('Edit'))
 
     //== An input should appear with the store name value
     const editInput = screen.getByDisplayValue('Costco')
@@ -176,8 +179,10 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    const editButtons = screen.getAllByLabelText('Edit store name')
-    fireEvent.click(editButtons[0])
+    //== Open kebab menu and click Edit
+    const kebabButtons = screen.getAllByLabelText('Store actions')
+    fireEvent.click(kebabButtons[0])
+    fireEvent.click(screen.getByText('Edit'))
 
     const editInput = screen.getByDisplayValue('Costco')
     fireEvent.change(editInput, { target: { value: 'Costco Wholesale' } })
@@ -196,8 +201,10 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    const editButtons = screen.getAllByLabelText('Edit store name')
-    fireEvent.click(editButtons[0])
+    //== Open kebab menu and click Edit
+    const kebabButtons = screen.getAllByLabelText('Store actions')
+    fireEvent.click(kebabButtons[0])
+    fireEvent.click(screen.getByText('Edit'))
 
     //== Cancel button should be visible in edit mode
     const cancelButton = screen.getByLabelText('Cancel editing')
@@ -216,8 +223,10 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    const editButtons = screen.getAllByLabelText('Edit store name')
-    fireEvent.click(editButtons[0])
+    //== Open kebab menu and click Edit
+    const kebabButtons = screen.getAllByLabelText('Store actions')
+    fireEvent.click(kebabButtons[0])
+    fireEvent.click(screen.getByText('Edit'))
 
     const editInput = screen.getByDisplayValue('Costco')
     fireEvent.change(editInput, { target: { value: 'Something Else' } })
@@ -233,8 +242,10 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    const deleteButtons = screen.getAllByLabelText('Delete store')
-    fireEvent.click(deleteButtons[0])
+    //== Open kebab menu and click Delete
+    const kebabButtons = screen.getAllByLabelText('Store actions')
+    fireEvent.click(kebabButtons[0])
+    fireEvent.click(screen.getByText('Delete'))
 
     expect(screen.getByText('Delete Store')).toBeInTheDocument()
     expect(screen.getByText(/Are you sure you want to delete/)).toBeInTheDocument()
@@ -253,8 +264,10 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    const deleteButtons = screen.getAllByLabelText('Delete store')
-    fireEvent.click(deleteButtons[0])
+    //== Open kebab menu and click Delete
+    const kebabButtons = screen.getAllByLabelText('Store actions')
+    fireEvent.click(kebabButtons[0])
+    fireEvent.click(screen.getByText('Delete'))
 
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
 
@@ -268,8 +281,10 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    const deleteButtons = screen.getAllByLabelText('Delete store')
-    fireEvent.click(deleteButtons[0])
+    //== Open kebab menu and click Delete
+    const kebabButtons = screen.getAllByLabelText('Store actions')
+    fireEvent.click(kebabButtons[0])
+    fireEvent.click(screen.getByText('Delete'))
 
     //== Modal should be visible
     expect(screen.getByText('Delete Store')).toBeInTheDocument()

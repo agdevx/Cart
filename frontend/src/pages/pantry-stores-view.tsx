@@ -1,9 +1,9 @@
 // ABOUTME: Store management view with list, create, edit, and delete functionality
 // ABOUTME: Groups stores by household with a personal stores section, inline editing and delete confirmation
 
-import { useMemo,useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { Check, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { Check, MoreVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateStoreMutation } from '@/apis/agdevx-cart-api/store/create-store.mutation'
@@ -27,6 +27,19 @@ export const PantryStoresView = () => {
   const [editingStoreId, setEditingStoreId] = useState<string | null>(null)
   const [editingName, setEditingName] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuOpenId) return
+    const handleMouseDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpenId(null)
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [menuOpenId])
 
   if (storesLoading || householdsLoading) {
     return <p className="text-text-secondary">Loading stores...</p>
@@ -142,21 +155,32 @@ export const PantryStoresView = () => {
       ) : (
         <>
           <span className="font-bold text-navy">{store.name}</span>
-          <div className="flex items-center gap-2">
+          <div className="relative" ref={menuOpenId === store.id ? menuRef : undefined}>
             <button
-              onClick={() => handleStartEdit(store.id, store.name)}
-              aria-label="Edit store name"
-              className="text-text-tertiary hover:text-teal transition-colors"
+              onClick={() => setMenuOpenId(menuOpenId === store.id ? null : store.id)}
+              aria-label="Store actions"
+              className="p-1.5 rounded-lg hover:bg-navy/8 transition-colors"
             >
-              <Pencil className="w-4 h-4" />
+              <MoreVertical className="w-5 h-5 text-text-tertiary" />
             </button>
-            <button
-              onClick={() => setDeleteConfirm({ id: store.id, name: store.name })}
-              aria-label="Delete store"
-              className="text-text-tertiary hover:text-coral transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {menuOpenId === store.id && (
+              <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[140px]">
+                <button
+                  onClick={() => { setMenuOpenId(null); handleStartEdit(store.id, store.name) }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Edit
+                </button>
+                <button
+                  onClick={() => { setMenuOpenId(null); setDeleteConfirm({ id: store.id, name: store.name }) }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </button>
+              </div>
+            )}
           </div>
         </>
       )}
