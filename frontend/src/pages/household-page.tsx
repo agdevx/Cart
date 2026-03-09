@@ -4,8 +4,25 @@
 import { LogOut, Plus, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-household-members.query'
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useAuth } from '@/auth/use-auth'
+
+const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
+  const { data: members } = useHouseholdMembersQuery(householdId)
+
+  if (!members || members.length === 0) return null
+
+  const names = members
+    .map((m) => m.user?.displayName || 'Unknown')
+    .join(', ')
+
+  return (
+    <p className="text-[13px] text-text-secondary font-medium mt-1 truncate">
+      {names}
+    </p>
+  )
+}
 
 export const HouseholdPage = () => {
   const { data: households, isLoading } = useHouseholdsQuery()
@@ -45,9 +62,7 @@ export const HouseholdPage = () => {
               <h2 className="font-display text-lg font-bold text-navy">
                 {household.name || 'Unnamed Household'}
               </h2>
-              <p className="text-[13px] text-text-secondary font-medium mt-1">
-                Created: {new Date(household.createdDate).toLocaleDateString()}
-              </p>
+              <HouseholdMembersList householdId={household.id} />
             </Link>
           ))}
         </div>
