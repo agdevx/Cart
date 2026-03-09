@@ -38,7 +38,7 @@ export const HouseholdDetailPage = () => {
   const [confirmAction, setConfirmAction] = useState<{
     type: 'remove' | 'transfer' | 'leave'
     userId: string
-    displayName: string
+    memberName: string
   } | null>(null)
 
   const currentUserMember = members?.find((m) => m.userId === user?.id)
@@ -254,7 +254,7 @@ export const HouseholdDetailPage = () => {
                             setConfirmAction({
                               type: 'transfer',
                               userId: member.userId,
-                              displayName: member.userId,
+                              memberName: member.userId,
                             })
                           }
                           className="px-3 py-1.5 text-xs font-bold text-teal bg-teal/8 rounded-lg hover:bg-teal/15 transition-colors"
@@ -266,7 +266,7 @@ export const HouseholdDetailPage = () => {
                             setConfirmAction({
                               type: 'remove',
                               userId: member.userId,
-                              displayName: member.userId,
+                              memberName: member.userId,
                             })
                           }
                           className="px-3 py-1.5 text-xs font-bold text-coral bg-coral/8 rounded-lg hover:bg-coral/15 transition-colors"
@@ -282,7 +282,7 @@ export const HouseholdDetailPage = () => {
                           setConfirmAction({
                             type: 'leave',
                             userId: member.userId,
-                            displayName: 'yourself',
+                            memberName: 'yourself',
                           })
                         }
                         className="px-3 py-1.5 text-xs font-bold text-coral bg-coral/8 rounded-lg hover:bg-coral/15 transition-colors"
@@ -334,9 +334,9 @@ export const HouseholdDetailPage = () => {
             </h3>
             <p className="text-text-secondary mb-5">
               {confirmAction.type === 'remove' &&
-                `Are you sure you want to remove ${confirmAction.displayName} from this household?`}
+                `Are you sure you want to remove ${confirmAction.memberName} from this household?`}
               {confirmAction.type === 'transfer' &&
-                `Are you sure you want to transfer ownership to ${confirmAction.displayName}? You will become a regular member.`}
+                `Are you sure you want to transfer ownership to ${confirmAction.memberName}? You will become a regular member.`}
               {confirmAction.type === 'leave' &&
                 'Are you sure you want to leave this household?'}
             </p>

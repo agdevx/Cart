@@ -22,7 +22,7 @@ describe('auth-atoms', () => {
       const mockUser: User = {
         id: '123',
         email: 'test@example.com',
-        displayName: 'Test User',
+        name: 'Test User',
         createdBy: null,
         createdDate: '2024-01-01T00:00:00Z',
         modifiedBy: null,
@@ -40,7 +40,7 @@ describe('auth-atoms', () => {
       const mockUser: User = {
         id: '123',
         email: 'test@example.com',
-        displayName: 'Test User',
+        name: 'Test User',
         createdBy: null,
         createdDate: '2024-01-01T00:00:00Z',
         modifiedBy: null,

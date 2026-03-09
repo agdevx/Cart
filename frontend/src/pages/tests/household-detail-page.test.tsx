@@ -90,7 +90,7 @@ const setupMocks = (overrides?: {
 
   vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
     isAuthenticated: true,
-    user: { id: userId, email: 'test@test.com', displayName: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+    user: { id: userId, email: 'test@test.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
     setAuth: vi.fn(),
     logout: vi.fn(),
   })

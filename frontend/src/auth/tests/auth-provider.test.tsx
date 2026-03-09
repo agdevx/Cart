@@ -12,7 +12,7 @@ import { useAuth } from '../use-auth'
 const TestComponent = () => {
   const { isAuthenticated, user } = useAuth()
   return createElement('div', null,
-    `Auth: ${isAuthenticated}, User: ${user?.displayName || 'none'}`
+    `Auth: ${isAuthenticated}, User: ${user?.name || 'none'}`
   )
 }
 
@@ -60,7 +60,7 @@ describe('AuthProvider', () => {
     localStorageMock['authUser'] = JSON.stringify({
       id: '1',
       email: 'test@example.com',
-      displayName: 'Test User',
+      name: 'Test User',
       createdBy: null,
       createdDate: '2024-01-01T00:00:00Z',
       modifiedBy: null,
@@ -73,7 +73,7 @@ describe('AuthProvider', () => {
       json: async () => ({
         userId: '1',
         email: 'test@example.com',
-        displayName: 'Test User',
+        name: 'Test User',
       }),
     }) as typeof fetch
 

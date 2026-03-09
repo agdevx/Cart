@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           const user: User = {
             id: userData.userId,
             email: userData.email,
-            displayName: userData.displayName,
+            name: userData.name,
             createdBy: null,
             createdDate: new Date().toISOString(),
             modifiedBy: null,

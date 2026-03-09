@@ -53,7 +53,7 @@ describe('useAuth', () => {
     const mockUser: User = {
       id: '123',
       email: 'test@example.com',
-      displayName: 'Test User',
+      name: 'Test User',
       createdBy: null,
       createdDate: '2024-01-01T00:00:00Z',
       modifiedBy: null,
@@ -74,7 +74,7 @@ describe('useAuth', () => {
     const mockUser: User = {
       id: '123',
       email: 'test@example.com',
-      displayName: 'Test User',
+      name: 'Test User',
       createdBy: null,
       createdDate: '2024-01-01T00:00:00Z',
       modifiedBy: null,
@@ -97,7 +97,7 @@ describe('useAuth', () => {
     const mockUser: User = {
       id: '123',
       email: 'test@example.com',
-      displayName: 'Test User',
+      name: 'Test User',
       createdBy: null,
       createdDate: '2024-01-01T00:00:00Z',
       modifiedBy: null,
@@ -125,7 +125,7 @@ describe('useAuth', () => {
     const mockUser: User = {
       id: '123',
       email: 'test@example.com',
-      displayName: 'Test User',
+      name: 'Test User',
       createdBy: null,
       createdDate: '2024-01-01T00:00:00Z',
       modifiedBy: null,
@@ -147,7 +147,7 @@ describe('useAuth', () => {
     localStorageMock['authUser'] = JSON.stringify({
       id: '456',
       email: 'stored@example.com',
-      displayName: 'Stored User',
+      name: 'Stored User',
       createdBy: null,
       createdDate: '2024-01-01T00:00:00Z',
       modifiedBy: null,
@@ -160,7 +160,7 @@ describe('useAuth', () => {
       json: async () => ({
         userId: '456',
         email: 'stored@example.com',
-        displayName: 'Stored User',
+        name: 'Stored User',
       }),
     }) as typeof fetch;
 

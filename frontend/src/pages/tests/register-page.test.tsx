@@ -27,9 +27,9 @@ describe('RegisterPage', () => {
     expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument();
   });
 
-  it('renders display name input', () => {
+  it('renders name input', () => {
     render(createElement(RegisterPage), { wrapper });
-    expect(screen.getByLabelText(/display name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^name$/i)).toBeInTheDocument();
   });
 
   it('renders sign up button', () => {
@@ -104,15 +104,15 @@ describe('RegisterPage', () => {
     });
   });
 
-  it('validates display name is required', async () => {
+  it('validates name is required', async () => {
     render(createElement(RegisterPage), { wrapper });
-    const displayNameInput = screen.getByLabelText(/display name/i);
+    const nameInput = screen.getByLabelText(/^name$/i);
 
-    fireEvent.change(displayNameInput, { target: { value: '' } });
-    fireEvent.blur(displayNameInput);
+    fireEvent.change(nameInput, { target: { value: '' } });
+    fireEvent.blur(nameInput);
 
     await waitFor(() => {
-      expect(screen.getByText(/display name is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/name is required/i)).toBeInTheDocument();
     });
   });
 
@@ -167,12 +167,12 @@ describe('RegisterPage', () => {
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/^password$/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    const displayNameInput = screen.getByLabelText(/display name/i);
+    const nameInput = screen.getByLabelText(/^name$/i);
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'Password1' } });
     fireEvent.change(confirmPasswordInput, { target: { value: 'Password2' } });
-    fireEvent.change(displayNameInput, { target: { value: 'Test User' } });
+    fireEvent.change(nameInput, { target: { value: 'Test User' } });
 
     expect(screen.getByRole('button', { name: /sign up/i })).toBeDisabled();
   });
@@ -182,12 +182,12 @@ describe('RegisterPage', () => {
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/^password$/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    const displayNameInput = screen.getByLabelText(/display name/i);
+    const nameInput = screen.getByLabelText(/^name$/i);
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'Password1' } });
     fireEvent.change(confirmPasswordInput, { target: { value: 'Password1' } });
-    fireEvent.change(displayNameInput, { target: { value: 'Test User' } });
+    fireEvent.change(nameInput, { target: { value: 'Test User' } });
 
     expect(screen.getByRole('button', { name: /sign up/i })).toBeEnabled();
   });

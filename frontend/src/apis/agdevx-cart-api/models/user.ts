@@ -4,7 +4,7 @@
 export interface User {
   id: string;
   email: string | null;
-  displayName: string | null;
+  name: string | null;
   createdBy: string | null;
   createdDate: string;
   modifiedBy: string | null;

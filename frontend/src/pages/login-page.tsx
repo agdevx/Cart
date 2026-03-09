@@ -23,7 +23,7 @@ export const LoginPage = () => {
       setAuth({
           id: response.userId,
           email: response.email,
-          displayName: response.displayName,
+          name: response.name,
           createdBy: null,
           createdDate: new Date().toISOString(),
           modifiedBy: null,

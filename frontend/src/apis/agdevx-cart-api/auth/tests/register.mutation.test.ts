@@ -27,7 +27,7 @@ describe('useRegisterMutation', () => {
         json: () => Promise.resolve({
           userId: 'test-user-id',
           email: 'test@example.com',
-          displayName: 'Test User'
+          name: 'Test User'
         })
       } as Response)
     ) as typeof fetch;
@@ -37,12 +37,12 @@ describe('useRegisterMutation', () => {
     const response = await result.current.mutateAsync({
       email: 'test@example.com',
       password: 'TestPass123',
-      displayName: 'Test User'
+      name: 'Test User'
     });
 
     expect(response.userId).toBe('test-user-id');
     expect(response.email).toBe('test@example.com');
-    expect(response.displayName).toBe('Test User');
+    expect(response.name).toBe('Test User');
   });
 
   it('should call the correct API endpoint', async () => {
@@ -52,7 +52,7 @@ describe('useRegisterMutation', () => {
         json: () => Promise.resolve({
           userId: 'id',
           email: 'test@example.com',
-          displayName: 'Test'
+          name: 'Test'
         })
       } as Response)
     ) as typeof fetch;
@@ -63,7 +63,7 @@ describe('useRegisterMutation', () => {
     await result.current.mutateAsync({
       email: 'test@example.com',
       password: 'TestPass123',
-      displayName: 'Test User'
+      name: 'Test User'
     });
 
     expect(mockFetch).toHaveBeenCalledWith(
@@ -96,7 +96,7 @@ describe('useRegisterMutation', () => {
       result.current.mutateAsync({
         email: 'existing@example.com',
         password: 'TestPass123',
-        displayName: 'Test User'
+        name: 'Test User'
       })
     ).rejects.toThrow();
   });

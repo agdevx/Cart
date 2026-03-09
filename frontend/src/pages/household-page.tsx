@@ -14,7 +14,7 @@ const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
   if (!members || members.length === 0) return null
 
   const names = members
-    .map((m) => m.user?.displayName || 'Unknown')
+    .map((m) => m.user?.name || 'Unknown')
     .join(', ')
 
   return (

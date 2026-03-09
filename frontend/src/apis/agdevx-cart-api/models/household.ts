@@ -18,7 +18,7 @@ export interface HouseholdMember {
   joinedAt: string;
   role: string;
   user?: {
-    displayName: string | null;
+    name: string | null;
   };
   createdBy: string | null;
   createdDate: string;

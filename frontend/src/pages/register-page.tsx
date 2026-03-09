@@ -36,7 +36,7 @@ export const RegisterPage = () => {
   // Confirm password validation
   const passwordsMatch = password === confirmPassword;
 
-  // Display name validation
+  // Name validation
   const isDisplayNameValid = displayName.trim().length > 0;
 
   // Form validation
@@ -72,7 +72,7 @@ export const RegisterPage = () => {
     : '';
 
   const displayNameError = touched.displayName && !displayName.trim()
-    ? 'Display name is required'
+    ? 'Name is required'
     : '';
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,13 +85,13 @@ export const RegisterPage = () => {
       const response = await registerMutation.mutateAsync({
         email,
         password,
-        displayName,
+        name: displayName.trim(),
       });
 
       setAuth({
           id: response.userId,
           email: response.email,
-          displayName: response.displayName,
+          name: response.name,
           createdBy: null,
           createdDate: new Date().toISOString(),
           modifiedBy: null,
@@ -199,18 +199,18 @@ export const RegisterPage = () => {
             )}
           </div>
 
-          {/* Display Name Field */}
+          {/* Name Field */}
           <div className="mb-6">
-            <label htmlFor="displayName" className="block text-sm font-semibold text-navy-soft mb-2">
-              Display Name
+            <label htmlFor="name" className="block text-sm font-semibold text-navy-soft mb-2">
+              Name
             </label>
             <input
-              id="displayName"
+              id="name"
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               onBlur={() => setTouched({ ...touched, displayName: true })}
-              placeholder="Enter your display name"
+              placeholder="Enter your name"
               className={inputClass(!!displayNameError)}
               autoComplete="name"
             />
