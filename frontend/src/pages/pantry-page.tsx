@@ -1,5 +1,5 @@
-// ABOUTME: Pantry management page with Items/Stores segmented control and filter dropdown
-// ABOUTME: Items tab supports filtering by all, personal, household, or merged views
+// ABOUTME: Pantry management page with Items/Stores segmented control and horizontal filter tabs
+// ABOUTME: Items tab supports filtering by all, personal, or per-household views
 
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -65,23 +65,49 @@ export const PantryPage = () => {
         </Link>
       )}
 
-      {/* Filter Dropdown — Items tab only */}
+      {/* Filter Tabs — Items tab only */}
       {activeTab === 'items' && (
-        <select
-          aria-label="Filter inventory"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value as InventoryFilter)}
-          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent mb-4"
-        >
-          <option value="all">All Items</option>
-          <option value="personal">Personal</option>
+        <div role="tablist" aria-label="Filter inventory" className="flex bg-bg-warm rounded-xl p-1 mb-4 overflow-x-auto">
+          <button
+            role="tab"
+            aria-selected={filter === 'all'}
+            onClick={() => setFilter('all')}
+            className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+              filter === 'all'
+                ? 'bg-teal text-white shadow-sm'
+                : 'text-text-secondary hover:text-navy'
+            }`}
+          >
+            All
+          </button>
+          <button
+            role="tab"
+            aria-selected={filter === 'personal'}
+            onClick={() => setFilter('personal')}
+            className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+              filter === 'personal'
+                ? 'bg-teal text-white shadow-sm'
+                : 'text-text-secondary hover:text-navy'
+            }`}
+          >
+            Personal
+          </button>
           {(households || []).map((household) => (
-            <optgroup key={household.id} label={household.name ?? undefined}>
-              <option value={`household:${household.id}`}>{household.name}</option>
-              <option value={`merged:${household.id}`}>{household.name} + Personal</option>
-            </optgroup>
+            <button
+              key={household.id}
+              role="tab"
+              aria-selected={filter === `household:${household.id}`}
+              onClick={() => setFilter(`household:${household.id}`)}
+              className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+                filter === `household:${household.id}`
+                  ? 'bg-teal text-white shadow-sm'
+                  : 'text-text-secondary hover:text-navy'
+              }`}
+            >
+              {household.name}
+            </button>
           ))}
-        </select>
+        </div>
       )}
 
       {/* Items View */}

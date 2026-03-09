@@ -57,29 +57,23 @@ describe('PantryPage', () => {
     expect(screen.getByRole('tab', { name: 'Stores' })).toBeInTheDocument()
   })
 
-  it('shows items view by default with filter dropdown', () => {
+  it('shows items view by default with filter tabs', () => {
     renderPage()
 
     const itemsButton = screen.getByRole('tab', { name: 'Items' })
     expect(itemsButton.className).toContain('bg-teal')
 
     expect(screen.getByTestId('pantry-items-view')).toBeInTheDocument()
-    expect(screen.getByLabelText('Filter inventory')).toBeInTheDocument()
+    expect(screen.getByRole('tablist', { name: 'Filter inventory' })).toBeInTheDocument()
   })
 
-  it('renders filter dropdown with correct options', () => {
+  it('renders filter tabs for all, personal, and each household', () => {
     renderPage()
 
-    const select = screen.getByLabelText('Filter inventory')
-    const options = select.querySelectorAll('option')
-
-    expect(options).toHaveLength(6)
-    expect(options[0]).toHaveTextContent('All Items')
-    expect(options[1]).toHaveTextContent('Personal')
-    expect(options[2]).toHaveTextContent('Smith Family')
-    expect(options[3]).toHaveTextContent('Smith Family + Personal')
-    expect(options[4]).toHaveTextContent('Book Club')
-    expect(options[5]).toHaveTextContent('Book Club + Personal')
+    expect(screen.getByRole('tab', { name: 'All' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Personal' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Smith Family' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Book Club' })).toBeInTheDocument()
   })
 
   it('passes filter value to PantryItemsView', () => {
@@ -89,23 +83,30 @@ describe('PantryPage', () => {
     expect(view).toHaveAttribute('data-filter', 'all')
   })
 
-  it('updates filter when dropdown changes', () => {
+  it('updates filter when a filter tab is clicked', () => {
     renderPage()
 
-    fireEvent.change(screen.getByLabelText('Filter inventory'), {
-      target: { value: 'personal' },
-    })
+    fireEvent.click(screen.getByRole('tab', { name: 'Personal' }))
 
     const view = screen.getByTestId('pantry-items-view')
     expect(view).toHaveAttribute('data-filter', 'personal')
   })
 
-  it('hides filter dropdown when Stores tab is active', () => {
+  it('updates filter to household when household tab is clicked', () => {
+    renderPage()
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Smith Family' }))
+
+    const view = screen.getByTestId('pantry-items-view')
+    expect(view).toHaveAttribute('data-filter', 'household:h1')
+  })
+
+  it('hides filter tabs when Stores tab is active', () => {
     renderPage()
 
     fireEvent.click(screen.getByRole('tab', { name: 'Stores' }))
 
-    expect(screen.queryByLabelText('Filter inventory')).not.toBeInTheDocument()
+    expect(screen.queryByRole('tablist', { name: 'Filter inventory' })).not.toBeInTheDocument()
     expect(screen.getByTestId('pantry-stores-view')).toBeInTheDocument()
   })
 
