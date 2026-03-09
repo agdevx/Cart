@@ -1,6 +1,10 @@
 // ABOUTME: Pantry items view with filter support for all, personal, household, and merged views
 // ABOUTME: Groups items by household in "all" view, flat list for scoped filters
 
+import { useEffect, useRef, useState } from 'react'
+
+import { MoreVertical, Trash2 } from 'lucide-react'
+
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useDeleteInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/delete-inventory-item.mutation'
 import { useHouseholdInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-household-inventory.query'
@@ -8,6 +12,8 @@ import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventor
 import { useMergedInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-merged-inventory.query'
 import { usePersonalInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-personal-inventory.query'
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
+
+import { ConfirmDialog } from './components/confirm-dialog'
 
 export type InventoryFilter = 'all' | 'personal' | `household:${string}` | `merged:${string}`
 
@@ -29,6 +35,20 @@ export const PantryItemsView = ({ filter }: PantryItemsViewProps) => {
   const { type: filterType, id: filterId } = parseFilter(filter)
   const { data: households } = useHouseholdsQuery()
   const deleteMutation = useDeleteInventoryItemMutation()
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
+
+  useEffect(() => {
+    if (!menuOpenId) return
+    const handleMouseDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpenId(null)
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [menuOpenId])
 
   //== All four hooks are called unconditionally (React rules of hooks). Inactive scoped hooks
   //== receive null IDs which disables them via `enabled`. The all/personal hooks stay in cache
@@ -54,10 +74,15 @@ export const PantryItemsView = ({ filter }: PantryItemsViewProps) => {
   const items = activeQuery.data
   const isLoading = activeQuery.isLoading
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this item?')) {
-      await deleteMutation.mutateAsync(id)
-    }
+  const handleDelete = (id: string, name: string) => {
+    setMenuOpenId(null)
+    setDeleteConfirm({ id, name })
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirm) return
+    await deleteMutation.mutateAsync(deleteConfirm.id)
+    setDeleteConfirm(null)
   }
 
   if (isLoading) {
@@ -79,13 +104,26 @@ export const PantryItemsView = ({ filter }: PantryItemsViewProps) => {
           <p className="text-sm text-text-secondary mt-0.5">{item.notes}</p>
         )}
       </div>
-      <button
-        onClick={() => handleDelete(item.id)}
-        disabled={deleteMutation.isPending}
-        className="text-coral hover:text-coral/80 text-sm font-semibold"
-      >
-        Delete
-      </button>
+      <div className="relative" ref={menuOpenId === item.id ? menuRef : undefined}>
+        <button
+          onClick={() => setMenuOpenId(menuOpenId === item.id ? null : item.id)}
+          aria-label="Item actions"
+          className="p-1.5 rounded-lg hover:bg-navy/8 transition-colors"
+        >
+          <MoreVertical className="w-5 h-5 text-text-tertiary" />
+        </button>
+        {menuOpenId === item.id && (
+          <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[140px]">
+            <button
+              onClick={() => handleDelete(item.id, item.name)}
+              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 
@@ -129,14 +167,38 @@ export const PantryItemsView = ({ filter }: PantryItemsViewProps) => {
             </div>
           </div>
         )}
+
+        {deleteConfirm && (
+          <ConfirmDialog
+            title="Delete Item"
+            message={`Delete "${deleteConfirm.name}"? This can't be undone.`}
+            confirmLabel="Delete"
+            onConfirm={handleConfirmDelete}
+            onCancel={() => setDeleteConfirm(null)}
+            isPending={deleteMutation.isPending}
+          />
+        )}
       </>
     )
   }
 
   //== For scoped filters, render a flat list
   return (
-    <div className="space-y-2">
-      {items.map(renderItem)}
-    </div>
+    <>
+      <div className="space-y-2">
+        {items.map(renderItem)}
+      </div>
+
+      {deleteConfirm && (
+        <ConfirmDialog
+          title="Delete Item"
+          message={`Delete "${deleteConfirm.name}"? This can't be undone.`}
+          confirmLabel="Delete"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteConfirm(null)}
+          isPending={deleteMutation.isPending}
+        />
+      )}
+    </>
   )
 }
