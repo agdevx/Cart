@@ -1,5 +1,5 @@
-// ABOUTME: Add inventory item page
-// ABOUTME: Form for creating household or personal inventory items
+// ABOUTME: Add pantry item page
+// ABOUTME: Form for creating household or personal pantry items
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -8,7 +8,7 @@ import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-househo
 import { useCreateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/create-inventory-item.mutation'
 import { getErrorMessage } from '@/utilities/error-messages'
 
-export const AddInventoryItemPage = () => {
+export const AddPantryItemPage = () => {
   const [name, setName] = useState('')
   const [notes, setNotes] = useState('')
   const [householdId, setHouseholdId] = useState<string>('personal')
@@ -29,7 +29,7 @@ export const AddInventoryItemPage = () => {
         notes: notes.trim() || null,
         householdId: householdId === 'personal' ? null : householdId,
       })
-      navigate('/inventory')
+      navigate('/pantry')
     } catch {
       // Error is handled by mutation state
     }
@@ -106,7 +106,7 @@ export const AddInventoryItemPage = () => {
           </button>
           <button
             type="button"
-            onClick={() => navigate('/inventory')}
+            onClick={() => navigate('/pantry')}
             className="w-full py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
           >
             Cancel

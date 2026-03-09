@@ -1,4 +1,4 @@
-// ABOUTME: Inventory management page with Items/Stores segmented control and filter dropdown
+// ABOUTME: Pantry management page with Items/Stores segmented control and filter dropdown
 // ABOUTME: Items tab supports filtering by all, personal, household, or merged views
 
 import { useState } from 'react'
@@ -7,13 +7,13 @@ import { Link } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
-import { InventoryItemsView } from '@/pages/inventory-items-view'
-import type { InventoryFilter } from '@/pages/inventory-items-view'
-import { InventoryStoresView } from '@/pages/inventory-stores-view'
+import { PantryItemsView } from '@/pages/pantry-items-view'
+import type { InventoryFilter } from '@/pages/pantry-items-view'
+import { PantryStoresView } from '@/pages/pantry-stores-view'
 
 type InventoryTab = 'items' | 'stores'
 
-export const InventoryPage = () => {
+export const PantryPage = () => {
   const [activeTab, setActiveTab] = useState<InventoryTab>('items')
   const [filter, setFilter] = useState<InventoryFilter>('all')
   const { data: households } = useHouseholdsQuery()
@@ -26,7 +26,7 @@ export const InventoryPage = () => {
         </h1>
         {activeTab === 'items' && (
           <Link
-            to="/inventory/add"
+            to="/pantry/add"
             className="flex items-center gap-1.5 px-4 py-2.5 bg-teal text-white rounded-xl font-display font-bold text-sm hover:bg-teal-light transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -83,10 +83,10 @@ export const InventoryPage = () => {
       )}
 
       {/* Items View */}
-      {activeTab === 'items' && <InventoryItemsView filter={filter} />}
+      {activeTab === 'items' && <PantryItemsView filter={filter} />}
 
       {/* Stores View */}
-      {activeTab === 'stores' && <InventoryStoresView />}
+      {activeTab === 'stores' && <PantryStoresView />}
     </div>
   )
 }

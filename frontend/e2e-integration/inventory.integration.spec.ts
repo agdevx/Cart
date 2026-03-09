@@ -20,19 +20,19 @@ test.describe('Inventory Integration', () => {
     await page.waitForLoadState('networkidle');
 
     // Navigate to inventory via bottom nav
-    await page.locator('a[href="/inventory"]').click({ timeout: 15000 });
-    await expect(page).toHaveURL('/inventory');
+    await page.locator('a[href="/pantry"]').click({ timeout: 15000 });
+    await expect(page).toHaveURL('/pantry');
 
-    // Should show inventory page content
-    await expect(page.locator('text=/inventory/i')).toBeVisible();
+    // Should show pantry page content
+    await expect(page.locator('text=/pantry/i')).toBeVisible();
   });
 
   test('should access add inventory item page', async ({ page }) => {
     // Wait for page to stabilize
     await page.waitForLoadState('networkidle');
 
-    await page.locator('a[href="/inventory"]').click({ timeout: 15000 });
-    await page.locator('a[href="/inventory/add"]').click({ timeout: 15000 });
-    await expect(page).toHaveURL('/inventory/add');
+    await page.locator('a[href="/pantry"]').click({ timeout: 15000 });
+    await page.locator('a[href="/pantry/add"]').click({ timeout: 15000 });
+    await expect(page).toHaveURL('/pantry/add');
   });
 });

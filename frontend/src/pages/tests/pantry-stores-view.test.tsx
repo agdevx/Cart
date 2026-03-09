@@ -13,7 +13,7 @@ import * as updateStoreModule from '@/apis/agdevx-cart-api/store/update-store.mu
 import * as storesQueryModule from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 
-import { InventoryStoresView } from '../inventory-stores-view'
+import { PantryStoresView } from '../pantry-stores-view'
 
 const mockHouseholds: Household[] = [
   { id: 'h1', name: 'Smith Family', createdBy: null, createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
@@ -29,7 +29,7 @@ const renderView = () => {
   return render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <InventoryStoresView />
+        <PantryStoresView />
       </BrowserRouter>
     </QueryClientProvider>
   )
@@ -74,7 +74,7 @@ const setupMocks = (options?: {
   } as unknown as UseMutationResult<void, Error, string>)
 }
 
-describe('InventoryStoresView', () => {
+describe('PantryStoresView', () => {
   beforeEach(() => {
     queryClient.clear()
     vi.clearAllMocks()

@@ -10,7 +10,7 @@ export const BottomNav = () => {
   const isActive = (path: string) => location.pathname.startsWith(path)
 
   const tabs = [
-    { path: '/inventory', label: 'Pantry', icon: Package },
+    { path: '/pantry', label: 'Pantry', icon: Package },
     { path: '/shopping', label: 'Trips', icon: ShoppingCart },
     { path: '/household', label: 'Household', icon: Users },
   ]

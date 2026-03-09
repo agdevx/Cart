@@ -16,8 +16,8 @@ test.describe('Navigation', () => {
     await expect(page).toHaveURL(/\/login/)
   })
 
-  test('inventory page redirects to login when not authenticated', async ({ page }) => {
-    await page.goto('/inventory')
+  test('pantry page redirects to login when not authenticated', async ({ page }) => {
+    await page.goto('/pantry')
     await expect(page).toHaveURL(/\/login/)
   })
 

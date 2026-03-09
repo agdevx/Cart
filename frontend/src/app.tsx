@@ -11,11 +11,11 @@ import { useAuth } from '@/auth/use-auth'
 import { BottomNav } from '@/features/bottom-nav/bottom-nav'
 import { PwaInstallPrompt } from '@/features/pwa-install-prompt/pwa-install-prompt'
 import { ActiveTripPage } from '@/pages/active-trip-page'
-import { AddInventoryItemPage } from '@/pages/add-inventory-item-page'
+import { AddPantryItemPage } from '@/pages/add-pantry-item-page'
 import { CreateHouseholdPage } from '@/pages/create-household-page'
 import { HouseholdDetailPage } from '@/pages/household-detail-page'
 import { HouseholdPage } from '@/pages/household-page'
-import { InventoryPage } from '@/pages/inventory-page'
+import { PantryPage } from '@/pages/pantry-page'
 import { JoinHouseholdPage } from '@/pages/join-household-page'
 import { LoginPage } from '@/pages/login-page'
 import { RegisterPage } from '@/pages/register-page'
@@ -40,8 +40,8 @@ export const AppRoutes = () => (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/inventory" element={<ProtectedRoute><LayoutWithNav><InventoryPage /></LayoutWithNav></ProtectedRoute>} />
-      <Route path="/inventory/add" element={<ProtectedRoute><AddInventoryItemPage /></ProtectedRoute>} />
+      <Route path="/pantry" element={<ProtectedRoute><LayoutWithNav><PantryPage /></LayoutWithNav></ProtectedRoute>} />
+      <Route path="/pantry/add" element={<ProtectedRoute><AddPantryItemPage /></ProtectedRoute>} />
       <Route path="/shopping" element={<ProtectedRoute><LayoutWithNav><ShoppingPage /></LayoutWithNav></ProtectedRoute>} />
       <Route path="/shopping/:tripId" element={<ProtectedRoute><TripDetailPage /></ProtectedRoute>} />
       <Route path="/shopping/:tripId/active" element={<ProtectedRoute><ActiveTripPage /></ProtectedRoute>} />

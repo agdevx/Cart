@@ -1,4 +1,4 @@
-// ABOUTME: Inventory items view with filter support for all, personal, household, and merged views
+// ABOUTME: Pantry items view with filter support for all, personal, household, and merged views
 // ABOUTME: Groups items by household in "all" view, flat list for scoped filters
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
@@ -11,7 +11,7 @@ import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item
 
 export type InventoryFilter = 'all' | 'personal' | `household:${string}` | `merged:${string}`
 
-interface InventoryItemsViewProps {
+interface PantryItemsViewProps {
   filter: InventoryFilter
 }
 
@@ -25,7 +25,7 @@ const parseFilter = (filter: InventoryFilter): { type: FilterType; id: string | 
   return { type: type as FilterType, id }
 }
 
-export const InventoryItemsView = ({ filter }: InventoryItemsViewProps) => {
+export const PantryItemsView = ({ filter }: PantryItemsViewProps) => {
   const { type: filterType, id: filterId } = parseFilter(filter)
   const { data: households } = useHouseholdsQuery()
   const deleteMutation = useDeleteInventoryItemMutation()

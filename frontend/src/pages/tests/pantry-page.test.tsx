@@ -8,20 +8,20 @@ import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-hou
 import type { Household } from '@/apis/agdevx-cart-api/models/household'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 
-import { InventoryPage } from '../inventory-page'
+import { PantryPage } from '../pantry-page'
 
-//== Mock InventoryItemsView so we can inspect its props without setting up all inventory hooks
-vi.mock('../inventory-items-view', () => ({
-  InventoryItemsView: ({ filter }: { filter: string }) => (
-    <div data-testid="inventory-items-view" data-filter={filter}>
+//== Mock PantryItemsView so we can inspect its props without setting up all inventory hooks
+vi.mock('../pantry-items-view', () => ({
+  PantryItemsView: ({ filter }: { filter: string }) => (
+    <div data-testid="pantry-items-view" data-filter={filter}>
       Items view with filter: {filter}
     </div>
   ),
 }))
 
-//== Mock InventoryStoresView
-vi.mock('../inventory-stores-view', () => ({
-  InventoryStoresView: () => <div data-testid="inventory-stores-view">Stores view</div>,
+//== Mock PantryStoresView
+vi.mock('../pantry-stores-view', () => ({
+  PantryStoresView: () => <div data-testid="pantry-stores-view">Stores view</div>,
 }))
 
 const mockHouseholds: Household[] = [
@@ -33,13 +33,13 @@ const renderPage = () => {
   return render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <InventoryPage />
+        <PantryPage />
       </BrowserRouter>
     </QueryClientProvider>
   )
 }
 
-describe('InventoryPage', () => {
+describe('PantryPage', () => {
   beforeEach(() => {
     queryClient.clear()
     vi.clearAllMocks()
@@ -63,7 +63,7 @@ describe('InventoryPage', () => {
     const itemsButton = screen.getByRole('tab', { name: 'Items' })
     expect(itemsButton.className).toContain('bg-teal')
 
-    expect(screen.getByTestId('inventory-items-view')).toBeInTheDocument()
+    expect(screen.getByTestId('pantry-items-view')).toBeInTheDocument()
     expect(screen.getByLabelText('Filter inventory')).toBeInTheDocument()
   })
 
@@ -82,10 +82,10 @@ describe('InventoryPage', () => {
     expect(options[5]).toHaveTextContent('Book Club + Personal')
   })
 
-  it('passes filter value to InventoryItemsView', () => {
+  it('passes filter value to PantryItemsView', () => {
     renderPage()
 
-    const view = screen.getByTestId('inventory-items-view')
+    const view = screen.getByTestId('pantry-items-view')
     expect(view).toHaveAttribute('data-filter', 'all')
   })
 
@@ -96,7 +96,7 @@ describe('InventoryPage', () => {
       target: { value: 'personal' },
     })
 
-    const view = screen.getByTestId('inventory-items-view')
+    const view = screen.getByTestId('pantry-items-view')
     expect(view).toHaveAttribute('data-filter', 'personal')
   })
 
@@ -106,7 +106,7 @@ describe('InventoryPage', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Stores' }))
 
     expect(screen.queryByLabelText('Filter inventory')).not.toBeInTheDocument()
-    expect(screen.getByTestId('inventory-stores-view')).toBeInTheDocument()
+    expect(screen.getByTestId('pantry-stores-view')).toBeInTheDocument()
   })
 
   it('switches to stores view when Stores tab is clicked', () => {

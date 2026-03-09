@@ -11,7 +11,7 @@ import { useDeleteStoreMutation } from '@/apis/agdevx-cart-api/store/delete-stor
 import { useUpdateStoreMutation } from '@/apis/agdevx-cart-api/store/update-store.mutation'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 
-export const InventoryStoresView = () => {
+export const PantryStoresView = () => {
   const { data: households, isLoading: householdsLoading } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores, isLoading: storesLoading } = useStoresQuery(householdIds)
