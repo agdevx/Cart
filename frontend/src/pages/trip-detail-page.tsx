@@ -2,13 +2,12 @@
 // ABOUTME: Allows adding items to trip and starting shopping session
 
 import { ArrowLeft, ShoppingCart } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
-import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
 import { useDeleteTripItemMutation } from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
 import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
@@ -25,29 +24,8 @@ export const TripDetailPage = () => {
   const { data: households } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores } = useStoresQuery(householdIds)
-  const addItemMutation = useAddTripItemMutation()
   const updateMutation = useUpdateTripItemMutation()
   const deleteMutation = useDeleteTripItemMutation()
-  const [showAddItem, setShowAddItem] = useState(false)
-  const [selectedItemId, setSelectedItemId] = useState('')
-  const [quantity, setQuantity] = useState('1')
-
-  const handleAddItem = async () => {
-    if (!selectedItemId || !tripId) return
-
-    try {
-      await addItemMutation.mutateAsync({
-        tripId,
-        inventoryItemId: selectedItemId,
-        quantity: parseInt(quantity, 10),
-      })
-      setSelectedItemId('')
-      setQuantity('1')
-      setShowAddItem(false)
-    } catch {
-      // Error handled by mutation state
-    }
-  }
 
   const handleStartShopping = () => {
     navigate(`/shopping/${tripId}/active`)
@@ -76,10 +54,6 @@ export const TripDetailPage = () => {
       </div>
     )
   }
-
-  const availableItems = inventory?.filter(
-    (item) => !tripItems?.some((ti) => ti.inventoryItemId === item.id)
-  ) || []
 
   return (
     <div className="px-5 pt-14 pb-8">
@@ -112,59 +86,12 @@ export const TripDetailPage = () => {
             <span className="flex-1 h-px bg-navy/8" />
           </div>
           <button
-            onClick={() => setShowAddItem(!showAddItem)}
+            onClick={() => navigate(`/shopping/${tripId}/add-items`)}
             className="px-4 py-2 text-sm font-display font-semibold text-teal border border-teal/30 rounded-xl hover:bg-teal/8 transition-colors"
           >
-            {showAddItem ? 'Cancel' : 'Add Item'}
+            Add Items
           </button>
         </div>
-
-        {showAddItem && (
-          <div className="mb-4 p-5 bg-surface rounded-2xl shadow-sm">
-            <div className="mb-3">
-              <label htmlFor="item" className="block text-sm font-semibold text-navy-soft mb-1">
-                Select Item
-              </label>
-              <select
-                id="item"
-                value={selectedItemId}
-                onChange={(e) => setSelectedItemId(e.target.value)}
-                className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-                disabled={addItemMutation.isPending}
-              >
-                <option value="">Choose an item...</option>
-                {availableItems.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="quantity" className="block text-sm font-semibold text-navy-soft mb-1">
-                Quantity
-              </label>
-              <input
-                id="quantity"
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-                disabled={addItemMutation.isPending}
-              />
-            </div>
-
-            <button
-              onClick={handleAddItem}
-              disabled={addItemMutation.isPending || !selectedItemId}
-              className="w-full py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
-            >
-              {addItemMutation.isPending ? 'Adding...' : 'Add to List'}
-            </button>
-          </div>
-        )}
 
         {tripItems && tripItems.length > 0 ? (
           <div className="space-y-2">
