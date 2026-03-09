@@ -1,0 +1,10 @@
+{
+  "name": "agdevx-cart",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"cd backend && dotnet run --project AGDevX.Cart.Api\" \"cd frontend && npm run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
