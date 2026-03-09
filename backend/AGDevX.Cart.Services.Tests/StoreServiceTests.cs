@@ -87,6 +87,30 @@ public class StoreServiceTests
     }
 
     [Fact]
+    public async Task Should_CreatePersonalStore_When_UserIdNotProvided()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var store = new Store
+        {
+            Name = "My Local Store",
+            // No UserId set — simulates what the frontend sends
+        };
+
+        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>()))
+                            .ReturnsAsync(store);
+
+        // Act
+        var result = await _storeService.CreateStore(store, userId);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Name.Should().Be("My Local Store");
+        store.UserId.Should().Be(userId);
+        _mockStoreRepository.Verify(x => x.Create(It.IsAny<Store>()), Times.Once);
+    }
+
+    [Fact]
     public async Task Should_ThrowUnauthorizedAccessException_When_CreatingHouseholdStoreAsNonMember()
     {
         // Arrange
@@ -105,17 +129,22 @@ public class StoreServiceTests
     }
 
     [Fact]
-    public async Task Should_ThrowUnauthorizedAccessException_When_CreatingPersonalStoreForDifferentUser()
+    public async Task Should_OverrideUserId_When_CreatingPersonalStoreWithDifferentUserId()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var store = new Store { Id = Guid.NewGuid(), Name = "My Store", UserId = Guid.NewGuid() };
 
+        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>()))
+                            .ReturnsAsync(store);
+
         // Act
-        var act = () => _storeService.CreateStore(store, userId);
+        var result = await _storeService.CreateStore(store, userId);
 
         // Assert
-        await act.Should().ThrowAsync<UnauthorizedAccessException>();
+        result.Should().NotBeNull();
+        store.UserId.Should().Be(userId);
+        _mockStoreRepository.Verify(x => x.Create(It.IsAny<Store>()), Times.Once);
     }
 
     [Fact]

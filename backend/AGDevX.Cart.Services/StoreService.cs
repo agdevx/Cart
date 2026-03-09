@@ -21,10 +21,10 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
                 throw new UnauthorizedAccessException("User is not a member of this household");
             }
         }
-        //== Personal store: verify userId matches
-        else if (store.UserId != userId)
+        //== Personal store: automatically set owner to current user
+        else
         {
-            throw new UnauthorizedAccessException("Cannot create store for another user");
+            store.UserId = userId;
         }
 
         return await storeRepository.Create(store);
