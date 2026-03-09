@@ -11,6 +11,7 @@ import { useDeleteStoreMutation } from '@/apis/agdevx-cart-api/store/delete-stor
 import { useUpdateStoreMutation } from '@/apis/agdevx-cart-api/store/update-store.mutation'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 
+import { ConfirmDialog } from './components/confirm-dialog'
 import { ScopeSelect } from './components/scope-select'
 
 export const PantryStoresView = () => {
@@ -280,27 +281,14 @@ export const PantryStoresView = () => {
 
       {/* Delete confirmation modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-surface rounded-2xl p-6 mx-4 max-w-sm w-full shadow-lg">
-            <h3 className="font-display text-lg font-bold text-navy mb-2">Delete Store</h3>
-            <p className="text-text-secondary mb-5">Are you sure you want to delete &quot;{deleteConfirm.name}&quot;?</p>
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="px-4 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmDelete}
-                disabled={deleteMutation.isPending}
-                className="px-4 py-2.5 text-sm font-bold text-white rounded-xl bg-coral hover:bg-coral/90 disabled:opacity-50 transition-colors"
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          title="Delete Store"
+          message={`Are you sure you want to delete "${deleteConfirm.name}"?`}
+          confirmLabel="Delete"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteConfirm(null)}
+          isPending={deleteMutation.isPending}
+        />
       )}
     </>
   )

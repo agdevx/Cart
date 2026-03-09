@@ -11,13 +11,13 @@ export const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
+  const [name, setName] = useState('');
   const [serverEmailError, setServerEmailError] = useState('');
   const [touched, setTouched] = useState({
     email: false,
     password: false,
     confirmPassword: false,
-    displayName: false,
+    name: false,
   });
 
   const navigate = useNavigate();
@@ -37,10 +37,10 @@ export const RegisterPage = () => {
   const passwordsMatch = password === confirmPassword;
 
   // Name validation
-  const isDisplayNameValid = displayName.trim().length > 0;
+  const isNameValid = name.trim().length > 0;
 
   // Form validation
-  const isFormValid = isEmailValid && isPasswordValid && passwordsMatch && confirmPassword.length > 0 && isDisplayNameValid;
+  const isFormValid = isEmailValid && isPasswordValid && passwordsMatch && confirmPassword.length > 0 && isNameValid;
 
   // Compute error messages directly from state
   const emailError = touched.email
@@ -71,7 +71,7 @@ export const RegisterPage = () => {
       : ''
     : '';
 
-  const displayNameError = touched.displayName && !displayName.trim()
+  const nameError = touched.name && !name.trim()
     ? 'Name is required'
     : '';
 
@@ -85,7 +85,7 @@ export const RegisterPage = () => {
       const response = await registerMutation.mutateAsync({
         email,
         password,
-        name: displayName.trim(),
+        name: name.trim(),
       });
 
       setAuth({
@@ -207,15 +207,15 @@ export const RegisterPage = () => {
             <input
               id="name"
               type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              onBlur={() => setTouched({ ...touched, displayName: true })}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onBlur={() => setTouched({ ...touched, name: true })}
               placeholder="Enter your name"
-              className={inputClass(!!displayNameError)}
+              className={inputClass(!!nameError)}
               autoComplete="name"
             />
-            {displayNameError && (
-              <p className="mt-1 text-sm text-coral">{displayNameError}</p>
+            {nameError && (
+              <p className="mt-1 text-sm text-coral">{nameError}</p>
             )}
           </div>
 

@@ -269,7 +269,7 @@ describe('PantryStoresView', () => {
     fireEvent.click(kebabButtons[0])
     fireEvent.click(screen.getByText('Delete'))
 
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
 
     await waitFor(() => {
       expect(mockDeleteMutateAsync).toHaveBeenCalledWith('hs1')
