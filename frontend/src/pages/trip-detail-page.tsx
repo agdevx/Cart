@@ -1,7 +1,7 @@
 // ABOUTME: Trip detail page for planning mode
 // ABOUTME: Allows adding items to trip and starting shopping session
 
-import { ArrowLeft, ShoppingCart } from 'lucide-react'
+import { ArrowLeft, Plus, ShoppingCart } from 'lucide-react'
 import { useMemo } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
@@ -80,18 +80,18 @@ export const TripDetailPage = () => {
       </div>
 
       <div className="mb-4">
-        <div className="flex justify-between items-center mb-3">
-          <div className="flex items-center gap-2.5">
-            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Shopping List</span>
-            <span className="flex-1 h-px bg-navy/8" />
-          </div>
-          <button
-            onClick={() => navigate(`/shopping/${tripId}/add-items`)}
-            className="px-4 py-2 text-sm font-display font-semibold text-teal border border-teal/30 rounded-xl hover:bg-teal/8 transition-colors"
-          >
-            Add Items
-          </button>
+        <div className="flex items-center gap-2.5 mb-3">
+          <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Shopping List</span>
+          <span className="flex-1 h-px bg-navy/8" />
         </div>
+
+        <button
+          onClick={() => navigate(`/shopping/${tripId}/add-items`)}
+          className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
+        >
+          <Plus className="w-5 h-5" />
+          Add Items
+        </button>
 
         {tripItems && tripItems.length > 0 ? (
           <div className="space-y-2">
