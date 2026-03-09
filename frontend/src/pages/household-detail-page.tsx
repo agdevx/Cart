@@ -1,7 +1,7 @@
 // ABOUTME: Household detail page with member management
 // ABOUTME: Shows invite code, member list, and role-based actions (remove, transfer, leave)
 
-import { ArrowLeft, Copy, Pencil, RefreshCw } from 'lucide-react'
+import { ArrowLeft, ChevronDown, Copy, Pencil, RefreshCw } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -35,6 +35,7 @@ export const HouseholdDetailPage = () => {
   const [isRenaming, setIsRenaming] = useState(false)
   const [editName, setEditName] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [dangerZoneOpen, setDangerZoneOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<{
     type: 'remove' | 'transfer' | 'leave'
     userId: string
@@ -298,16 +299,28 @@ export const HouseholdDetailPage = () => {
         </div>
       </div>
 
-      {/* Danger Zone — owner-only delete section */}
+      {/* Danger Zone — owner-only delete section, collapsed by default */}
       {isOwner && (
-        <div className="mt-6 p-5 bg-coral/5 rounded-2xl border border-coral/20">
-          <h2 className="font-display text-sm font-semibold uppercase tracking-[1.5px] text-coral mb-3">Danger Zone</h2>
+        <div className="mt-6 bg-coral/5 rounded-2xl border border-coral/20 overflow-hidden">
           <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="w-full py-3 bg-coral text-white rounded-xl font-display font-bold hover:bg-coral/90 transition-colors"
+            onClick={() => setDangerZoneOpen(!dangerZoneOpen)}
+            className="w-full p-5 flex items-center justify-between"
           >
-            Delete Household
+            <h2 className="font-display text-sm font-semibold uppercase tracking-[1.5px] text-coral">Danger Zone</h2>
+            <ChevronDown className={`w-4 h-4 text-coral transition-transform ${dangerZoneOpen ? 'rotate-180' : ''}`} />
           </button>
+          <div className={`grid transition-all duration-200 ${dangerZoneOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+            <div className="overflow-hidden">
+              <div className="px-5 pb-5">
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="w-full py-3 bg-coral text-white rounded-xl font-display font-bold hover:bg-coral/90 transition-colors"
+                >
+                  Delete Household
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -315,7 +328,7 @@ export const HouseholdDetailPage = () => {
       {showDeleteConfirm && (
         <ConfirmDialog
           title="Delete Household"
-          message={`Delete "${household?.name}"? This will remove the household and all members. This can't be undone.`}
+          message="This will permanently delete the household and all its items and stores. This can't be undone."
           confirmLabel="Delete"
           onConfirm={handleDeleteHousehold}
           onCancel={() => setShowDeleteConfirm(false)}
