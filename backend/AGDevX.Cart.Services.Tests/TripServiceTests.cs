@@ -395,4 +395,106 @@ public class TripServiceTests
         // Assert
         await act.Should().ThrowAsync<UnauthorizedAccessException>();
     }
+
+    [Fact]
+    public async Task Should_StartTrip_When_UserIsCollaborator()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var trip = new Trip { Id = tripId, Name = "Planning Trip", IsCompleted = false, IsStarted = false };
+
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>())).ReturnsAsync((Trip t) => t);
+
+        // Act
+        var result = await _tripService.StartTrip(tripId, userId);
+
+        // Assert
+        result.IsStarted.Should().BeTrue();
+        result.StartedAt.Should().NotBeNull();
+        result.StartedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
+    public async Task Should_ThrowUnauthorizedAccessException_When_StartingTripAsNonCollaborator()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(false);
+
+        // Act
+        var act = () => _tripService.StartTrip(tripId, userId);
+
+        // Assert
+        await act.Should().ThrowAsync<UnauthorizedAccessException>();
+    }
+
+    [Fact]
+    public async Task Should_ThrowKeyNotFoundException_When_StartingNonExistingTrip()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync((Trip?)null);
+
+        // Act
+        var act = () => _tripService.StartTrip(tripId, userId);
+
+        // Assert
+        await act.Should().ThrowAsync<KeyNotFoundException>();
+    }
+
+    [Fact]
+    public async Task Should_ResetIsStarted_When_ReopeningTrip()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var trip = new Trip
+        {
+            Id = tripId,
+            Name = "Started Trip",
+            IsCompleted = true,
+            CompletedAt = DateTime.UtcNow,
+            IsStarted = true,
+            StartedAt = DateTime.UtcNow.AddHours(-1)
+        };
+
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>())).ReturnsAsync((Trip t) => t);
+
+        // Act
+        var result = await _tripService.ReopenTrip(tripId, userId);
+
+        // Assert
+        result.IsStarted.Should().BeFalse();
+        result.StartedAt.Should().BeNull();
+        result.IsCompleted.Should().BeFalse();
+        result.CompletedAt.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Should_InitializeIsStartedFalse_When_CreatingTrip()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripName = "New Trip";
+
+        _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>()))
+                           .ReturnsAsync((Trip t) => t);
+
+        // Act
+        var result = await _tripService.CreateTrip(tripName, userId);
+
+        // Assert
+        result.IsStarted.Should().BeFalse();
+        result.StartedAt.Should().BeNull();
+    }
 }

@@ -24,7 +24,9 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
             Name = name,
             HouseholdId = householdId,
             IsCompleted = false,
-            CompletedAt = null
+            CompletedAt = null,
+            IsStarted = false,
+            StartedAt = null
         };
 
         return await tripRepository.Create(trip);
@@ -75,6 +77,25 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
         await tripRepository.Delete(tripId);
     }
 
+    public async Task<Trip> StartTrip(Guid tripId, Guid userId)
+    {
+        //== Verify user is collaborator before starting trip
+        var isCollaborator = await tripRepository.IsUserCollaborator(tripId, userId);
+        if (!isCollaborator)
+        {
+            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
+        }
+
+        var trip = await tripRepository.GetById(tripId)
+                        ?? throw new KeyNotFoundException("Trip not found");
+
+        //== Set IsStarted and StartedAt timestamp
+        trip.IsStarted = true;
+        trip.StartedAt = DateTime.UtcNow;
+
+        return await tripRepository.Update(trip);
+    }
+
     public async Task<Trip> CompleteTrip(Guid tripId, Guid userId)
     {
         //== Verify user is collaborator before completing trip
@@ -106,9 +127,11 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
         var trip = await tripRepository.GetById(tripId)
                         ?? throw new KeyNotFoundException("Trip not found");
 
-        //== Set IsCompleted to false and clear CompletedAt timestamp
+        //== Reset completion and started state when reopening
         trip.IsCompleted = false;
         trip.CompletedAt = null;
+        trip.IsStarted = false;
+        trip.StartedAt = null;
 
         return await tripRepository.Update(trip);
     }

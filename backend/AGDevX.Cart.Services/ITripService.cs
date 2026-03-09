@@ -12,6 +12,7 @@ public interface ITripService
     Task<Trip?> GetById(Guid id);
     Task<Trip> UpdateTrip(Guid tripId, string name, Guid userId);
     Task DeleteTrip(Guid tripId, Guid userId);
+    Task<Trip> StartTrip(Guid tripId, Guid userId);
     Task<Trip> CompleteTrip(Guid tripId, Guid userId);
     Task<Trip> ReopenTrip(Guid tripId, Guid userId);
     Task AddCollaborator(Guid tripId, Guid userId, Guid collaboratorUserId);
