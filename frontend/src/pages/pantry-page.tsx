@@ -24,15 +24,6 @@ export const PantryPage = () => {
         <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">
           Your <span className="text-teal">Pantry</span>
         </h1>
-        {activeTab === 'items' && (
-          <Link
-            to="/pantry/add"
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-teal text-white rounded-xl font-display font-bold text-sm hover:bg-teal-light transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Add Item
-          </Link>
-        )}
       </div>
 
       {/* Segmented Control */}
@@ -62,6 +53,17 @@ export const PantryPage = () => {
           Stores
         </button>
       </div>
+
+      {/* Add Item Button — Items tab only */}
+      {activeTab === 'items' && (
+        <Link
+          to="/pantry/add"
+          className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
+        >
+          <Plus className="w-5 h-5" />
+          Add Item
+        </Link>
+      )}
 
       {/* Filter Dropdown — Items tab only */}
       {activeTab === 'items' && (
