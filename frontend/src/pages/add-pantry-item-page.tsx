@@ -2,7 +2,7 @@
 // ABOUTME: Form for creating household or personal pantry items
 
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/create-inventory-item.mutation'
@@ -12,9 +12,17 @@ import { getErrorMessage } from '@/utilities/error-messages'
 import { ScopeSelect } from './components/scope-select'
 
 export const AddPantryItemPage = () => {
+  const [searchParams] = useSearchParams()
+  const scopeParam = searchParams.get('scope')
+
   const [name, setName] = useState('')
   const [notes, setNotes] = useState('')
-  const [householdId, setHouseholdId] = useState<string>('personal')
+  const [householdId, setHouseholdId] = useState<string>(() => {
+    if (scopeParam?.startsWith('household:')) {
+      return scopeParam.split(':')[1]
+    }
+    return 'personal'
+  })
   const [defaultStoreId, setDefaultStoreId] = useState<string | null>(null)
   const navigate = useNavigate()
   const createMutation = useCreateInventoryItemMutation()

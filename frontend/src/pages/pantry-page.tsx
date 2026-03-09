@@ -57,7 +57,7 @@ export const PantryPage = () => {
       {/* Add Item Button — Items tab only */}
       {activeTab === 'items' && (
         <Link
-          to="/pantry/add"
+          to={filter === 'all' || filter === 'personal' ? '/pantry/add' : `/pantry/add?scope=${filter}`}
           className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
         >
           <Plus className="w-5 h-5" />

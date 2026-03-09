@@ -17,12 +17,14 @@ import { queryClient } from '@/apis/tanstack-query/query-client'
 import { AddPantryItemPage } from '../add-pantry-item-page'
 
 const mockNavigate = vi.fn()
+const mockSearchParams = new URLSearchParams()
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
   return {
     ...actual,
     useNavigate: () => mockNavigate,
+    useSearchParams: () => [mockSearchParams],
   }
 })
 
@@ -51,6 +53,7 @@ describe('AddPantryItemPage', () => {
   beforeEach(() => {
     queryClient.clear()
     vi.clearAllMocks()
+    mockSearchParams.delete('scope')
     mockMutateAsync.mockResolvedValue({})
 
     vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
@@ -192,5 +195,34 @@ describe('AddPantryItemPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
 
     expect(mockNavigate).toHaveBeenCalledWith('/pantry')
+  })
+
+  it('defaults to personal when no scope param is provided', () => {
+    mockSearchParams.delete('scope')
+    renderPage()
+
+    // ScopeSelect receives 'personal' as value — verify submission uses null householdId
+    fireEvent.change(screen.getByLabelText('Item Name'), { target: { value: 'Milk' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Add Item' }))
+
+    return waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({ householdId: null })
+      )
+    })
+  })
+
+  it('pre-selects household when scope param is household:id', () => {
+    mockSearchParams.set('scope', 'household:h1')
+    renderPage()
+
+    fireEvent.change(screen.getByLabelText('Item Name'), { target: { value: 'Bread' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Add Item' }))
+
+    return waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({ householdId: 'h1' })
+      )
+    })
   })
 })

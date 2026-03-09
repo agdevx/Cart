@@ -101,6 +101,31 @@ describe('PantryPage', () => {
     expect(view).toHaveAttribute('data-filter', 'household:h1')
   })
 
+  it('renders Add Item link to /pantry/add by default', () => {
+    renderPage()
+
+    const link = screen.getByRole('link', { name: /add item/i })
+    expect(link).toHaveAttribute('href', '/pantry/add')
+  })
+
+  it('renders Add Item link to /pantry/add when personal filter is active', () => {
+    renderPage()
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Personal' }))
+
+    const link = screen.getByRole('link', { name: /add item/i })
+    expect(link).toHaveAttribute('href', '/pantry/add')
+  })
+
+  it('renders Add Item link with scope param when household filter is active', () => {
+    renderPage()
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Smith Family' }))
+
+    const link = screen.getByRole('link', { name: /add item/i })
+    expect(link).toHaveAttribute('href', '/pantry/add?scope=household:h1')
+  })
+
   it('hides filter tabs when Stores tab is active', () => {
     renderPage()
 
