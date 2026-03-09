@@ -1,11 +1,12 @@
 // ABOUTME: Add pantry item page
 // ABOUTME: Form for creating household or personal pantry items
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/create-inventory-item.mutation'
+import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { getErrorMessage } from '@/utilities/error-messages'
 
 import { ScopeSelect } from './components/scope-select'
@@ -14,9 +15,12 @@ export const AddPantryItemPage = () => {
   const [name, setName] = useState('')
   const [notes, setNotes] = useState('')
   const [householdId, setHouseholdId] = useState<string>('personal')
+  const [defaultStoreId, setDefaultStoreId] = useState<string | null>(null)
   const navigate = useNavigate()
   const createMutation = useCreateInventoryItemMutation()
   const { data: households } = useHouseholdsQuery()
+  const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
+  const { data: stores } = useStoresQuery(householdIds)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,6 +34,7 @@ export const AddPantryItemPage = () => {
         name: name.trim(),
         notes: notes.trim() || null,
         householdId: householdId === 'personal' ? null : householdId,
+        defaultStoreId,
       })
       navigate('/pantry')
     } catch {
@@ -86,6 +91,26 @@ export const AddPantryItemPage = () => {
             aria-label="Type"
           />
         </div>
+
+        {stores && stores.length > 0 && (
+          <div>
+            <label htmlFor="defaultStore" className="block text-sm font-semibold text-navy-soft mb-1">
+              Default Store (optional)
+            </label>
+            <select
+              id="defaultStore"
+              value={defaultStoreId || ''}
+              onChange={(e) => setDefaultStoreId(e.target.value || null)}
+              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+              disabled={createMutation.isPending}
+            >
+              <option value="">None</option>
+              {stores.map((store) => (
+                <option key={store.id} value={store.id}>{store.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {createMutation.isError && (
           <div className="p-3 bg-coral/10 text-coral rounded-xl font-semibold text-sm">
