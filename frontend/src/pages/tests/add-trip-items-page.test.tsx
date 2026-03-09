@@ -39,6 +39,8 @@ const mockTrip: Trip = {
   name: 'Weekly Groceries',
   householdId: null,
   createdByUserId: 'user1',
+  isStarted: false,
+  startedAt: null,
   isCompleted: false,
   completedAt: null,
   createdBy: 'user1',

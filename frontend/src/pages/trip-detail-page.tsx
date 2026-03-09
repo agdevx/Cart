@@ -8,6 +8,7 @@ import { useNavigate,useParams } from 'react-router-dom'
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
+import { useStartTripMutation } from '@/apis/agdevx-cart-api/trip/start-trip.mutation'
 import { useDeleteTripItemMutation } from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
 import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
@@ -24,11 +25,17 @@ export const TripDetailPage = () => {
   const { data: households } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores } = useStoresQuery(householdIds)
+  const startMutation = useStartTripMutation()
   const updateMutation = useUpdateTripItemMutation()
   const deleteMutation = useDeleteTripItemMutation()
 
-  const handleStartShopping = () => {
-    navigate(`/shopping/${tripId}/active`)
+  const handleStartShopping = async () => {
+    try {
+      await startMutation.mutateAsync(tripId!)
+      navigate(`/shopping/${tripId}/active`)
+    } catch {
+      // Error handled by mutation state
+    }
   }
 
   const handleUpdateItem = (tripItemId: string, quantity: number, notes: string | null, storeId: string | null) => {
@@ -71,11 +78,11 @@ export const TripDetailPage = () => {
       <div className="mb-6">
         <button
           onClick={handleStartShopping}
-          disabled={!tripItems || tripItems.length === 0}
+          disabled={!tripItems || tripItems.length === 0 || startMutation.isPending}
           className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors flex items-center justify-center gap-2"
         >
           <ShoppingCart className="w-5 h-5" />
-          Start Shopping
+          {startMutation.isPending ? 'Starting...' : 'Start Shopping'}
         </button>
       </div>
 

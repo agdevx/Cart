@@ -48,6 +48,8 @@ const mockTrip: Trip = {
   name: 'Weekly Groceries',
   householdId: null,
   createdByUserId: 'user1',
+  isStarted: true,
+  startedAt: '2024-01-15',
   isCompleted: false,
   completedAt: null,
   createdBy: 'user1',

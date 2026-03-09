@@ -1,7 +1,7 @@
 // ABOUTME: Shopping page displaying active trip and trip history
 // ABOUTME: Shows current trip in progress and completed trips list
 
-import { Plus } from 'lucide-react'
+import { ChevronDown, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -29,8 +29,10 @@ export const ShoppingPage = () => {
   const [tripName, setTripName] = useState('')
   const [householdId, setHouseholdId] = useState<string>('personal')
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
+  const [showCompleted, setShowCompleted] = useState(false)
 
-  const activeTrips = trips?.filter((trip) => !trip.isCompleted) || []
+  const inProgressTrips = trips?.filter((trip) => trip.isStarted && !trip.isCompleted) || []
+  const planningTrips = trips?.filter((trip) => !trip.isStarted && !trip.isCompleted) || []
   const completedTrips = trips?.filter((trip) => trip.isCompleted) || []
 
   const handleCreateTrip = async (e: React.FormEvent) => {
@@ -139,43 +141,56 @@ export const ShoppingPage = () => {
         </form>
       )}
 
-      {activeTrips.length > 0 && (
+      {/* In Progress section */}
+      {inProgressTrips.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center gap-2.5 mt-6 mb-3">
             <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">In Progress</span>
             <span className="flex-1 h-px bg-navy/8" />
           </div>
           <div className="space-y-3">
-            {activeTrips.map((trip) => (
-              <TripCard
-                key={trip.id}
-                trip={trip}
-                onRename={handleRename}
-                onDelete={handleDelete}
-                onReopen={handleReopen}
-              />
+            {inProgressTrips.map((trip) => (
+              <TripCard key={trip.id} trip={trip} onRename={handleRename} onDelete={handleDelete} onReopen={handleReopen} />
             ))}
           </div>
         </div>
       )}
 
-      {completedTrips.length > 0 && (
-        <div>
+      {/* Planning section */}
+      {planningTrips.length > 0 && (
+        <div className="mb-6">
           <div className="flex items-center gap-2.5 mt-6 mb-3">
-            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Completed</span>
+            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Planning</span>
             <span className="flex-1 h-px bg-navy/8" />
           </div>
           <div className="space-y-3">
-            {completedTrips.map((trip) => (
-              <TripCard
-                key={trip.id}
-                trip={trip}
-                onRename={handleRename}
-                onDelete={handleDelete}
-                onReopen={handleReopen}
-              />
+            {planningTrips.map((trip) => (
+              <TripCard key={trip.id} trip={trip} onRename={handleRename} onDelete={handleDelete} onReopen={handleReopen} />
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Completed section (accordion) */}
+      {completedTrips.length > 0 && (
+        <div className="mt-6">
+          <button
+            onClick={() => setShowCompleted(!showCompleted)}
+            className="flex items-center gap-2.5 w-full mb-3"
+          >
+            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">
+              Completed ({completedTrips.length})
+            </span>
+            <span className="flex-1 h-px bg-navy/8" />
+            <ChevronDown className={`w-4 h-4 text-text-tertiary transition-transform ${showCompleted ? 'rotate-180' : ''}`} />
+          </button>
+          {showCompleted && (
+            <div className="space-y-3">
+              {completedTrips.map((trip) => (
+                <TripCard key={trip.id} trip={trip} onRename={handleRename} onDelete={handleDelete} onReopen={handleReopen} />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
