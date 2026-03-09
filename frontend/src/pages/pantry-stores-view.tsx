@@ -3,7 +3,7 @@
 
 import { useMemo,useState } from 'react'
 
-import { Check, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Check, Pencil, Plus, Trash2, X } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateStoreMutation } from '@/apis/agdevx-cart-api/store/create-store.mutation'
@@ -130,6 +130,13 @@ export const PantryStoresView = () => {
             className="text-teal hover:text-teal-light transition-colors"
           >
             <Check className="w-5 h-5" />
+          </button>
+          <button
+            onClick={handleCancelEdit}
+            aria-label="Cancel editing"
+            className="text-text-tertiary hover:text-coral transition-colors"
+          >
+            <X className="w-5 h-5" />
           </button>
         </div>
       ) : (

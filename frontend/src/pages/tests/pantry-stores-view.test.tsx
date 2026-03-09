@@ -191,6 +191,26 @@ describe('PantryStoresView', () => {
     })
   })
 
+  it('cancels editing when cancel button is clicked', () => {
+    setupMocks()
+
+    renderView()
+
+    const editButtons = screen.getAllByLabelText('Edit store name')
+    fireEvent.click(editButtons[0])
+
+    //== Cancel button should be visible in edit mode
+    const cancelButton = screen.getByLabelText('Cancel editing')
+    expect(cancelButton).toBeInTheDocument()
+
+    fireEvent.change(screen.getByDisplayValue('Costco'), { target: { value: 'Something Else' } })
+    fireEvent.click(cancelButton)
+
+    //== Original name should be back, no input visible
+    expect(screen.getByText('Costco')).toBeInTheDocument()
+    expect(screen.queryByDisplayValue('Something Else')).not.toBeInTheDocument()
+  })
+
   it('cancels editing on Escape', () => {
     setupMocks()
 
