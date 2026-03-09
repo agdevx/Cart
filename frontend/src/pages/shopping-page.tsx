@@ -3,6 +3,7 @@
 
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
@@ -16,6 +17,7 @@ import { ScopeSelect } from './components/scope-select'
 import { TripCard } from './components/trip-card'
 
 export const ShoppingPage = () => {
+  const navigate = useNavigate()
   const { data: trips, isLoading } = useTripsQuery()
   const { data: households } = useHouseholdsQuery()
   const createMutation = useCreateTripMutation()
@@ -39,12 +41,13 @@ export const ShoppingPage = () => {
     }
 
     try {
-      await createMutation.mutateAsync({
+      const newTrip = await createMutation.mutateAsync({
         name: tripName.trim(),
         householdId: householdId === 'personal' ? null : householdId,
       })
       setTripName('')
       setShowCreateForm(false)
+      navigate(`/shopping/${newTrip.id}`)
     } catch {
       // Error handled by mutation state
     }

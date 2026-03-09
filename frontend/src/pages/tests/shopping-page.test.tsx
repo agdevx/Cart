@@ -2,7 +2,7 @@
 // ABOUTME: Verifies kebab menu actions (rename, delete, reopen) on trip cards
 
 import { QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -17,6 +17,16 @@ import * as reopenTripModule from '@/apis/agdevx-cart-api/trip/reopen-trip.mutat
 import * as createTripModule from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
 
 import { ShoppingPage } from '../shopping-page'
+
+const mockNavigate = vi.fn()
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  }
+})
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>
@@ -190,5 +200,50 @@ describe('ShoppingPage', () => {
     fireEvent.click(screen.getByText('Reopen'))
 
     expect(reopenMutateFn).toHaveBeenCalledWith('trip2')
+  })
+
+  it('navigates to the new trip after creation', async () => {
+    const createdTrip: Trip = {
+      id: 'new-trip-123',
+      name: 'Weekend Run',
+      householdId: null,
+      createdByUserId: 'user1',
+      isCompleted: false,
+      completedAt: null,
+      createdBy: 'user1',
+      createdDate: '2024-02-01',
+      modifiedBy: null,
+      modifiedDate: null,
+    }
+
+    const mutateAsyncFn = vi.fn().mockResolvedValue(createdTrip)
+
+    setupMocks()
+
+    //== Override the create mutation mock to use our tracked mutateAsync
+    vi.spyOn(createTripModule, 'useCreateTripMutation').mockReturnValue({
+      mutateAsync: mutateAsyncFn,
+      isPending: false,
+    } as any)
+
+    render(<ShoppingPage />, { wrapper })
+
+    //== Open the create form
+    fireEvent.click(screen.getByText('Plan a new trip'))
+
+    //== Fill in the trip name
+    const input = screen.getByPlaceholderText('e.g., Weekly Groceries')
+    fireEvent.change(input, { target: { value: 'Weekend Run' } })
+
+    //== Submit the form
+    fireEvent.click(screen.getByText('Create Trip'))
+
+    await waitFor(() => {
+      expect(mutateAsyncFn).toHaveBeenCalledWith({
+        name: 'Weekend Run',
+        householdId: null,
+      })
+      expect(mockNavigate).toHaveBeenCalledWith('/shopping/new-trip-123')
+    })
   })
 })
