@@ -232,7 +232,32 @@ describe('TripDetailPage', () => {
     })
   })
 
-  it('calls start mutation and navigates when Start Shopping is clicked', async () => {
+  it('should show "Start Shopping" when trip is not started', () => {
+    setupMocks()
+    render(<TripDetailPage />, { wrapper })
+
+    //== Button text should be "Start Shopping" for an unstarted trip
+    expect(screen.getByText('Start Shopping')).toBeInTheDocument()
+    expect(screen.queryByText('Continue Shopping')).not.toBeInTheDocument()
+  })
+
+  it('should show "Continue Shopping" when trip is already started', () => {
+    setupMocks()
+
+    //== Override trip to be started
+    vi.spyOn(tripQueryModule, 'useTripQuery').mockReturnValue({
+      data: { ...mockTrip, isStarted: true, startedAt: '2024-01-15' },
+      isLoading: false,
+    } as any)
+
+    render(<TripDetailPage />, { wrapper })
+
+    //== Button text should be "Continue Shopping" for a started trip
+    expect(screen.getByText('Continue Shopping')).toBeInTheDocument()
+    expect(screen.queryByText('Start Shopping')).not.toBeInTheDocument()
+  })
+
+  it('should call start trip mutation when clicking "Start Shopping"', async () => {
     setupMocks()
     render(<TripDetailPage />, { wrapper })
 
@@ -241,6 +266,28 @@ describe('TripDetailPage', () => {
 
     await waitFor(() => {
       expect(startMutateAsyncFn).toHaveBeenCalledWith('trip1')
+      expect(mockNavigate).toHaveBeenCalledWith('/shopping/trip1/active')
+    })
+  })
+
+  it('should NOT call start trip mutation when clicking "Continue Shopping"', async () => {
+    setupMocks()
+
+    //== Override trip to be started
+    vi.spyOn(tripQueryModule, 'useTripQuery').mockReturnValue({
+      data: { ...mockTrip, isStarted: true, startedAt: '2024-01-15' },
+      isLoading: false,
+    } as any)
+
+    render(<TripDetailPage />, { wrapper })
+
+    //== Click Continue Shopping button
+    fireEvent.click(screen.getByText('Continue Shopping'))
+
+    await waitFor(() => {
+      //== Start mutation should NOT have been called
+      expect(startMutateAsyncFn).not.toHaveBeenCalled()
+      //== Should navigate directly to active page
       expect(mockNavigate).toHaveBeenCalledWith('/shopping/trip1/active')
     })
   })

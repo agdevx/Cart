@@ -29,7 +29,9 @@ export const TripDetailPage = () => {
 
   const handleStartShopping = async () => {
     try {
-      await startMutation.mutateAsync(tripId!)
+      if (!trip?.isStarted) {
+        await startMutation.mutateAsync(tripId!)
+      }
       navigate(`/shopping/${tripId}/active`)
     } catch {
       // Error handled by mutation state
@@ -80,7 +82,7 @@ export const TripDetailPage = () => {
           className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors flex items-center justify-center gap-2"
         >
           <ShoppingCart className="w-5 h-5" />
-          {startMutation.isPending ? 'Starting...' : 'Start Shopping'}
+          {startMutation.isPending ? 'Starting...' : trip.isStarted ? 'Continue Shopping' : 'Start Shopping'}
         </button>
       </div>
 

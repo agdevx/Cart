@@ -124,7 +124,7 @@ export const ActiveTripPage = () => {
           className="text-teal hover:text-teal-light font-semibold text-sm flex items-center gap-1 mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Planning
+          Update Shopping List
         </button>
         <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">{trip.name}</h1>
 

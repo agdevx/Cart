@@ -343,6 +343,15 @@ describe('ActiveTripPage', () => {
     expect(screen.getByText('Remove')).toBeInTheDocument()
   })
 
+  it('should show "Update Shopping List" link instead of "Back to Planning"', () => {
+    setupMocks()
+    render(<ActiveTripPage />, { wrapper })
+
+    //== Link text should be "Update Shopping List", not "Back to Planning"
+    expect(screen.getByText('Update Shopping List')).toBeInTheDocument()
+    expect(screen.queryByText('Back to Planning')).not.toBeInTheDocument()
+  })
+
   it('does not toggle check when editing', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
