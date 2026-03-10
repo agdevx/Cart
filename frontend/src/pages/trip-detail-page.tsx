@@ -6,7 +6,6 @@ import { useMemo } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
-import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useStartTripMutation } from '@/apis/agdevx-cart-api/trip/start-trip.mutation'
 import { useDeleteTripItemMutation } from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
@@ -21,7 +20,6 @@ export const TripDetailPage = () => {
   const navigate = useNavigate()
   const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
   const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!)
-  const { data: inventory } = useInventoryQuery()
   const { data: households } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores } = useStoresQuery(householdIds)
@@ -102,20 +100,17 @@ export const TripDetailPage = () => {
 
         {tripItems && tripItems.length > 0 ? (
           <div className="space-y-2">
-            {tripItems.map((item) => {
-              const inventoryItem = inventory?.find((i) => i.id === item.inventoryItemId)
-              return (
+            {tripItems.map((item) => (
                 <TripItemRow
                   key={item.id}
                   tripItem={item}
-                  itemName={inventoryItem?.name || 'Unknown Item'}
+                  itemName={item.itemName}
                   stores={stores || []}
                   onUpdate={handleUpdateItem}
                   onDelete={handleDeleteItem}
                   isUpdating={updateMutation.isPending}
                 />
-              )
-            })}
+            ))}
           </div>
         ) : (
           <p className="text-text-secondary">No items in this trip yet. Add some items to get started!</p>

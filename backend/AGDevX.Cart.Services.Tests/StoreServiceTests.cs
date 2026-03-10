@@ -14,13 +14,15 @@ public class StoreServiceTests
 {
     private readonly Mock<IStoreRepository> _mockStoreRepository;
     private readonly Mock<IHouseholdRepository> _mockHouseholdRepository;
+    private readonly Mock<ITripItemRepository> _mockTripItemRepository;
     private readonly StoreService _storeService;
 
     public StoreServiceTests()
     {
         _mockStoreRepository = new Mock<IStoreRepository>();
         _mockHouseholdRepository = new Mock<IHouseholdRepository>();
-        _storeService = new StoreService(_mockStoreRepository.Object, _mockHouseholdRepository.Object);
+        _mockTripItemRepository = new Mock<ITripItemRepository>();
+        _storeService = new StoreService(_mockStoreRepository.Object, _mockHouseholdRepository.Object, _mockTripItemRepository.Object);
     }
 
     [Fact]
@@ -290,7 +292,7 @@ public class StoreServiceTests
                             .ReturnsAsync((Store s) => s);
 
         // Act
-        var result = await _storeService.UpdateStore(storeId, "New", userId);
+        var result = await _storeService.UpdateStore(storeId, "New", null, userId);
 
         // Assert
         result.Name.Should().Be("New");
@@ -309,7 +311,7 @@ public class StoreServiceTests
                             .ReturnsAsync((Store s) => s);
 
         // Act
-        var result = await _storeService.UpdateStore(storeId, "Renamed", userId);
+        var result = await _storeService.UpdateStore(storeId, "Renamed", null, userId);
 
         // Assert
         result.UserId.Should().Be(userId);
@@ -337,7 +339,7 @@ public class StoreServiceTests
                             .ReturnsAsync((Store s) => s);
 
         // Act
-        var result = await _storeService.UpdateStore(storeId, "Renamed", userId);
+        var result = await _storeService.UpdateStore(storeId, "Renamed", householdId, userId);
 
         // Assert
         result.Name.Should().Be("Renamed");
@@ -351,7 +353,7 @@ public class StoreServiceTests
         _mockStoreRepository.Setup(r => r.GetById(It.IsAny<Guid>())).ReturnsAsync((Store?)null);
 
         // Act
-        var act = () => _storeService.UpdateStore(Guid.NewGuid(), "Ghost", Guid.NewGuid());
+        var act = () => _storeService.UpdateStore(Guid.NewGuid(), "Ghost", null, Guid.NewGuid());
 
         // Assert
         await act.Should().ThrowAsync<UnauthorizedAccessException>();
@@ -369,7 +371,7 @@ public class StoreServiceTests
         _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
 
         // Act
-        var act = () => _storeService.UpdateStore(storeId, "Hacked", attackerId);
+        var act = () => _storeService.UpdateStore(storeId, "Hacked", null, attackerId);
 
         // Assert
         await act.Should().ThrowAsync<UnauthorizedAccessException>();
@@ -404,5 +406,56 @@ public class StoreServiceTests
 
         // Assert
         await act.Should().ThrowAsync<UnauthorizedAccessException>();
+    }
+
+    [Fact]
+    public async Task UpdateStore_UpdatesStoreNameOnRelatedTripItems()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var storeId = Guid.NewGuid();
+        var existing = new Store { Id = storeId, Name = "Old Store", UserId = userId };
+
+        _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
+        _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>()))
+                            .ReturnsAsync((Store s) => s);
+        _mockTripItemRepository.Setup(r => r.UpdateStoreNameByStoreId(storeId, "Renamed Store"))
+                               .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _storeService.UpdateStore(storeId, "Renamed Store", null, userId);
+
+        // Assert
+        result.Name.Should().Be("Renamed Store");
+        _mockTripItemRepository.Verify(r => r.UpdateStoreNameByStoreId(storeId, "Renamed Store"), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateStore_CanChangeScopeToHousehold()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var storeId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        var existing = new Store { Id = storeId, Name = "My Store", UserId = userId };
+        var household = new Household
+        {
+            Id = householdId,
+            Name = "Home",
+            Members = new List<HouseholdMember> { new() { UserId = userId, HouseholdId = householdId } }
+        };
+
+        _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
+        _mockHouseholdRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
+        _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>()))
+                            .ReturnsAsync((Store s) => s);
+
+        // Act
+        var result = await _storeService.UpdateStore(storeId, "Shared Store", householdId, userId);
+
+        // Assert
+        result.HouseholdId.Should().Be(householdId);
+        result.UserId.Should().BeNull();
+        result.Name.Should().Be("Shared Store");
     }
 }

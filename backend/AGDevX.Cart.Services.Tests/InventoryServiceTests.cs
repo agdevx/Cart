@@ -13,13 +13,15 @@ public class InventoryServiceTests
 {
     private readonly Mock<IInventoryRepository> _mockInventoryRepository;
     private readonly Mock<IHouseholdRepository> _mockHouseholdRepository;
+    private readonly Mock<ITripItemRepository> _mockTripItemRepository;
     private readonly InventoryService _inventoryService;
 
     public InventoryServiceTests()
     {
         _mockInventoryRepository = new Mock<IInventoryRepository>();
         _mockHouseholdRepository = new Mock<IHouseholdRepository>();
-        _inventoryService = new InventoryService(_mockInventoryRepository.Object, _mockHouseholdRepository.Object);
+        _mockTripItemRepository = new Mock<ITripItemRepository>();
+        _inventoryService = new InventoryService(_mockInventoryRepository.Object, _mockHouseholdRepository.Object, _mockTripItemRepository.Object);
     }
 
     [Fact]
@@ -382,5 +384,27 @@ public class InventoryServiceTests
 
         // Assert
         await act.Should().ThrowAsync<UnauthorizedAccessException>();
+    }
+
+    [Fact]
+    public async Task UpdateInventoryItem_UpdatesItemNameOnRelatedTripItems()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        var existing = new InventoryItem { Id = itemId, Name = "Old Name", OwnerUserId = userId };
+        var updated = new InventoryItem { Id = itemId, Name = "Renamed Item", OwnerUserId = userId };
+
+        _mockInventoryRepository.Setup(r => r.GetById(itemId)).ReturnsAsync(existing);
+        _mockInventoryRepository.Setup(r => r.Update(It.IsAny<InventoryItem>())).ReturnsAsync(updated);
+        _mockTripItemRepository.Setup(r => r.UpdateItemNameByInventoryItemId(itemId, "Renamed Item"))
+                               .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await _inventoryService.UpdateInventoryItem(updated, userId);
+
+        // Assert
+        result.Name.Should().Be("Renamed Item");
+        _mockTripItemRepository.Verify(r => r.UpdateItemNameByInventoryItemId(itemId, "Renamed Item"), Times.Once);
     }
 }

@@ -13,6 +13,8 @@ const mockTripItem: TripItem = {
   id: 'ti1',
   tripId: 'trip1',
   inventoryItemId: 'inv1',
+  itemName: 'Bananas',
+  storeName: 'Whole Foods',
   quantity: 2,
   storeId: 'store1',
   notes: 'Get organic',

@@ -8,11 +8,13 @@ using AGDevX.Cart.Shared.Models;
 
 namespace AGDevX.Cart.Services;
 
-public class TripItemService(ITripItemRepository tripItemRepository, ITripRepository tripRepository, ITripEventService tripEventService) : ITripItemService
+public class TripItemService(ITripItemRepository tripItemRepository, ITripRepository tripRepository, ITripEventService tripEventService, IInventoryRepository inventoryRepository, IStoreRepository storeRepository) : ITripItemService
 {
     private readonly ITripItemRepository _tripItemRepository = tripItemRepository;
     private readonly ITripRepository _tripRepository = tripRepository;
     private readonly ITripEventService _tripEventService = tripEventService;
+    private readonly IInventoryRepository _inventoryRepository = inventoryRepository;
+    private readonly IStoreRepository _storeRepository = storeRepository;
 
     //== Serializer options that handle EF Core circular navigation properties
     private static readonly JsonSerializerOptions _jsonOptions = new()
@@ -28,11 +30,25 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
             throw new UnauthorizedAccessException("User is not a collaborator on this trip");
         }
 
+        //== Lookup inventory item to populate denormalized name
+        var inventoryItem = await _inventoryRepository.GetById(inventoryItemId)
+            ?? throw new ArgumentException("Inventory item not found");
+
+        //== Lookup store name if a store is specified
+        string? storeName = null;
+        if (storeId.HasValue)
+        {
+            var store = await _storeRepository.GetById(storeId.Value);
+            storeName = store?.Name;
+        }
+
         //== Create new trip item with provided details
         var tripItem = new TripItem
         {
             TripId = tripId,
             InventoryItemId = inventoryItemId,
+            ItemName = inventoryItem.Name,
+            StoreName = storeName,
             Quantity = quantity,
             Notes = notes,
             StoreId = storeId,
@@ -101,6 +117,17 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
         tripItem.Quantity = quantity;
         tripItem.Notes = notes;
         tripItem.StoreId = storeId;
+
+        //== Update denormalized StoreName to match new store
+        if (storeId.HasValue)
+        {
+            var store = await _storeRepository.GetById(storeId.Value);
+            tripItem.StoreName = store?.Name;
+        }
+        else
+        {
+            tripItem.StoreName = null;
+        }
 
         var updated = await _tripItemRepository.Update(tripItem);
 

@@ -9,12 +9,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import type { TripItem } from '@/apis/agdevx-cart-api/models/trip-item'
-import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
 import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import type { Household } from '@/apis/agdevx-cart-api/models/household'
 import * as tripQueryModule from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import * as tripItemsQueryModule from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
-import * as inventoryQueryModule from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import * as startTripModule from '@/apis/agdevx-cart-api/trip/start-trip.mutation'
 import * as addTripItemModule from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
 import * as updateTripItemModule from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
@@ -61,6 +59,8 @@ const mockTripItems: TripItem[] = [
     id: 'ti1',
     tripId: 'trip1',
     inventoryItemId: 'inv1',
+    itemName: 'Milk',
+    storeName: null,
     quantity: 2,
     storeId: null,
     notes: 'Get the organic kind',
@@ -75,6 +75,8 @@ const mockTripItems: TripItem[] = [
     id: 'ti2',
     tripId: 'trip1',
     inventoryItemId: 'inv2',
+    itemName: 'Bread',
+    storeName: null,
     quantity: 1,
     storeId: null,
     notes: null,
@@ -82,33 +84,6 @@ const mockTripItems: TripItem[] = [
     checkedAt: null,
     createdBy: 'user1',
     createdDate: '2024-01-15',
-    modifiedBy: null,
-    modifiedDate: null,
-  },
-]
-
-const mockInventory: InventoryItem[] = [
-  {
-    id: 'inv1',
-    name: 'Milk',
-    defaultStoreId: null,
-    notes: null,
-    ownerUserId: 'user1',
-    householdId: null,
-    createdBy: 'user1',
-    createdDate: '2024-01-10',
-    modifiedBy: null,
-    modifiedDate: null,
-  },
-  {
-    id: 'inv2',
-    name: 'Bread',
-    defaultStoreId: null,
-    notes: null,
-    ownerUserId: 'user1',
-    householdId: null,
-    createdBy: 'user1',
-    createdDate: '2024-01-10',
     modifiedBy: null,
     modifiedDate: null,
   },
@@ -160,11 +135,6 @@ const setupMocks = () => {
 
   vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
     data: mockTripItems,
-    isLoading: false,
-  } as any)
-
-  vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
-    data: mockInventory,
     isLoading: false,
   } as any)
 

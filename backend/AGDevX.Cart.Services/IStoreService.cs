@@ -11,6 +11,6 @@ public interface IStoreService
     Task<IEnumerable<Store>> GetHouseholdStores(Guid householdId, Guid userId);
     Task<IEnumerable<Store>> GetPersonalStores(Guid userId);
     Task<Store?> GetById(Guid id, Guid userId);
-    Task<Store> UpdateStore(Guid storeId, string name, Guid userId);
+    Task<Store> UpdateStore(Guid storeId, string name, Guid? householdId, Guid userId);
     Task DeleteStore(Guid id, Guid userId);
 }

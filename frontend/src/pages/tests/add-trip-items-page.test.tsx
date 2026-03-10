@@ -55,6 +55,8 @@ const mockTripItems: TripItem[] = [
     id: 'ti1',
     tripId: 'trip1',
     inventoryItemId: 'inv1',
+    itemName: 'Milk',
+    storeName: null,
     quantity: 2,
     storeId: null,
     notes: null,

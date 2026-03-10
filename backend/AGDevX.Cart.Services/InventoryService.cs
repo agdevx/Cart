@@ -6,7 +6,7 @@ using AGDevX.Cart.Data.Repositories;
 
 namespace AGDevX.Cart.Services;
 
-public class InventoryService(IInventoryRepository inventoryRepository, IHouseholdRepository householdRepository) : IInventoryService
+public class InventoryService(IInventoryRepository inventoryRepository, IHouseholdRepository householdRepository, ITripItemRepository tripItemRepository) : IInventoryService
 {
     public async Task<InventoryItem> CreateInventoryItem(InventoryItem inventoryItem, Guid userId)
     {
@@ -115,7 +115,34 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
         var existing = await GetById(inventoryItem.Id, userId)
                             ?? throw new UnauthorizedAccessException("Inventory item not found or user not authorized");
 
-        return await inventoryRepository.Update(inventoryItem);
+        //== Handle scope change
+        if (inventoryItem.HouseholdId.HasValue)
+        {
+            //== Moving to household: verify membership
+            var household = await householdRepository.GetById(inventoryItem.HouseholdId.Value)
+                                ?? throw new UnauthorizedAccessException("Household not found");
+
+            if (!household.Members.Any(m => m.UserId == userId))
+            {
+                throw new UnauthorizedAccessException("User is not a member of the household");
+            }
+
+            //== Clear personal owner when moving to household
+            inventoryItem.OwnerUserId = null;
+        }
+        else
+        {
+            //== Moving to personal: set owner, clear household
+            inventoryItem.OwnerUserId = userId;
+            inventoryItem.HouseholdId = null;
+        }
+
+        var result = await inventoryRepository.Update(inventoryItem);
+
+        //== Live mirror: update denormalized ItemName on all TripItems
+        await tripItemRepository.UpdateItemNameByInventoryItemId(inventoryItem.Id, inventoryItem.Name);
+
+        return result;
     }
 
     public async Task DeleteInventoryItem(Guid id, Guid userId)

@@ -64,13 +64,36 @@ public class CartDbContext(DbContextOptions<CartDbContext> options, IHttpContext
             entity.HasIndex(u => u.Email).IsUnique();
         });
 
-        //== Cascade delete inventory items when household is deleted
+        //== InventoryItem FK behaviors
         modelBuilder.Entity<InventoryItem>(entity =>
         {
+            //== Cascade delete inventory items when household is deleted
             entity.HasOne(i => i.Household)
                   .WithMany()
                   .HasForeignKey(i => i.HouseholdId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            //== SET NULL on DefaultStore delete so items survive store removal
+            entity.HasOne(i => i.DefaultStore)
+                  .WithMany()
+                  .HasForeignKey(i => i.DefaultStoreId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        //== TripItem FK behaviors
+        modelBuilder.Entity<TripItem>(entity =>
+        {
+            //== SET NULL on InventoryItem delete so trip items survive pantry cleanup
+            entity.HasOne(ti => ti.InventoryItem)
+                  .WithMany()
+                  .HasForeignKey(ti => ti.InventoryItemId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            //== SET NULL on Store delete so trip items survive store removal
+            entity.HasOne(ti => ti.Store)
+                  .WithMany()
+                  .HasForeignKey(ti => ti.StoreId)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
 
         //== Cascade delete stores when household is deleted

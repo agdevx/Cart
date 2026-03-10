@@ -4,12 +4,20 @@
 export interface TripItem {
   id: string;
   tripId: string;
-  inventoryItemId: string;
+  inventoryItemId: string | null;
+  itemName: string;
+  storeName: string | null;
   quantity: number;
   storeId: string | null;
   notes: string | null;
   isChecked: boolean;
   checkedAt: string | null;
+  inventoryItem?: {
+    id: string;
+    name: string;
+    notes: string | null;
+    defaultStoreId: string | null;
+  } | null;
   createdBy: string | null;
   createdDate: string;
   modifiedBy: string | null;

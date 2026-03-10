@@ -8,6 +8,7 @@ import { apiFetch } from '../agdevx-cart-api-config'
 interface UpdateStoreRequest {
   id: string
   name: string
+  householdId?: string | null
 }
 
 export const useUpdateStoreMutation = () => {

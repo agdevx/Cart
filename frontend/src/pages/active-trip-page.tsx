@@ -8,7 +8,6 @@ import { useNavigate,useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
-import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useCheckTripItemMutation } from '@/apis/agdevx-cart-api/trip/check-trip-item.mutation'
 import { useCompleteTripMutation } from '@/apis/agdevx-cart-api/trip/complete-trip.mutation'
@@ -27,7 +26,6 @@ export const ActiveTripPage = () => {
   const queryClient = useQueryClient()
   const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
   const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!)
-  const { data: inventory } = useInventoryQuery()
   const { data: households } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores } = useStoresQuery(householdIds)
@@ -147,13 +145,11 @@ export const ActiveTripPage = () => {
 
       {tripItems && tripItems.length > 0 ? (
         <div className="space-y-2 mb-6">
-          {tripItems.map((item) => {
-            const inventoryItem = inventory?.find((i) => i.id === item.inventoryItemId)
-            return (
+          {tripItems.map((item) => (
               <TripItemRow
                 key={item.id}
                 tripItem={item}
-                itemName={inventoryItem?.name || 'Unknown Item'}
+                itemName={item.itemName}
                 stores={stores || []}
                 onUpdate={handleUpdateItem}
                 onDelete={handleDeleteItem}
@@ -161,8 +157,7 @@ export const ActiveTripPage = () => {
                 showCheckbox
                 onToggleCheck={(id, checked) => handleToggleItem(id, checked)}
               />
-            )
-          })}
+          ))}
         </div>
       ) : (
         <p className="text-text-secondary mb-6">No items in this trip.</p>

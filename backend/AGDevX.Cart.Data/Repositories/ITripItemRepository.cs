@@ -11,4 +11,6 @@ public interface ITripItemRepository
     Task<TripItem> Create(TripItem tripItem);
     Task<TripItem> Update(TripItem tripItem);
     Task Delete(Guid id);
+    Task UpdateItemNameByInventoryItemId(Guid inventoryItemId, string itemName);
+    Task UpdateStoreNameByStoreId(Guid storeId, string storeName);
 }
