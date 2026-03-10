@@ -129,7 +129,7 @@ export const TripCard = ({ trip, onRename, onDelete, onReopen }: TripCardProps) 
           <button
             onClick={handleKebabClick}
             aria-label="Trip actions"
-            className="p-1.5 rounded-lg hover:bg-navy/8 transition-colors"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
           >
             <MoreVertical className="w-5 h-5" />
           </button>

@@ -107,7 +107,7 @@ export const TripItemRow = ({
             <button
               onClick={handleKebabClick}
               aria-label="Item actions"
-              className="p-1.5 rounded-lg hover:bg-navy/8 transition-colors"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
             >
               <MoreVertical className="w-4 h-4 text-text-secondary" />
             </button>
@@ -189,7 +189,7 @@ export const TripItemRow = ({
         <button
           onClick={handleKebabClick}
           aria-label="Item actions"
-          className="p-1.5 rounded-lg hover:bg-navy/8 transition-colors"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
         >
           <MoreVertical className="w-4 h-4 text-text-secondary" />
         </button>
