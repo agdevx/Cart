@@ -1,20 +1,55 @@
-// ABOUTME: Settings page with user preferences and account actions
-// ABOUTME: Contains logout functionality moved from the household page
+// ABOUTME: Settings page with user profile management and account actions
+// ABOUTME: iOS-style grouped list with Profile, Security sections, and logout
+
+import { useState } from 'react'
 
 import { LogOut } from 'lucide-react'
 
+import type { UpdateProfileResponse } from '@/apis/agdevx-cart-api/auth/update-profile.mutation'
 import { useAuth } from '@/auth/use-auth'
 
 import { PageHeader } from './components/page-header'
+import { ProfileSection } from './components/profile-section'
+import { SecuritySection } from './components/security-section'
+
+type EditingSection = 'none' | 'profile' | 'password'
 
 export const SettingsPage = () => {
-  const { logout } = useAuth()
+  const { user, setAuth, logout } = useAuth()
+  const [editingSection, setEditingSection] = useState<EditingSection>('none')
+  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState('')
+
+  const handleProfileSaved = (response: UpdateProfileResponse) => {
+    setAuth({ ...user!, id: response.userId, email: response.email, name: response.name })
+    setEditingSection('none')
+  }
+
+  const handlePasswordSaved = () => {
+    setEditingSection('none')
+    setPasswordSuccessMessage('Password updated')
+    setTimeout(() => setPasswordSuccessMessage(''), 3000)
+  }
+
+  if (!user) return null
 
   return (
     <div className="pb-4">
       <PageHeader>Settings</PageHeader>
-      <div className="px-5">
-      <div className="space-y-3">
+      <div className="px-5 space-y-4">
+        <ProfileSection
+          user={user}
+          isEditing={editingSection === 'profile'}
+          onStartEdit={() => setEditingSection('profile')}
+          onCancel={() => setEditingSection('none')}
+          onSaved={handleProfileSaved}
+        />
+        <SecuritySection
+          isEditing={editingSection === 'password'}
+          onStartEdit={() => setEditingSection('password')}
+          onCancel={() => setEditingSection('none')}
+          onSaved={handlePasswordSaved}
+          successMessage={passwordSuccessMessage}
+        />
         <button
           onClick={logout}
           className="w-full flex items-center justify-center gap-2 py-3.5 border-2 border-coral/30 text-coral rounded-xl font-display font-bold hover:bg-coral/8 transition-colors"
@@ -22,7 +57,6 @@ export const SettingsPage = () => {
           <LogOut className="w-5 h-5" />
           Logout
         </button>
-      </div>
       </div>
     </div>
   )
