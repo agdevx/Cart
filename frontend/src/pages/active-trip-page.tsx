@@ -2,13 +2,12 @@
 // ABOUTME: Shows checklist of items to purchase with check/uncheck functionality
 
 import { ArrowLeft } from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
 import { useQueryClient } from '@tanstack/react-query'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
-import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useCheckTripItemMutation } from '@/apis/agdevx-cart-api/trip/check-trip-item.mutation'
 import { useCompleteTripMutation } from '@/apis/agdevx-cart-api/trip/complete-trip.mutation'
@@ -18,7 +17,10 @@ import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { useSSE } from '@/hooks/use-sse'
 
+import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
+
 import { ConfirmDialog } from './components/confirm-dialog'
+import { StoreAccordion } from './components/store-accordion'
 import { TripItemRow } from './components/trip-item-row'
 
 export const ActiveTripPage = () => {
@@ -27,14 +29,36 @@ export const ActiveTripPage = () => {
   const queryClient = useQueryClient()
   const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
   const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!)
-  const { data: inventory } = useInventoryQuery()
   const { data: households } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores } = useStoresQuery(householdIds)
+  const { isExpanded, toggleStore, autoCollapseIfAllChecked, cleanup } = useStoreAccordionState(tripId!, trip?.isCompleted ?? false)
   const checkMutation = useCheckTripItemMutation()
   const completeMutation = useCompleteTripMutation()
   const updateMutation = useUpdateTripItemMutation()
   const deleteMutation = useDeleteTripItemMutation()
+
+  const groupedItems = useMemo(() => {
+    if (!tripItems) return []
+    const groups: Record<string, typeof tripItems> = {}
+    tripItems.forEach((item) => {
+      const key = item.storeName ?? 'Any Store'
+      ;(groups[key] ??= []).push(item)
+    })
+    return Object.entries(groups).sort(([a], [b]) => {
+      if (a === 'Any Store') return 1
+      if (b === 'Any Store') return -1
+      return a.localeCompare(b)
+    })
+  }, [tripItems])
+
+  // Auto-collapse store groups where all items are checked
+  useEffect(() => {
+    groupedItems.forEach(([storeName, storeItems]) => {
+      const allChecked = storeItems.every((item) => item.isChecked)
+      autoCollapseIfAllChecked(storeName, allChecked)
+    })
+  }, [groupedItems, autoCollapseIfAllChecked])
 
   const handleSSEMessage = useCallback((_data: unknown) => {
     // Invalidate trip items query to refetch with latest data
@@ -92,6 +116,7 @@ export const ActiveTripPage = () => {
 
     try {
       await completeMutation.mutateAsync(tripId)
+      cleanup()
       navigate('/shopping')
     } catch {
       // Error handled by mutation state
@@ -126,7 +151,7 @@ export const ActiveTripPage = () => {
           className="text-teal hover:text-teal-light font-semibold text-sm flex items-center gap-1 mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Planning
+          Update Shopping List
         </button>
         <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">{trip.name}</h1>
 
@@ -145,22 +170,35 @@ export const ActiveTripPage = () => {
         </div>
       </div>
 
-      {tripItems && tripItems.length > 0 ? (
-        <div className="space-y-2 mb-6">
-          {tripItems.map((item) => {
-            const inventoryItem = inventory?.find((i) => i.id === item.inventoryItemId)
+      {groupedItems.length > 0 ? (
+        <div className="mb-6">
+          {groupedItems.map(([storeName, storeItems]) => {
+            const checkedCount = storeItems.filter((item) => item.isChecked).length
             return (
-              <TripItemRow
-                key={item.id}
-                tripItem={item}
-                itemName={inventoryItem?.name || 'Unknown Item'}
-                stores={stores || []}
-                onUpdate={handleUpdateItem}
-                onDelete={handleDeleteItem}
-                isUpdating={updateMutation.isPending}
-                showCheckbox
-                onToggleCheck={(id, checked) => handleToggleItem(id, checked)}
-              />
+              <StoreAccordion
+                key={storeName}
+                storeName={storeName}
+                isExpanded={isExpanded(storeName)}
+                onToggle={() => toggleStore(storeName)}
+                itemCount={storeItems.length}
+                checkedCount={checkedCount}
+              >
+                <div className="space-y-2">
+                  {storeItems.map((item) => (
+                    <TripItemRow
+                      key={item.id}
+                      tripItem={item}
+                      itemName={item.itemName}
+                      stores={stores || []}
+                      onUpdate={handleUpdateItem}
+                      onDelete={handleDeleteItem}
+                      isUpdating={updateMutation.isPending}
+                      showCheckbox
+                      onToggleCheck={(id, checked) => handleToggleItem(id, checked)}
+                    />
+                  ))}
+                </div>
+              </StoreAccordion>
             )
           })}
         </div>

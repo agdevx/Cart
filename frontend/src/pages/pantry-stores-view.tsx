@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { Check, MoreVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateStoreMutation } from '@/apis/agdevx-cart-api/store/create-store.mutation'
@@ -27,6 +27,7 @@ export const PantryStoresView = () => {
   const [storeScope, setStoreScope] = useState<string>('personal')
   const [editingStoreId, setEditingStoreId] = useState<string | null>(null)
   const [editingName, setEditingName] = useState('')
+  const [editingScope, setEditingScope] = useState<string>('personal')
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -77,9 +78,10 @@ export const PantryStoresView = () => {
     }
   }
 
-  const handleStartEdit = (storeId: string, currentName: string) => {
-    setEditingStoreId(storeId)
-    setEditingName(currentName)
+  const handleStartEdit = (store: NonNullable<typeof stores>[number]) => {
+    setEditingStoreId(store.id)
+    setEditingName(store.name)
+    setEditingScope(store.householdId ?? 'personal')
   }
 
   const handleSaveEdit = async () => {
@@ -91,9 +93,11 @@ export const PantryStoresView = () => {
       await updateMutation.mutateAsync({
         id: editingStoreId,
         name: editingName.trim(),
+        householdId: editingScope === 'personal' ? null : editingScope,
       })
       setEditingStoreId(null)
       setEditingName('')
+      setEditingScope('personal')
     } catch {
       // Error handled by mutation state
     }
@@ -102,14 +106,7 @@ export const PantryStoresView = () => {
   const handleCancelEdit = () => {
     setEditingStoreId(null)
     setEditingName('')
-  }
-
-  const handleEditKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSaveEdit()
-    } else if (e.key === 'Escape') {
-      handleCancelEdit()
-    }
+    setEditingScope('personal')
   }
 
   const handleConfirmDelete = async () => {
@@ -126,64 +123,88 @@ export const PantryStoresView = () => {
   }
 
   const renderStoreRow = (store: NonNullable<typeof stores>[number]) => (
-    <div key={store.id} className="p-4 bg-surface rounded-xl shadow-sm flex justify-between items-center">
-      {editingStoreId === store.id ? (
-        <div className="flex items-center gap-2 flex-1 mr-2">
-          <input
-            type="text"
-            value={editingName}
-            onChange={(e) => setEditingName(e.target.value)}
-            onKeyDown={handleEditKeyDown}
-            aria-label="Edit store name"
-            className="flex-1 px-3 py-1.5 border border-navy/10 rounded-lg bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-            autoFocus
-          />
+    <div key={store.id}>
+      <div className="p-4 bg-surface rounded-xl shadow-sm flex justify-between items-center">
+        <span className="font-bold text-navy">{store.name}</span>
+        <div className="relative" ref={menuOpenId === store.id ? menuRef : undefined}>
           <button
-            onClick={handleSaveEdit}
-            aria-label="Save store name"
-            className="text-teal hover:text-teal-light transition-colors"
+            onClick={() => setMenuOpenId(menuOpenId === store.id ? null : store.id)}
+            aria-label="Store actions"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
           >
-            <Check className="w-5 h-5" />
+            <MoreVertical className="w-5 h-5 text-text-tertiary" />
           </button>
-          <button
-            onClick={handleCancelEdit}
-            aria-label="Cancel editing"
-            className="text-text-tertiary hover:text-coral transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {menuOpenId === store.id && (
+            <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[140px]">
+              <button
+                onClick={() => { setMenuOpenId(null); handleStartEdit(store) }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
+              >
+                <Pencil className="w-4 h-4" />
+                Edit
+              </button>
+              <button
+                onClick={() => { setMenuOpenId(null); setDeleteConfirm({ id: store.id, name: store.name }) }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+            </div>
+          )}
         </div>
-      ) : (
-        <>
-          <span className="font-bold text-navy">{store.name}</span>
-          <div className="relative" ref={menuOpenId === store.id ? menuRef : undefined}>
-            <button
-              onClick={() => setMenuOpenId(menuOpenId === store.id ? null : store.id)}
-              aria-label="Store actions"
-              className="p-1.5 rounded-lg hover:bg-navy/8 transition-colors"
-            >
-              <MoreVertical className="w-5 h-5 text-text-tertiary" />
-            </button>
-            {menuOpenId === store.id && (
-              <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[140px]">
-                <button
-                  onClick={() => { setMenuOpenId(null); handleStartEdit(store.id, store.name) }}
-                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
-                >
-                  <Pencil className="w-4 h-4" />
-                  Edit
-                </button>
-                <button
-                  onClick={() => { setMenuOpenId(null); setDeleteConfirm({ id: store.id, name: store.name }) }}
-                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete
-                </button>
-              </div>
-            )}
+      </div>
+
+      {/* Expandable edit form below the store row */}
+      {editingStoreId === store.id && (
+        <div className="mt-2 p-5 bg-surface rounded-2xl shadow-sm">
+          <div className="mb-3">
+            <label htmlFor={`editStoreName-${store.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
+              Store Name
+            </label>
+            <input
+              id={`editStoreName-${store.id}`}
+              type="text"
+              value={editingName}
+              onChange={(e) => setEditingName(e.target.value)}
+              aria-label="Edit store name"
+              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+              autoFocus
+            />
           </div>
-        </>
+
+          <div className="mb-4">
+            <label htmlFor={`editStoreScope-${store.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
+              Scope
+            </label>
+            <ScopeSelect
+              value={editingScope}
+              onChange={setEditingScope}
+              personalLabel="Personal"
+              households={households}
+              householdDescription="Household"
+              disabled={updateMutation.isPending}
+              aria-label="Edit scope"
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={handleSaveEdit}
+              disabled={updateMutation.isPending || !editingName.trim()}
+              className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
+            >
+              {updateMutation.isPending ? 'Saving...' : 'Save'}
+            </button>
+            <button
+              onClick={handleCancelEdit}
+              disabled={updateMutation.isPending}
+              className="flex-1 py-3 bg-bg-warm text-text-secondary rounded-xl font-display font-bold hover:bg-navy/10 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

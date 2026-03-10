@@ -31,7 +31,7 @@ public class TripItemRepositoryTests
         context.Trips.Add(new Trip { Id = tripId, Name = "Run", IsCompleted = false });
         context.InventoryItems.Add(new InventoryItem { Id = inventoryItemId, Name = "Milk", OwnerUserId = Guid.NewGuid() });
         await context.SaveChangesAsync();
-        var tripItem = new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, Quantity = 2 };
+        var tripItem = new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, ItemName = "Milk", Quantity = 2 };
 
         // Act
         var result = await repo.Create(tripItem);
@@ -52,7 +52,7 @@ public class TripItemRepositoryTests
         var inventoryItemId = Guid.NewGuid();
         context.Trips.Add(new Trip { Id = tripId, Name = "Run", IsCompleted = false });
         context.InventoryItems.Add(new InventoryItem { Id = inventoryItemId, Name = "Milk", OwnerUserId = Guid.NewGuid() });
-        var tripItem = new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, Quantity = 1 };
+        var tripItem = new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, ItemName = "Milk", Quantity = 1 };
         context.TripItems.Add(tripItem);
         await context.SaveChangesAsync();
 
@@ -93,7 +93,7 @@ public class TripItemRepositoryTests
         context.Trips.Add(new Trip { Id = tripId, Name = "Run", IsCompleted = false });
         context.InventoryItems.Add(new InventoryItem { Id = inventoryItemId, Name = "Milk", OwnerUserId = Guid.NewGuid() });
         context.Stores.Add(new Store { Id = storeId, Name = "Costco", UserId = Guid.NewGuid() });
-        var tripItem = new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, Quantity = 1, StoreId = storeId };
+        var tripItem = new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, ItemName = "Milk", Quantity = 1, StoreId = storeId };
         context.TripItems.Add(tripItem);
         await context.SaveChangesAsync();
 
@@ -119,8 +119,8 @@ public class TripItemRepositoryTests
         context.Trips.Add(new Trip { Id = tripId, Name = "Run 1", IsCompleted = false });
         context.Trips.Add(new Trip { Id = otherTripId, Name = "Run 2", IsCompleted = false });
         context.InventoryItems.Add(new InventoryItem { Id = inventoryItemId, Name = "Milk", OwnerUserId = Guid.NewGuid() });
-        context.TripItems.Add(new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, Quantity = 1 });
-        context.TripItems.Add(new TripItem { Id = Guid.NewGuid(), TripId = otherTripId, InventoryItemId = inventoryItemId, Quantity = 3 });
+        context.TripItems.Add(new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, ItemName = "Milk", Quantity = 1 });
+        context.TripItems.Add(new TripItem { Id = Guid.NewGuid(), TripId = otherTripId, InventoryItemId = inventoryItemId, ItemName = "Milk", Quantity = 3 });
         await context.SaveChangesAsync();
 
         // Act
@@ -142,7 +142,7 @@ public class TripItemRepositoryTests
         var inventoryItemId = Guid.NewGuid();
         context.Trips.Add(new Trip { Id = tripId, Name = "Run", IsCompleted = false });
         context.InventoryItems.Add(new InventoryItem { Id = inventoryItemId, Name = "Milk", OwnerUserId = Guid.NewGuid() });
-        var tripItem = new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, Quantity = 1 };
+        var tripItem = new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, ItemName = "Milk", Quantity = 1 };
         context.TripItems.Add(tripItem);
         await context.SaveChangesAsync();
 
@@ -165,7 +165,7 @@ public class TripItemRepositoryTests
         var inventoryItemId = Guid.NewGuid();
         context.Trips.Add(new Trip { Id = tripId, Name = "Run", IsCompleted = false });
         context.InventoryItems.Add(new InventoryItem { Id = inventoryItemId, Name = "Milk", OwnerUserId = Guid.NewGuid() });
-        var tripItem = new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, Quantity = 1 };
+        var tripItem = new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, ItemName = "Milk", Quantity = 1 };
         context.TripItems.Add(tripItem);
         await context.SaveChangesAsync();
 

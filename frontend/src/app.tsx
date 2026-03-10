@@ -12,7 +12,6 @@ import { BottomNav } from '@/features/bottom-nav/bottom-nav'
 import { PwaInstallPrompt } from '@/features/pwa-install-prompt/pwa-install-prompt'
 import { ActiveTripPage } from '@/pages/active-trip-page'
 import { AddTripItemsPage } from '@/pages/add-trip-items-page'
-import { AddPantryItemPage } from '@/pages/add-pantry-item-page'
 import { CreateHouseholdPage } from '@/pages/create-household-page'
 import { HouseholdDetailPage } from '@/pages/household-detail-page'
 import { HouseholdPage } from '@/pages/household-page'
@@ -43,7 +42,6 @@ export const AppRoutes = () => (
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/pantry" element={<ProtectedRoute><AuthenticatedLayout><PantryPage /></AuthenticatedLayout></ProtectedRoute>} />
-      <Route path="/pantry/add" element={<ProtectedRoute><AuthenticatedLayout><AddPantryItemPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path="/shopping" element={<ProtectedRoute><AuthenticatedLayout><ShoppingPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path="/shopping/:tripId" element={<ProtectedRoute><AuthenticatedLayout><TripDetailPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path="/shopping/:tripId/add-items" element={<ProtectedRoute><AuthenticatedLayout><AddTripItemsPage /></AuthenticatedLayout></ProtectedRoute>} />

@@ -15,6 +15,8 @@ public class TripItemServiceTests
     private readonly Mock<ITripItemRepository> _mockTripItemRepository;
     private readonly Mock<ITripRepository> _mockTripRepository;
     private readonly Mock<ITripEventService> _mockTripEventService;
+    private readonly Mock<IInventoryRepository> _mockInventoryRepository;
+    private readonly Mock<IStoreRepository> _mockStoreRepository;
     private readonly TripItemService _tripItemService;
 
     public TripItemServiceTests()
@@ -22,7 +24,14 @@ public class TripItemServiceTests
         _mockTripItemRepository = new Mock<ITripItemRepository>();
         _mockTripRepository = new Mock<ITripRepository>();
         _mockTripEventService = new Mock<ITripEventService>();
-        _tripItemService = new TripItemService(_mockTripItemRepository.Object, _mockTripRepository.Object, _mockTripEventService.Object);
+        _mockInventoryRepository = new Mock<IInventoryRepository>();
+        _mockStoreRepository = new Mock<IStoreRepository>();
+        _tripItemService = new TripItemService(
+            _mockTripItemRepository.Object,
+            _mockTripRepository.Object,
+            _mockTripEventService.Object,
+            _mockInventoryRepository.Object,
+            _mockStoreRepository.Object);
     }
 
     [Fact]
@@ -38,6 +47,9 @@ public class TripItemServiceTests
         _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId))
                            .ReturnsAsync(true);
 
+        _mockInventoryRepository.Setup(x => x.GetById(inventoryItemId))
+                                .ReturnsAsync(new InventoryItem { Id = inventoryItemId, Name = "Milk" });
+
         _mockTripItemRepository.Setup(x => x.Create(It.IsAny<TripItem>()))
                                .ReturnsAsync((TripItem ti) => ti);
 
@@ -48,6 +60,7 @@ public class TripItemServiceTests
         Assert.NotNull(result);
         Assert.Equal(tripId, result.TripId);
         Assert.Equal(inventoryItemId, result.InventoryItemId);
+        Assert.Equal("Milk", result.ItemName);
         Assert.Equal(quantity, result.Quantity);
         Assert.Equal(notes, result.Notes);
         Assert.False(result.IsChecked);
@@ -66,6 +79,7 @@ public class TripItemServiceTests
             Id = tripItemId,
             TripId = tripId,
             InventoryItemId = Guid.NewGuid(),
+            ItemName = "Test Item",
             Quantity = 1,
             IsChecked = false,
             CheckedAt = null,
@@ -101,6 +115,7 @@ public class TripItemServiceTests
             Id = tripItemId,
             TripId = tripId,
             InventoryItemId = Guid.NewGuid(),
+            ItemName = "Test Item",
             Quantity = 1,
             IsChecked = true,
             CheckedAt = DateTime.UtcNow,
@@ -152,6 +167,7 @@ public class TripItemServiceTests
             Id = tripItemId,
             TripId = tripId,
             InventoryItemId = Guid.NewGuid(),
+            ItemName = "Test Item",
             Quantity = 1,
             IsChecked = false,
         };
@@ -180,6 +196,9 @@ public class TripItemServiceTests
         _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId))
                            .ReturnsAsync(true);
 
+        _mockInventoryRepository.Setup(x => x.GetById(inventoryItemId))
+                                .ReturnsAsync(new InventoryItem { Id = inventoryItemId, Name = "Milk" });
+
         _mockTripItemRepository.Setup(x => x.Create(It.IsAny<TripItem>()))
                                .ReturnsAsync((TripItem ti) => { ti.Id = itemId; return ti; });
 
@@ -204,6 +223,7 @@ public class TripItemServiceTests
             Id = tripItemId,
             TripId = tripId,
             InventoryItemId = Guid.NewGuid(),
+            ItemName = "Test Item",
             Quantity = 1,
         };
 
@@ -237,6 +257,7 @@ public class TripItemServiceTests
             Id = tripItemId,
             TripId = tripId,
             InventoryItemId = Guid.NewGuid(),
+            ItemName = "Test Item",
             Quantity = 1,
             IsChecked = false,
             CheckedAt = null,
@@ -272,6 +293,7 @@ public class TripItemServiceTests
             Id = tripItemId,
             TripId = tripId,
             InventoryItemId = Guid.NewGuid(),
+            ItemName = "Test Item",
             Quantity = 1,
         };
 
@@ -299,7 +321,7 @@ public class TripItemServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var items = new List<TripItem> { new() { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = Guid.NewGuid(), Quantity = 1 } };
+        var items = new List<TripItem> { new() { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 1 } };
 
         _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
         _mockTripItemRepository.Setup(r => r.GetTripItems(tripId)).ReturnsAsync(items);
@@ -334,7 +356,7 @@ public class TripItemServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
-        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), Quantity = 2 };
+        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 2 };
 
         _mockTripItemRepository.Setup(r => r.GetById(itemId)).ReturnsAsync(tripItem);
         _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
@@ -367,7 +389,7 @@ public class TripItemServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
-        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), Quantity = 1 };
+        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 1 };
 
         _mockTripItemRepository.Setup(r => r.GetById(itemId)).ReturnsAsync(tripItem);
         _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(false);
@@ -399,7 +421,7 @@ public class TripItemServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
-        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), Quantity = 1 };
+        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 1 };
 
         _mockTripItemRepository.Setup(r => r.GetById(itemId)).ReturnsAsync(tripItem);
         _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
@@ -419,7 +441,7 @@ public class TripItemServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
-        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), Quantity = 1 };
+        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 1 };
 
         _mockTripItemRepository.Setup(r => r.GetById(itemId)).ReturnsAsync(tripItem);
         _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(false);
@@ -442,5 +464,140 @@ public class TripItemServiceTests
 
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>();
+    }
+
+    [Fact]
+    public async Task AddTripItem_PopulatesItemNameFromInventoryItem()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var inventoryItemId = Guid.NewGuid();
+
+        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
+        _mockInventoryRepository.Setup(x => x.GetById(inventoryItemId))
+                                .ReturnsAsync(new InventoryItem { Id = inventoryItemId, Name = "Organic Eggs" });
+        _mockTripItemRepository.Setup(x => x.Create(It.IsAny<TripItem>()))
+                               .ReturnsAsync((TripItem ti) => ti);
+
+        // Act
+        var result = await _tripItemService.AddTripItem(tripId, inventoryItemId, 1, userId);
+
+        // Assert
+        result.ItemName.Should().Be("Organic Eggs");
+        result.InventoryItemId.Should().Be(inventoryItemId);
+    }
+
+    [Fact]
+    public async Task UpdateTripItem_UpdatesStoreNameWhenStoreChanges()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripItemId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var oldStoreId = Guid.NewGuid();
+        var newStoreId = Guid.NewGuid();
+        var tripItem = new TripItem
+        {
+            Id = tripItemId,
+            TripId = tripId,
+            InventoryItemId = Guid.NewGuid(),
+            ItemName = "Milk",
+            StoreName = "Costco",
+            StoreId = oldStoreId,
+            Quantity = 1,
+        };
+
+        _mockTripItemRepository.Setup(x => x.GetById(tripItemId)).ReturnsAsync(tripItem);
+        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
+        _mockStoreRepository.Setup(x => x.GetById(newStoreId))
+                            .ReturnsAsync(new Store { Id = newStoreId, Name = "Walmart" });
+        _mockTripItemRepository.Setup(x => x.Update(It.IsAny<TripItem>()))
+                               .ReturnsAsync((TripItem ti) => ti);
+
+        // Act
+        var result = await _tripItemService.UpdateTripItem(tripItemId, 2, userId, null, newStoreId);
+
+        // Assert
+        result.StoreName.Should().Be("Walmart");
+        result.StoreId.Should().Be(newStoreId);
+    }
+
+    [Fact]
+    public async Task UpdateTripItem_ClearsStoreNameWhenStoreRemoved()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripItemId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var tripItem = new TripItem
+        {
+            Id = tripItemId,
+            TripId = tripId,
+            InventoryItemId = Guid.NewGuid(),
+            ItemName = "Milk",
+            StoreName = "Costco",
+            StoreId = Guid.NewGuid(),
+            Quantity = 1,
+        };
+
+        _mockTripItemRepository.Setup(x => x.GetById(tripItemId)).ReturnsAsync(tripItem);
+        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
+        _mockTripItemRepository.Setup(x => x.Update(It.IsAny<TripItem>()))
+                               .ReturnsAsync((TripItem ti) => ti);
+
+        // Act
+        var result = await _tripItemService.UpdateTripItem(tripItemId, 2, userId, null, null);
+
+        // Assert
+        result.StoreName.Should().BeNull();
+        result.StoreId.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task AddTripItem_PopulatesStoreNameWhenStoreProvided()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var inventoryItemId = Guid.NewGuid();
+        var storeId = Guid.NewGuid();
+
+        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
+        _mockInventoryRepository.Setup(x => x.GetById(inventoryItemId))
+                                .ReturnsAsync(new InventoryItem { Id = inventoryItemId, Name = "Milk" });
+        _mockStoreRepository.Setup(x => x.GetById(storeId))
+                            .ReturnsAsync(new Store { Id = storeId, Name = "Costco" });
+        _mockTripItemRepository.Setup(x => x.Create(It.IsAny<TripItem>()))
+                               .ReturnsAsync((TripItem ti) => ti);
+
+        // Act
+        var result = await _tripItemService.AddTripItem(tripId, inventoryItemId, 1, userId, null, storeId);
+
+        // Assert
+        result.ItemName.Should().Be("Milk");
+        result.StoreName.Should().Be("Costco");
+        result.StoreId.Should().Be(storeId);
+    }
+
+    [Fact]
+    public async Task AddTripItem_StoreNameIsNullWhenNoStoreProvided()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var inventoryItemId = Guid.NewGuid();
+
+        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
+        _mockInventoryRepository.Setup(x => x.GetById(inventoryItemId))
+                                .ReturnsAsync(new InventoryItem { Id = inventoryItemId, Name = "Bread" });
+        _mockTripItemRepository.Setup(x => x.Create(It.IsAny<TripItem>()))
+                               .ReturnsAsync((TripItem ti) => ti);
+
+        // Act
+        var result = await _tripItemService.AddTripItem(tripId, inventoryItemId, 1, userId, null, null);
+
+        // Assert
+        result.StoreName.Should().BeNull();
     }
 }

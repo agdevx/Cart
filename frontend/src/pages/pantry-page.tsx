@@ -2,7 +2,6 @@
 // ABOUTME: Items tab supports filtering by all, personal, or per-household views
 
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 
 import { Plus } from 'lucide-react'
 
@@ -16,6 +15,7 @@ type InventoryTab = 'items' | 'stores'
 export const PantryPage = () => {
   const [activeTab, setActiveTab] = useState<InventoryTab>('items')
   const [filter, setFilter] = useState<InventoryFilter>('all')
+  const [showItemCreateForm, setShowItemCreateForm] = useState(false)
   const { data: households } = useHouseholdsQuery()
 
   return (
@@ -56,13 +56,13 @@ export const PantryPage = () => {
 
       {/* Add Item Button — Items tab only */}
       {activeTab === 'items' && (
-        <Link
-          to={filter === 'all' || filter === 'personal' ? '/pantry/add' : `/pantry/add?scope=${filter}`}
+        <button
+          onClick={() => setShowItemCreateForm(!showItemCreateForm)}
           className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
         >
           <Plus className="w-5 h-5" />
-          Add Item
-        </Link>
+          {showItemCreateForm ? 'Cancel' : 'Add Item'}
+        </button>
       )}
 
       {/* Filter Tabs — Items tab only */}
@@ -111,7 +111,13 @@ export const PantryPage = () => {
       )}
 
       {/* Items View */}
-      {activeTab === 'items' && <PantryItemsView filter={filter} />}
+      {activeTab === 'items' && (
+        <PantryItemsView
+          filter={filter}
+          showCreateForm={showItemCreateForm}
+          onCloseCreateForm={() => setShowItemCreateForm(false)}
+        />
+      )}
 
       {/* Stores View */}
       {activeTab === 'stores' && <PantryStoresView />}

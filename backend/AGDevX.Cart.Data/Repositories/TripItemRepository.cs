@@ -45,4 +45,20 @@ public class TripItemRepository(CartDbContext context) : ITripItemRepository
             await context.SaveChangesAsync();
         }
     }
+
+    //== Bulk update denormalized ItemName when inventory item is renamed
+    public async Task UpdateItemNameByInventoryItemId(Guid inventoryItemId, string itemName)
+    {
+        await context.TripItems
+            .Where(ti => ti.InventoryItemId == inventoryItemId)
+            .ExecuteUpdateAsync(s => s.SetProperty(ti => ti.ItemName, itemName));
+    }
+
+    //== Bulk update denormalized StoreName when store is renamed
+    public async Task UpdateStoreNameByStoreId(Guid storeId, string storeName)
+    {
+        await context.TripItems
+            .Where(ti => ti.StoreId == storeId)
+            .ExecuteUpdateAsync(s => s.SetProperty(ti => ti.StoreName, storeName));
+    }
 }

@@ -8,9 +8,15 @@ public class TripItem : BaseEntity
     public required Guid TripId { get; set; }
     public Trip? Trip { get; set; }
 
-    //== Inventory item being purchased
-    public required Guid InventoryItemId { get; set; }
+    //== Inventory item being purchased (nullable for SET NULL on delete)
+    public Guid? InventoryItemId { get; set; }
     public InventoryItem? InventoryItem { get; set; }
+
+    //== Denormalized item name from InventoryItem for display after deletion
+    public required string ItemName { get; set; }
+
+    //== Denormalized store name from Store for display after deletion
+    public string? StoreName { get; set; }
 
     //== Quantity to purchase
     public int Quantity { get; set; }

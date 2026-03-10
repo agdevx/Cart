@@ -6,7 +6,7 @@ using AGDevX.Cart.Data.Repositories;
 
 namespace AGDevX.Cart.Services;
 
-public class StoreService(IStoreRepository storeRepository, IHouseholdRepository householdRepository) : IStoreService
+public class StoreService(IStoreRepository storeRepository, IHouseholdRepository householdRepository, ITripItemRepository tripItemRepository) : IStoreService
 {
     public async Task<Store> CreateStore(Store store, Guid userId)
     {
@@ -73,15 +73,43 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
         return store;
     }
 
-    public async Task<Store> UpdateStore(Guid storeId, string name, Guid userId)
+    public async Task<Store> UpdateStore(Guid storeId, string name, Guid? householdId, Guid userId)
     {
         //== Verify access before updating
         var existingStore = await GetById(storeId, userId)
                                 ?? throw new UnauthorizedAccessException("Store not found or access denied");
 
-        //== Update only the name on the existing entity, preserving all other fields
+        //== Update name
         existingStore.Name = name;
-        return await storeRepository.Update(existingStore);
+
+        //== Handle scope change
+        if (householdId.HasValue)
+        {
+            //== Moving to household: verify membership
+            var household = await householdRepository.GetById(householdId.Value)
+                                ?? throw new UnauthorizedAccessException("Household not found");
+
+            if (!household.Members.Any(m => m.UserId == userId))
+            {
+                throw new UnauthorizedAccessException("User is not a member of this household");
+            }
+
+            existingStore.HouseholdId = householdId.Value;
+            existingStore.UserId = null;
+        }
+        else
+        {
+            //== Moving to personal: set owner, clear household
+            existingStore.UserId = userId;
+            existingStore.HouseholdId = null;
+        }
+
+        var result = await storeRepository.Update(existingStore);
+
+        //== Live mirror: update denormalized StoreName on all TripItems
+        await tripItemRepository.UpdateStoreNameByStoreId(storeId, name);
+
+        return result;
     }
 
     public async Task DeleteStore(Guid id, Guid userId)

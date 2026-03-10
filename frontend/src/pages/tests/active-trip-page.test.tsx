@@ -9,12 +9,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import type { TripItem } from '@/apis/agdevx-cart-api/models/trip-item'
-import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
 import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import type { Household } from '@/apis/agdevx-cart-api/models/household'
 import * as tripQueryModule from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import * as tripItemsQueryModule from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
-import * as inventoryQueryModule from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import * as checkTripItemModule from '@/apis/agdevx-cart-api/trip/check-trip-item.mutation'
 import * as completeTripModule from '@/apis/agdevx-cart-api/trip/complete-trip.mutation'
 import * as updateTripItemModule from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
@@ -63,8 +61,10 @@ const mockTripItems: TripItem[] = [
     id: 'ti1',
     tripId: 'trip1',
     inventoryItemId: 'inv1',
+    itemName: 'Milk',
+    storeName: 'Costco',
     quantity: 2,
-    storeId: null,
+    storeId: 'store1',
     notes: 'Get organic',
     isChecked: false,
     checkedAt: null,
@@ -77,40 +77,15 @@ const mockTripItems: TripItem[] = [
     id: 'ti2',
     tripId: 'trip1',
     inventoryItemId: 'inv2',
+    itemName: 'Bread',
+    storeName: 'Costco',
     quantity: 1,
-    storeId: null,
+    storeId: 'store1',
     notes: null,
     isChecked: true,
     checkedAt: '2024-01-16',
     createdBy: 'user1',
     createdDate: '2024-01-15',
-    modifiedBy: null,
-    modifiedDate: null,
-  },
-]
-
-const mockInventory: InventoryItem[] = [
-  {
-    id: 'inv1',
-    name: 'Milk',
-    defaultStoreId: null,
-    notes: null,
-    ownerUserId: 'user1',
-    householdId: null,
-    createdBy: 'user1',
-    createdDate: '2024-01-01',
-    modifiedBy: null,
-    modifiedDate: null,
-  },
-  {
-    id: 'inv2',
-    name: 'Bread',
-    defaultStoreId: null,
-    notes: null,
-    ownerUserId: 'user1',
-    householdId: null,
-    createdBy: 'user1',
-    createdDate: '2024-01-01',
     modifiedBy: null,
     modifiedDate: null,
   },
@@ -156,11 +131,6 @@ const setupMocks = () => {
     isLoading: false,
   } as any)
 
-  vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
-    data: mockInventory,
-    isLoading: false,
-  } as any)
-
   vi.spyOn(checkTripItemModule, 'useCheckTripItemMutation').mockReturnValue({
     mutateAsync: checkMutateAsyncFn,
     isPending: false,
@@ -202,6 +172,9 @@ describe('ActiveTripPage', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
 
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
+
     //== Both items should appear
     expect(screen.getByText('Milk')).toBeInTheDocument()
     expect(screen.getByText('Bread')).toBeInTheDocument()
@@ -219,6 +192,9 @@ describe('ActiveTripPage', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
 
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
+
     //== Click the unchecked item (Milk) — the row itself should toggle
     fireEvent.click(screen.getByText('Milk'))
 
@@ -232,6 +208,9 @@ describe('ActiveTripPage', () => {
   it('opens edit form via kebab menu and saves updated quantity', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
+
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
 
     //== Open kebab menu on Milk item
     const kebabButtons = screen.getAllByLabelText('Item actions')
@@ -258,6 +237,9 @@ describe('ActiveTripPage', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
 
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
+
     //== Open kebab menu on Milk item
     const kebabButtons = screen.getAllByLabelText('Item actions')
     fireEvent.click(kebabButtons[0])
@@ -272,6 +254,9 @@ describe('ActiveTripPage', () => {
   it('shows strikethrough styling on checked items', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
+
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
 
     //== Bread (ti2) is checked — should have line-through styling
     const breadElement = screen.getByText('Bread')
@@ -348,9 +333,49 @@ describe('ActiveTripPage', () => {
     expect(completeMutateAsyncFn).toHaveBeenCalledWith('trip1')
   })
 
+  it('should not toggle checkbox when kebab menu is tapped (mobile touch)', () => {
+    setupMocks()
+    render(<ActiveTripPage />, { wrapper })
+
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
+
+    //== Find the kebab button for the unchecked item (Milk)
+    const kebabButtons = screen.getAllByLabelText('Item actions')
+    const milkKebab = kebabButtons[0]
+
+    //== Simulate mobile touch event chain: touchstart → touchend → mousedown → click
+    //== On real mobile devices, the mousedown event bubbles from the kebab to the
+    //== parent row before click-level stopPropagation can prevent it. We fire mouseDown
+    //== separately to verify the kebab container stops propagation at the mousedown level.
+    fireEvent.touchStart(milkKebab)
+    fireEvent.touchEnd(milkKebab)
+    fireEvent.mouseDown(milkKebab)
+    fireEvent.click(milkKebab)
+
+    //== Check mutation should NOT have been called — kebab tap should not toggle checkbox
+    expect(checkMutateAsyncFn).not.toHaveBeenCalled()
+
+    //== Kebab menu should be open (Edit/Remove options visible)
+    expect(screen.getByText('Edit')).toBeInTheDocument()
+    expect(screen.getByText('Remove')).toBeInTheDocument()
+  })
+
+  it('should show "Update Shopping List" link instead of "Back to Planning"', () => {
+    setupMocks()
+    render(<ActiveTripPage />, { wrapper })
+
+    //== Link text should be "Update Shopping List", not "Back to Planning"
+    expect(screen.getByText('Update Shopping List')).toBeInTheDocument()
+    expect(screen.queryByText('Back to Planning')).not.toBeInTheDocument()
+  })
+
   it('does not toggle check when editing', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
+
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
 
     //== Open kebab menu and click Edit on Milk item
     const kebabButtons = screen.getAllByLabelText('Item actions')
@@ -364,5 +389,133 @@ describe('ActiveTripPage', () => {
     fireEvent.click(screen.getByText('Milk'))
 
     expect(checkMutateAsyncFn).not.toHaveBeenCalled()
+  })
+
+  describe('dual notes display', () => {
+    it('should display pantry notes in italics with "Pantry:" label', () => {
+      setupMocks()
+
+      //== Override trip items to include inventoryItem with notes
+      vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+        data: [
+          {
+            ...mockTripItems[0],
+            inventoryItem: { id: 'inv1', name: 'Milk', notes: 'Buy organic', defaultStoreId: null },
+          },
+        ],
+        isLoading: false,
+      } as any)
+
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Expand Costco accordion to reveal items
+      fireEvent.click(screen.getByText('Costco'))
+
+      //== Pantry notes should be visible with "Pantry:" prefix and italic styling
+      const pantryNotes = screen.getByText('Pantry: Buy organic')
+      expect(pantryNotes).toBeInTheDocument()
+      expect(pantryNotes).toHaveClass('italic')
+    })
+
+    it('should display both pantry and trip notes', () => {
+      setupMocks()
+
+      //== Override trip items to have both pantry and trip notes
+      vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+        data: [
+          {
+            ...mockTripItems[0],
+            notes: 'Get 2 if on sale',
+            inventoryItem: { id: 'inv1', name: 'Milk', notes: 'Buy organic', defaultStoreId: null },
+          },
+        ],
+        isLoading: false,
+      } as any)
+
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Expand Costco accordion to reveal items
+      fireEvent.click(screen.getByText('Costco'))
+
+      //== Both notes should be visible
+      expect(screen.getByText('Pantry: Buy organic')).toBeInTheDocument()
+      expect(screen.getByText('Get 2 if on sale')).toBeInTheDocument()
+    })
+
+    it('should not show pantry notes when inventoryItem is null', () => {
+      setupMocks()
+
+      //== Override trip items with null inventoryItem (deleted pantry item)
+      vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+        data: [
+          {
+            ...mockTripItems[0],
+            inventoryItemId: null,
+            inventoryItem: null,
+            notes: 'Trip note only',
+          },
+        ],
+        isLoading: false,
+      } as any)
+
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Expand Costco accordion to reveal items
+      fireEvent.click(screen.getByText('Costco'))
+
+      //== No "Pantry:" label should be rendered
+      expect(screen.queryByText(/Pantry:/)).not.toBeInTheDocument()
+      //== Trip notes should still show
+      expect(screen.getByText('Trip note only')).toBeInTheDocument()
+    })
+  })
+
+  describe('store grouping', () => {
+    it('should group items by store on active trip page', () => {
+      setupMocks()
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Costco accordion should be visible
+      expect(screen.getByText('Costco')).toBeInTheDocument()
+    })
+
+    it('should show checked count in accordion header', () => {
+      setupMocks()
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Costco has 2 items, 1 checked (Bread) — header should show "1/2"
+      const costcoHeader = screen.getByText('Costco').closest('button')!
+      expect(costcoHeader).toHaveTextContent('1/2')
+    })
+
+    it('should default all accordions to collapsed', () => {
+      setupMocks()
+      localStorage.removeItem('trip-accordion-trip1')
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Item names should NOT be visible because accordions default to collapsed
+      expect(screen.queryByText('Milk')).not.toBeInTheDocument()
+      expect(screen.queryByText('Bread')).not.toBeInTheDocument()
+    })
+
+    it('should auto-collapse store group when all items are checked', () => {
+      setupMocks()
+
+      //== Override: all Costco items are checked
+      vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+        data: mockTripItems.map((item) => ({ ...item, isChecked: true, checkedAt: '2024-01-16' })),
+        isLoading: false,
+      } as any)
+
+      //== Pre-set localStorage with Costco expanded
+      localStorage.setItem('trip-accordion-trip1', JSON.stringify({ Costco: true }))
+
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Costco should have auto-collapsed because all items are checked
+      //== Items should not be visible
+      expect(screen.queryByText('Milk')).not.toBeInTheDocument()
+      expect(screen.queryByText('Bread')).not.toBeInTheDocument()
+    })
   })
 })

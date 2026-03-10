@@ -11,6 +11,8 @@ interface UpdateInventoryItemRequest {
   name?: string
   defaultStoreId?: string | null
   notes?: string | null
+  householdId?: string | null
+  ownerUserId?: string | null
 }
 
 export const useUpdateInventoryItemMutation = () => {

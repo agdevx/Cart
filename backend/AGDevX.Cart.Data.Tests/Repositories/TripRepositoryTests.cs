@@ -105,7 +105,7 @@ public class TripRepositoryTests
         var trip = new Trip { Id = tripId, Name = "Run", IsCompleted = false };
         context.Trips.Add(trip);
         context.TripCollaborators.Add(new TripCollaborator { TripId = tripId, UserId = userId, Trip = null!, User = null! });
-        context.TripItems.Add(new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, Quantity = 1 });
+        context.TripItems.Add(new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, ItemName = "Milk", Quantity = 1 });
         await context.SaveChangesAsync();
 
         // Act

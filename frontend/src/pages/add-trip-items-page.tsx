@@ -2,11 +2,12 @@
 // ABOUTME: Supports search, source filtering, batch selection, and quantity editing
 
 import { ArrowLeft, Search } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
+import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
@@ -15,6 +16,7 @@ type SourceFilter = 'all' | 'personal' | string
 
 interface SelectedItem {
   quantity: number
+  storeId: string | null
 }
 
 export const AddTripItemsPage = () => {
@@ -24,12 +26,20 @@ export const AddTripItemsPage = () => {
   const { data: inventory } = useInventoryQuery()
   const { data: households } = useHouseholdsQuery()
   const { data: tripItems } = useTripItemsQuery(tripId!)
+  const householdIds = useMemo(() => households?.map((h) => h.id) ?? [], [households])
+  const { data: stores } = useStoresQuery(householdIds)
   const addTripItemMutation = useAddTripItemMutation()
 
   const [searchText, setSearchText] = useState('')
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
+  const [storeFilter, setStoreFilter] = useState<string>('all')
   const [selectedItems, setSelectedItems] = useState<Record<string, SelectedItem>>({})
   const [isAdding, setIsAdding] = useState(false)
+
+  // Reset store filter when source filter changes
+  useEffect(() => {
+    setStoreFilter('all')
+  }, [sourceFilter])
 
   // IDs of items already on the trip
   const existingItemIds = useMemo(
@@ -37,7 +47,18 @@ export const AddTripItemsPage = () => {
     [tripItems]
   )
 
-  // Filter inventory items based on source filter, search text, and existing trip items
+  // Derive stores visible in the store filter based on the current source filter scope
+  const filteredStores = useMemo(() => {
+    if (!stores) return []
+    if (sourceFilter === 'all') return stores
+    if (sourceFilter === 'personal') {
+      return stores.filter((s) => s.userId !== null && s.householdId === null)
+    }
+    // sourceFilter is a household ID
+    return stores.filter((s) => s.householdId === sourceFilter)
+  }, [stores, sourceFilter])
+
+  // Filter inventory items based on source filter, store filter, search text, and existing trip items
   const filteredItems = useMemo(() => {
     if (!inventory) return []
 
@@ -51,6 +72,11 @@ export const AddTripItemsPage = () => {
       items = items.filter((item) => item.householdId === sourceFilter)
     }
 
+    // Apply store filter
+    if (storeFilter !== 'all') {
+      items = items.filter((item) => item.defaultStoreId === storeFilter)
+    }
+
     // Apply search text filter
     if (searchText.trim()) {
       const search = searchText.trim().toLowerCase()
@@ -58,7 +84,7 @@ export const AddTripItemsPage = () => {
     }
 
     return items
-  }, [inventory, existingItemIds, sourceFilter, searchText])
+  }, [inventory, existingItemIds, sourceFilter, storeFilter, searchText])
 
   const selectedCount = Object.keys(selectedItems).length
 
@@ -68,14 +94,22 @@ export const AddTripItemsPage = () => {
         const { [itemId]: _, ...rest } = prev
         return rest
       }
-      return { ...prev, [itemId]: { quantity: 1 } }
+      const item = inventory?.find((i) => i.id === itemId)
+      return { ...prev, [itemId]: { quantity: 1, storeId: item?.defaultStoreId ?? null } }
     })
   }
 
   const updateQuantity = (itemId: string, quantity: number) => {
     setSelectedItems((prev) => ({
       ...prev,
-      [itemId]: { quantity: Math.max(1, quantity) },
+      [itemId]: { ...prev[itemId], quantity: Math.max(1, quantity) },
+    }))
+  }
+
+  const updateStore = (itemId: string, storeId: string | null) => {
+    setSelectedItems((prev) => ({
+      ...prev,
+      [itemId]: { ...prev[itemId], storeId },
     }))
   }
 
@@ -85,11 +119,12 @@ export const AddTripItemsPage = () => {
     setIsAdding(true)
     try {
       await Promise.all(
-        Object.entries(selectedItems).map(([inventoryItemId, { quantity }]) =>
+        Object.entries(selectedItems).map(([inventoryItemId, { quantity, storeId }]) =>
           addTripItemMutation.mutateAsync({
             tripId,
             inventoryItemId,
             quantity,
+            storeId,
           })
         )
       )
@@ -151,47 +186,85 @@ export const AddTripItemsPage = () => {
         />
       </div>
 
-      {/* Source filter toggle */}
-      <div role="tablist" className="flex bg-bg-warm rounded-xl p-1 mb-4 overflow-x-auto">
-        <button
-          role="tab"
-          aria-selected={sourceFilter === 'all'}
-          onClick={() => setSourceFilter('all')}
-          className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-            sourceFilter === 'all'
-              ? 'bg-teal text-white shadow-sm'
-              : 'text-text-secondary hover:text-navy'
-          }`}
-        >
-          All
-        </button>
-        <button
-          role="tab"
-          aria-selected={sourceFilter === 'personal'}
-          onClick={() => setSourceFilter('personal')}
-          className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-            sourceFilter === 'personal'
-              ? 'bg-teal text-white shadow-sm'
-              : 'text-text-secondary hover:text-navy'
-          }`}
-        >
-          Personal
-        </button>
-        {(households || []).map((household) => (
-          <button
-            key={household.id}
-            role="tab"
-            aria-selected={sourceFilter === household.id}
-            onClick={() => setSourceFilter(household.id)}
-            className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-              sourceFilter === household.id
-                ? 'bg-teal text-white shadow-sm'
-                : 'text-text-secondary hover:text-navy'
-            }`}
-          >
-            {household.name}
-          </button>
-        ))}
+      {/* Source and store filter toggles */}
+      <div className="flex gap-2 mb-4">
+        {/* Source filter */}
+        <div className="flex-1 overflow-x-auto">
+          <div role="tablist" className="flex bg-bg-warm rounded-xl p-1">
+            <button
+              role="tab"
+              aria-selected={sourceFilter === 'all'}
+              onClick={() => setSourceFilter('all')}
+              className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+                sourceFilter === 'all'
+                  ? 'bg-teal text-white shadow-sm'
+                  : 'text-text-secondary hover:text-navy'
+              }`}
+            >
+              All
+            </button>
+            <button
+              role="tab"
+              aria-selected={sourceFilter === 'personal'}
+              onClick={() => setSourceFilter('personal')}
+              className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+                sourceFilter === 'personal'
+                  ? 'bg-teal text-white shadow-sm'
+                  : 'text-text-secondary hover:text-navy'
+              }`}
+            >
+              Personal
+            </button>
+            {(households || []).map((household) => (
+              <button
+                key={household.id}
+                role="tab"
+                aria-selected={sourceFilter === household.id}
+                onClick={() => setSourceFilter(household.id)}
+                className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+                  sourceFilter === household.id
+                    ? 'bg-teal text-white shadow-sm'
+                    : 'text-text-secondary hover:text-navy'
+                }`}
+              >
+                {household.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Store filter */}
+        <div className="flex-1 overflow-x-auto">
+          <div role="tablist" className="flex bg-bg-warm rounded-xl p-1">
+            <button
+              role="tab"
+              aria-selected={storeFilter === 'all'}
+              onClick={() => setStoreFilter('all')}
+              className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+                storeFilter === 'all'
+                  ? 'bg-teal text-white shadow-sm'
+                  : 'text-text-secondary hover:text-navy'
+              }`}
+            >
+              All
+            </button>
+            {filteredStores.map((store) => (
+              <button
+                key={store.id}
+                role="tab"
+                aria-selected={storeFilter === store.id}
+                onClick={() => setStoreFilter(store.id)}
+                className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+                  storeFilter === store.id
+                    ? 'bg-teal text-white shadow-sm'
+                    : 'text-text-secondary hover:text-navy'
+                }`}
+              >
+                {store.name}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Item list */}
@@ -244,6 +317,26 @@ export const AddTripItemsPage = () => {
                   </div>
                 )}
               </div>
+
+              {/* Store dropdown (when selected) */}
+              {isSelected && (
+                <div className="mt-2 pl-9" onClick={(e) => e.stopPropagation()}>
+                  <label htmlFor={`store-${item.id}`} className="text-xs text-text-tertiary mr-2">Store</label>
+                  <select
+                    id={`store-${item.id}`}
+                    value={selectedItems[item.id].storeId ?? ''}
+                    onChange={(e) => updateStore(item.id, e.target.value || null)}
+                    className="px-2 py-1 border border-navy/10 rounded-lg bg-surface text-text text-sm focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+                  >
+                    <option value="">No store</option>
+                    {(stores ?? []).map((store) => (
+                      <option key={store.id} value={store.id}>
+                        {store.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
           )
         })}
