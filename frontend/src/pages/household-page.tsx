@@ -8,6 +8,7 @@ import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-h
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useAuth } from '@/auth/use-auth'
 import { householdDetailPath, ROUTES } from '@/routes'
+
 const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
   const { user } = useAuth()
   const { data: members } = useHouseholdMembersQuery(householdId)
