@@ -76,6 +76,51 @@ public class AuthController(IAuthService authService) : ControllerBase
         }
     }
 
+    [Authorize]
+    [HttpPut("profile")]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var response = await authService.UpdateProfile(userId, request);
+            await SignInUser(response);
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { errorCode = "DUPLICATE_EMAIL", message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { errorCode = "VALIDATION_ERROR", message = ex.Message });
+        }
+    }
+
+    [Authorize]
+    [HttpPut("password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            await authService.ChangePassword(userId, request);
+            return Ok();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { errorCode = "VALIDATION_ERROR", message = ex.Message });
+        }
+    }
+
     //== Private helper to create cookie session from auth response
     private async Task SignInUser(AuthResponse response)
     {
