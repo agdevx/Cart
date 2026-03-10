@@ -149,7 +149,7 @@ describe('PantryStoresView', () => {
     })
   })
 
-  it('enables in-place editing when edit is clicked via kebab menu', () => {
+  it('opens expandable edit form when edit is clicked via kebab menu', () => {
     setupMocks()
 
     renderView()
@@ -162,11 +162,15 @@ describe('PantryStoresView', () => {
     fireEvent.click(screen.getByText('Edit'))
 
     //== An input should appear with the store name value
-    const editInput = screen.getByDisplayValue('Costco')
-    expect(editInput).toBeInTheDocument()
+    const editInput = screen.getByLabelText('Edit store name')
+    expect(editInput).toHaveValue('Costco')
+
+    //== Save and Cancel buttons should be visible
+    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument()
   })
 
-  it('saves edited name on Enter', async () => {
+  it('saves edited store via Save button', async () => {
     const mockUpdateMutateAsync = vi.fn().mockResolvedValue(undefined)
 
     setupMocks()
@@ -175,7 +179,7 @@ describe('PantryStoresView', () => {
     vi.spyOn(updateStoreModule, 'useUpdateStoreMutation').mockReturnValue({
       mutateAsync: mockUpdateMutateAsync,
       isPending: false,
-    } as unknown as UseMutationResult<void, Error, { id: string; name: string }>)
+    } as unknown as UseMutationResult<void, Error, { id: string; name: string; householdId?: string | null }>)
 
     renderView()
 
@@ -184,19 +188,20 @@ describe('PantryStoresView', () => {
     fireEvent.click(kebabButtons[0])
     fireEvent.click(screen.getByText('Edit'))
 
-    const editInput = screen.getByDisplayValue('Costco')
+    const editInput = screen.getByLabelText('Edit store name')
     fireEvent.change(editInput, { target: { value: 'Costco Wholesale' } })
-    fireEvent.keyDown(editInput, { key: 'Enter' })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
 
     await waitFor(() => {
       expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
         id: 'hs1',
         name: 'Costco Wholesale',
+        householdId: 'h1',
       })
     })
   })
 
-  it('cancels editing when cancel button is clicked', () => {
+  it('cancels editing when Cancel button is clicked', () => {
     setupMocks()
 
     renderView()
@@ -206,33 +211,14 @@ describe('PantryStoresView', () => {
     fireEvent.click(kebabButtons[0])
     fireEvent.click(screen.getByText('Edit'))
 
-    //== Cancel button should be visible in edit mode
-    const cancelButton = screen.getByLabelText('Cancel editing')
+    //== Cancel button should be visible in edit form
+    const cancelButton = screen.getByRole('button', { name: 'Cancel' })
     expect(cancelButton).toBeInTheDocument()
 
-    fireEvent.change(screen.getByDisplayValue('Costco'), { target: { value: 'Something Else' } })
+    fireEvent.change(screen.getByLabelText('Edit store name'), { target: { value: 'Something Else' } })
     fireEvent.click(cancelButton)
 
-    //== Original name should be back, no input visible
-    expect(screen.getByText('Costco')).toBeInTheDocument()
-    expect(screen.queryByDisplayValue('Something Else')).not.toBeInTheDocument()
-  })
-
-  it('cancels editing on Escape', () => {
-    setupMocks()
-
-    renderView()
-
-    //== Open kebab menu and click Edit
-    const kebabButtons = screen.getAllByLabelText('Store actions')
-    fireEvent.click(kebabButtons[0])
-    fireEvent.click(screen.getByText('Edit'))
-
-    const editInput = screen.getByDisplayValue('Costco')
-    fireEvent.change(editInput, { target: { value: 'Something Else' } })
-    fireEvent.keyDown(editInput, { key: 'Escape' })
-
-    //== Original name should be back, no input visible
+    //== Edit form should be gone, no input visible
     expect(screen.getByText('Costco')).toBeInTheDocument()
     expect(screen.queryByDisplayValue('Something Else')).not.toBeInTheDocument()
   })
@@ -273,6 +259,99 @@ describe('PantryStoresView', () => {
 
     await waitFor(() => {
       expect(mockDeleteMutateAsync).toHaveBeenCalledWith('hs1')
+    })
+  })
+
+  it('should expand full edit form when Edit is clicked in kebab menu', () => {
+    setupMocks()
+
+    renderView()
+
+    //== Open kebab menu on the first store and click Edit
+    const kebabButtons = screen.getAllByLabelText('Store actions')
+    fireEvent.click(kebabButtons[0])
+    fireEvent.click(screen.getByText('Edit'))
+
+    //== Expandable form appears below store row (NOT inline name replacement)
+    //== Name field pre-populated
+    const nameInput = screen.getByLabelText('Edit store name')
+    expect(nameInput).toHaveValue('Costco')
+
+    //== Scope dropdown pre-populated (household store -> should show household id)
+    expect(screen.getByLabelText('Edit scope')).toBeInTheDocument()
+
+    //== Save/Cancel buttons visible
+    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument()
+  })
+
+  it('should save name and scope changes on submit', async () => {
+    const mockUpdateMutateAsync = vi.fn().mockResolvedValue(undefined)
+
+    setupMocks()
+
+    //== Override update mutation with trackable mock
+    vi.spyOn(updateStoreModule, 'useUpdateStoreMutation').mockReturnValue({
+      mutateAsync: mockUpdateMutateAsync,
+      isPending: false,
+    } as unknown as UseMutationResult<void, Error, { id: string; name: string; householdId?: string | null }>)
+
+    renderView()
+
+    //== Open edit form on Costco (household store)
+    const kebabButtons = screen.getAllByLabelText('Store actions')
+    fireEvent.click(kebabButtons[0])
+    fireEvent.click(screen.getByText('Edit'))
+
+    //== Change name
+    const nameInput = screen.getByLabelText('Edit store name')
+    fireEvent.change(nameInput, { target: { value: 'Costco Wholesale' } })
+
+    //== Click Save
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => {
+      expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
+        id: 'hs1',
+        name: 'Costco Wholesale',
+        householdId: 'h1',
+      })
+    })
+  })
+
+  it('should allow changing scope from personal to household', async () => {
+    const mockUpdateMutateAsync = vi.fn().mockResolvedValue(undefined)
+
+    setupMocks()
+
+    //== Override update mutation with trackable mock
+    vi.spyOn(updateStoreModule, 'useUpdateStoreMutation').mockReturnValue({
+      mutateAsync: mockUpdateMutateAsync,
+      isPending: false,
+    } as unknown as UseMutationResult<void, Error, { id: string; name: string; householdId?: string | null }>)
+
+    renderView()
+
+    //== Open edit form on Corner Market (personal store — it's the 3rd kebab button)
+    const kebabButtons = screen.getAllByLabelText('Store actions')
+    fireEvent.click(kebabButtons[2])
+    fireEvent.click(screen.getByText('Edit'))
+
+    //== Change scope from personal to household
+    const scopeButton = screen.getByLabelText('Edit scope')
+    fireEvent.click(scopeButton)
+    //== Click the household option in the ScopeSelect dropdown (contains "Household" description)
+    fireEvent.click(screen.getByText(/Household/))
+
+    //== Click Save
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => {
+      expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
+        id: 'ps1',
+        name: 'Corner Market',
+        householdId: 'h1',
+      })
     })
   })
 
