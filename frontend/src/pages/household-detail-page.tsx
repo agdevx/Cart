@@ -359,17 +359,17 @@ export const HouseholdDetailPage = () => {
               {confirmAction.type === 'leave' &&
                 'Are you sure you want to leave this household?'}
             </p>
-            <div className="flex gap-2 justify-end">
+            <div className="flex gap-3">
               <button
                 onClick={() => setConfirmAction(null)}
-                className="px-4 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
+                className="flex-1 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmAction}
                 disabled={removeMemberMutation.isPending || transferOwnershipMutation.isPending}
-                className={`px-4 py-2.5 text-sm font-bold text-white rounded-xl disabled:opacity-50 transition-colors ${
+                className={`flex-1 py-2.5 text-sm font-bold text-white rounded-xl disabled:opacity-50 transition-colors ${
                   confirmAction.type === 'transfer'
                     ? 'bg-teal hover:bg-teal-light'
                     : 'bg-coral hover:bg-coral/90'

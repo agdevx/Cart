@@ -54,20 +54,20 @@ export const JoinHouseholdPage = () => {
           </div>
         )}
 
-        <div className="space-y-2 pt-2">
-          <button
-            type="submit"
-            disabled={joinMutation.isPending || !inviteCode.trim()}
-            className="w-full py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
-          >
-            {joinMutation.isPending ? 'Joining...' : 'Join Household'}
-          </button>
+        <div className="flex gap-3 pt-2">
           <button
             type="button"
             onClick={() => navigate(ROUTES.HOUSEHOLD)}
-            className="w-full py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
+            className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
           >
             Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={joinMutation.isPending || !inviteCode.trim()}
+            className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
+          >
+            {joinMutation.isPending ? 'Joining...' : 'Join Household'}
           </button>
         </div>
       </form>

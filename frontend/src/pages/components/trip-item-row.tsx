@@ -316,20 +316,20 @@ const EditForm = ({
         ))}
       </select>
     </div>
-    <div className="flex items-center gap-2 pt-1">
-      <button
-        onClick={onSave}
-        disabled={isUpdating}
-        className="px-4 py-2 text-sm font-bold text-white rounded-lg bg-teal hover:bg-teal-light disabled:opacity-50 transition-colors"
-      >
-        {isUpdating ? 'Saving...' : 'Save'}
-      </button>
+    <div className="flex gap-3 pt-1">
       <button
         onClick={onCancel}
         disabled={isUpdating}
-        className="px-4 py-2 text-sm font-semibold text-text-secondary hover:text-navy transition-colors"
+        className="flex-1 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
       >
         Cancel
+      </button>
+      <button
+        onClick={onSave}
+        disabled={isUpdating}
+        className="flex-1 py-2.5 text-sm font-bold text-white rounded-xl bg-teal hover:bg-teal-light disabled:opacity-50 transition-colors"
+      >
+        {isUpdating ? 'Saving...' : 'Save'}
       </button>
     </div>
   </div>

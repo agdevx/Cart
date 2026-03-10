@@ -190,18 +190,18 @@ export const PantryStoresView = () => {
 
           <div className="flex gap-3">
             <button
+              onClick={handleCancelEdit}
+              disabled={updateMutation.isPending}
+              className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-display font-bold hover:bg-navy/10 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
               onClick={handleSaveEdit}
               disabled={updateMutation.isPending || !editingName.trim()}
               className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
             >
               {updateMutation.isPending ? 'Saving...' : 'Save'}
-            </button>
-            <button
-              onClick={handleCancelEdit}
-              disabled={updateMutation.isPending}
-              className="flex-1 py-3 bg-bg-warm text-text-secondary rounded-xl font-display font-bold hover:bg-navy/10 transition-colors"
-            >
-              Cancel
             </button>
           </div>
         </div>
@@ -253,13 +253,22 @@ export const PantryStoresView = () => {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={createMutation.isPending || !storeName.trim()}
-            className="w-full py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
-          >
-            {createMutation.isPending ? 'Creating...' : 'Create'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setShowCreateForm(false)}
+              className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-display font-bold hover:bg-navy/10 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={createMutation.isPending || !storeName.trim()}
+              className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
+            >
+              {createMutation.isPending ? 'Creating...' : 'Create'}
+            </button>
+          </div>
         </form>
       )}
 
