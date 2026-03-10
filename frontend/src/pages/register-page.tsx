@@ -135,6 +135,7 @@ export const RegisterPage = () => {
               onChange={(e) => setEmail(e.target.value)}
               onBlur={() => setTouched({ ...touched, email: true })}
               placeholder="Enter your email"
+              maxLength={254}
               className={inputClass(!!emailError)}
               autoComplete="email"
             />
@@ -155,6 +156,7 @@ export const RegisterPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               onBlur={() => setTouched({ ...touched, password: true })}
               placeholder="Enter your password"
+              maxLength={128}
               className={inputClass(!!passwordError)}
               autoComplete="new-password"
             />
@@ -192,6 +194,7 @@ export const RegisterPage = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               onBlur={() => setTouched({ ...touched, confirmPassword: true })}
               placeholder="Confirm your password"
+              maxLength={128}
               className={inputClass(!!confirmPasswordError)}
               autoComplete="new-password"
             />
@@ -212,6 +215,7 @@ export const RegisterPage = () => {
               onChange={(e) => setName(e.target.value)}
               onBlur={() => setTouched({ ...touched, name: true })}
               placeholder="Enter your name"
+              maxLength={64}
               className={inputClass(!!nameError)}
               autoComplete="name"
             />
