@@ -318,6 +318,31 @@ describe('ActiveTripPage', () => {
     expect(completeMutateAsyncFn).toHaveBeenCalledWith('trip1')
   })
 
+  it('should not toggle checkbox when kebab menu is tapped (mobile touch)', () => {
+    setupMocks()
+    render(<ActiveTripPage />, { wrapper })
+
+    //== Find the kebab button for the unchecked item (Milk)
+    const kebabButtons = screen.getAllByLabelText('Item actions')
+    const milkKebab = kebabButtons[0]
+
+    //== Simulate mobile touch event chain: touchstart → touchend → mousedown → click
+    //== On real mobile devices, the mousedown event bubbles from the kebab to the
+    //== parent row before click-level stopPropagation can prevent it. We fire mouseDown
+    //== separately to verify the kebab container stops propagation at the mousedown level.
+    fireEvent.touchStart(milkKebab)
+    fireEvent.touchEnd(milkKebab)
+    fireEvent.mouseDown(milkKebab)
+    fireEvent.click(milkKebab)
+
+    //== Check mutation should NOT have been called — kebab tap should not toggle checkbox
+    expect(checkMutateAsyncFn).not.toHaveBeenCalled()
+
+    //== Kebab menu should be open (Edit/Remove options visible)
+    expect(screen.getByText('Edit')).toBeInTheDocument()
+    expect(screen.getByText('Remove')).toBeInTheDocument()
+  })
+
   it('does not toggle check when editing', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })

@@ -177,8 +177,15 @@ export const TripItemRow = ({
         {tripItem.notes && <p className="text-xs text-text-tertiary mt-0.5">{tripItem.notes}</p>}
       </div>
 
-      {/* Kebab menu */}
-      <div className="relative flex-shrink-0 self-start" ref={menuRef}>
+      {/* Kebab menu — stop touch/mousedown propagation to prevent mobile browsers
+         from synthesizing a click on the parent row when tapping the kebab area */}
+      <div
+        className="relative flex-shrink-0 self-start"
+        ref={menuRef}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <button
           onClick={handleKebabClick}
           aria-label="Item actions"
