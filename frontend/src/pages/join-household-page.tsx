@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useJoinHouseholdMutation } from '@/apis/agdevx-cart-api/household/join-household.mutation'
+import { ROUTES } from '@/routes'
 import { getErrorMessage } from '@/utilities/error-messages'
 
 export const JoinHouseholdPage = () => {
@@ -21,14 +22,14 @@ export const JoinHouseholdPage = () => {
 
     try {
       await joinMutation.mutateAsync({ inviteCode: inviteCode.trim() })
-      navigate('/household')
+      navigate(ROUTES.HOUSEHOLD)
     } catch {
       // Error is handled by mutation state
     }
   }
 
   return (
-    <div className="px-5 pt-14 pb-8">
+    <div className="px-5 pt-7 pb-8">
       <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight mb-6">Join Household</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -53,20 +54,20 @@ export const JoinHouseholdPage = () => {
           </div>
         )}
 
-        <div className="space-y-2 pt-2">
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => navigate(ROUTES.HOUSEHOLD)}
+            className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
+          >
+            Cancel
+          </button>
           <button
             type="submit"
             disabled={joinMutation.isPending || !inviteCode.trim()}
-            className="w-full py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
+            className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
           >
             {joinMutation.isPending ? 'Joining...' : 'Join Household'}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/household')}
-            className="w-full py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
-          >
-            Cancel
           </button>
         </div>
       </form>

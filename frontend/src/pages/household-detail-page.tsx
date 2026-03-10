@@ -15,6 +15,8 @@ import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-h
 import { useInviteCodeQuery } from '@/apis/agdevx-cart-api/household/use-invite-code.query'
 import { useAuth } from '@/auth/use-auth'
 
+import { ROUTES } from '@/routes'
+
 import { ConfirmDialog } from './components/confirm-dialog'
 
 export const HouseholdDetailPage = () => {
@@ -99,7 +101,7 @@ export const HouseholdDetailPage = () => {
   const handleDeleteHousehold = () => {
     if (!householdId) return
     deleteHouseholdMutation.mutate(householdId, {
-      onSuccess: () => navigate('/household'),
+      onSuccess: () => navigate(ROUTES.HOUSEHOLD),
     })
   }
 
@@ -113,7 +115,7 @@ export const HouseholdDetailPage = () => {
           userId: confirmAction.userId,
         })
         if (confirmAction.type === 'leave') {
-          navigate('/household')
+          navigate(ROUTES.HOUSEHOLD)
           return
         }
       } else if (confirmAction.type === 'transfer') {
@@ -131,18 +133,18 @@ export const HouseholdDetailPage = () => {
 
   if (membersLoading || codeLoading || householdLoading) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Loading household...</p>
       </div>
     )
   }
 
   return (
-    <div className="px-5 pt-14 pb-8">
+    <div className="px-5 pt-7 pb-8">
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/household')}
+          onClick={() => navigate(ROUTES.HOUSEHOLD)}
           className="text-teal hover:text-teal-light font-semibold text-sm flex items-center gap-1 mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -357,17 +359,17 @@ export const HouseholdDetailPage = () => {
               {confirmAction.type === 'leave' &&
                 'Are you sure you want to leave this household?'}
             </p>
-            <div className="flex gap-2 justify-end">
+            <div className="flex gap-3">
               <button
                 onClick={() => setConfirmAction(null)}
-                className="px-4 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
+                className="flex-1 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmAction}
                 disabled={removeMemberMutation.isPending || transferOwnershipMutation.isPending}
-                className={`px-4 py-2.5 text-sm font-bold text-white rounded-xl disabled:opacity-50 transition-colors ${
+                className={`flex-1 py-2.5 text-sm font-bold text-white rounded-xl disabled:opacity-50 transition-colors ${
                   confirmAction.type === 'transfer'
                     ? 'bg-teal hover:bg-teal-light'
                     : 'bg-coral hover:bg-coral/90'

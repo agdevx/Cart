@@ -15,6 +15,8 @@ import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.qu
 
 import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
 
+import { activeTripPath, ROUTES, tripAddItemsPath } from '@/routes'
+
 import { StoreAccordion } from './components/store-accordion'
 import { TripItemRow } from './components/trip-item-row'
 
@@ -26,7 +28,7 @@ export const TripDetailPage = () => {
   const { data: households } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores } = useStoresQuery(householdIds)
-  const { isExpanded, toggleStore } = useStoreAccordionState(tripId!, trip?.isCompleted ?? false)
+  const { isExpanded, toggleStore } = useStoreAccordionState(tripId!, 'planning', trip?.isCompleted ?? false)
   const startMutation = useStartTripMutation()
   const updateMutation = useUpdateTripItemMutation()
   const deleteMutation = useDeleteTripItemMutation()
@@ -50,7 +52,7 @@ export const TripDetailPage = () => {
       if (!trip?.isStarted) {
         await startMutation.mutateAsync(tripId!)
       }
-      navigate(`/shopping/${tripId}/active`)
+      navigate(activeTripPath(tripId!))
     } catch {
       // Error handled by mutation state
     }
@@ -66,7 +68,7 @@ export const TripDetailPage = () => {
 
   if (tripLoading || itemsLoading) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Loading trip...</p>
       </div>
     )
@@ -74,17 +76,19 @@ export const TripDetailPage = () => {
 
   if (!trip) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Trip not found</p>
       </div>
     )
   }
 
+  const readOnly = trip.isCompleted ?? false
+
   return (
-    <div className="px-5 pt-14 pb-8">
+    <div className="px-5 pt-7 pb-8">
       <div className="mb-6">
         <button
-          onClick={() => navigate('/shopping')}
+          onClick={() => navigate(ROUTES.SHOPPING)}
           className="text-teal hover:text-teal-light font-semibold text-sm flex items-center gap-1 mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -93,16 +97,18 @@ export const TripDetailPage = () => {
         <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">{trip.name}</h1>
       </div>
 
-      <div className="mb-6">
-        <button
-          onClick={handleStartShopping}
-          disabled={!tripItems || tripItems.length === 0 || startMutation.isPending}
-          className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors flex items-center justify-center gap-2"
-        >
-          <ShoppingCart className="w-5 h-5" />
-          {startMutation.isPending ? 'Starting...' : trip.isStarted ? 'Continue Shopping' : 'Start Shopping'}
-        </button>
-      </div>
+      {!readOnly && (
+        <div className="mb-6">
+          <button
+            onClick={handleStartShopping}
+            disabled={!tripItems || tripItems.length === 0 || startMutation.isPending}
+            className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors flex items-center justify-center gap-2"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            {startMutation.isPending ? 'Starting...' : trip.isStarted ? 'Continue Shopping' : 'Start Shopping'}
+          </button>
+        </div>
+      )}
 
       <div className="mb-4">
         <div className="flex items-center gap-2.5 mb-3">
@@ -110,13 +116,15 @@ export const TripDetailPage = () => {
           <span className="flex-1 h-px bg-navy/8" />
         </div>
 
-        <button
-          onClick={() => navigate(`/shopping/${tripId}/add-items`)}
-          className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
-        >
-          <Plus className="w-5 h-5" />
-          Add Items
-        </button>
+        {!readOnly && (
+          <button
+            onClick={() => navigate(tripAddItemsPath(tripId!))}
+            className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
+          >
+            <Plus className="w-5 h-5" />
+            Add Items
+          </button>
+        )}
 
         {groupedItems.length > 0 ? (
           <div>
@@ -138,6 +146,7 @@ export const TripDetailPage = () => {
                       onUpdate={handleUpdateItem}
                       onDelete={handleDeleteItem}
                       isUpdating={updateMutation.isPending}
+                      readOnly={readOnly}
                     />
                   ))}
                 </div>

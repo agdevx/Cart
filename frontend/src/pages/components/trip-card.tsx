@@ -1,23 +1,28 @@
 // ABOUTME: TripCard component for displaying a trip with kebab menu actions
-// ABOUTME: Supports inline rename, delete, reopen actions with active/completed visual states
+// ABOUTME: Supports inline edit form (name + scope), delete, reopen actions with active/completed visual states
 
 import { MoreVertical, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
+import { tripDetailPath } from '@/routes'
+
+import { ScopeSelect } from './scope-select'
 
 interface TripCardProps {
   trip: Trip
-  onRename: (tripId: string, newName: string) => void
+  onUpdate: (tripId: string, name: string, householdId: string | null) => void
   onDelete: (tripId: string, tripName: string) => void
   onReopen: (tripId: string) => void
+  households?: Array<{ id: string; name: string | null }>
 }
 
-export const TripCard = ({ trip, onRename, onDelete, onReopen }: TripCardProps) => {
+export const TripCard = ({ trip, onUpdate, onDelete, onReopen, households }: TripCardProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
-  const [editValue, setEditValue] = useState(trip.name)
+  const [editName, setEditName] = useState(trip.name)
+  const [editHouseholdId, setEditHouseholdId] = useState<string>(trip.householdId ?? 'personal')
   const menuRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -49,11 +54,12 @@ export const TripCard = ({ trip, onRename, onDelete, onReopen }: TripCardProps) 
     setMenuOpen((prev) => !prev)
   }
 
-  const handleRenameClick = (e: React.MouseEvent) => {
+  const startEditing = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setMenuOpen(false)
-    setEditValue(trip.name)
+    setEditName(trip.name)
+    setEditHouseholdId(trip.householdId ?? 'personal')
     setEditing(true)
   }
 
@@ -71,29 +77,19 @@ export const TripCard = ({ trip, onRename, onDelete, onReopen }: TripCardProps) 
     onReopen(trip.id)
   }
 
-  const commitRename = () => {
-    const trimmed = editValue.trim()
-    if (trimmed && trimmed !== trip.name) {
-      onRename(trip.id, trimmed)
+  const commitEdit = () => {
+    const trimmed = editName.trim()
+    if (trimmed) {
+      const resolvedHouseholdId = editHouseholdId === 'personal' ? null : editHouseholdId
+      onUpdate(trip.id, trimmed, resolvedHouseholdId)
     }
     setEditing(false)
   }
 
-  const cancelRename = () => {
+  const cancelEdit = () => {
     setEditing(false)
-    setEditValue(trip.name)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      commitRename()
-    } else if (e.key === 'Escape') {
-      cancelRename()
-    }
-  }
-
-  const handleBlur = () => {
-    commitRename()
+    setEditName(trip.name)
+    setEditHouseholdId(trip.householdId ?? 'personal')
   }
 
   const dateLabel = trip.isCompleted
@@ -102,27 +98,13 @@ export const TripCard = ({ trip, onRename, onDelete, onReopen }: TripCardProps) 
     ? `Started: ${trip.startedAt ? new Date(trip.startedAt).toLocaleDateString() : 'N/A'}`
     : `Created: ${new Date(trip.createdDate).toLocaleDateString()}`
 
-  const nameElement = editing ? (
-    <input
-      ref={inputRef}
-      type="text"
-      value={editValue}
-      onChange={(e) => setEditValue(e.target.value)}
-      onKeyDown={handleKeyDown}
-      onBlur={handleBlur}
-      className="font-display text-lg font-bold text-navy bg-transparent border-b-2 border-teal outline-none w-full"
-    />
-  ) : (
-    <h3 className={`font-display text-lg font-bold ${trip.isCompleted ? 'text-navy-soft' : 'text-navy'}`}>
-      {trip.name}
-    </h3>
-  )
-
   const cardContent = (
     <>
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          {nameElement}
+          <h3 className={`font-display text-lg font-bold ${trip.isCompleted ? 'text-navy-soft' : 'text-navy'}`}>
+            {trip.name}
+          </h3>
           <p className="text-[13px] text-text-secondary font-medium mt-1">{dateLabel}</p>
         </div>
         <div className="relative" ref={menuRef}>
@@ -136,11 +118,11 @@ export const TripCard = ({ trip, onRename, onDelete, onReopen }: TripCardProps) 
           {menuOpen && (
             <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[140px]">
               <button
-                onClick={handleRenameClick}
+                onClick={startEditing}
                 className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
               >
                 <Pencil className="w-4 h-4" />
-                Rename
+                Edit
               </button>
               {trip.isCompleted && (
                 <button
@@ -162,15 +144,51 @@ export const TripCard = ({ trip, onRename, onDelete, onReopen }: TripCardProps) 
           )}
         </div>
       </div>
+
+      {editing && (
+        <div className="mt-3 pt-3 border-t border-navy/10">
+          <div className="mb-3">
+            <label className="block text-sm font-semibold text-navy-soft mb-1">Trip Name</label>
+            <input
+              ref={inputRef}
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="block text-sm font-semibold text-navy-soft mb-1">Type</label>
+            <ScopeSelect
+              value={editHouseholdId}
+              onChange={setEditHouseholdId}
+              personalLabel="Personal Trip"
+              households={households}
+              householdDescription="Household"
+            />
+          </div>
+          <div className="flex gap-3">
+            <button onClick={cancelEdit} className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors">
+              Cancel
+            </button>
+            <button onClick={commitEdit} disabled={!editName.trim()} className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors">
+              Save
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 
-  // Active trips are links (unless editing), completed trips are static divs
+  // Active trips are links (unless editing), completed trips are read-only links
   if (trip.isCompleted) {
     return (
-      <div className="p-5 bg-surface rounded-2xl shadow-sm opacity-60">
+      <Link
+        to={tripDetailPath(trip.id)}
+        className="block p-5 bg-surface rounded-2xl shadow-sm opacity-60 hover:shadow-md transition-all"
+      >
         {cardContent}
-      </div>
+      </Link>
     )
   }
 
@@ -185,7 +203,7 @@ export const TripCard = ({ trip, onRename, onDelete, onReopen }: TripCardProps) 
 
   return (
     <Link
-      to={`/shopping/${trip.id}`}
+      to={tripDetailPath(trip.id)}
       className="block p-5 bg-surface rounded-2xl shadow-sm border-2 border-transparent hover:shadow-md hover:-translate-y-0.5 transition-all"
     >
       {cardContent}

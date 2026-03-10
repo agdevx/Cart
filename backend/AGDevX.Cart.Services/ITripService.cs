@@ -10,7 +10,7 @@ public interface ITripService
     Task<IEnumerable<Trip>> GetUserTrips(Guid userId);
     Task<IEnumerable<Trip>> GetHouseholdTrips(Guid householdId);
     Task<Trip?> GetById(Guid id);
-    Task<Trip> UpdateTrip(Guid tripId, string name, Guid userId);
+    Task<Trip> UpdateTrip(Guid tripId, string name, Guid? householdId, Guid userId);
     Task DeleteTrip(Guid tripId, Guid userId);
     Task<Trip> StartTrip(Guid tripId, Guid userId);
     Task<Trip> CompleteTrip(Guid tripId, Guid userId);

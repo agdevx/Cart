@@ -180,7 +180,7 @@ public class TripServiceTests
         _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>())).ReturnsAsync((Trip t) => t);
 
         // Act
-        var result = await _tripService.UpdateTrip(tripId, "New Name", userId);
+        var result = await _tripService.UpdateTrip(tripId, "New Name", null, userId);
 
         // Assert
         result.Name.Should().Be("New Name");
@@ -196,7 +196,7 @@ public class TripServiceTests
         _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(false);
 
         // Act
-        var act = () => _tripService.UpdateTrip(tripId, "New Name", userId);
+        var act = () => _tripService.UpdateTrip(tripId, "New Name", null, userId);
 
         // Assert
         await act.Should().ThrowAsync<UnauthorizedAccessException>();
@@ -213,7 +213,7 @@ public class TripServiceTests
         _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync((Trip?)null);
 
         // Act
-        var act = () => _tripService.UpdateTrip(tripId, "New Name", userId);
+        var act = () => _tripService.UpdateTrip(tripId, "New Name", null, userId);
 
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>();

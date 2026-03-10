@@ -12,7 +12,10 @@ import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.m
 import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
 
+import { tripDetailPath } from '@/routes'
+
 import { ConfirmDialog } from './components/confirm-dialog'
+import { PageHeader } from './components/page-header'
 import { ScopeSelect } from './components/scope-select'
 import { TripCard } from './components/trip-card'
 
@@ -49,14 +52,14 @@ export const ShoppingPage = () => {
       })
       setTripName('')
       setShowCreateForm(false)
-      navigate(`/shopping/${newTrip.id}`)
+      navigate(tripDetailPath(newTrip.id))
     } catch {
       // Error handled by mutation state
     }
   }
 
-  const handleRename = (tripId: string, newName: string) => {
-    updateMutation.mutate({ tripId, name: newName })
+  const handleUpdate = (tripId: string, name: string, householdId: string | null) => {
+    updateMutation.mutate({ tripId, name, householdId })
   }
 
   const handleDelete = (tripId: string, tripName: string) => {
@@ -76,20 +79,16 @@ export const ShoppingPage = () => {
 
   if (isLoading) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Loading trips...</p>
       </div>
     )
   }
 
   return (
-    <div className="px-5 pt-14 pb-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">
-          Your <span className="text-teal">Trips</span>
-        </h1>
-      </div>
-
+    <div className="pb-4">
+      <PageHeader>Your <span className="text-teal">Trips</span></PageHeader>
+      <div className="px-5">
       {/* New Trip Button */}
       <button
         onClick={() => setShowCreateForm(!showCreateForm)}
@@ -131,13 +130,22 @@ export const ShoppingPage = () => {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={createMutation.isPending || !tripName.trim()}
-            className="w-full py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
-          >
-            {createMutation.isPending ? 'Creating...' : 'Create Trip'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setShowCreateForm(false)}
+              className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={createMutation.isPending || !tripName.trim()}
+              className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
+            >
+              {createMutation.isPending ? 'Creating...' : 'Create Trip'}
+            </button>
+          </div>
         </form>
       )}
 
@@ -150,7 +158,7 @@ export const ShoppingPage = () => {
           </div>
           <div className="space-y-3">
             {inProgressTrips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} onRename={handleRename} onDelete={handleDelete} onReopen={handleReopen} />
+              <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} households={households} onDelete={handleDelete} onReopen={handleReopen} />
             ))}
           </div>
         </div>
@@ -165,7 +173,7 @@ export const ShoppingPage = () => {
           </div>
           <div className="space-y-3">
             {planningTrips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} onRename={handleRename} onDelete={handleDelete} onReopen={handleReopen} />
+              <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} households={households} onDelete={handleDelete} onReopen={handleReopen} />
             ))}
           </div>
         </div>
@@ -187,7 +195,7 @@ export const ShoppingPage = () => {
           {showCompleted && (
             <div className="space-y-3">
               {completedTrips.map((trip) => (
-                <TripCard key={trip.id} trip={trip} onRename={handleRename} onDelete={handleDelete} onReopen={handleReopen} />
+                <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} households={households} onDelete={handleDelete} onReopen={handleReopen} />
               ))}
             </div>
           )}
@@ -209,6 +217,7 @@ export const ShoppingPage = () => {
           isPending={deleteMutation.isPending}
         />
       )}
+      </div>
     </div>
   )
 }

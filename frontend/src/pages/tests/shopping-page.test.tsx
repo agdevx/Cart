@@ -165,15 +165,15 @@ describe('ShoppingPage', () => {
     const kebabButtons = screen.getAllByLabelText('Trip actions')
     fireEvent.click(kebabButtons[0])
 
-    //== Click Rename
-    fireEvent.click(screen.getByText('Rename'))
+    //== Click Edit (formerly "Rename")
+    fireEvent.click(screen.getByText('Edit'))
 
-    //== Change name and press Enter
+    //== Change name in the edit form and click Save
     const input = screen.getByDisplayValue('Weekly Groceries')
     fireEvent.change(input, { target: { value: 'Saturday Groceries' } })
-    fireEvent.keyDown(input, { key: 'Enter' })
+    fireEvent.click(screen.getByText('Save'))
 
-    expect(updateMutateFn).toHaveBeenCalledWith({ tripId: 'trip1', name: 'Saturday Groceries' })
+    expect(updateMutateFn).toHaveBeenCalledWith({ tripId: 'trip1', name: 'Saturday Groceries', householdId: null })
   })
 
   it('shows delete confirmation dialog', () => {

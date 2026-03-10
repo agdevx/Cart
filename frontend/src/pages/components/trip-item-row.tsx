@@ -16,6 +16,7 @@ interface TripItemRowProps {
   isUpdating?: boolean
   showCheckbox?: boolean
   onToggleCheck?: (tripItemId: string, currentlyChecked: boolean) => void
+  readOnly?: boolean
 }
 
 export const TripItemRow = ({
@@ -27,6 +28,7 @@ export const TripItemRow = ({
   isUpdating = false,
   showCheckbox = false,
   onToggleCheck,
+  readOnly = false,
 }: TripItemRowProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -100,43 +102,54 @@ export const TripItemRow = ({
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <span className="font-bold text-navy">{itemName}</span>
-            <p className="text-sm text-text-secondary">Quantity: {tripItem.quantity}</p>
-            {/* Pantry notes — only shown when inventoryItem exists and has notes */}
-            {tripItem.inventoryItem?.notes && (
-              <p className="text-xs text-text-secondary italic">
-                Pantry: {tripItem.inventoryItem.notes}
-              </p>
-            )}
-            {/* Trip notes */}
-            {tripItem.notes && <p className="text-sm text-text-secondary">{tripItem.notes}</p>}
-          </div>
-          <div className="relative" ref={menuRef}>
-            <button
-              onClick={handleKebabClick}
-              aria-label="Item actions"
-              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
-            >
-              <MoreVertical className="w-4 h-4 text-text-secondary" />
-            </button>
-            {menuOpen && (
-              <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[120px]">
-                <button
-                  onClick={handleEditClick}
-                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
-                >
-                  <Pencil className="w-4 h-4" />
-                  Edit
-                </button>
-                <button
-                  onClick={handleRemoveClick}
-                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Remove
-                </button>
-              </div>
+            {/* Item details — hidden during edit */}
+            {!editing && (
+              <>
+                <p className="text-sm text-text-secondary mt-1">
+                  <span className="italic text-text-tertiary">Qty:</span> {tripItem.quantity}
+                </p>
+                {tripItem.inventoryItem?.notes && (
+                  <p className="text-sm text-text-secondary mt-0.5">
+                    <span className="italic text-text-tertiary">Pantry Notes:</span> {tripItem.inventoryItem.notes}
+                  </p>
+                )}
+                {tripItem.notes && (
+                  <p className="text-sm text-text-secondary mt-0.5">
+                    <span className="italic text-text-tertiary">Shopping Notes:</span> {tripItem.notes}
+                  </p>
+                )}
+              </>
             )}
           </div>
+          {!readOnly && (
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={handleKebabClick}
+                aria-label="Item actions"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
+              >
+                <MoreVertical className="w-4 h-4 text-text-secondary" />
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[120px]">
+                  <button
+                    onClick={handleEditClick}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Edit
+                  </button>
+                  <button
+                    onClick={handleRemoveClick}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         {editing && (
           <EditForm
@@ -180,52 +193,63 @@ export const TripItemRow = ({
         <span className={`text-base font-bold ${tripItem.isChecked ? 'line-through text-text-tertiary' : 'text-navy'}`}>
           {itemName}
         </span>
-        <p className="text-xs text-text-tertiary font-semibold mt-0.5">Qty: {tripItem.quantity}</p>
-        {/* Pantry notes — only shown when inventoryItem exists and has notes */}
-        {tripItem.inventoryItem?.notes && (
-          <p className="text-xs text-text-secondary italic mt-0.5">
-            Pantry: {tripItem.inventoryItem.notes}
-          </p>
+        {/* Item details — hidden during edit */}
+        {!editing && (
+          <>
+            <p className="text-sm text-text-secondary mt-0.5">
+              <span className="italic text-text-tertiary">Qty:</span> {tripItem.quantity}
+            </p>
+            {tripItem.inventoryItem?.notes && (
+              <p className="text-sm text-text-secondary mt-0.5">
+                <span className="italic text-text-tertiary">Pantry Notes:</span> {tripItem.inventoryItem.notes}
+              </p>
+            )}
+            {tripItem.notes && (
+              <p className="text-sm text-text-secondary mt-0.5">
+                <span className="italic text-text-tertiary">Shopping Notes:</span> {tripItem.notes}
+              </p>
+            )}
+          </>
         )}
-        {/* Trip notes */}
-        {tripItem.notes && <p className="text-xs text-text-tertiary mt-0.5">{tripItem.notes}</p>}
       </div>
 
       {/* Kebab menu — stop touch/mousedown propagation to prevent mobile browsers
          from synthesizing a click on the parent row when tapping the kebab area */}
-      <div
-        className="relative flex-shrink-0 self-start"
-        ref={menuRef}
-        onTouchStart={(e) => e.stopPropagation()}
-        onTouchEnd={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={handleKebabClick}
-          aria-label="Item actions"
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
+      {!readOnly && (
+        <div
+          className="relative flex-shrink-0 self-start"
+          ref={menuRef}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         >
-          <MoreVertical className="w-4 h-4 text-text-secondary" />
-        </button>
-        {menuOpen && (
-          <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[120px]">
-            <button
-              onClick={handleEditClick}
-              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
-            >
-              <Pencil className="w-4 h-4" />
-              Edit
-            </button>
-            <button
-              onClick={handleRemoveClick}
-              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-              Remove
-            </button>
-          </div>
-        )}
-      </div>
+          <button
+            onClick={handleKebabClick}
+            aria-label="Item actions"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
+          >
+            <MoreVertical className="w-4 h-4 text-text-secondary" />
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[120px]">
+              <button
+                onClick={handleEditClick}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
+              >
+                <Pencil className="w-4 h-4" />
+                Edit
+              </button>
+              <button
+                onClick={handleRemoveClick}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                Remove
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Inline edit form in shopping mode */}
       {editing && (
@@ -290,7 +314,7 @@ const EditForm = ({
       />
     </div>
     <div>
-      <label htmlFor="edit-notes" className="block text-xs font-semibold text-text-secondary mb-1">Notes</label>
+      <label htmlFor="edit-notes" className="block text-xs font-semibold text-text-secondary mb-1">Shopping Notes</label>
       <input
         id="edit-notes"
         type="text"
@@ -316,20 +340,20 @@ const EditForm = ({
         ))}
       </select>
     </div>
-    <div className="flex items-center gap-2 pt-1">
-      <button
-        onClick={onSave}
-        disabled={isUpdating}
-        className="px-4 py-2 text-sm font-bold text-white rounded-lg bg-teal hover:bg-teal-light disabled:opacity-50 transition-colors"
-      >
-        {isUpdating ? 'Saving...' : 'Save'}
-      </button>
+    <div className="flex gap-3 pt-1">
       <button
         onClick={onCancel}
         disabled={isUpdating}
-        className="px-4 py-2 text-sm font-semibold text-text-secondary hover:text-navy transition-colors"
+        className="flex-1 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
       >
         Cancel
+      </button>
+      <button
+        onClick={onSave}
+        disabled={isUpdating}
+        className="flex-1 py-2.5 text-sm font-bold text-white rounded-xl bg-teal hover:bg-teal-light disabled:opacity-50 transition-colors"
+      >
+        {isUpdating ? 'Saving...' : 'Save'}
       </button>
     </div>
   </div>

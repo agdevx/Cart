@@ -211,12 +211,7 @@ describe('TripDetailPage', () => {
     setupMocks()
     render(<TripDetailPage />, { wrapper })
 
-    //== Expand all store accordions to reveal items
-    fireEvent.click(screen.getByText('Costco'))
-    fireEvent.click(screen.getByText('Walmart'))
-    fireEvent.click(screen.getByText('Any Store'))
-
-    //== All items should appear by name
+    //== Planning context defaults to expanded, so items should be visible without clicking
     expect(screen.getByText('Milk')).toBeInTheDocument()
     expect(screen.getByText('Bread')).toBeInTheDocument()
     expect(screen.getByText('Apples')).toBeInTheDocument()
@@ -231,9 +226,7 @@ describe('TripDetailPage', () => {
     setupMocks()
     render(<TripDetailPage />, { wrapper })
 
-    //== Expand Costco accordion to reveal Milk and Bread
-    fireEvent.click(screen.getByText('Costco'))
-
+    //== Planning context defaults to expanded, so items are already visible
     //== Open kebab menu on first item (Milk)
     const kebabButtons = screen.getAllByLabelText('Item actions')
     fireEvent.click(kebabButtons[0])
@@ -261,9 +254,7 @@ describe('TripDetailPage', () => {
     setupMocks()
     render(<TripDetailPage />, { wrapper })
 
-    //== Expand Costco accordion to reveal Milk and Bread
-    fireEvent.click(screen.getByText('Costco'))
-
+    //== Planning context defaults to expanded, items already visible
     //== Open kebab menu on first item (Milk)
     const kebabButtons = screen.getAllByLabelText('Item actions')
     fireEvent.click(kebabButtons[0])
@@ -341,9 +332,7 @@ describe('TripDetailPage', () => {
     setupMocks()
     render(<TripDetailPage />, { wrapper })
 
-    //== Expand Costco accordion to reveal items
-    fireEvent.click(screen.getByText('Costco'))
-
+    //== Planning context defaults to expanded, items already visible
     //== Open kebab menu and click Edit on first item
     const kebabButtons = screen.getAllByLabelText('Item actions')
     fireEvent.click(kebabButtons[0])
@@ -403,32 +392,32 @@ describe('TripDetailPage', () => {
       expect(buttons[2]).toHaveTextContent('Any Store')
     })
 
-    it('should default all accordions to collapsed', () => {
+    it('should default all accordions to expanded in planning context', () => {
       setupMocks()
-      localStorage.removeItem('trip-accordion-trip1')
+      localStorage.removeItem('accordion-trip1-planning')
       render(<TripDetailPage />, { wrapper })
 
-      //== Item names should NOT be visible because all accordions default to collapsed
-      expect(screen.queryByText('Milk')).not.toBeInTheDocument()
-      expect(screen.queryByText('Bread')).not.toBeInTheDocument()
-      expect(screen.queryByText('Apples')).not.toBeInTheDocument()
-      expect(screen.queryByText('Eggs')).not.toBeInTheDocument()
+      //== Item names SHOULD be visible because planning context defaults to expanded
+      expect(screen.getByText('Milk')).toBeInTheDocument()
+      expect(screen.getByText('Bread')).toBeInTheDocument()
+      expect(screen.getByText('Apples')).toBeInTheDocument()
+      expect(screen.getByText('Eggs')).toBeInTheDocument()
     })
 
     it('should persist accordion state in localStorage', () => {
       setupMocks()
-      localStorage.removeItem('trip-accordion-trip1')
+      localStorage.removeItem('accordion-trip1-planning')
       render(<TripDetailPage />, { wrapper })
 
-      //== Expand "Costco" section
+      //== Planning defaults to expanded; collapse "Costco" section
       fireEvent.click(screen.getByText('Costco'))
 
-      //== localStorage should have the expanded state
-      const stored = JSON.parse(localStorage.getItem('trip-accordion-trip1') || '{}')
-      expect(stored['Costco']).toBe(true)
+      //== localStorage should have the collapsed state
+      const stored = JSON.parse(localStorage.getItem('accordion-trip1-planning') || '{}')
+      expect(stored['Costco']).toBe(false)
     })
 
-    it('should display pantry notes in italics with "Pantry:" label', () => {
+    it('should display pantry notes in italics with "Pantry Notes:" label', () => {
       setupMocks()
 
       //== Override trip items to include inventoryItem with notes
@@ -444,14 +433,12 @@ describe('TripDetailPage', () => {
 
       render(<TripDetailPage />, { wrapper })
 
-      //== Expand Costco accordion to reveal items
-      fireEvent.click(screen.getByText('Costco'))
-
-      //== Pantry notes should be visible with "Pantry:" prefix
-      const pantryNotes = screen.getByText('Pantry: Buy organic')
-      expect(pantryNotes).toBeInTheDocument()
-      expect(pantryNotes.tagName).toBe('P')
-      expect(pantryNotes).toHaveClass('italic')
+      //== Planning defaults to expanded, items already visible
+      //== Pantry notes should be visible with "Pantry Notes:" label
+      expect(screen.getByText('Pantry Notes:')).toBeInTheDocument()
+      expect(screen.getByText('Pantry Notes:')).toHaveClass('italic')
+      //== The full <p> should contain the notes text
+      expect(screen.getByText((_, el) => el?.tagName === 'P' && el?.textContent === 'Pantry Notes: Buy organic')).toBeInTheDocument()
     })
 
     it('should display trip notes below pantry notes', () => {
@@ -471,12 +458,10 @@ describe('TripDetailPage', () => {
 
       render(<TripDetailPage />, { wrapper })
 
-      //== Expand Costco accordion to reveal items
-      fireEvent.click(screen.getByText('Costco'))
-
-      //== Both notes should be visible
-      expect(screen.getByText('Pantry: Buy organic')).toBeInTheDocument()
-      expect(screen.getByText('Get 2 if on sale')).toBeInTheDocument()
+      //== Planning defaults to expanded, items already visible
+      //== Both notes should be visible with their label prefixes
+      expect(screen.getByText((_, el) => el?.tagName === 'P' && el?.textContent === 'Pantry Notes: Buy organic')).toBeInTheDocument()
+      expect(screen.getByText((_, el) => el?.tagName === 'P' && el?.textContent === 'Shopping Notes: Get 2 if on sale')).toBeInTheDocument()
     })
 
     it('should not show pantry notes when inventoryItem is null (deleted item)', () => {
@@ -497,13 +482,11 @@ describe('TripDetailPage', () => {
 
       render(<TripDetailPage />, { wrapper })
 
-      //== Expand Costco accordion to reveal items
-      fireEvent.click(screen.getByText('Costco'))
-
-      //== No "Pantry:" label should be rendered
-      expect(screen.queryByText(/Pantry:/)).not.toBeInTheDocument()
-      //== Trip notes should still be visible
-      expect(screen.getByText('Trip note still here')).toBeInTheDocument()
+      //== Planning defaults to expanded, items already visible
+      //== No "Pantry Notes:" label should be rendered
+      expect(screen.queryByText('Pantry Notes:')).not.toBeInTheDocument()
+      //== Trip notes should still be visible with "Shopping Notes:" label
+      expect(screen.getByText((_, el) => el?.tagName === 'P' && el?.textContent === 'Shopping Notes: Trip note still here')).toBeInTheDocument()
     })
 
     it('should not show pantry notes when inventoryItem has no notes', () => {
@@ -522,11 +505,9 @@ describe('TripDetailPage', () => {
 
       render(<TripDetailPage />, { wrapper })
 
-      //== Expand Costco accordion to reveal items
-      fireEvent.click(screen.getByText('Costco'))
-
-      //== No "Pantry:" label should be rendered
-      expect(screen.queryByText(/Pantry:/)).not.toBeInTheDocument()
+      //== Planning defaults to expanded, items already visible
+      //== No "Pantry Notes:" label should be rendered
+      expect(screen.queryByText('Pantry Notes:')).not.toBeInTheDocument()
     })
 
     it('should show item count per store group', () => {

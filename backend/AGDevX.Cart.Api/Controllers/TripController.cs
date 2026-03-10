@@ -90,7 +90,7 @@ public class TripController(ITripService tripService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            await tripService.UpdateTrip(id, request.Name, userId);
+            await tripService.UpdateTrip(id, request.Name, request.HouseholdId, userId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

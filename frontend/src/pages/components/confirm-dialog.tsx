@@ -1,8 +1,8 @@
 // ABOUTME: Reusable confirmation dialog with overlay backdrop
 // ABOUTME: Supports customizable title, message, and destructive confirm button styling
-// ABOUTME: Optional holdDuration prop requires long-press to confirm, with progress bar feedback
+// ABOUTME: Optional holdDuration prop requires long-press to confirm, with smooth CSS transition progress bar
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 interface ConfirmDialogProps {
   title: string
@@ -16,40 +16,28 @@ interface ConfirmDialogProps {
 }
 
 export const ConfirmDialog = ({ title, message, confirmLabel, cancelLabel, onConfirm, onCancel, isPending, holdDuration }: ConfirmDialogProps) => {
-  const [progress, setProgress] = useState(0)
-  const intervalRef = useRef<number | null>(null)
-  const startTimeRef = useRef<number>(0)
+  const [holding, setHolding] = useState(false)
+  const holdingRef = useRef(false)
 
-  const startHold = () => {
+  const startHold = useCallback(() => {
     if (!holdDuration) return
-    startTimeRef.current = Date.now()
-    intervalRef.current = window.setInterval(() => {
-      const elapsed = Date.now() - startTimeRef.current
-      const pct = Math.min((elapsed / holdDuration) * 100, 100)
-      setProgress(pct)
-      if (pct >= 100) {
-        stopHold()
-        onConfirm()
-      }
-    }, 50)
-  }
+    holdingRef.current = true
+    setHolding(true)
+  }, [holdDuration])
 
-  const stopHold = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
+  const stopHold = useCallback(() => {
+    if (!holdDuration) return
+    holdingRef.current = false
+    setHolding(false)
+  }, [holdDuration])
+
+  const handleTransitionEnd = useCallback((e: React.TransitionEvent) => {
+    if (e.propertyName === 'width' && holdingRef.current) {
+      onConfirm()
     }
-    setProgress(0)
-  }
+  }, [onConfirm])
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
-    }
-  }, [])
-
-  const confirmButtonClass = "px-4 py-2.5 text-sm font-bold text-white rounded-xl bg-coral hover:bg-coral/90 disabled:opacity-50 transition-colors"
+  const confirmButtonClass = "flex-1 py-2.5 text-sm font-bold text-white rounded-xl bg-coral hover:bg-coral/90 disabled:opacity-50 transition-colors"
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -59,27 +47,30 @@ export const ConfirmDialog = ({ title, message, confirmLabel, cancelLabel, onCon
             <div
               data-testid="hold-progress-bar"
               className="h-full bg-coral"
-              style={{ width: `${progress}%`, transition: 'none' }}
+              style={{
+                width: holding ? '100%' : '0%',
+                transition: holding ? `width ${holdDuration}ms linear` : 'none',
+              }}
+              onTransitionEnd={handleTransitionEnd}
             />
           </div>
         )}
         <div className="p-6">
           <h3 className="font-display text-lg font-bold text-navy mb-2">{title}</h3>
           <p className="text-text-secondary mb-5">{message}</p>
-          <div className="flex gap-2 justify-end">
+          <div className="flex gap-3">
             <button
               onClick={onCancel}
-              className="px-4 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
+              className="flex-1 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
             >
               {cancelLabel || 'Cancel'}
             </button>
             {holdDuration ? (
               <button
-                onMouseDown={startHold}
-                onMouseUp={stopHold}
-                onMouseLeave={stopHold}
-                onTouchStart={startHold}
-                onTouchEnd={stopHold}
+                onPointerDown={startHold}
+                onPointerUp={stopHold}
+                onPointerLeave={stopHold}
+                onPointerCancel={stopHold}
                 disabled={isPending}
                 className={confirmButtonClass}
               >

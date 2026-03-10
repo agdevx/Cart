@@ -88,7 +88,7 @@ const setupMocks = (overrides?: {
 
   vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
     isAuthenticated: true,
-    user: { id: userId, email: 'test@test.com', name: 'Me', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+    user: { id: userId, email: 'test@test.com', name: 'Test User', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
     setAuth: vi.fn(),
     logout: vi.fn(),
   })
@@ -141,7 +141,8 @@ describe('HouseholdPage', () => {
 
     //== Should show other members but not the current user
     expect(screen.getByText('Alice, Bob')).toBeInTheDocument()
-    expect(screen.queryByText(/Me/)).not.toBeInTheDocument()
+    //== The current user's member name ('Me') should not appear in the member list
+    expect(screen.queryByText('Me')).not.toBeInTheDocument()
   })
 
   it('returns null for member list when current user is the only member', () => {
@@ -165,6 +166,7 @@ describe('HouseholdPage', () => {
 
     //== Household name should render but no member names paragraph
     expect(screen.getByText('Test Household')).toBeInTheDocument()
+    //== The current user's member name ('Me') should not appear
     expect(screen.queryByText('Me')).not.toBeInTheDocument()
   })
 

@@ -59,8 +59,10 @@ describe('TripItemRow', () => {
     )
 
     expect(screen.getByText('Bananas')).toBeInTheDocument()
-    expect(screen.getByText('Quantity: 2')).toBeInTheDocument()
-    expect(screen.getByText('Get organic')).toBeInTheDocument()
+    //== Quantity is now rendered as italic "Qty:" label + quantity value in a <p>
+    expect(screen.getByText((_, el) => el?.tagName === 'P' && el?.textContent === 'Qty: 2')).toBeInTheDocument()
+    //== Notes now rendered with "Shopping Notes:" label prefix
+    expect(screen.getByText((_, el) => el?.tagName === 'P' && el?.textContent === 'Shopping Notes: Get organic')).toBeInTheDocument()
   })
 
   it('shows kebab menu with Edit and Remove', () => {
@@ -98,8 +100,8 @@ describe('TripItemRow', () => {
     const quantityInput = screen.getByLabelText('Quantity')
     expect(quantityInput).toHaveValue(2)
 
-    //== Notes input pre-filled with current notes
-    const notesInput = screen.getByLabelText('Notes')
+    //== Notes input pre-filled with current notes (label renamed to "Shopping Notes")
+    const notesInput = screen.getByLabelText('Shopping Notes')
     expect(notesInput).toHaveValue('Get organic')
 
     //== Store select pre-filled with current storeId
@@ -123,7 +125,7 @@ describe('TripItemRow', () => {
 
     //== Change quantity and notes
     fireEvent.change(screen.getByLabelText('Quantity'), { target: { value: '5' } })
-    fireEvent.change(screen.getByLabelText('Notes'), { target: { value: 'Ripe ones' } })
+    fireEvent.change(screen.getByLabelText('Shopping Notes'), { target: { value: 'Ripe ones' } })
 
     fireEvent.click(screen.getByText('Save'))
 

@@ -19,6 +19,8 @@ import { useSSE } from '@/hooks/use-sse'
 
 import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
 
+import { ROUTES, tripDetailPath } from '@/routes'
+
 import { ConfirmDialog } from './components/confirm-dialog'
 import { StoreAccordion } from './components/store-accordion'
 import { TripItemRow } from './components/trip-item-row'
@@ -32,7 +34,7 @@ export const ActiveTripPage = () => {
   const { data: households } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores } = useStoresQuery(householdIds)
-  const { isExpanded, toggleStore, autoCollapseIfAllChecked, cleanup } = useStoreAccordionState(tripId!, trip?.isCompleted ?? false)
+  const { isExpanded, toggleStore, autoCollapseIfAllChecked, cleanup } = useStoreAccordionState(tripId!, 'shopping', trip?.isCompleted ?? false)
   const checkMutation = useCheckTripItemMutation()
   const completeMutation = useCompleteTripMutation()
   const updateMutation = useUpdateTripItemMutation()
@@ -117,7 +119,7 @@ export const ActiveTripPage = () => {
     try {
       await completeMutation.mutateAsync(tripId)
       cleanup()
-      navigate('/shopping')
+      navigate(ROUTES.SHOPPING)
     } catch {
       // Error handled by mutation state
     }
@@ -125,7 +127,7 @@ export const ActiveTripPage = () => {
 
   if (tripLoading || itemsLoading) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Loading trip...</p>
       </div>
     )
@@ -133,7 +135,7 @@ export const ActiveTripPage = () => {
 
   if (!trip) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Trip not found</p>
       </div>
     )
@@ -144,10 +146,10 @@ export const ActiveTripPage = () => {
   const progressPercent = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0
 
   return (
-    <div className="px-5 pt-14 pb-8">
+    <div className="px-5 pt-7 pb-8">
       <div className="mb-6">
         <button
-          onClick={() => navigate(`/shopping/${tripId}`)}
+          onClick={() => navigate(tripDetailPath(tripId!))}
           className="text-teal hover:text-teal-light font-semibold text-sm flex items-center gap-1 mb-3"
         >
           <ArrowLeft className="w-4 h-4" />

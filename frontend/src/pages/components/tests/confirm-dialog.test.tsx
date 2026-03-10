@@ -1,8 +1,8 @@
 // ABOUTME: Tests for the reusable confirmation dialog component
 // ABOUTME: Verifies rendering, confirm/cancel actions, and destructive styling
 
-import { act, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 
 import { ConfirmDialog } from '../confirm-dialog'
 
@@ -74,10 +74,6 @@ describe('ConfirmDialog', () => {
   })
 
   describe('hold-to-confirm', () => {
-    afterEach(() => {
-      vi.useRealTimers()
-    })
-
     it('should work normally without holdDuration (single click confirms)', () => {
       const onConfirm = vi.fn()
 
@@ -111,8 +107,8 @@ describe('ConfirmDialog', () => {
       )
 
       const button = screen.getByText('Confirm')
-      fireEvent.mouseDown(button)
-      fireEvent.mouseUp(button)
+      fireEvent.pointerDown(button)
+      fireEvent.pointerUp(button)
 
       expect(onConfirm).not.toHaveBeenCalled()
     })
@@ -135,7 +131,6 @@ describe('ConfirmDialog', () => {
     })
 
     it('should fill progress bar during hold and fire confirm after duration', () => {
-      vi.useFakeTimers()
       const onConfirm = vi.fn()
 
       render(
@@ -150,17 +145,16 @@ describe('ConfirmDialog', () => {
       )
 
       const button = screen.getByText('Confirm')
-      fireEvent.mouseDown(button)
+      fireEvent.pointerDown(button)
 
-      act(() => {
-        vi.advanceTimersByTime(5000)
-      })
+      //== CSS transitions don't fire in jsdom — simulate transitionEnd on the progress bar
+      const progressBar = screen.getByTestId('hold-progress-bar')
+      fireEvent.transitionEnd(progressBar, { propertyName: 'width' })
 
       expect(onConfirm).toHaveBeenCalledOnce()
     })
 
     it('should reset progress bar when released early', () => {
-      vi.useFakeTimers()
       const onConfirm = vi.fn()
 
       render(
@@ -175,13 +169,10 @@ describe('ConfirmDialog', () => {
       )
 
       const button = screen.getByText('Confirm')
-      fireEvent.mouseDown(button)
+      fireEvent.pointerDown(button)
 
-      act(() => {
-        vi.advanceTimersByTime(2000)
-      })
-
-      fireEvent.mouseUp(button)
+      //== Release before transition completes
+      fireEvent.pointerUp(button)
 
       expect(onConfirm).not.toHaveBeenCalled()
 
@@ -189,8 +180,7 @@ describe('ConfirmDialog', () => {
       expect(progressBar).toHaveStyle({ width: '0%' })
     })
 
-    it('should reset progress when mouse leaves the button', () => {
-      vi.useFakeTimers()
+    it('should reset progress when pointer leaves the button', () => {
       const onConfirm = vi.fn()
 
       render(
@@ -205,13 +195,9 @@ describe('ConfirmDialog', () => {
       )
 
       const button = screen.getByText('Confirm')
-      fireEvent.mouseDown(button)
+      fireEvent.pointerDown(button)
 
-      act(() => {
-        vi.advanceTimersByTime(2000)
-      })
-
-      fireEvent.mouseLeave(button)
+      fireEvent.pointerLeave(button)
 
       expect(onConfirm).not.toHaveBeenCalled()
 
@@ -219,8 +205,7 @@ describe('ConfirmDialog', () => {
       expect(progressBar).toHaveStyle({ width: '0%' })
     })
 
-    it('should support touch events', () => {
-      vi.useFakeTimers()
+    it('should support touch events (via pointer events)', () => {
       const onConfirm = vi.fn()
 
       render(
@@ -234,18 +219,18 @@ describe('ConfirmDialog', () => {
         />
       )
 
+      //== pointerDown/pointerUp handle both mouse and touch
       const button = screen.getByText('Confirm')
-      fireEvent.touchStart(button)
+      fireEvent.pointerDown(button)
 
-      act(() => {
-        vi.advanceTimersByTime(5000)
-      })
+      //== Simulate transition completing
+      const progressBar = screen.getByTestId('hold-progress-bar')
+      fireEvent.transitionEnd(progressBar, { propertyName: 'width' })
 
       expect(onConfirm).toHaveBeenCalledOnce()
     })
 
-    it('should reset on touchend before duration completes', () => {
-      vi.useFakeTimers()
+    it('should not fire confirm if transitionEnd fires after release', () => {
       const onConfirm = vi.fn()
 
       render(
@@ -260,13 +245,14 @@ describe('ConfirmDialog', () => {
       )
 
       const button = screen.getByText('Confirm')
-      fireEvent.touchStart(button)
+      fireEvent.pointerDown(button)
 
-      act(() => {
-        vi.advanceTimersByTime(2000)
-      })
+      //== Release the button first
+      fireEvent.pointerUp(button)
 
-      fireEvent.touchEnd(button)
+      //== Stale transitionEnd should NOT fire confirm (holdingRef is false)
+      const progressBar = screen.getByTestId('hold-progress-bar')
+      fireEvent.transitionEnd(progressBar, { propertyName: 'width' })
 
       expect(onConfirm).not.toHaveBeenCalled()
     })

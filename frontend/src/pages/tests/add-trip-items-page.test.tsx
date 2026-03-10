@@ -244,13 +244,13 @@ describe('AddTripItemsPage', () => {
     render(<AddTripItemsPage />, { wrapper })
 
     //== No quantity inputs initially
-    expect(screen.queryByLabelText('Qty')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Quantity')).not.toBeInTheDocument()
 
     //== Click on Bread to select it
     fireEvent.click(screen.getByText('Bread'))
 
     //== Quantity input should appear
-    expect(screen.getByLabelText('Qty')).toBeInTheDocument()
+    expect(screen.getByLabelText('Quantity')).toBeInTheDocument()
   })
 
   it('shows Add Items button with selected count when items are selected', () => {
@@ -281,7 +281,7 @@ describe('AddTripItemsPage', () => {
     fireEvent.click(screen.getByText('Bread'))
 
     //== Quantity input should be visible
-    expect(screen.getByLabelText('Qty')).toBeInTheDocument()
+    expect(screen.getByLabelText('Quantity')).toBeInTheDocument()
 
     //== Store dropdown should be visible
     const storeSelect = screen.getByLabelText('Store')

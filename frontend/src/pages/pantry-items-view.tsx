@@ -249,13 +249,22 @@ export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: P
         </select>
       </div>
 
-      <button
-        type="submit"
-        disabled={createMutation.isPending || !itemName.trim()}
-        className="w-full py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
-      >
-        {createMutation.isPending ? 'Creating...' : 'Create'}
-      </button>
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={onCloseCreateForm}
+          className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={createMutation.isPending || !itemName.trim()}
+          className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
+        >
+          {createMutation.isPending ? 'Creating...' : 'Create'}
+        </button>
+      </div>
     </form>
   )
 
@@ -339,7 +348,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: P
         <button
           type="button"
           onClick={() => setEditingItemId(null)}
-          className="flex-1 py-3 border border-navy/10 rounded-xl font-display font-bold text-text-secondary hover:bg-bg-warm transition-colors"
+          className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
         >
           Cancel
         </button>

@@ -6,6 +6,7 @@ import { Link,useNavigate } from 'react-router-dom'
 
 import { useLoginMutation } from '@/apis/agdevx-cart-api/auth/login.mutation'
 import { useAuth } from '@/auth/use-auth'
+import { ROUTES } from '@/routes'
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('')
@@ -29,7 +30,7 @@ export const LoginPage = () => {
           modifiedBy: null,
           modifiedDate: null,
         })
-      navigate('/shopping')
+      navigate(ROUTES.SHOPPING)
     } catch (error) {
       console.error('Login failed:', error)
     }
@@ -87,7 +88,7 @@ export const LoginPage = () => {
         {/* Link to Register */}
         <p className="mt-4 text-center text-sm text-text-secondary">
           Don't have an account?{' '}
-          <Link to="/register" className="text-teal hover:text-teal-light font-semibold">
+          <Link to={ROUTES.REGISTER} className="text-teal hover:text-teal-light font-semibold">
             Sign up
           </Link>
         </p>
