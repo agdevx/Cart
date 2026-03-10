@@ -16,6 +16,7 @@ interface TripItemRowProps {
   isUpdating?: boolean
   showCheckbox?: boolean
   onToggleCheck?: (tripItemId: string, currentlyChecked: boolean) => void
+  readOnly?: boolean
 }
 
 export const TripItemRow = ({
@@ -27,6 +28,7 @@ export const TripItemRow = ({
   isUpdating = false,
   showCheckbox = false,
   onToggleCheck,
+  readOnly = false,
 }: TripItemRowProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -119,33 +121,35 @@ export const TripItemRow = ({
               </>
             )}
           </div>
-          <div className="relative" ref={menuRef}>
-            <button
-              onClick={handleKebabClick}
-              aria-label="Item actions"
-              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
-            >
-              <MoreVertical className="w-4 h-4 text-text-secondary" />
-            </button>
-            {menuOpen && (
-              <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[120px]">
-                <button
-                  onClick={handleEditClick}
-                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
-                >
-                  <Pencil className="w-4 h-4" />
-                  Edit
-                </button>
-                <button
-                  onClick={handleRemoveClick}
-                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Remove
-                </button>
-              </div>
-            )}
-          </div>
+          {!readOnly && (
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={handleKebabClick}
+                aria-label="Item actions"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
+              >
+                <MoreVertical className="w-4 h-4 text-text-secondary" />
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[120px]">
+                  <button
+                    onClick={handleEditClick}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Edit
+                  </button>
+                  <button
+                    onClick={handleRemoveClick}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         {editing && (
           <EditForm
@@ -211,39 +215,41 @@ export const TripItemRow = ({
 
       {/* Kebab menu — stop touch/mousedown propagation to prevent mobile browsers
          from synthesizing a click on the parent row when tapping the kebab area */}
-      <div
-        className="relative flex-shrink-0 self-start"
-        ref={menuRef}
-        onTouchStart={(e) => e.stopPropagation()}
-        onTouchEnd={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={handleKebabClick}
-          aria-label="Item actions"
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
+      {!readOnly && (
+        <div
+          className="relative flex-shrink-0 self-start"
+          ref={menuRef}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         >
-          <MoreVertical className="w-4 h-4 text-text-secondary" />
-        </button>
-        {menuOpen && (
-          <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[120px]">
-            <button
-              onClick={handleEditClick}
-              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
-            >
-              <Pencil className="w-4 h-4" />
-              Edit
-            </button>
-            <button
-              onClick={handleRemoveClick}
-              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-              Remove
-            </button>
-          </div>
-        )}
-      </div>
+          <button
+            onClick={handleKebabClick}
+            aria-label="Item actions"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
+          >
+            <MoreVertical className="w-4 h-4 text-text-secondary" />
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[120px]">
+              <button
+                onClick={handleEditClick}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
+              >
+                <Pencil className="w-4 h-4" />
+                Edit
+              </button>
+              <button
+                onClick={handleRemoveClick}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                Remove
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Inline edit form in shopping mode */}
       {editing && (

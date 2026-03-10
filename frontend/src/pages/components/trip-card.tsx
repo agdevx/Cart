@@ -166,12 +166,15 @@ export const TripCard = ({ trip, onRename, onDelete, onReopen }: TripCardProps) 
     </>
   )
 
-  // Active trips are links (unless editing), completed trips are static divs
+  // Active trips are links (unless editing), completed trips are read-only links
   if (trip.isCompleted) {
     return (
-      <div className="p-5 bg-surface rounded-2xl shadow-sm opacity-60">
+      <Link
+        to={tripDetailPath(trip.id)}
+        className="block p-5 bg-surface rounded-2xl shadow-sm opacity-60 hover:shadow-md transition-all"
+      >
         {cardContent}
-      </div>
+      </Link>
     )
   }
 

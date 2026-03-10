@@ -82,6 +82,8 @@ export const TripDetailPage = () => {
     )
   }
 
+  const readOnly = trip.isCompleted ?? false
+
   return (
     <div className="px-5 pt-7 pb-8">
       <div className="mb-6">
@@ -95,16 +97,18 @@ export const TripDetailPage = () => {
         <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">{trip.name}</h1>
       </div>
 
-      <div className="mb-6">
-        <button
-          onClick={handleStartShopping}
-          disabled={!tripItems || tripItems.length === 0 || startMutation.isPending}
-          className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors flex items-center justify-center gap-2"
-        >
-          <ShoppingCart className="w-5 h-5" />
-          {startMutation.isPending ? 'Starting...' : trip.isStarted ? 'Continue Shopping' : 'Start Shopping'}
-        </button>
-      </div>
+      {!readOnly && (
+        <div className="mb-6">
+          <button
+            onClick={handleStartShopping}
+            disabled={!tripItems || tripItems.length === 0 || startMutation.isPending}
+            className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors flex items-center justify-center gap-2"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            {startMutation.isPending ? 'Starting...' : trip.isStarted ? 'Continue Shopping' : 'Start Shopping'}
+          </button>
+        </div>
+      )}
 
       <div className="mb-4">
         <div className="flex items-center gap-2.5 mb-3">
@@ -112,13 +116,15 @@ export const TripDetailPage = () => {
           <span className="flex-1 h-px bg-navy/8" />
         </div>
 
-        <button
-          onClick={() => navigate(tripAddItemsPath(tripId!))}
-          className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
-        >
-          <Plus className="w-5 h-5" />
-          Add Items
-        </button>
+        {!readOnly && (
+          <button
+            onClick={() => navigate(tripAddItemsPath(tripId!))}
+            className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
+          >
+            <Plus className="w-5 h-5" />
+            Add Items
+          </button>
+        )}
 
         {groupedItems.length > 0 ? (
           <div>
@@ -140,6 +146,7 @@ export const TripDetailPage = () => {
                       onUpdate={handleUpdateItem}
                       onDelete={handleDeleteItem}
                       isUpdating={updateMutation.isPending}
+                      readOnly={readOnly}
                     />
                   ))}
                 </div>
