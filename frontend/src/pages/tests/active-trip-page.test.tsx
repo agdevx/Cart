@@ -411,10 +411,11 @@ describe('ActiveTripPage', () => {
       //== Expand Costco accordion to reveal items
       fireEvent.click(screen.getByText('Costco'))
 
-      //== Pantry notes should be visible with "Pantry:" prefix and italic styling
-      const pantryNotes = screen.getByText('Pantry: Buy organic')
-      expect(pantryNotes).toBeInTheDocument()
-      expect(pantryNotes).toHaveClass('italic')
+      //== Pantry notes should be visible with "Pantry Notes:" label + notes text
+      expect(screen.getByText('Pantry Notes:')).toBeInTheDocument()
+      expect(screen.getByText('Pantry Notes:')).toHaveClass('italic')
+      //== The full <p> should contain the notes text
+      expect(screen.getByText((_, el) => el?.tagName === 'P' && el?.textContent === 'Pantry Notes: Buy organic')).toBeInTheDocument()
     })
 
     it('should display both pantry and trip notes', () => {
@@ -437,9 +438,9 @@ describe('ActiveTripPage', () => {
       //== Expand Costco accordion to reveal items
       fireEvent.click(screen.getByText('Costco'))
 
-      //== Both notes should be visible
-      expect(screen.getByText('Pantry: Buy organic')).toBeInTheDocument()
-      expect(screen.getByText('Get 2 if on sale')).toBeInTheDocument()
+      //== Both notes should be visible — pantry with "Pantry Notes:" label, shopping with "Shopping Notes:" label
+      expect(screen.getByText((_, el) => el?.tagName === 'P' && el?.textContent === 'Pantry Notes: Buy organic')).toBeInTheDocument()
+      expect(screen.getByText((_, el) => el?.tagName === 'P' && el?.textContent === 'Shopping Notes: Get 2 if on sale')).toBeInTheDocument()
     })
 
     it('should not show pantry notes when inventoryItem is null', () => {
@@ -463,10 +464,10 @@ describe('ActiveTripPage', () => {
       //== Expand Costco accordion to reveal items
       fireEvent.click(screen.getByText('Costco'))
 
-      //== No "Pantry:" label should be rendered
-      expect(screen.queryByText(/Pantry:/)).not.toBeInTheDocument()
-      //== Trip notes should still show
-      expect(screen.getByText('Trip note only')).toBeInTheDocument()
+      //== No "Pantry Notes:" label should be rendered
+      expect(screen.queryByText('Pantry Notes:')).not.toBeInTheDocument()
+      //== Trip notes should still show with "Shopping Notes:" label
+      expect(screen.getByText((_, el) => el?.tagName === 'P' && el?.textContent === 'Shopping Notes: Trip note only')).toBeInTheDocument()
     })
   })
 
@@ -490,7 +491,7 @@ describe('ActiveTripPage', () => {
 
     it('should default all accordions to collapsed', () => {
       setupMocks()
-      localStorage.removeItem('trip-accordion-trip1')
+      localStorage.removeItem('accordion-trip1-shopping')
       render(<ActiveTripPage />, { wrapper })
 
       //== Item names should NOT be visible because accordions default to collapsed
@@ -508,7 +509,7 @@ describe('ActiveTripPage', () => {
       } as any)
 
       //== Pre-set localStorage with Costco expanded
-      localStorage.setItem('trip-accordion-trip1', JSON.stringify({ Costco: true }))
+      localStorage.setItem('accordion-trip1-shopping', JSON.stringify({ Costco: true }))
 
       render(<ActiveTripPage />, { wrapper })
 

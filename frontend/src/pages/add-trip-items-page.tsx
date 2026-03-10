@@ -309,6 +309,7 @@ export const AddTripItemsPage = () => {
                 <div className="flex items-center gap-2 mt-3 pl-9" onClick={(e) => e.stopPropagation()}>
                   <select
                     id={`store-${item.id}`}
+                    aria-label="Store"
                     value={selectedItems[item.id].storeId ?? ''}
                     onChange={(e) => updateStore(item.id, e.target.value || null)}
                     className="flex-1 min-w-0 px-3 py-2 min-h-[38px] border border-navy/10 rounded-xl bg-surface text-text text-sm focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
@@ -322,6 +323,7 @@ export const AddTripItemsPage = () => {
                   </select>
                   <input
                     id={`qty-${item.id}`}
+                    aria-label="Quantity"
                     type="number"
                     min={1}
                     value={selectedItems[item.id].quantity}
