@@ -11,11 +11,13 @@ import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import type { TripItem } from '@/apis/agdevx-cart-api/models/trip-item'
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
 import type { Household } from '@/apis/agdevx-cart-api/models/household'
+import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import * as tripQueryModule from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import * as tripItemsQueryModule from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import * as inventoryQueryModule from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
 import * as addTripItemModule from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
+import * as storesQueryModule from '@/apis/agdevx-cart-api/store/use-stores.query'
 
 import { AddTripItemsPage } from '../add-trip-items-page'
 
@@ -85,7 +87,7 @@ const mockInventory: InventoryItem[] = [
   {
     id: 'inv2',
     name: 'Bread',
-    defaultStoreId: null,
+    defaultStoreId: 'store1',
     notes: null,
     ownerUserId: 'user1',
     householdId: null,
@@ -113,6 +115,29 @@ const mockInventory: InventoryItem[] = [
     notes: null,
     ownerUserId: 'user1',
     householdId: null,
+    createdBy: 'user1',
+    createdDate: '2024-01-01',
+    modifiedBy: null,
+    modifiedDate: null,
+  },
+]
+
+const mockStores: Store[] = [
+  {
+    id: 'store1',
+    name: 'Costco',
+    householdId: null,
+    userId: 'user1',
+    createdBy: 'user1',
+    createdDate: '2024-01-01',
+    modifiedBy: null,
+    modifiedDate: null,
+  },
+  {
+    id: 'store2',
+    name: 'Walmart',
+    householdId: null,
+    userId: 'user1',
     createdBy: 'user1',
     createdDate: '2024-01-01',
     modifiedBy: null,
@@ -151,6 +176,11 @@ const setupMocks = () => {
 
   vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
     data: mockHouseholds,
+    isLoading: false,
+  } as any)
+
+  vi.spyOn(storesQueryModule, 'useStoresQuery').mockReturnValue({
+    data: mockStores,
     isLoading: false,
   } as any)
 
@@ -241,5 +271,63 @@ describe('AddTripItemsPage', () => {
 
     //== Button should update count
     expect(screen.getByText('Add Items (2 items)')).toBeInTheDocument()
+  })
+
+  it('shows store dropdown alongside quantity when item is selected', () => {
+    setupMocks()
+    render(<AddTripItemsPage />, { wrapper })
+
+    //== Select Bread (has defaultStoreId: 'store1' = Costco)
+    fireEvent.click(screen.getByText('Bread'))
+
+    //== Quantity input should be visible
+    expect(screen.getByLabelText('Qty')).toBeInTheDocument()
+
+    //== Store dropdown should be visible
+    const storeSelect = screen.getByLabelText('Store')
+    expect(storeSelect).toBeInTheDocument()
+
+    //== Store dropdown should be pre-populated with item's default store (Costco)
+    expect(storeSelect).toHaveValue('store1')
+  })
+
+  it('shows store dropdown with empty value when item has no default store', () => {
+    setupMocks()
+    render(<AddTripItemsPage />, { wrapper })
+
+    //== Select Eggs (has no defaultStoreId)
+    fireEvent.click(screen.getByText('Eggs'))
+
+    //== Store dropdown should be visible with empty value
+    const storeSelect = screen.getByLabelText('Store')
+    expect(storeSelect).toBeInTheDocument()
+    expect(storeSelect).toHaveValue('')
+  })
+
+  it('allows overriding the store for a selected item', async () => {
+    addMutateAsyncFn.mockResolvedValue({})
+    setupMocks()
+    render(<AddTripItemsPage />, { wrapper })
+
+    //== Select Bread (default store: Costco / store1)
+    fireEvent.click(screen.getByText('Bread'))
+
+    //== Change store dropdown to Walmart (store2)
+    const storeSelect = screen.getByLabelText('Store')
+    fireEvent.change(storeSelect, { target: { value: 'store2' } })
+    expect(storeSelect).toHaveValue('store2')
+
+    //== Click "Add Items"
+    fireEvent.click(screen.getByText('Add Items (1 item)'))
+
+    //== Assert: addTripItem mutation called with storeId for Walmart
+    expect(addMutateAsyncFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tripId: 'trip1',
+        inventoryItemId: 'inv2',
+        quantity: 1,
+        storeId: 'store2',
+      })
+    )
   })
 })

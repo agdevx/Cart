@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
+import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
@@ -15,6 +16,7 @@ type SourceFilter = 'all' | 'personal' | string
 
 interface SelectedItem {
   quantity: number
+  storeId: string | null
 }
 
 export const AddTripItemsPage = () => {
@@ -24,6 +26,8 @@ export const AddTripItemsPage = () => {
   const { data: inventory } = useInventoryQuery()
   const { data: households } = useHouseholdsQuery()
   const { data: tripItems } = useTripItemsQuery(tripId!)
+  const householdIds = useMemo(() => households?.map((h) => h.id) ?? [], [households])
+  const { data: stores } = useStoresQuery(householdIds)
   const addTripItemMutation = useAddTripItemMutation()
 
   const [searchText, setSearchText] = useState('')
@@ -68,14 +72,22 @@ export const AddTripItemsPage = () => {
         const { [itemId]: _, ...rest } = prev
         return rest
       }
-      return { ...prev, [itemId]: { quantity: 1 } }
+      const item = inventory?.find((i) => i.id === itemId)
+      return { ...prev, [itemId]: { quantity: 1, storeId: item?.defaultStoreId ?? null } }
     })
   }
 
   const updateQuantity = (itemId: string, quantity: number) => {
     setSelectedItems((prev) => ({
       ...prev,
-      [itemId]: { quantity: Math.max(1, quantity) },
+      [itemId]: { ...prev[itemId], quantity: Math.max(1, quantity) },
+    }))
+  }
+
+  const updateStore = (itemId: string, storeId: string | null) => {
+    setSelectedItems((prev) => ({
+      ...prev,
+      [itemId]: { ...prev[itemId], storeId },
     }))
   }
 
@@ -85,11 +97,12 @@ export const AddTripItemsPage = () => {
     setIsAdding(true)
     try {
       await Promise.all(
-        Object.entries(selectedItems).map(([inventoryItemId, { quantity }]) =>
+        Object.entries(selectedItems).map(([inventoryItemId, { quantity, storeId }]) =>
           addTripItemMutation.mutateAsync({
             tripId,
             inventoryItemId,
             quantity,
+            storeId,
           })
         )
       )
@@ -244,6 +257,26 @@ export const AddTripItemsPage = () => {
                   </div>
                 )}
               </div>
+
+              {/* Store dropdown (when selected) */}
+              {isSelected && (
+                <div className="mt-2 pl-9" onClick={(e) => e.stopPropagation()}>
+                  <label htmlFor={`store-${item.id}`} className="text-xs text-text-tertiary mr-2">Store</label>
+                  <select
+                    id={`store-${item.id}`}
+                    value={selectedItems[item.id].storeId ?? ''}
+                    onChange={(e) => updateStore(item.id, e.target.value || null)}
+                    className="px-2 py-1 border border-navy/10 rounded-lg bg-surface text-text text-sm focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+                  >
+                    <option value="">No store</option>
+                    {(stores ?? []).map((store) => (
+                      <option key={store.id} value={store.id}>
+                        {store.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
           )
         })}
