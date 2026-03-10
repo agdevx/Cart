@@ -73,13 +73,17 @@ Cancel/Save buttons at the bottom (same pattern).
 
 ### New AuthService Methods
 
-- `UpdateProfile(userId, request)` — validates constraints, checks email uniqueness if changed, verifies password if email changed, updates user record, re-signs cookie with updated claims
+- `UpdateProfile(userId, request)` — validates constraints, checks email uniqueness if changed, verifies password if email changed, updates user record, returns `AuthResponse`
 - `ChangePassword(userId, request)` — verifies current password, validates new password rules, hashes and updates
+
+**Cookie re-signing responsibility:** The service layer returns an `AuthResponse`. The **controller** calls `SignInUser()` to re-sign the cookie with updated claims (same pattern as Register/Login). The service does not touch `HttpContext`.
+
+**Authorization:** Both new endpoints require `[Authorize]`. The existing Register and Login endpoints remain unauthenticated.
 
 ### Server-Side Validation
 
 - Name: required, max 64 chars
-- Email: required, valid format, max 254 chars, unique
+- Email: required, valid format, max 254 chars, unique (case-insensitive comparison — inherit existing DB collation behavior)
 - New password: min 8 chars, max 128 chars, one uppercase, one number
 
 ## Database Changes
@@ -88,7 +92,7 @@ New migration adding `HasMaxLength` constraints to the User entity:
 
 - `User.Name` → `HasMaxLength(64)`
 - `User.Email` → `HasMaxLength(254)`
-- `User.PasswordHash` → `HasMaxLength(128)`
+- `User.PasswordHash` → `HasMaxLength(256)` (BCrypt outputs 60 chars; 256 provides headroom for future algorithm changes)
 
 ## Frontend Changes
 
@@ -110,7 +114,7 @@ New migration adding `HasMaxLength` constraints to the User entity:
 ### State Updates on Success
 
 - Profile save: `useAuth().setAuth()` with updated name/email → refreshes Jotai atom + localStorage + PageHeader
-- Password save: no state change, collapse to view mode
+- Password save: no state change, collapse to view mode with a temporary "Password updated" success text (shown for ~3 seconds in the Security section, then fades)
 
 ### Error Handling
 
@@ -128,3 +132,8 @@ Add `maxLength` attributes to registration page inputs to match new DB constrain
 - Confirm password input: `maxLength={128}`
 
 Add the same `maxLength` attributes to the login page email and password inputs.
+
+## Known Limitations
+
+- **No rate limiting on password verification.** Both profile update and password change endpoints accept a current password. An attacker with a stolen session cookie could brute-force the password. This is a future concern — not in scope for this feature.
+- **`GET /api/auth/me` reads from cookie claims, not DB.** This is an existing design tradeoff. After profile updates, the cookie is re-signed so claims stay current. If re-signing fails, `me` would return stale data.
