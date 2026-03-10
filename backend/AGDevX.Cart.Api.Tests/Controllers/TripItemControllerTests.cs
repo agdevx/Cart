@@ -39,6 +39,7 @@ public class TripItemControllerTests
                 Id = Guid.NewGuid(),
                 TripId = tripId,
                 InventoryItemId = Guid.NewGuid(),
+                ItemName = "Test Item",
                 Quantity = 2
             }
         };
@@ -77,7 +78,7 @@ public class TripItemControllerTests
             Id = tripItemId,
             TripId = Guid.NewGuid(),
             InventoryItemId = Guid.NewGuid(),
-
+            ItemName = "Test Item",
             Quantity = 2
         };
 
@@ -144,7 +145,7 @@ public class TripItemControllerTests
             Id = Guid.NewGuid(),
             TripId = tripId,
             InventoryItemId = inventoryItemId,
-
+            ItemName = "Test Item",
             Quantity = 3,
             Notes = "Test notes"
         };
@@ -204,7 +205,7 @@ public class TripItemControllerTests
             Id = tripItemId,
             TripId = Guid.NewGuid(),
             InventoryItemId = Guid.NewGuid(),
-
+            ItemName = "Test Item",
             Quantity = 5
         };
 
@@ -381,7 +382,7 @@ public class TripItemControllerTests
             Id = tripItemId,
             TripId = Guid.NewGuid(),
             InventoryItemId = Guid.NewGuid(),
-
+            ItemName = "Test Item",
             Quantity = 2,
             IsChecked = true,
             CheckedAt = DateTime.UtcNow
@@ -477,7 +478,7 @@ public class TripItemControllerTests
             Id = tripItemId,
             TripId = Guid.NewGuid(),
             InventoryItemId = Guid.NewGuid(),
-
+            ItemName = "Test Item",
             Quantity = 2,
             IsChecked = false,
             CheckedAt = null
