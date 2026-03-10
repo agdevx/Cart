@@ -348,7 +348,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: P
         <button
           type="button"
           onClick={() => setEditingItemId(null)}
-          className="flex-1 py-3 border border-navy/10 rounded-xl font-display font-bold text-text-secondary hover:bg-bg-warm transition-colors"
+          className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
         >
           Cancel
         </button>
