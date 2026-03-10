@@ -62,6 +62,9 @@ public class CartDbContext(DbContextOptions<CartDbContext> options, IHttpContext
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasIndex(u => u.Email).IsUnique();
+            entity.Property(u => u.Name).HasMaxLength(64);
+            entity.Property(u => u.Email).HasMaxLength(254);
+            entity.Property(u => u.PasswordHash).HasMaxLength(256);
         });
 
         //== InventoryItem FK behaviors
