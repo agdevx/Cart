@@ -428,6 +428,107 @@ describe('TripDetailPage', () => {
       expect(stored['Costco']).toBe(true)
     })
 
+    it('should display pantry notes in italics with "Pantry:" label', () => {
+      setupMocks()
+
+      //== Override trip items to include inventoryItem with notes
+      vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+        data: [
+          {
+            ...mockTripItems[0],
+            inventoryItem: { id: 'inv1', name: 'Milk', notes: 'Buy organic', defaultStoreId: null },
+          },
+        ],
+        isLoading: false,
+      } as any)
+
+      render(<TripDetailPage />, { wrapper })
+
+      //== Expand Costco accordion to reveal items
+      fireEvent.click(screen.getByText('Costco'))
+
+      //== Pantry notes should be visible with "Pantry:" prefix
+      const pantryNotes = screen.getByText('Pantry: Buy organic')
+      expect(pantryNotes).toBeInTheDocument()
+      expect(pantryNotes.tagName).toBe('P')
+      expect(pantryNotes).toHaveClass('italic')
+    })
+
+    it('should display trip notes below pantry notes', () => {
+      setupMocks()
+
+      //== Override trip items to have both pantry and trip notes
+      vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+        data: [
+          {
+            ...mockTripItems[0],
+            notes: 'Get 2 if on sale',
+            inventoryItem: { id: 'inv1', name: 'Milk', notes: 'Buy organic', defaultStoreId: null },
+          },
+        ],
+        isLoading: false,
+      } as any)
+
+      render(<TripDetailPage />, { wrapper })
+
+      //== Expand Costco accordion to reveal items
+      fireEvent.click(screen.getByText('Costco'))
+
+      //== Both notes should be visible
+      expect(screen.getByText('Pantry: Buy organic')).toBeInTheDocument()
+      expect(screen.getByText('Get 2 if on sale')).toBeInTheDocument()
+    })
+
+    it('should not show pantry notes when inventoryItem is null (deleted item)', () => {
+      setupMocks()
+
+      //== Override trip items with null inventoryItem (pantry item was deleted)
+      vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+        data: [
+          {
+            ...mockTripItems[0],
+            inventoryItemId: null,
+            inventoryItem: null,
+            notes: 'Trip note still here',
+          },
+        ],
+        isLoading: false,
+      } as any)
+
+      render(<TripDetailPage />, { wrapper })
+
+      //== Expand Costco accordion to reveal items
+      fireEvent.click(screen.getByText('Costco'))
+
+      //== No "Pantry:" label should be rendered
+      expect(screen.queryByText(/Pantry:/)).not.toBeInTheDocument()
+      //== Trip notes should still be visible
+      expect(screen.getByText('Trip note still here')).toBeInTheDocument()
+    })
+
+    it('should not show pantry notes when inventoryItem has no notes', () => {
+      setupMocks()
+
+      //== Override trip items with inventoryItem that has null notes
+      vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+        data: [
+          {
+            ...mockTripItems[0],
+            inventoryItem: { id: 'inv1', name: 'Milk', notes: null, defaultStoreId: null },
+          },
+        ],
+        isLoading: false,
+      } as any)
+
+      render(<TripDetailPage />, { wrapper })
+
+      //== Expand Costco accordion to reveal items
+      fireEvent.click(screen.getByText('Costco'))
+
+      //== No "Pantry:" label should be rendered
+      expect(screen.queryByText(/Pantry:/)).not.toBeInTheDocument()
+    })
+
     it('should show item count per store group', () => {
       setupMocks()
       render(<TripDetailPage />, { wrapper })

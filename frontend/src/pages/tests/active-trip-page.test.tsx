@@ -391,6 +391,85 @@ describe('ActiveTripPage', () => {
     expect(checkMutateAsyncFn).not.toHaveBeenCalled()
   })
 
+  describe('dual notes display', () => {
+    it('should display pantry notes in italics with "Pantry:" label', () => {
+      setupMocks()
+
+      //== Override trip items to include inventoryItem with notes
+      vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+        data: [
+          {
+            ...mockTripItems[0],
+            inventoryItem: { id: 'inv1', name: 'Milk', notes: 'Buy organic', defaultStoreId: null },
+          },
+        ],
+        isLoading: false,
+      } as any)
+
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Expand Costco accordion to reveal items
+      fireEvent.click(screen.getByText('Costco'))
+
+      //== Pantry notes should be visible with "Pantry:" prefix and italic styling
+      const pantryNotes = screen.getByText('Pantry: Buy organic')
+      expect(pantryNotes).toBeInTheDocument()
+      expect(pantryNotes).toHaveClass('italic')
+    })
+
+    it('should display both pantry and trip notes', () => {
+      setupMocks()
+
+      //== Override trip items to have both pantry and trip notes
+      vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+        data: [
+          {
+            ...mockTripItems[0],
+            notes: 'Get 2 if on sale',
+            inventoryItem: { id: 'inv1', name: 'Milk', notes: 'Buy organic', defaultStoreId: null },
+          },
+        ],
+        isLoading: false,
+      } as any)
+
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Expand Costco accordion to reveal items
+      fireEvent.click(screen.getByText('Costco'))
+
+      //== Both notes should be visible
+      expect(screen.getByText('Pantry: Buy organic')).toBeInTheDocument()
+      expect(screen.getByText('Get 2 if on sale')).toBeInTheDocument()
+    })
+
+    it('should not show pantry notes when inventoryItem is null', () => {
+      setupMocks()
+
+      //== Override trip items with null inventoryItem (deleted pantry item)
+      vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+        data: [
+          {
+            ...mockTripItems[0],
+            inventoryItemId: null,
+            inventoryItem: null,
+            notes: 'Trip note only',
+          },
+        ],
+        isLoading: false,
+      } as any)
+
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Expand Costco accordion to reveal items
+      fireEvent.click(screen.getByText('Costco'))
+
+      //== No "Pantry:" label should be rendered
+      expect(screen.queryByText(/Pantry:/)).not.toBeInTheDocument()
+      //== Trip notes should still show
+      expect(screen.getByText('Trip note only')).toBeInTheDocument()
+    })
+  })
+
   describe('store grouping', () => {
     it('should group items by store on active trip page', () => {
       setupMocks()

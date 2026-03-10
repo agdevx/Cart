@@ -101,6 +101,13 @@ export const TripItemRow = ({
           <div className="flex-1 min-w-0">
             <span className="font-bold text-navy">{itemName}</span>
             <p className="text-sm text-text-secondary">Quantity: {tripItem.quantity}</p>
+            {/* Pantry notes — only shown when inventoryItem exists and has notes */}
+            {tripItem.inventoryItem?.notes && (
+              <p className="text-xs text-text-secondary italic">
+                Pantry: {tripItem.inventoryItem.notes}
+              </p>
+            )}
+            {/* Trip notes */}
             {tripItem.notes && <p className="text-sm text-text-secondary">{tripItem.notes}</p>}
           </div>
           <div className="relative" ref={menuRef}>
@@ -174,6 +181,13 @@ export const TripItemRow = ({
           {itemName}
         </span>
         <p className="text-xs text-text-tertiary font-semibold mt-0.5">Qty: {tripItem.quantity}</p>
+        {/* Pantry notes — only shown when inventoryItem exists and has notes */}
+        {tripItem.inventoryItem?.notes && (
+          <p className="text-xs text-text-secondary italic mt-0.5">
+            Pantry: {tripItem.inventoryItem.notes}
+          </p>
+        )}
+        {/* Trip notes */}
         {tripItem.notes && <p className="text-xs text-text-tertiary mt-0.5">{tripItem.notes}</p>}
       </div>
 
