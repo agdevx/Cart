@@ -390,4 +390,197 @@ public class AuthServiceTests
         await Assert.ThrowsAsync<ArgumentException>(
             () => authService.UpdateProfile(registered.UserId, updateRequest));
     }
+
+    [Fact]
+    public async Task Should_ChangePassword_When_CurrentPasswordIsCorrect()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+
+        using var context = new CartDbContext(options);
+        var authService = new AuthService(context);
+
+        var registerRequest = new RegisterRequest
+        {
+            Email = "test@example.com",
+            Password = "OldPassword123!",
+            Name = "Test User"
+        };
+
+        var registered = await authService.Register(registerRequest);
+
+        var changeRequest = new ChangePasswordRequest
+        {
+            CurrentPassword = "OldPassword123!",
+            NewPassword = "NewPassword456!"
+        };
+
+        // Act
+        await authService.ChangePassword(registered.UserId, changeRequest);
+
+        // Assert — verify new password works for login
+        var loginResult = await authService.Login(new LoginRequest
+        {
+            Email = "test@example.com",
+            Password = "NewPassword456!"
+        });
+        Assert.NotNull(loginResult);
+    }
+
+    [Fact]
+    public async Task Should_ThrowUnauthorized_When_CurrentPasswordIsWrong()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+
+        using var context = new CartDbContext(options);
+        var authService = new AuthService(context);
+
+        var registerRequest = new RegisterRequest
+        {
+            Email = "test@example.com",
+            Password = "CorrectPassword123!",
+            Name = "Test User"
+        };
+
+        var registered = await authService.Register(registerRequest);
+
+        var changeRequest = new ChangePasswordRequest
+        {
+            CurrentPassword = "WrongPassword456!",
+            NewPassword = "NewPassword789!"
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => authService.ChangePassword(registered.UserId, changeRequest));
+    }
+
+    [Fact]
+    public async Task Should_ThrowArgumentException_When_NewPasswordTooShort()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+
+        using var context = new CartDbContext(options);
+        var authService = new AuthService(context);
+
+        var registerRequest = new RegisterRequest
+        {
+            Email = "test@example.com",
+            Password = "CorrectPassword123!",
+            Name = "Test User"
+        };
+
+        var registered = await authService.Register(registerRequest);
+
+        var changeRequest = new ChangePasswordRequest
+        {
+            CurrentPassword = "CorrectPassword123!",
+            NewPassword = "Short1!"
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => authService.ChangePassword(registered.UserId, changeRequest));
+    }
+
+    [Fact]
+    public async Task Should_ThrowArgumentException_When_NewPasswordMissingUppercase()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+
+        using var context = new CartDbContext(options);
+        var authService = new AuthService(context);
+
+        var registerRequest = new RegisterRequest
+        {
+            Email = "test@example.com",
+            Password = "CorrectPassword123!",
+            Name = "Test User"
+        };
+
+        var registered = await authService.Register(registerRequest);
+
+        var changeRequest = new ChangePasswordRequest
+        {
+            CurrentPassword = "CorrectPassword123!",
+            NewPassword = "alllowercase123"
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => authService.ChangePassword(registered.UserId, changeRequest));
+    }
+
+    [Fact]
+    public async Task Should_ThrowArgumentException_When_NewPasswordMissingNumber()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+
+        using var context = new CartDbContext(options);
+        var authService = new AuthService(context);
+
+        var registerRequest = new RegisterRequest
+        {
+            Email = "test@example.com",
+            Password = "CorrectPassword123!",
+            Name = "Test User"
+        };
+
+        var registered = await authService.Register(registerRequest);
+
+        var changeRequest = new ChangePasswordRequest
+        {
+            CurrentPassword = "CorrectPassword123!",
+            NewPassword = "NoNumbersHere!"
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => authService.ChangePassword(registered.UserId, changeRequest));
+    }
+
+    [Fact]
+    public async Task Should_ThrowArgumentException_When_NewPasswordExceeds128Characters()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+
+        using var context = new CartDbContext(options);
+        var authService = new AuthService(context);
+
+        var registerRequest = new RegisterRequest
+        {
+            Email = "test@example.com",
+            Password = "CorrectPassword123!",
+            Name = "Test User"
+        };
+
+        var registered = await authService.Register(registerRequest);
+
+        var changeRequest = new ChangePasswordRequest
+        {
+            CurrentPassword = "CorrectPassword123!",
+            NewPassword = "A1" + new string('a', 127)
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => authService.ChangePassword(registered.UserId, changeRequest));
+    }
 }

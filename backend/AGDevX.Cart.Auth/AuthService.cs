@@ -118,4 +118,36 @@ public class AuthService(CartDbContext context) : IAuthService
             Name = user.Name ?? string.Empty
         };
     }
+
+    public async Task ChangePassword(Guid userId, ChangePasswordRequest request)
+    {
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId)
+                        ?? throw new UnauthorizedAccessException("User not found.");
+
+        //== Verify current password
+        if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
+        {
+            throw new UnauthorizedAccessException("Incorrect password.");
+        }
+
+        //== Validate new password rules
+        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8 || request.NewPassword.Length > 128)
+        {
+            throw new ArgumentException("Password must be between 8 and 128 characters.");
+        }
+
+        if (!request.NewPassword.Any(char.IsUpper))
+        {
+            throw new ArgumentException("Password must contain at least one uppercase letter.");
+        }
+
+        if (!request.NewPassword.Any(char.IsDigit))
+        {
+            throw new ArgumentException("Password must contain at least one number.");
+        }
+
+        //== Hash and save new password
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        await context.SaveChangesAsync();
+    }
 }
