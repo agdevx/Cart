@@ -2,7 +2,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as deleteHouseholdModule from '@/apis/agdevx-cart-api/household/delete-household.mutation'
@@ -322,7 +322,8 @@ describe('HouseholdDetailPage', () => {
     expect(screen.getByText('Delete Household - Are you sure?')).toBeInTheDocument()
   })
 
-  it('deletes household on confirm', () => {
+  it('deletes household on confirm (hold-to-confirm)', () => {
+    vi.useFakeTimers()
     setupMocks()
 
     renderWithRouter('h1')
@@ -331,15 +332,20 @@ describe('HouseholdDetailPage', () => {
     fireEvent.click(screen.getByText('Danger Zone'))
     fireEvent.click(screen.getByText('Delete Household'))
 
-    //== Click Delete in the dialog (the confirm button inside ConfirmDialog)
+    //== Hold the Delete button for the full holdDuration (5000ms)
     const deleteButtons = screen.getAllByText('Delete')
-    //== The dialog confirm button is the one inside ConfirmDialog
     const confirmButton = deleteButtons.find((btn) => btn.closest('.fixed'))
-    fireEvent.click(confirmButton!)
+    fireEvent.mouseDown(confirmButton!)
+
+    act(() => {
+      vi.advanceTimersByTime(5000)
+    })
 
     expect(deleteMutateFn).toHaveBeenCalledWith(
       'h1',
       expect.objectContaining({ onSuccess: expect.any(Function) })
     )
+
+    vi.useRealTimers()
   })
 })

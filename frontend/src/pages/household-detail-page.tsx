@@ -333,6 +333,7 @@ export const HouseholdDetailPage = () => {
           title="Delete Household - Are you sure?"
           message="This will permanently delete the household and all its items and stores. This can't be undone."
           confirmLabel="Delete"
+          holdDuration={5000}
           onConfirm={handleDeleteHousehold}
           onCancel={() => setShowDeleteConfirm(false)}
           isPending={deleteHouseholdMutation.isPending}
