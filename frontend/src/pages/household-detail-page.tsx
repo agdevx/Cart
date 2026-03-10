@@ -312,6 +312,9 @@ export const HouseholdDetailPage = () => {
           <div className={`grid transition-all duration-200 ${dangerZoneOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
             <div className="overflow-hidden">
               <div className="px-5 pb-5">
+                <p className="text-sm text-text-secondary mb-3">
+                  This will permanently delete the household and all its items and stores. This can't be undone.
+                </p>
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
                   className="w-full py-3 bg-coral text-white rounded-xl font-display font-bold hover:bg-coral/90 transition-colors"
@@ -327,7 +330,7 @@ export const HouseholdDetailPage = () => {
       {/* Delete Confirmation Dialog */}
       {showDeleteConfirm && (
         <ConfirmDialog
-          title="Delete Household"
+          title="Delete Household - Are you sure?"
           message="This will permanently delete the household and all its items and stores. This can't be undone."
           confirmLabel="Delete"
           onConfirm={handleDeleteHousehold}

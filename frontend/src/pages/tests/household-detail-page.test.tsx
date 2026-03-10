@@ -285,8 +285,41 @@ describe('HouseholdDetailPage', () => {
     fireEvent.click(screen.getByText('Danger Zone'))
     fireEvent.click(screen.getByText('Delete Household'))
 
-    expect(screen.getByText(/items and stores/)).toBeInTheDocument()
-    expect(screen.getByText(/can't be undone/)).toBeInTheDocument()
+    //== Warning text appears both in danger zone and in the modal
+    const itemsWarnings = screen.getAllByText(/items and stores/)
+    expect(itemsWarnings.length).toBeGreaterThanOrEqual(1)
+    //== At least one should be inside the modal (fixed overlay)
+    expect(itemsWarnings.some((el) => el.closest('.fixed'))).toBe(true)
+    const undoneWarnings = screen.getAllByText(/can't be undone/)
+    expect(undoneWarnings.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('should show warning text above Delete Household button in danger zone', () => {
+    setupMocks()
+
+    renderWithRouter('h1')
+
+    //== Expand danger zone
+    fireEvent.click(screen.getByText('Danger Zone'))
+
+    //== Warning text should be visible above delete button
+    const warningText = screen.getByText(/permanently delete.*can't be undone/)
+    expect(warningText).toBeInTheDocument()
+    //== Verify it's in the danger zone section (not the modal)
+    expect(warningText.closest('.fixed')).toBeNull()
+  })
+
+  it('should show updated modal title "Delete Household - Are you sure?"', () => {
+    setupMocks()
+
+    renderWithRouter('h1')
+
+    //== Expand danger zone and open delete confirmation
+    fireEvent.click(screen.getByText('Danger Zone'))
+    fireEvent.click(screen.getByText('Delete Household'))
+
+    //== Modal title should include "Are you sure?"
+    expect(screen.getByText('Delete Household - Are you sure?')).toBeInTheDocument()
   })
 
   it('deletes household on confirm', () => {
