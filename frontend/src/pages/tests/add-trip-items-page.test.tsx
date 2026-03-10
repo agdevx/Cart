@@ -304,6 +304,116 @@ describe('AddTripItemsPage', () => {
     expect(storeSelect).toHaveValue('')
   })
 
+  it('shows store filter segmented control with All option and store names', () => {
+    setupMocks()
+    render(<AddTripItemsPage />, { wrapper })
+
+    //== There should be two tablists: source filter and store filter
+    const tablists = screen.getAllByRole('tablist')
+    expect(tablists.length).toBe(2)
+
+    //== Store filter should have "All" tab plus each store name
+    const storeTablist = tablists[1]
+    const storeTabs = storeTablist.querySelectorAll('[role="tab"]')
+    expect(storeTabs.length).toBe(3) // All + Costco + Walmart
+    expect(storeTabs[0].textContent).toBe('All')
+    expect(storeTabs[1].textContent).toBe('Costco')
+    expect(storeTabs[2].textContent).toBe('Walmart')
+  })
+
+  it('populates store filter with stores matching current source scope', () => {
+    //== Add a household store to the mock data
+    const householdStore: Store = {
+      id: 'store3',
+      name: 'H-Mart',
+      householdId: 'hh1',
+      userId: null,
+      createdBy: 'user1',
+      createdDate: '2024-01-01',
+      modifiedBy: null,
+      modifiedDate: null,
+    }
+
+    vi.spyOn(tripQueryModule, 'useTripQuery').mockReturnValue({
+      data: mockTrip,
+      isLoading: false,
+    } as any)
+    vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+      data: mockTripItems,
+      isLoading: false,
+    } as any)
+    vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
+      data: mockInventory,
+      isLoading: false,
+    } as any)
+    vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
+      data: mockHouseholds,
+      isLoading: false,
+    } as any)
+    vi.spyOn(storesQueryModule, 'useStoresQuery').mockReturnValue({
+      data: [...mockStores, householdStore],
+      isLoading: false,
+    } as any)
+    vi.spyOn(addTripItemModule, 'useAddTripItemMutation').mockReturnValue({
+      mutateAsync: addMutateAsyncFn,
+      isPending: false,
+    } as any)
+
+    render(<AddTripItemsPage />, { wrapper })
+
+    //== Click on "Test Household" source filter
+    fireEvent.click(screen.getByRole('tab', { name: 'Test Household' }))
+
+    //== Store filter should show only household store (H-Mart) + All
+    const tablists = screen.getAllByRole('tablist')
+    const storeTablist = tablists[1]
+    const storeTabs = storeTablist.querySelectorAll('[role="tab"]')
+    expect(storeTabs.length).toBe(2) // All + H-Mart
+    expect(storeTabs[0].textContent).toBe('All')
+    expect(storeTabs[1].textContent).toBe('H-Mart')
+  })
+
+  it('filters items by selected store', () => {
+    setupMocks()
+    render(<AddTripItemsPage />, { wrapper })
+
+    //== All non-trip items visible initially: Bread, Eggs, Butter
+    expect(screen.getByText('Bread')).toBeInTheDocument()
+    expect(screen.getByText('Eggs')).toBeInTheDocument()
+    expect(screen.getByText('Butter')).toBeInTheDocument()
+
+    //== Click on "Costco" in store filter
+    const tablists = screen.getAllByRole('tablist')
+    const costcoTab = tablists[1].querySelector('[role="tab"]:nth-child(2)')!
+    fireEvent.click(costcoTab)
+
+    //== Only Bread should be visible (defaultStoreId = 'store1' = Costco)
+    expect(screen.getByText('Bread')).toBeInTheDocument()
+    expect(screen.queryByText('Eggs')).not.toBeInTheDocument()
+    expect(screen.queryByText('Butter')).not.toBeInTheDocument()
+  })
+
+  it('resets store filter to All when source filter changes', () => {
+    setupMocks()
+    render(<AddTripItemsPage />, { wrapper })
+
+    //== Select Costco in store filter
+    const tablists = screen.getAllByRole('tablist')
+    const costcoTab = tablists[1].querySelector('[role="tab"]:nth-child(2)')!
+    fireEvent.click(costcoTab)
+
+    //== Costco tab should be selected
+    expect(costcoTab).toHaveAttribute('aria-selected', 'true')
+
+    //== Change source filter from All to Personal
+    fireEvent.click(screen.getByRole('tab', { name: 'Personal' }))
+
+    //== Store filter should reset — "All" tab should be selected
+    const updatedTablists = screen.getAllByRole('tablist')
+    const allStoreTab = updatedTablists[1].querySelector('[role="tab"]:first-child')!
+    expect(allStoreTab).toHaveAttribute('aria-selected', 'true')
+  })
+
   it('allows overriding the store for a selected item', async () => {
     addMutateAsyncFn.mockResolvedValue({})
     setupMocks()

@@ -2,7 +2,7 @@
 // ABOUTME: Supports search, source filtering, batch selection, and quantity editing
 
 import { ArrowLeft, Search } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
@@ -32,8 +32,14 @@ export const AddTripItemsPage = () => {
 
   const [searchText, setSearchText] = useState('')
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
+  const [storeFilter, setStoreFilter] = useState<string>('all')
   const [selectedItems, setSelectedItems] = useState<Record<string, SelectedItem>>({})
   const [isAdding, setIsAdding] = useState(false)
+
+  // Reset store filter when source filter changes
+  useEffect(() => {
+    setStoreFilter('all')
+  }, [sourceFilter])
 
   // IDs of items already on the trip
   const existingItemIds = useMemo(
@@ -41,7 +47,18 @@ export const AddTripItemsPage = () => {
     [tripItems]
   )
 
-  // Filter inventory items based on source filter, search text, and existing trip items
+  // Derive stores visible in the store filter based on the current source filter scope
+  const filteredStores = useMemo(() => {
+    if (!stores) return []
+    if (sourceFilter === 'all') return stores
+    if (sourceFilter === 'personal') {
+      return stores.filter((s) => s.userId !== null && s.householdId === null)
+    }
+    // sourceFilter is a household ID
+    return stores.filter((s) => s.householdId === sourceFilter)
+  }, [stores, sourceFilter])
+
+  // Filter inventory items based on source filter, store filter, search text, and existing trip items
   const filteredItems = useMemo(() => {
     if (!inventory) return []
 
@@ -55,6 +72,11 @@ export const AddTripItemsPage = () => {
       items = items.filter((item) => item.householdId === sourceFilter)
     }
 
+    // Apply store filter
+    if (storeFilter !== 'all') {
+      items = items.filter((item) => item.defaultStoreId === storeFilter)
+    }
+
     // Apply search text filter
     if (searchText.trim()) {
       const search = searchText.trim().toLowerCase()
@@ -62,7 +84,7 @@ export const AddTripItemsPage = () => {
     }
 
     return items
-  }, [inventory, existingItemIds, sourceFilter, searchText])
+  }, [inventory, existingItemIds, sourceFilter, storeFilter, searchText])
 
   const selectedCount = Object.keys(selectedItems).length
 
@@ -164,47 +186,85 @@ export const AddTripItemsPage = () => {
         />
       </div>
 
-      {/* Source filter toggle */}
-      <div role="tablist" className="flex bg-bg-warm rounded-xl p-1 mb-4 overflow-x-auto">
-        <button
-          role="tab"
-          aria-selected={sourceFilter === 'all'}
-          onClick={() => setSourceFilter('all')}
-          className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-            sourceFilter === 'all'
-              ? 'bg-teal text-white shadow-sm'
-              : 'text-text-secondary hover:text-navy'
-          }`}
-        >
-          All
-        </button>
-        <button
-          role="tab"
-          aria-selected={sourceFilter === 'personal'}
-          onClick={() => setSourceFilter('personal')}
-          className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-            sourceFilter === 'personal'
-              ? 'bg-teal text-white shadow-sm'
-              : 'text-text-secondary hover:text-navy'
-          }`}
-        >
-          Personal
-        </button>
-        {(households || []).map((household) => (
-          <button
-            key={household.id}
-            role="tab"
-            aria-selected={sourceFilter === household.id}
-            onClick={() => setSourceFilter(household.id)}
-            className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-              sourceFilter === household.id
-                ? 'bg-teal text-white shadow-sm'
-                : 'text-text-secondary hover:text-navy'
-            }`}
-          >
-            {household.name}
-          </button>
-        ))}
+      {/* Source and store filter toggles */}
+      <div className="flex gap-2 mb-4">
+        {/* Source filter */}
+        <div className="flex-1 overflow-x-auto">
+          <div role="tablist" className="flex bg-bg-warm rounded-xl p-1">
+            <button
+              role="tab"
+              aria-selected={sourceFilter === 'all'}
+              onClick={() => setSourceFilter('all')}
+              className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+                sourceFilter === 'all'
+                  ? 'bg-teal text-white shadow-sm'
+                  : 'text-text-secondary hover:text-navy'
+              }`}
+            >
+              All
+            </button>
+            <button
+              role="tab"
+              aria-selected={sourceFilter === 'personal'}
+              onClick={() => setSourceFilter('personal')}
+              className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+                sourceFilter === 'personal'
+                  ? 'bg-teal text-white shadow-sm'
+                  : 'text-text-secondary hover:text-navy'
+              }`}
+            >
+              Personal
+            </button>
+            {(households || []).map((household) => (
+              <button
+                key={household.id}
+                role="tab"
+                aria-selected={sourceFilter === household.id}
+                onClick={() => setSourceFilter(household.id)}
+                className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+                  sourceFilter === household.id
+                    ? 'bg-teal text-white shadow-sm'
+                    : 'text-text-secondary hover:text-navy'
+                }`}
+              >
+                {household.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Store filter */}
+        <div className="flex-1 overflow-x-auto">
+          <div role="tablist" className="flex bg-bg-warm rounded-xl p-1">
+            <button
+              role="tab"
+              aria-selected={storeFilter === 'all'}
+              onClick={() => setStoreFilter('all')}
+              className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+                storeFilter === 'all'
+                  ? 'bg-teal text-white shadow-sm'
+                  : 'text-text-secondary hover:text-navy'
+              }`}
+            >
+              All
+            </button>
+            {filteredStores.map((store) => (
+              <button
+                key={store.id}
+                role="tab"
+                aria-selected={storeFilter === store.id}
+                onClick={() => setStoreFilter(store.id)}
+                className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
+                  storeFilter === store.id
+                    ? 'bg-teal text-white shadow-sm'
+                    : 'text-text-secondary hover:text-navy'
+                }`}
+              >
+                {store.name}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Item list */}
