@@ -1,24 +1,29 @@
 // ABOUTME: Pantry items view with filter support for all, personal, household, and merged views
-// ABOUTME: Groups items by household in "all" view, flat list for scoped filters
+// ABOUTME: Groups items by household in "all" view, flat list for scoped filters, inline create form
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { MoreVertical, Trash2 } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
+import { useCreateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/create-inventory-item.mutation'
 import { useDeleteInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/delete-inventory-item.mutation'
 import { useHouseholdInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-household-inventory.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import { useMergedInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-merged-inventory.query'
 import { usePersonalInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-personal-inventory.query'
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
+import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 
 import { ConfirmDialog } from './components/confirm-dialog'
+import { ScopeSelect } from './components/scope-select'
 
 export type InventoryFilter = 'all' | 'personal' | `household:${string}` | `merged:${string}`
 
 interface PantryItemsViewProps {
   filter: InventoryFilter
+  showCreateForm: boolean
+  onCloseCreateForm: () => void
 }
 
 type FilterType = 'all' | 'personal' | 'household' | 'merged'
@@ -31,13 +36,55 @@ const parseFilter = (filter: InventoryFilter): { type: FilterType; id: string | 
   return { type: type as FilterType, id }
 }
 
-export const PantryItemsView = ({ filter }: PantryItemsViewProps) => {
+export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: PantryItemsViewProps) => {
   const { type: filterType, id: filterId } = parseFilter(filter)
   const { data: households } = useHouseholdsQuery()
+  const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
+  const { data: stores } = useStoresQuery(householdIds)
+  const createMutation = useCreateInventoryItemMutation()
   const deleteMutation = useDeleteInventoryItemMutation()
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
+
+  //== Inline create form state
+  const [itemName, setItemName] = useState('')
+  const [itemNotes, setItemNotes] = useState('')
+  const [itemScope, setItemScope] = useState<string>('personal')
+  const [itemDefaultStoreId, setItemDefaultStoreId] = useState<string | null>(null)
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!itemName.trim()) {
+      return
+    }
+
+    try {
+      await createMutation.mutateAsync({
+        name: itemName.trim(),
+        notes: itemNotes.trim() || null,
+        householdId: itemScope === 'personal' ? null : itemScope,
+        defaultStoreId: itemDefaultStoreId,
+      })
+      setItemName('')
+      setItemNotes('')
+      setItemScope('personal')
+      setItemDefaultStoreId(null)
+      onCloseCreateForm()
+    } catch {
+      // Error handled by mutation state
+    }
+  }
+
+  //== Filter stores by the selected scope
+  const filteredStores = useMemo(() => {
+    if (!stores) return []
+    if (itemScope === 'personal') {
+      return stores.filter((s) => s.userId !== null)
+    }
+    return stores.filter((s) => s.householdId === itemScope)
+  }, [stores, itemScope])
 
   useEffect(() => {
     if (!menuOpenId) return
@@ -85,12 +132,92 @@ export const PantryItemsView = ({ filter }: PantryItemsViewProps) => {
     setDeleteConfirm(null)
   }
 
+  const createForm = showCreateForm && (
+    <form onSubmit={handleCreate} className="mb-4 p-5 bg-surface rounded-2xl shadow-sm">
+      <div className="mb-3">
+        <label htmlFor="itemName" className="block text-sm font-semibold text-navy-soft mb-1">
+          Item Name
+        </label>
+        <input
+          id="itemName"
+          type="text"
+          value={itemName}
+          onChange={(e) => setItemName(e.target.value)}
+          placeholder="e.g., Milk"
+          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+          disabled={createMutation.isPending}
+        />
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor="itemScope" className="block text-sm font-semibold text-navy-soft mb-1">
+          Scope
+        </label>
+        <ScopeSelect
+          value={itemScope}
+          onChange={(val) => {
+            setItemScope(val)
+            setItemDefaultStoreId(null)
+          }}
+          personalLabel="Personal"
+          households={households}
+          householdDescription="Household"
+          disabled={createMutation.isPending}
+          aria-label="Scope"
+        />
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor="itemNotes" className="block text-sm font-semibold text-navy-soft mb-1">
+          Notes (optional)
+        </label>
+        <input
+          id="itemNotes"
+          type="text"
+          value={itemNotes}
+          onChange={(e) => setItemNotes(e.target.value)}
+          placeholder="Additional details"
+          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+          disabled={createMutation.isPending}
+        />
+      </div>
+
+      {filteredStores.length > 0 && (
+        <div className="mb-4">
+          <label htmlFor="itemDefaultStore" className="block text-sm font-semibold text-navy-soft mb-1">
+            Default Store (optional)
+          </label>
+          <select
+            id="itemDefaultStore"
+            value={itemDefaultStoreId || ''}
+            onChange={(e) => setItemDefaultStoreId(e.target.value || null)}
+            className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+            disabled={createMutation.isPending}
+          >
+            <option value="">None</option>
+            {filteredStores.map((store) => (
+              <option key={store.id} value={store.id}>{store.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <button
+        type="submit"
+        disabled={createMutation.isPending || !itemName.trim()}
+        className="w-full py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
+      >
+        {createMutation.isPending ? 'Creating...' : 'Create'}
+      </button>
+    </form>
+  )
+
   if (isLoading) {
-    return <p className="text-text-secondary">Loading inventory...</p>
+    return <>{createForm}<p className="text-text-secondary">Loading inventory...</p></>
   }
 
   if (!items || items.length === 0) {
-    return <p className="text-text-secondary mt-4">No inventory items yet. Add your first item!</p>
+    return <>{createForm}<p className="text-text-secondary mt-4">No inventory items yet. Add your first item!</p></>
   }
 
   const renderItem = (item: InventoryItem) => (
@@ -140,6 +267,7 @@ export const PantryItemsView = ({ filter }: PantryItemsViewProps) => {
 
     return (
       <>
+        {createForm}
         {(households || []).map((household) => {
           const householdItems = householdItemsMap.get(household.id) || []
           if (householdItems.length === 0) return null
@@ -185,6 +313,7 @@ export const PantryItemsView = ({ filter }: PantryItemsViewProps) => {
   //== For scoped filters, render a flat list
   return (
     <>
+      {createForm}
       <div className="space-y-2">
         {items.map(renderItem)}
       </div>

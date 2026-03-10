@@ -12,9 +12,11 @@ import { PantryPage } from '../pantry-page'
 
 //== Mock PantryItemsView so we can inspect its props without setting up all inventory hooks
 vi.mock('../pantry-items-view', () => ({
-  PantryItemsView: ({ filter }: { filter: string }) => (
-    <div data-testid="pantry-items-view" data-filter={filter}>
+  PantryItemsView: ({ filter, showCreateForm, onCloseCreateForm }: { filter: string; showCreateForm: boolean; onCloseCreateForm: () => void }) => (
+    <div data-testid="pantry-items-view" data-filter={filter} data-show-create-form={String(showCreateForm)}>
       Items view with filter: {filter}
+      {showCreateForm && <span data-testid="create-form-visible">Form visible</span>}
+      <button data-testid="close-create-form" onClick={onCloseCreateForm}>Close form</button>
     </div>
   ),
 }))
@@ -101,29 +103,37 @@ describe('PantryPage', () => {
     expect(view).toHaveAttribute('data-filter', 'household:h1')
   })
 
-  it('renders Add Item link to /pantry/add by default', () => {
+  it('renders Add Item button that toggles inline create form', () => {
     renderPage()
 
-    const link = screen.getByRole('link', { name: /add item/i })
-    expect(link).toHaveAttribute('href', '/pantry/add')
+    const button = screen.getByRole('button', { name: /add item/i })
+    expect(button).toBeInTheDocument()
+
+    //== Initially, create form should not be visible
+    expect(screen.getByTestId('pantry-items-view')).toHaveAttribute('data-show-create-form', 'false')
   })
 
-  it('renders Add Item link to /pantry/add when personal filter is active', () => {
+  it('toggles showCreateForm when Add Item button is clicked', () => {
     renderPage()
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Personal' }))
+    const button = screen.getByRole('button', { name: /add item/i })
+    fireEvent.click(button)
 
-    const link = screen.getByRole('link', { name: /add item/i })
-    expect(link).toHaveAttribute('href', '/pantry/add')
+    //== After clicking, form should be visible and button text should change to Cancel
+    expect(screen.getByTestId('pantry-items-view')).toHaveAttribute('data-show-create-form', 'true')
+    expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
   })
 
-  it('renders Add Item link with scope param when household filter is active', () => {
+  it('closes create form when onCloseCreateForm is called', () => {
     renderPage()
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Smith Family' }))
+    //== Open the form
+    fireEvent.click(screen.getByRole('button', { name: /add item/i }))
+    expect(screen.getByTestId('pantry-items-view')).toHaveAttribute('data-show-create-form', 'true')
 
-    const link = screen.getByRole('link', { name: /add item/i })
-    expect(link).toHaveAttribute('href', '/pantry/add?scope=household:h1')
+    //== Simulate the child calling onCloseCreateForm
+    fireEvent.click(screen.getByTestId('close-create-form'))
+    expect(screen.getByTestId('pantry-items-view')).toHaveAttribute('data-show-create-form', 'false')
   })
 
   it('hides filter tabs when Stores tab is active', () => {
