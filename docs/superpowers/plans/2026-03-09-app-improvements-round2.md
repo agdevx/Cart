@@ -6,7 +6,7 @@
 
 **Architecture:** Backend-first for schema changes (denormalization, FK behaviors, scope editing support), then frontend tasks grouped by dependency. TripItem gets denormalized `ItemName`/`StoreName` fields with live mirror updates. Frontend gets inline forms, accordion grouping, and UX polish.
 
-**Tech Stack:** .NET 9 / EF Core (backend), React / TypeScript / TanStack Query / Tailwind (frontend), Vitest + React Testing Library (frontend tests), xUnit + Moq (backend tests)
+**Tech Stack:** .NET 10 / EF Core (backend), React / TypeScript / TanStack Query / Tailwind (frontend), Vitest + React Testing Library (frontend tests), xUnit + Moq (backend tests)
 
 **Spec:** `docs/superpowers/specs/2026-03-09-app-improvements-round2-design.md`
 
