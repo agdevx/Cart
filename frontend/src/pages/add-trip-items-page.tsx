@@ -302,40 +302,32 @@ export const AddTripItemsPage = () => {
                   <span className="font-display font-bold text-navy">{item.name}</span>
                   <span className="ml-2 text-xs text-text-tertiary">{getSourceLabel(item.householdId)}</span>
                 </div>
-
-                {/* Quantity input (when selected) */}
-                {isSelected && (
-                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                    <label htmlFor={`qty-${item.id}`} className="text-xs text-text-tertiary mr-1">Qty</label>
-                    <input
-                      id={`qty-${item.id}`}
-                      type="number"
-                      min={1}
-                      value={selectedItems[item.id].quantity}
-                      onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10) || 1)}
-                      className="w-14 px-2 py-1 text-center border border-navy/10 rounded-lg bg-surface text-text text-sm focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-                    />
-                  </div>
-                )}
               </div>
 
-              {/* Store dropdown (when selected) */}
+              {/* Store dropdown + quantity (second line, when selected) */}
               {isSelected && (
-                <div className="mt-2 pl-9" onClick={(e) => e.stopPropagation()}>
-                  <label htmlFor={`store-${item.id}`} className="text-xs text-text-tertiary mr-2">Store</label>
+                <div className="flex items-center gap-2 mt-3 pl-9" onClick={(e) => e.stopPropagation()}>
                   <select
                     id={`store-${item.id}`}
                     value={selectedItems[item.id].storeId ?? ''}
                     onChange={(e) => updateStore(item.id, e.target.value || null)}
-                    className="px-2 py-1 border border-navy/10 rounded-lg bg-surface text-text text-sm focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+                    className="flex-1 min-w-0 px-3 py-2 min-h-[38px] border border-navy/10 rounded-xl bg-surface text-text text-sm focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
                   >
-                    <option value="">No store</option>
+                    <option value="">Any Store</option>
                     {(stores ?? []).map((store) => (
                       <option key={store.id} value={store.id}>
                         {store.name}
                       </option>
                     ))}
                   </select>
+                  <input
+                    id={`qty-${item.id}`}
+                    type="number"
+                    min={1}
+                    value={selectedItems[item.id].quantity}
+                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10) || 1)}
+                    className="w-14 px-2 py-2 text-center border border-navy/10 rounded-xl bg-surface text-text text-sm focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+                  />
                 </div>
               )}
             </div>
