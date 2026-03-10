@@ -11,6 +11,7 @@ import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
+import { tripDetailPath } from '@/routes'
 
 type SourceFilter = 'all' | 'personal' | string
 
@@ -128,7 +129,7 @@ export const AddTripItemsPage = () => {
           })
         )
       )
-      navigate(`/shopping/${tripId}`)
+      navigate(tripDetailPath(tripId!))
     } catch {
       // Error handled by mutation state
       setIsAdding(false)
@@ -161,7 +162,7 @@ export const AddTripItemsPage = () => {
     <div className="px-5 pt-14 pb-28">
       {/* Back button */}
       <button
-        onClick={() => navigate(`/shopping/${tripId}`)}
+        onClick={() => navigate(tripDetailPath(tripId!))}
         className="text-teal hover:text-teal-light font-semibold text-sm flex items-center gap-1 mb-3"
       >
         <ArrowLeft className="w-4 h-4" />

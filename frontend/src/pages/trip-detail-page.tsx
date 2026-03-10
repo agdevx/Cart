@@ -15,6 +15,8 @@ import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.qu
 
 import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
 
+import { activeTripPath, ROUTES, tripAddItemsPath } from '@/routes'
+
 import { StoreAccordion } from './components/store-accordion'
 import { TripItemRow } from './components/trip-item-row'
 
@@ -50,7 +52,7 @@ export const TripDetailPage = () => {
       if (!trip?.isStarted) {
         await startMutation.mutateAsync(tripId!)
       }
-      navigate(`/shopping/${tripId}/active`)
+      navigate(activeTripPath(tripId!))
     } catch {
       // Error handled by mutation state
     }
@@ -84,7 +86,7 @@ export const TripDetailPage = () => {
     <div className="px-5 pt-14 pb-8">
       <div className="mb-6">
         <button
-          onClick={() => navigate('/shopping')}
+          onClick={() => navigate(ROUTES.SHOPPING)}
           className="text-teal hover:text-teal-light font-semibold text-sm flex items-center gap-1 mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -111,7 +113,7 @@ export const TripDetailPage = () => {
         </div>
 
         <button
-          onClick={() => navigate(`/shopping/${tripId}/add-items`)}
+          onClick={() => navigate(tripAddItemsPath(tripId!))}
           className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
         >
           <Plus className="w-5 h-5" />

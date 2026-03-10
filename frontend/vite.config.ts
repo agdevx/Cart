@@ -55,6 +55,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      '@/routes': path.resolve(__dirname, './src/routes.ts'),
       '@/apis': path.resolve(__dirname, './src/apis'),
       '@/auth': path.resolve(__dirname, './src/auth'),
       '@/config': path.resolve(__dirname, './src/config'),

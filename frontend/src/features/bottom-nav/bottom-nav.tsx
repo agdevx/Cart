@@ -4,16 +4,18 @@
 import { Package, Settings, ShoppingCart, Users } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 
+import { ROUTES } from '@/routes'
+
 export const BottomNav = () => {
   const location = useLocation()
 
   const isActive = (path: string) => location.pathname.startsWith(path)
 
   const tabs = [
-    { path: '/pantry', label: 'Pantry', icon: Package },
-    { path: '/shopping', label: 'Trips', icon: ShoppingCart },
-    { path: '/household', label: 'Household', icon: Users },
-    { path: '/settings', label: 'Settings', icon: Settings },
+    { path: ROUTES.PANTRY, label: 'Pantry', icon: Package },
+    { path: ROUTES.SHOPPING, label: 'Trips', icon: ShoppingCart },
+    { path: ROUTES.HOUSEHOLD, label: 'Household', icon: Users },
+    { path: ROUTES.SETTINGS, label: 'Settings', icon: Settings },
   ]
 
   return (

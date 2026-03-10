@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
+import { tripDetailPath } from '@/routes'
 
 interface TripCardProps {
   trip: Trip
@@ -185,7 +186,7 @@ export const TripCard = ({ trip, onRename, onDelete, onReopen }: TripCardProps) 
 
   return (
     <Link
-      to={`/shopping/${trip.id}`}
+      to={tripDetailPath(trip.id)}
       className="block p-5 bg-surface rounded-2xl shadow-sm border-2 border-transparent hover:shadow-md hover:-translate-y-0.5 transition-all"
     >
       {cardContent}

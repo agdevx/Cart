@@ -27,6 +27,7 @@
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {
+      "@/routes": ["src/routes.ts"],
       "@/apis/*": ["src/apis/*"],
       "@/auth/*": ["src/auth/*"],
       "@/config/*": ["src/config/*"],

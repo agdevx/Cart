@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useJoinHouseholdMutation } from '@/apis/agdevx-cart-api/household/join-household.mutation'
+import { ROUTES } from '@/routes'
 import { getErrorMessage } from '@/utilities/error-messages'
 
 export const JoinHouseholdPage = () => {
@@ -21,7 +22,7 @@ export const JoinHouseholdPage = () => {
 
     try {
       await joinMutation.mutateAsync({ inviteCode: inviteCode.trim() })
-      navigate('/household')
+      navigate(ROUTES.HOUSEHOLD)
     } catch {
       // Error is handled by mutation state
     }
@@ -63,7 +64,7 @@ export const JoinHouseholdPage = () => {
           </button>
           <button
             type="button"
-            onClick={() => navigate('/household')}
+            onClick={() => navigate(ROUTES.HOUSEHOLD)}
             className="w-full py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
           >
             Cancel

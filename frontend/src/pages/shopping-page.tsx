@@ -12,6 +12,8 @@ import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.m
 import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
 
+import { tripDetailPath } from '@/routes'
+
 import { ConfirmDialog } from './components/confirm-dialog'
 import { ScopeSelect } from './components/scope-select'
 import { TripCard } from './components/trip-card'
@@ -49,7 +51,7 @@ export const ShoppingPage = () => {
       })
       setTripName('')
       setShowCreateForm(false)
-      navigate(`/shopping/${newTrip.id}`)
+      navigate(tripDetailPath(newTrip.id))
     } catch {
       // Error handled by mutation state
     }

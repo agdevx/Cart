@@ -15,6 +15,8 @@ import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-h
 import { useInviteCodeQuery } from '@/apis/agdevx-cart-api/household/use-invite-code.query'
 import { useAuth } from '@/auth/use-auth'
 
+import { ROUTES } from '@/routes'
+
 import { ConfirmDialog } from './components/confirm-dialog'
 
 export const HouseholdDetailPage = () => {
@@ -99,7 +101,7 @@ export const HouseholdDetailPage = () => {
   const handleDeleteHousehold = () => {
     if (!householdId) return
     deleteHouseholdMutation.mutate(householdId, {
-      onSuccess: () => navigate('/household'),
+      onSuccess: () => navigate(ROUTES.HOUSEHOLD),
     })
   }
 
@@ -113,7 +115,7 @@ export const HouseholdDetailPage = () => {
           userId: confirmAction.userId,
         })
         if (confirmAction.type === 'leave') {
-          navigate('/household')
+          navigate(ROUTES.HOUSEHOLD)
           return
         }
       } else if (confirmAction.type === 'transfer') {
@@ -142,7 +144,7 @@ export const HouseholdDetailPage = () => {
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/household')}
+          onClick={() => navigate(ROUTES.HOUSEHOLD)}
           className="text-teal hover:text-teal-light font-semibold text-sm flex items-center gap-1 mb-3"
         >
           <ArrowLeft className="w-4 h-4" />

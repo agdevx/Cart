@@ -6,6 +6,7 @@ import { Link,useNavigate } from 'react-router-dom';
 
 import { useRegisterMutation } from '@/apis/agdevx-cart-api/auth/register.mutation';
 import { useAuth } from '@/auth/use-auth';
+import { ROUTES } from '@/routes';
 
 export const RegisterPage = () => {
   const [email, setEmail] = useState('');
@@ -98,7 +99,7 @@ export const RegisterPage = () => {
           modifiedDate: null,
         });
 
-      navigate('/shopping');
+      navigate(ROUTES.SHOPPING);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (errorMessage.includes('already exists') || errorMessage.includes('DUPLICATE_EMAIL')) {
@@ -231,7 +232,7 @@ export const RegisterPage = () => {
           {/* Link to Login */}
           <p className="mt-4 text-center text-sm text-text-secondary">
             Already have an account?{' '}
-            <Link to="/login" className="text-teal hover:text-teal-light font-semibold">
+            <Link to={ROUTES.LOGIN} className="text-teal hover:text-teal-light font-semibold">
               Log in
             </Link>
           </p>

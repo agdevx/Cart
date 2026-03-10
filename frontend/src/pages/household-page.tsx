@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom'
 import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-household-members.query'
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useAuth } from '@/auth/use-auth'
+import { householdDetailPath, ROUTES } from '@/routes'
 const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
   const { user } = useAuth()
   const { data: members } = useHouseholdMembersQuery(householdId)
@@ -50,7 +51,7 @@ export const HouseholdPage = () => {
           {households.map((household) => (
             <Link
               key={household.id}
-              to={`/household/${household.id}`}
+              to={householdDetailPath(household.id)}
               className="block p-5 bg-surface rounded-xl shadow-sm border-2 border-transparent hover:border-teal/30 hover:shadow-md transition-all"
             >
               <h2 className="font-display text-lg font-bold text-navy">
@@ -66,14 +67,14 @@ export const HouseholdPage = () => {
 
       <div className="space-y-3">
         <Link
-          to="/household/create"
+          to={ROUTES.HOUSEHOLD_CREATE}
           className="flex items-center justify-center gap-2 w-full py-3.5 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light transition-colors"
         >
           <Plus className="w-5 h-5" />
           Create Household
         </Link>
         <Link
-          to="/household/join"
+          to={ROUTES.HOUSEHOLD_JOIN}
           className="flex items-center justify-center gap-2 w-full py-3.5 border-2 border-teal/30 text-teal rounded-xl font-display font-bold hover:bg-teal/8 transition-colors"
         >
           <UserPlus className="w-5 h-5" />
