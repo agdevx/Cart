@@ -60,9 +60,9 @@ const mockTripItems: TripItem[] = [
     tripId: 'trip1',
     inventoryItemId: 'inv1',
     itemName: 'Milk',
-    storeName: null,
+    storeName: 'Costco',
     quantity: 2,
-    storeId: null,
+    storeId: 'store1',
     notes: 'Get the organic kind',
     isChecked: false,
     checkedAt: null,
@@ -76,6 +76,38 @@ const mockTripItems: TripItem[] = [
     tripId: 'trip1',
     inventoryItemId: 'inv2',
     itemName: 'Bread',
+    storeName: 'Costco',
+    quantity: 1,
+    storeId: 'store1',
+    notes: null,
+    isChecked: false,
+    checkedAt: null,
+    createdBy: 'user1',
+    createdDate: '2024-01-15',
+    modifiedBy: null,
+    modifiedDate: null,
+  },
+  {
+    id: 'ti3',
+    tripId: 'trip1',
+    inventoryItemId: 'inv3',
+    itemName: 'Apples',
+    storeName: 'Walmart',
+    quantity: 6,
+    storeId: 'store3',
+    notes: null,
+    isChecked: false,
+    checkedAt: null,
+    createdBy: 'user1',
+    createdDate: '2024-01-15',
+    modifiedBy: null,
+    modifiedDate: null,
+  },
+  {
+    id: 'ti4',
+    tripId: 'trip1',
+    inventoryItemId: 'inv4',
+    itemName: 'Eggs',
     storeName: null,
     quantity: 1,
     storeId: null,
@@ -179,18 +211,28 @@ describe('TripDetailPage', () => {
     setupMocks()
     render(<TripDetailPage />, { wrapper })
 
-    //== Both items should appear by name
+    //== Expand all store accordions to reveal items
+    fireEvent.click(screen.getByText('Costco'))
+    fireEvent.click(screen.getByText('Walmart'))
+    fireEvent.click(screen.getByText('Any Store'))
+
+    //== All items should appear by name
     expect(screen.getByText('Milk')).toBeInTheDocument()
     expect(screen.getByText('Bread')).toBeInTheDocument()
+    expect(screen.getByText('Apples')).toBeInTheDocument()
+    expect(screen.getByText('Eggs')).toBeInTheDocument()
 
-    //== Both should have kebab menu buttons (TripItemRow uses "Item actions" aria-label)
+    //== All should have kebab menu buttons (TripItemRow uses "Item actions" aria-label)
     const kebabButtons = screen.getAllByLabelText('Item actions')
-    expect(kebabButtons).toHaveLength(2)
+    expect(kebabButtons).toHaveLength(4)
   })
 
   it('edits a trip item via kebab menu', () => {
     setupMocks()
     render(<TripDetailPage />, { wrapper })
+
+    //== Expand Costco accordion to reveal Milk and Bread
+    fireEvent.click(screen.getByText('Costco'))
 
     //== Open kebab menu on first item (Milk)
     const kebabButtons = screen.getAllByLabelText('Item actions')
@@ -211,13 +253,16 @@ describe('TripDetailPage', () => {
       tripId: 'trip1',
       quantity: 5,
       notes: 'Get the organic kind',
-      storeId: null,
+      storeId: 'store1',
     })
   })
 
   it('removes a trip item via kebab menu', () => {
     setupMocks()
     render(<TripDetailPage />, { wrapper })
+
+    //== Expand Costco accordion to reveal Milk and Bread
+    fireEvent.click(screen.getByText('Costco'))
 
     //== Open kebab menu on first item (Milk)
     const kebabButtons = screen.getAllByLabelText('Item actions')
@@ -296,6 +341,9 @@ describe('TripDetailPage', () => {
     setupMocks()
     render(<TripDetailPage />, { wrapper })
 
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
+
     //== Open kebab menu and click Edit on first item
     const kebabButtons = screen.getAllByLabelText('Item actions')
     fireEvent.click(kebabButtons[0])
@@ -311,5 +359,88 @@ describe('TripDetailPage', () => {
     expect(options[0]).toHaveTextContent('No store')
     expect(options[1]).toHaveTextContent('Costco')
     expect(options[2]).toHaveTextContent('Trader Joes')
+  })
+
+  describe('store grouping', () => {
+    it('should group items by store name', () => {
+      setupMocks()
+      render(<TripDetailPage />, { wrapper })
+
+      //== 3 accordion sections: "Costco", "Walmart", "Any Store"
+      expect(screen.getByText('Costco')).toBeInTheDocument()
+      expect(screen.getByText('Walmart')).toBeInTheDocument()
+      expect(screen.getByText('Any Store')).toBeInTheDocument()
+    })
+
+    it('should show "Any Store" group for items without a store', () => {
+      setupMocks()
+
+      //== Override with items that have no store
+      vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+        data: [
+          { ...mockTripItems[0], storeName: null, storeId: null },
+        ],
+        isLoading: false,
+      } as any)
+
+      render(<TripDetailPage />, { wrapper })
+
+      expect(screen.getByText('Any Store')).toBeInTheDocument()
+    })
+
+    it('should sort named stores alphabetically with "Any Store" last', () => {
+      setupMocks()
+      render(<TripDetailPage />, { wrapper })
+
+      //== Get all accordion buttons (store group headers)
+      const buttons = screen.getAllByRole('button').filter((btn) =>
+        ['Costco', 'Walmart', 'Any Store'].some((name) => btn.textContent?.includes(name))
+      )
+
+      //== Verify order: Costco, Walmart, Any Store
+      expect(buttons[0]).toHaveTextContent('Costco')
+      expect(buttons[1]).toHaveTextContent('Walmart')
+      expect(buttons[2]).toHaveTextContent('Any Store')
+    })
+
+    it('should default all accordions to collapsed', () => {
+      setupMocks()
+      localStorage.removeItem('trip-accordion-trip1')
+      render(<TripDetailPage />, { wrapper })
+
+      //== Item names should NOT be visible because all accordions default to collapsed
+      expect(screen.queryByText('Milk')).not.toBeInTheDocument()
+      expect(screen.queryByText('Bread')).not.toBeInTheDocument()
+      expect(screen.queryByText('Apples')).not.toBeInTheDocument()
+      expect(screen.queryByText('Eggs')).not.toBeInTheDocument()
+    })
+
+    it('should persist accordion state in localStorage', () => {
+      setupMocks()
+      localStorage.removeItem('trip-accordion-trip1')
+      render(<TripDetailPage />, { wrapper })
+
+      //== Expand "Costco" section
+      fireEvent.click(screen.getByText('Costco'))
+
+      //== localStorage should have the expanded state
+      const stored = JSON.parse(localStorage.getItem('trip-accordion-trip1') || '{}')
+      expect(stored['Costco']).toBe(true)
+    })
+
+    it('should show item count per store group', () => {
+      setupMocks()
+      render(<TripDetailPage />, { wrapper })
+
+      //== Costco has 2 items, Walmart has 1, Any Store has 1
+      const costcoHeader = screen.getByText('Costco').closest('button')!
+      expect(costcoHeader).toHaveTextContent('2')
+
+      const walmartHeader = screen.getByText('Walmart').closest('button')!
+      expect(walmartHeader).toHaveTextContent('1')
+
+      const anyStoreHeader = screen.getByText('Any Store').closest('button')!
+      expect(anyStoreHeader).toHaveTextContent('1')
+    })
   })
 })

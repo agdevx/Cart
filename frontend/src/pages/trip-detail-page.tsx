@@ -13,6 +13,9 @@ import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-tr
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 
+import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
+
+import { StoreAccordion } from './components/store-accordion'
 import { TripItemRow } from './components/trip-item-row'
 
 export const TripDetailPage = () => {
@@ -23,9 +26,24 @@ export const TripDetailPage = () => {
   const { data: households } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores } = useStoresQuery(householdIds)
+  const { isExpanded, toggleStore } = useStoreAccordionState(tripId!, trip?.isCompleted ?? false)
   const startMutation = useStartTripMutation()
   const updateMutation = useUpdateTripItemMutation()
   const deleteMutation = useDeleteTripItemMutation()
+
+  const groupedItems = useMemo(() => {
+    if (!tripItems) return []
+    const groups: Record<string, typeof tripItems> = {}
+    tripItems.forEach((item) => {
+      const key = item.storeName ?? 'Any Store'
+      ;(groups[key] ??= []).push(item)
+    })
+    return Object.entries(groups).sort(([a], [b]) => {
+      if (a === 'Any Store') return 1
+      if (b === 'Any Store') return -1
+      return a.localeCompare(b)
+    })
+  }, [tripItems])
 
   const handleStartShopping = async () => {
     try {
@@ -100,18 +118,30 @@ export const TripDetailPage = () => {
           Add Items
         </button>
 
-        {tripItems && tripItems.length > 0 ? (
-          <div className="space-y-2">
-            {tripItems.map((item) => (
-                <TripItemRow
-                  key={item.id}
-                  tripItem={item}
-                  itemName={item.itemName}
-                  stores={stores || []}
-                  onUpdate={handleUpdateItem}
-                  onDelete={handleDeleteItem}
-                  isUpdating={updateMutation.isPending}
-                />
+        {groupedItems.length > 0 ? (
+          <div>
+            {groupedItems.map(([storeName, storeItems]) => (
+              <StoreAccordion
+                key={storeName}
+                storeName={storeName}
+                isExpanded={isExpanded(storeName)}
+                onToggle={() => toggleStore(storeName)}
+                itemCount={storeItems.length}
+              >
+                <div className="space-y-2">
+                  {storeItems.map((item) => (
+                    <TripItemRow
+                      key={item.id}
+                      tripItem={item}
+                      itemName={item.itemName}
+                      stores={stores || []}
+                      onUpdate={handleUpdateItem}
+                      onDelete={handleDeleteItem}
+                      isUpdating={updateMutation.isPending}
+                    />
+                  ))}
+                </div>
+              </StoreAccordion>
             ))}
           </div>
         ) : (

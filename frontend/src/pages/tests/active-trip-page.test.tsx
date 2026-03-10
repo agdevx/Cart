@@ -62,9 +62,9 @@ const mockTripItems: TripItem[] = [
     tripId: 'trip1',
     inventoryItemId: 'inv1',
     itemName: 'Milk',
-    storeName: null,
+    storeName: 'Costco',
     quantity: 2,
-    storeId: null,
+    storeId: 'store1',
     notes: 'Get organic',
     isChecked: false,
     checkedAt: null,
@@ -78,9 +78,9 @@ const mockTripItems: TripItem[] = [
     tripId: 'trip1',
     inventoryItemId: 'inv2',
     itemName: 'Bread',
-    storeName: null,
+    storeName: 'Costco',
     quantity: 1,
-    storeId: null,
+    storeId: 'store1',
     notes: null,
     isChecked: true,
     checkedAt: '2024-01-16',
@@ -172,6 +172,9 @@ describe('ActiveTripPage', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
 
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
+
     //== Both items should appear
     expect(screen.getByText('Milk')).toBeInTheDocument()
     expect(screen.getByText('Bread')).toBeInTheDocument()
@@ -189,6 +192,9 @@ describe('ActiveTripPage', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
 
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
+
     //== Click the unchecked item (Milk) — the row itself should toggle
     fireEvent.click(screen.getByText('Milk'))
 
@@ -202,6 +208,9 @@ describe('ActiveTripPage', () => {
   it('opens edit form via kebab menu and saves updated quantity', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
+
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
 
     //== Open kebab menu on Milk item
     const kebabButtons = screen.getAllByLabelText('Item actions')
@@ -228,6 +237,9 @@ describe('ActiveTripPage', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
 
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
+
     //== Open kebab menu on Milk item
     const kebabButtons = screen.getAllByLabelText('Item actions')
     fireEvent.click(kebabButtons[0])
@@ -242,6 +254,9 @@ describe('ActiveTripPage', () => {
   it('shows strikethrough styling on checked items', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
+
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
 
     //== Bread (ti2) is checked — should have line-through styling
     const breadElement = screen.getByText('Bread')
@@ -322,6 +337,9 @@ describe('ActiveTripPage', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
 
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
+
     //== Find the kebab button for the unchecked item (Milk)
     const kebabButtons = screen.getAllByLabelText('Item actions')
     const milkKebab = kebabButtons[0]
@@ -356,6 +374,9 @@ describe('ActiveTripPage', () => {
     setupMocks()
     render(<ActiveTripPage />, { wrapper })
 
+    //== Expand Costco accordion to reveal items
+    fireEvent.click(screen.getByText('Costco'))
+
     //== Open kebab menu and click Edit on Milk item
     const kebabButtons = screen.getAllByLabelText('Item actions')
     fireEvent.click(kebabButtons[0])
@@ -368,5 +389,54 @@ describe('ActiveTripPage', () => {
     fireEvent.click(screen.getByText('Milk'))
 
     expect(checkMutateAsyncFn).not.toHaveBeenCalled()
+  })
+
+  describe('store grouping', () => {
+    it('should group items by store on active trip page', () => {
+      setupMocks()
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Costco accordion should be visible
+      expect(screen.getByText('Costco')).toBeInTheDocument()
+    })
+
+    it('should show checked count in accordion header', () => {
+      setupMocks()
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Costco has 2 items, 1 checked (Bread) — header should show "1/2"
+      const costcoHeader = screen.getByText('Costco').closest('button')!
+      expect(costcoHeader).toHaveTextContent('1/2')
+    })
+
+    it('should default all accordions to collapsed', () => {
+      setupMocks()
+      localStorage.removeItem('trip-accordion-trip1')
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Item names should NOT be visible because accordions default to collapsed
+      expect(screen.queryByText('Milk')).not.toBeInTheDocument()
+      expect(screen.queryByText('Bread')).not.toBeInTheDocument()
+    })
+
+    it('should auto-collapse store group when all items are checked', () => {
+      setupMocks()
+
+      //== Override: all Costco items are checked
+      vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
+        data: mockTripItems.map((item) => ({ ...item, isChecked: true, checkedAt: '2024-01-16' })),
+        isLoading: false,
+      } as any)
+
+      //== Pre-set localStorage with Costco expanded
+      localStorage.setItem('trip-accordion-trip1', JSON.stringify({ Costco: true }))
+
+      render(<ActiveTripPage />, { wrapper })
+
+      //== Costco should have auto-collapsed because all items are checked
+      //== Items should not be visible
+      expect(screen.queryByText('Milk')).not.toBeInTheDocument()
+      expect(screen.queryByText('Bread')).not.toBeInTheDocument()
+    })
   })
 })
