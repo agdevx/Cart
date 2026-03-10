@@ -133,14 +133,14 @@ export const HouseholdDetailPage = () => {
 
   if (membersLoading || codeLoading || householdLoading) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Loading household...</p>
       </div>
     )
   }
 
   return (
-    <div className="px-5 pt-14 pb-8">
+    <div className="px-5 pt-7 pb-8">
       {/* Header */}
       <div className="mb-6">
         <button

@@ -5,17 +5,15 @@ import { LogOut } from 'lucide-react'
 
 import { useAuth } from '@/auth/use-auth'
 
+import { PageHeader } from './components/page-header'
+
 export const SettingsPage = () => {
   const { logout } = useAuth()
 
   return (
-    <div className="px-5 pt-14 pb-4">
-      <div className="mb-6">
-        <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">
-          Settings
-        </h1>
-      </div>
-
+    <div className="pb-4">
+      <PageHeader>Settings</PageHeader>
+      <div className="px-5">
       <div className="space-y-3">
         <button
           onClick={logout}
@@ -24,6 +22,7 @@ export const SettingsPage = () => {
           <LogOut className="w-5 h-5" />
           Logout
         </button>
+      </div>
       </div>
     </div>
   )

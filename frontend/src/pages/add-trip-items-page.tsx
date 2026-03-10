@@ -144,7 +144,7 @@ export const AddTripItemsPage = () => {
 
   if (tripLoading) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Loading...</p>
       </div>
     )
@@ -152,14 +152,14 @@ export const AddTripItemsPage = () => {
 
   if (!trip) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Trip not found</p>
       </div>
     )
   }
 
   return (
-    <div className="px-5 pt-14 pb-28">
+    <div className="px-5 pt-7 pb-28">
       {/* Back button */}
       <button
         onClick={() => navigate(tripDetailPath(tripId!))}

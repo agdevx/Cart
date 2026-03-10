@@ -9,6 +9,8 @@ import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-househo
 import { useAuth } from '@/auth/use-auth'
 import { householdDetailPath, ROUTES } from '@/routes'
 
+import { PageHeader } from './components/page-header'
+
 const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
   const { user } = useAuth()
   const { data: members } = useHouseholdMembersQuery(householdId)
@@ -33,20 +35,16 @@ export const HouseholdPage = () => {
   const { data: households, isLoading } = useHouseholdsQuery()
   if (isLoading) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Loading households...</p>
       </div>
     )
   }
 
   return (
-    <div className="px-5 pt-14 pb-4">
-      <div className="mb-6">
-        <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">
-          Your <span className="text-teal">Household</span>
-        </h1>
-      </div>
-
+    <div className="pb-4">
+      <PageHeader>Your <span className="text-teal">Household</span></PageHeader>
+      <div className="px-5">
       {households && households.length > 0 ? (
         <div className="space-y-3 mb-6">
           {households.map((household) => (
@@ -81,6 +79,7 @@ export const HouseholdPage = () => {
           <UserPlus className="w-5 h-5" />
           Join with Code
         </Link>
+      </div>
       </div>
     </div>
   )

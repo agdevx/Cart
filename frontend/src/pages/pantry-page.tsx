@@ -10,6 +10,8 @@ import { PantryItemsView } from '@/pages/pantry-items-view'
 import type { InventoryFilter } from '@/pages/pantry-items-view'
 import { PantryStoresView } from '@/pages/pantry-stores-view'
 
+import { PageHeader } from './components/page-header'
+
 type InventoryTab = 'items' | 'stores'
 
 export const PantryPage = () => {
@@ -19,13 +21,10 @@ export const PantryPage = () => {
   const { data: households } = useHouseholdsQuery()
 
   return (
-    <div className="px-5 pt-14 pb-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">
-          Your <span className="text-teal">Pantry</span>
-        </h1>
-      </div>
+    <div className="pb-4">
+      <PageHeader>Your <span className="text-teal">Pantry</span></PageHeader>
 
+      <div className="px-5">
       {/* Segmented Control */}
       <div role="tablist" className="flex bg-bg-warm rounded-xl p-1 mb-4">
         <button
@@ -121,6 +120,7 @@ export const PantryPage = () => {
 
       {/* Stores View */}
       {activeTab === 'stores' && <PantryStoresView />}
+      </div>
     </div>
   )
 }

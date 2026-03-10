@@ -15,6 +15,7 @@ import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
 import { tripDetailPath } from '@/routes'
 
 import { ConfirmDialog } from './components/confirm-dialog'
+import { PageHeader } from './components/page-header'
 import { ScopeSelect } from './components/scope-select'
 import { TripCard } from './components/trip-card'
 
@@ -78,20 +79,16 @@ export const ShoppingPage = () => {
 
   if (isLoading) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Loading trips...</p>
       </div>
     )
   }
 
   return (
-    <div className="px-5 pt-14 pb-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">
-          Your <span className="text-teal">Trips</span>
-        </h1>
-      </div>
-
+    <div className="pb-4">
+      <PageHeader>Your <span className="text-teal">Trips</span></PageHeader>
+      <div className="px-5">
       {/* New Trip Button */}
       <button
         onClick={() => setShowCreateForm(!showCreateForm)}
@@ -211,6 +208,7 @@ export const ShoppingPage = () => {
           isPending={deleteMutation.isPending}
         />
       )}
+      </div>
     </div>
   )
 }

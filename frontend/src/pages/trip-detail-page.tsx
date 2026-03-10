@@ -68,7 +68,7 @@ export const TripDetailPage = () => {
 
   if (tripLoading || itemsLoading) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Loading trip...</p>
       </div>
     )
@@ -76,14 +76,14 @@ export const TripDetailPage = () => {
 
   if (!trip) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Trip not found</p>
       </div>
     )
   }
 
   return (
-    <div className="px-5 pt-14 pb-8">
+    <div className="px-5 pt-7 pb-8">
       <div className="mb-6">
         <button
           onClick={() => navigate(ROUTES.SHOPPING)}

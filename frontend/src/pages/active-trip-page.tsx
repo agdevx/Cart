@@ -127,7 +127,7 @@ export const ActiveTripPage = () => {
 
   if (tripLoading || itemsLoading) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Loading trip...</p>
       </div>
     )
@@ -135,7 +135,7 @@ export const ActiveTripPage = () => {
 
   if (!trip) {
     return (
-      <div className="px-5 pt-14">
+      <div className="px-5 pt-7">
         <p className="text-text-secondary">Trip not found</p>
       </div>
     )
@@ -146,7 +146,7 @@ export const ActiveTripPage = () => {
   const progressPercent = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0
 
   return (
-    <div className="px-5 pt-14 pb-8">
+    <div className="px-5 pt-7 pb-8">
       <div className="mb-6">
         <button
           onClick={() => navigate(tripDetailPath(tripId!))}
