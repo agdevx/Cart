@@ -1,13 +1,14 @@
 // ABOUTME: Pantry items view with filter support for all, personal, household, and merged views
-// ABOUTME: Groups items by household in "all" view, flat list for scoped filters, inline create form
+// ABOUTME: Groups items by household in "all" view, flat list for scoped filters, inline create and edit forms
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { MoreVertical, Trash2 } from 'lucide-react'
+import { MoreVertical, Pencil, Trash2 } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/create-inventory-item.mutation'
 import { useDeleteInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/delete-inventory-item.mutation'
+import { useUpdateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/update-inventory-item.mutation'
 import { useHouseholdInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-household-inventory.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import { useMergedInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-merged-inventory.query'
@@ -43,9 +44,17 @@ export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: P
   const { data: stores } = useStoresQuery(householdIds)
   const createMutation = useCreateInventoryItemMutation()
   const deleteMutation = useDeleteInventoryItemMutation()
+  const updateMutation = useUpdateInventoryItemMutation()
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
+  const [editingItemId, setEditingItemId] = useState<string | null>(null)
+
+  //== Inline edit form state
+  const [editName, setEditName] = useState('')
+  const [editNotes, setEditNotes] = useState('')
+  const [editScope, setEditScope] = useState<string>('personal')
+  const [editDefaultStoreId, setEditDefaultStoreId] = useState<string | null>(null)
 
   //== Inline create form state
   const [itemName, setItemName] = useState('')
@@ -77,7 +86,38 @@ export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: P
     }
   }
 
-  //== Filter stores by the selected scope
+  const handleEdit = (item: InventoryItem) => {
+    setMenuOpenId(null)
+    setEditingItemId(item.id)
+    setEditName(item.name)
+    setEditNotes(item.notes || '')
+    setEditScope(item.householdId || 'personal')
+    setEditDefaultStoreId(item.defaultStoreId)
+  }
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!editingItemId || !editName.trim()) {
+      return
+    }
+
+    try {
+      await updateMutation.mutateAsync({
+        id: editingItemId,
+        name: editName.trim(),
+        notes: editNotes.trim() || null,
+        householdId: editScope === 'personal' ? null : editScope,
+        ownerUserId: editScope === 'personal' ? items?.find((i) => i.id === editingItemId)?.ownerUserId ?? null : null,
+        defaultStoreId: editDefaultStoreId,
+      })
+      setEditingItemId(null)
+    } catch {
+      // Error handled by mutation state
+    }
+  }
+
+  //== Filter stores by the selected scope (for create form)
   const filteredStores = useMemo(() => {
     if (!stores) return []
     if (itemScope === 'personal') {
@@ -85,6 +125,15 @@ export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: P
     }
     return stores.filter((s) => s.householdId === itemScope)
   }, [stores, itemScope])
+
+  //== Filter stores by the selected scope (for edit form)
+  const editFilteredStores = useMemo(() => {
+    if (!stores) return []
+    if (editScope === 'personal') {
+      return stores.filter((s) => s.userId !== null)
+    }
+    return stores.filter((s) => s.householdId === editScope)
+  }, [stores, editScope])
 
   useEffect(() => {
     if (!menuOpenId) return
@@ -220,37 +269,133 @@ export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: P
     return <>{createForm}<p className="text-text-secondary mt-4">No inventory items yet. Add your first item!</p></>
   }
 
-  const renderItem = (item: InventoryItem) => (
-    <div
-      key={item.id}
-      className="p-4 bg-surface rounded-xl shadow-sm flex justify-between items-start"
-    >
-      <div>
-        <h3 className="font-bold text-navy">{item.name}</h3>
-        {item.notes && (
-          <p className="text-sm text-text-secondary mt-0.5">{item.notes}</p>
-        )}
+  const renderEditForm = (item: InventoryItem) => (
+    <form onSubmit={handleEditSubmit} className="p-5 bg-surface rounded-2xl shadow-sm mt-2">
+      <div className="mb-3">
+        <label htmlFor={`editName-${item.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
+          Item Name
+        </label>
+        <input
+          id={`editName-${item.id}`}
+          type="text"
+          value={editName}
+          onChange={(e) => setEditName(e.target.value)}
+          placeholder="e.g., Milk"
+          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+          disabled={updateMutation.isPending}
+        />
       </div>
-      <div className="relative" ref={menuOpenId === item.id ? menuRef : undefined}>
+
+      <div className="mb-3">
+        <label htmlFor={`editScope-${item.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
+          Scope
+        </label>
+        <ScopeSelect
+          value={editScope}
+          onChange={(val) => {
+            setEditScope(val)
+            setEditDefaultStoreId(null)
+          }}
+          personalLabel="Personal"
+          households={households}
+          householdDescription="Household"
+          disabled={updateMutation.isPending}
+          aria-label="Scope"
+        />
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor={`editNotes-${item.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
+          Notes (optional)
+        </label>
+        <input
+          id={`editNotes-${item.id}`}
+          type="text"
+          value={editNotes}
+          onChange={(e) => setEditNotes(e.target.value)}
+          placeholder="Additional details"
+          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+          disabled={updateMutation.isPending}
+        />
+      </div>
+
+      {editFilteredStores.length > 0 && (
+        <div className="mb-4">
+          <label htmlFor={`editDefaultStore-${item.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
+            Default Store (optional)
+          </label>
+          <select
+            id={`editDefaultStore-${item.id}`}
+            value={editDefaultStoreId || ''}
+            onChange={(e) => setEditDefaultStoreId(e.target.value || null)}
+            className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+            disabled={updateMutation.isPending}
+          >
+            <option value="">None</option>
+            {editFilteredStores.map((store) => (
+              <option key={store.id} value={store.id}>{store.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <div className="flex gap-3">
         <button
-          onClick={() => setMenuOpenId(menuOpenId === item.id ? null : item.id)}
-          aria-label="Item actions"
-          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
+          type="button"
+          onClick={() => setEditingItemId(null)}
+          className="flex-1 py-3 border border-navy/10 rounded-xl font-display font-bold text-text-secondary hover:bg-bg-warm transition-colors"
         >
-          <MoreVertical className="w-5 h-5 text-text-tertiary" />
+          Cancel
         </button>
-        {menuOpenId === item.id && (
-          <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[140px]">
-            <button
-              onClick={() => handleDelete(item.id, item.name)}
-              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-              Delete
-            </button>
-          </div>
-        )}
+        <button
+          type="submit"
+          disabled={updateMutation.isPending || !editName.trim()}
+          className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
+        >
+          {updateMutation.isPending ? 'Saving...' : 'Save'}
+        </button>
       </div>
+    </form>
+  )
+
+  const renderItem = (item: InventoryItem) => (
+    <div key={item.id}>
+      <div className="p-4 bg-surface rounded-xl shadow-sm flex justify-between items-start">
+        <div>
+          <h3 className="font-bold text-navy">{item.name}</h3>
+          {item.notes && (
+            <p className="text-sm text-text-secondary mt-0.5">{item.notes}</p>
+          )}
+        </div>
+        <div className="relative" ref={menuOpenId === item.id ? menuRef : undefined}>
+          <button
+            onClick={() => setMenuOpenId(menuOpenId === item.id ? null : item.id)}
+            aria-label="Item actions"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
+          >
+            <MoreVertical className="w-5 h-5 text-text-tertiary" />
+          </button>
+          {menuOpenId === item.id && (
+            <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[140px]">
+              <button
+                onClick={() => handleEdit(item)}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-text hover:bg-bg-warm transition-colors"
+              >
+                <Pencil className="w-4 h-4" />
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(item.id, item.name)}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+      {editingItemId === item.id && renderEditForm(item)}
     </div>
   )
 
