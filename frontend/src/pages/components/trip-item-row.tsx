@@ -100,15 +100,24 @@ export const TripItemRow = ({
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <span className="font-bold text-navy">{itemName}</span>
-            <p className="text-sm text-text-secondary">Quantity: {tripItem.quantity}</p>
-            {/* Pantry notes — only shown when inventoryItem exists and has notes */}
-            {tripItem.inventoryItem?.notes && (
-              <p className="text-xs text-text-secondary italic">
-                Pantry: {tripItem.inventoryItem.notes}
-              </p>
+            {/* Item details — hidden during edit */}
+            {!editing && (
+              <>
+                <p className="text-sm text-text-secondary mt-1">
+                  <span className="italic text-text-tertiary">Qty:</span> {tripItem.quantity}
+                </p>
+                {tripItem.inventoryItem?.notes && (
+                  <p className="text-sm text-text-secondary mt-0.5">
+                    <span className="italic text-text-tertiary">Pantry Notes:</span> {tripItem.inventoryItem.notes}
+                  </p>
+                )}
+                {tripItem.notes && (
+                  <p className="text-sm text-text-secondary mt-0.5">
+                    <span className="italic text-text-tertiary">Shopping Notes:</span> {tripItem.notes}
+                  </p>
+                )}
+              </>
             )}
-            {/* Trip notes */}
-            {tripItem.notes && <p className="text-sm text-text-secondary">{tripItem.notes}</p>}
           </div>
           <div className="relative" ref={menuRef}>
             <button
@@ -180,15 +189,24 @@ export const TripItemRow = ({
         <span className={`text-base font-bold ${tripItem.isChecked ? 'line-through text-text-tertiary' : 'text-navy'}`}>
           {itemName}
         </span>
-        <p className="text-xs text-text-tertiary font-semibold mt-0.5">Qty: {tripItem.quantity}</p>
-        {/* Pantry notes — only shown when inventoryItem exists and has notes */}
-        {tripItem.inventoryItem?.notes && (
-          <p className="text-xs text-text-secondary italic mt-0.5">
-            Pantry: {tripItem.inventoryItem.notes}
-          </p>
+        {/* Item details — hidden during edit */}
+        {!editing && (
+          <>
+            <p className="text-sm text-text-secondary mt-0.5">
+              <span className="italic text-text-tertiary">Qty:</span> {tripItem.quantity}
+            </p>
+            {tripItem.inventoryItem?.notes && (
+              <p className="text-sm text-text-secondary mt-0.5">
+                <span className="italic text-text-tertiary">Pantry Notes:</span> {tripItem.inventoryItem.notes}
+              </p>
+            )}
+            {tripItem.notes && (
+              <p className="text-sm text-text-secondary mt-0.5">
+                <span className="italic text-text-tertiary">Shopping Notes:</span> {tripItem.notes}
+              </p>
+            )}
+          </>
         )}
-        {/* Trip notes */}
-        {tripItem.notes && <p className="text-xs text-text-tertiary mt-0.5">{tripItem.notes}</p>}
       </div>
 
       {/* Kebab menu — stop touch/mousedown propagation to prevent mobile browsers
@@ -290,7 +308,7 @@ const EditForm = ({
       />
     </div>
     <div>
-      <label htmlFor="edit-notes" className="block text-xs font-semibold text-text-secondary mb-1">Notes</label>
+      <label htmlFor="edit-notes" className="block text-xs font-semibold text-text-secondary mb-1">Shopping Notes</label>
       <input
         id="edit-notes"
         type="text"
