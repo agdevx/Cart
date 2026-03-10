@@ -47,7 +47,7 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
         return await tripRepository.GetById(id);
     }
 
-    public async Task<Trip> UpdateTrip(Guid tripId, string name, Guid userId)
+    public async Task<Trip> UpdateTrip(Guid tripId, string name, Guid? householdId, Guid userId)
     {
         //== Verify user is collaborator before updating trip
         var isCollaborator = await tripRepository.IsUserCollaborator(tripId, userId);
@@ -56,10 +56,21 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
             throw new UnauthorizedAccessException("User is not a collaborator on this trip");
         }
 
+        //== Verify household membership if changing to household scope
+        if (householdId.HasValue)
+        {
+            var isMember = await householdRepository.IsUserMember(householdId.Value, userId);
+            if (!isMember)
+            {
+                throw new UnauthorizedAccessException("User is not a member of the household");
+            }
+        }
+
         var trip = await tripRepository.GetById(tripId)
                         ?? throw new KeyNotFoundException("Trip not found");
 
         trip.Name = name;
+        trip.HouseholdId = householdId;
         return await tripRepository.Update(trip);
     }
 

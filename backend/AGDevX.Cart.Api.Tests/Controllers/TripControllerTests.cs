@@ -214,7 +214,7 @@ public class TripControllerTests
         var request = new UpdateTripRequest { Name = "Updated Trip" };
         var trip = new Trip { Id = tripId, Name = "Updated Trip" };
 
-        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, userId))
+        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, request.HouseholdId, userId))
                    .ReturnsAsync(trip);
 
         // Act
@@ -244,7 +244,7 @@ public class TripControllerTests
 
         var request = new UpdateTripRequest { Name = "Updated Trip" };
 
-        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, userId))
+        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, request.HouseholdId, userId))
                    .ThrowsAsync(new ArgumentException("Trip not found"));
 
         // Act
@@ -274,7 +274,7 @@ public class TripControllerTests
 
         var request = new UpdateTripRequest { Name = "Updated Trip" };
 
-        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, userId))
+        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, request.HouseholdId, userId))
                    .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this trip"));
 
         // Act

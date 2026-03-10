@@ -58,8 +58,8 @@ export const ShoppingPage = () => {
     }
   }
 
-  const handleRename = (tripId: string, newName: string) => {
-    updateMutation.mutate({ tripId, name: newName })
+  const handleUpdate = (tripId: string, name: string, householdId: string | null) => {
+    updateMutation.mutate({ tripId, name, householdId })
   }
 
   const handleDelete = (tripId: string, tripName: string) => {
@@ -158,7 +158,7 @@ export const ShoppingPage = () => {
           </div>
           <div className="space-y-3">
             {inProgressTrips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} onRename={handleRename} onDelete={handleDelete} onReopen={handleReopen} />
+              <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} households={households} onDelete={handleDelete} onReopen={handleReopen} />
             ))}
           </div>
         </div>
@@ -173,7 +173,7 @@ export const ShoppingPage = () => {
           </div>
           <div className="space-y-3">
             {planningTrips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} onRename={handleRename} onDelete={handleDelete} onReopen={handleReopen} />
+              <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} households={households} onDelete={handleDelete} onReopen={handleReopen} />
             ))}
           </div>
         </div>
@@ -195,7 +195,7 @@ export const ShoppingPage = () => {
           {showCompleted && (
             <div className="space-y-3">
               {completedTrips.map((trip) => (
-                <TripCard key={trip.id} trip={trip} onRename={handleRename} onDelete={handleDelete} onReopen={handleReopen} />
+                <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} households={households} onDelete={handleDelete} onReopen={handleReopen} />
               ))}
             </div>
           )}
