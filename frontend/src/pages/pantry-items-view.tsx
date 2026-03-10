@@ -231,25 +231,23 @@ export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: P
         />
       </div>
 
-      {filteredStores.length > 0 && (
-        <div className="mb-4">
-          <label htmlFor="itemDefaultStore" className="block text-sm font-semibold text-navy-soft mb-1">
-            Default Store (optional)
-          </label>
-          <select
-            id="itemDefaultStore"
-            value={itemDefaultStoreId || ''}
-            onChange={(e) => setItemDefaultStoreId(e.target.value || null)}
-            className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-            disabled={createMutation.isPending}
-          >
-            <option value="">None</option>
-            {filteredStores.map((store) => (
-              <option key={store.id} value={store.id}>{store.name}</option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div className="mb-4">
+        <label htmlFor="itemDefaultStore" className="block text-sm font-semibold text-navy-soft mb-1">
+          Default Store (optional)
+        </label>
+        <select
+          id="itemDefaultStore"
+          value={itemDefaultStoreId || ''}
+          onChange={(e) => setItemDefaultStoreId(e.target.value || null)}
+          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+          disabled={createMutation.isPending}
+        >
+          <option value="">None</option>
+          {filteredStores.map((store) => (
+            <option key={store.id} value={store.id}>{store.name}</option>
+          ))}
+        </select>
+      </div>
 
       <button
         type="submit"
@@ -319,25 +317,23 @@ export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: P
         />
       </div>
 
-      {editFilteredStores.length > 0 && (
-        <div className="mb-4">
-          <label htmlFor={`editDefaultStore-${item.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
-            Default Store (optional)
-          </label>
-          <select
-            id={`editDefaultStore-${item.id}`}
-            value={editDefaultStoreId || ''}
-            onChange={(e) => setEditDefaultStoreId(e.target.value || null)}
-            className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-            disabled={updateMutation.isPending}
-          >
-            <option value="">None</option>
-            {editFilteredStores.map((store) => (
-              <option key={store.id} value={store.id}>{store.name}</option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div className="mb-4">
+        <label htmlFor={`editDefaultStore-${item.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
+          Default Store (optional)
+        </label>
+        <select
+          id={`editDefaultStore-${item.id}`}
+          value={editDefaultStoreId || ''}
+          onChange={(e) => setEditDefaultStoreId(e.target.value || null)}
+          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+          disabled={updateMutation.isPending}
+        >
+          <option value="">None</option>
+          {editFilteredStores.map((store) => (
+            <option key={store.id} value={store.id}>{store.name}</option>
+          ))}
+        </select>
+      </div>
 
       <div className="flex gap-3">
         <button
