@@ -34,7 +34,7 @@ export const ActiveTripPage = () => {
   const { data: households } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores } = useStoresQuery(householdIds)
-  const { isExpanded, toggleStore, autoCollapseIfAllChecked, cleanup } = useStoreAccordionState(tripId!, trip?.isCompleted ?? false)
+  const { isExpanded, toggleStore, autoCollapseIfAllChecked, cleanup } = useStoreAccordionState(tripId!, 'shopping', trip?.isCompleted ?? false)
   const checkMutation = useCheckTripItemMutation()
   const completeMutation = useCompleteTripMutation()
   const updateMutation = useUpdateTripItemMutation()
