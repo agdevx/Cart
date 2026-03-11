@@ -364,4 +364,67 @@ public class StoreControllerTests
         // Assert
         result.Should().BeOfType<UnauthorizedObjectResult>();
     }
+
+    [Fact]
+    public async Task Should_ReturnConflict_When_CreateStoreWithDuplicateName()
+    {
+        // Arrange
+        var mockService = new Mock<IStoreService>();
+        var controller = new StoreController(mockService.Object);
+        var userId = Guid.NewGuid();
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        ]));
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        var store = new Store { Name = "Costco" };
+
+        mockService.Setup(s => s.CreateStore(store, userId))
+                   .ThrowsAsync(new InvalidOperationException("A store named \"Costco\" already exists in this scope"));
+
+        // Act
+        var result = await controller.Create(store);
+
+        // Assert
+        var conflictResult = result.Should().BeOfType<ConflictObjectResult>().Subject;
+        var errorCode = conflictResult.Value?.GetType().GetProperty("errorCode")?.GetValue(conflictResult.Value) as string;
+        errorCode.Should().Be("DUPLICATE_STORE_NAME");
+    }
+
+    [Fact]
+    public async Task Should_ReturnConflict_When_UpdateStoreWithDuplicateName()
+    {
+        // Arrange
+        var mockService = new Mock<IStoreService>();
+        var controller = new StoreController(mockService.Object);
+        var userId = Guid.NewGuid();
+        var storeId = Guid.NewGuid();
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        ]));
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        var store = new Store { Name = "Costco" };
+
+        mockService.Setup(s => s.UpdateStore(storeId, "Costco", null, userId))
+                   .ThrowsAsync(new InvalidOperationException("A store named \"Costco\" already exists in this scope"));
+
+        // Act
+        var result = await controller.Update(storeId, store);
+
+        // Assert
+        var conflictResult = result.Should().BeOfType<ConflictObjectResult>().Subject;
+        var errorCode = conflictResult.Value?.GetType().GetProperty("errorCode")?.GetValue(conflictResult.Value) as string;
+        errorCode.Should().Be("DUPLICATE_STORE_NAME");
+    }
 }

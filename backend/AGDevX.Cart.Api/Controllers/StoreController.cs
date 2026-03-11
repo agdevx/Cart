@@ -82,6 +82,10 @@ public class StoreController(IStoreService storeService) : ControllerBase
         {
             return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
         }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { errorCode = "DUPLICATE_STORE_NAME", message = ex.Message });
+        }
     }
 
     //== Update an existing store
@@ -97,6 +101,10 @@ public class StoreController(IStoreService storeService) : ControllerBase
         catch (UnauthorizedAccessException ex)
         {
             return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { errorCode = "DUPLICATE_STORE_NAME", message = ex.Message });
         }
         catch (ArgumentException ex)
         {
