@@ -16,6 +16,7 @@ import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.qu
 import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
 
 import { activeTripPath, ROUTES, tripAddItemsPath } from '@/routes'
+import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 
 import { StoreAccordion } from './components/store-accordion'
 import { TripItemRow } from './components/trip-item-row'
@@ -32,6 +33,11 @@ export const TripDetailPage = () => {
   const startMutation = useStartTripMutation()
   const updateMutation = useUpdateTripItemMutation()
   const deleteMutation = useDeleteTripItemMutation()
+
+  const storeDisplayNames = useMemo(
+    () => getStoreDisplayNames(stores ?? [], households ?? []),
+    [stores, households]
+  )
 
   const groupedItems = useMemo(() => {
     if (!tripItems) return []
@@ -143,6 +149,7 @@ export const TripDetailPage = () => {
                       tripItem={item}
                       itemName={item.itemName}
                       stores={stores || []}
+                      storeDisplayNames={storeDisplayNames}
                       onUpdate={handleUpdateItem}
                       onDelete={handleDeleteItem}
                       isUpdating={updateMutation.isPending}

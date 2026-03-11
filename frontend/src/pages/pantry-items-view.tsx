@@ -15,6 +15,7 @@ import { useMergedInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-me
 import { usePersonalInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-personal-inventory.query'
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
+import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 
 import { ConfirmDialog } from './components/confirm-dialog'
 import { ScopeSelect } from './components/scope-select'
@@ -116,6 +117,11 @@ export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: P
       // Error handled by mutation state
     }
   }
+
+  const storeDisplayNames = useMemo(
+    () => getStoreDisplayNames(stores ?? [], households ?? []),
+    [stores, households]
+  )
 
   //== Filter stores by the selected scope (for create form)
   const filteredStores = useMemo(() => {
@@ -244,7 +250,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: P
         >
           <option value="">None</option>
           {filteredStores.map((store) => (
-            <option key={store.id} value={store.id}>{store.name}</option>
+            <option key={store.id} value={store.id}>{storeDisplayNames.get(store.id) ?? store.name}</option>
           ))}
         </select>
       </div>
@@ -339,7 +345,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: P
         >
           <option value="">None</option>
           {editFilteredStores.map((store) => (
-            <option key={store.id} value={store.id}>{store.name}</option>
+            <option key={store.id} value={store.id}>{storeDisplayNames.get(store.id) ?? store.name}</option>
           ))}
         </select>
       </div>

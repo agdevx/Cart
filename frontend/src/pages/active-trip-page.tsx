@@ -20,6 +20,7 @@ import { useSSE } from '@/hooks/use-sse'
 import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
 
 import { ROUTES, tripDetailPath } from '@/routes'
+import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 
 import { ConfirmDialog } from './components/confirm-dialog'
 import { StoreAccordion } from './components/store-accordion'
@@ -39,6 +40,11 @@ export const ActiveTripPage = () => {
   const completeMutation = useCompleteTripMutation()
   const updateMutation = useUpdateTripItemMutation()
   const deleteMutation = useDeleteTripItemMutation()
+
+  const storeDisplayNames = useMemo(
+    () => getStoreDisplayNames(stores ?? [], households ?? []),
+    [stores, households]
+  )
 
   const groupedItems = useMemo(() => {
     if (!tripItems) return []
@@ -192,6 +198,7 @@ export const ActiveTripPage = () => {
                       tripItem={item}
                       itemName={item.itemName}
                       stores={stores || []}
+                      storeDisplayNames={storeDisplayNames}
                       onUpdate={handleUpdateItem}
                       onDelete={handleDeleteItem}
                       isUpdating={updateMutation.isPending}

@@ -11,6 +11,7 @@ interface TripItemRowProps {
   tripItem: TripItem
   itemName: string
   stores: Store[]
+  storeDisplayNames: Map<string, string>
   onUpdate: (tripItemId: string, quantity: number, notes: string | null, storeId: string | null) => void
   onDelete: (tripItemId: string) => void
   isUpdating?: boolean
@@ -23,6 +24,7 @@ export const TripItemRow = ({
   tripItem,
   itemName,
   stores,
+  storeDisplayNames,
   onUpdate,
   onDelete,
   isUpdating = false,
@@ -157,6 +159,7 @@ export const TripItemRow = ({
             editNotes={editNotes}
             editStoreId={editStoreId}
             stores={stores}
+            storeDisplayNames={storeDisplayNames}
             isUpdating={isUpdating}
             onQuantityChange={setEditQuantity}
             onNotesChange={setEditNotes}
@@ -259,6 +262,7 @@ export const TripItemRow = ({
             editNotes={editNotes}
             editStoreId={editStoreId}
             stores={stores}
+            storeDisplayNames={storeDisplayNames}
             isUpdating={isUpdating}
             onQuantityChange={setEditQuantity}
             onNotesChange={setEditNotes}
@@ -278,6 +282,7 @@ interface EditFormProps {
   editNotes: string
   editStoreId: string
   stores: Store[]
+  storeDisplayNames: Map<string, string>
   isUpdating: boolean
   onQuantityChange: (value: number) => void
   onNotesChange: (value: string) => void
@@ -293,6 +298,7 @@ const EditForm = ({
   editNotes,
   editStoreId,
   stores,
+  storeDisplayNames,
   isUpdating,
   onQuantityChange,
   onNotesChange,
@@ -336,7 +342,7 @@ const EditForm = ({
       >
         <option value="">No store</option>
         {stores.map((store) => (
-          <option key={store.id} value={store.id}>{store.name}</option>
+          <option key={store.id} value={store.id}>{storeDisplayNames.get(store.id) ?? store.name}</option>
         ))}
       </select>
     </div>
