@@ -2,6 +2,7 @@
 // ABOUTME: Verifies rendering, confirm/cancel actions, and destructive styling
 
 import { fireEvent, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ConfirmDialog } from '../confirm-dialog'
@@ -255,6 +256,48 @@ describe('ConfirmDialog', () => {
       fireEvent.transitionEnd(progressBar, { propertyName: 'width' })
 
       expect(onConfirm).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('ConfirmDialog accessibility', () => {
+    const a11yProps = {
+      title: 'Delete item?',
+      message: 'This cannot be undone.',
+      confirmLabel: 'Delete',
+      onConfirm: vi.fn(),
+      onCancel: vi.fn(),
+    }
+
+    it('calls onCancel when Escape is pressed', async () => {
+      const onCancel = vi.fn()
+      const user = userEvent.setup()
+      render(<ConfirmDialog {...a11yProps} onCancel={onCancel} />)
+
+      await user.keyboard('{Escape}')
+
+      expect(onCancel).toHaveBeenCalledOnce()
+    })
+
+    it('focuses Cancel button on open', () => {
+      render(<ConfirmDialog {...a11yProps} />)
+
+      expect(screen.getByRole('button', { name: 'Cancel' })).toHaveFocus()
+    })
+
+    it('traps Tab focus between Cancel and Confirm buttons', async () => {
+      const user = userEvent.setup()
+      render(<ConfirmDialog {...a11yProps} />)
+
+      // Cancel should have focus
+      expect(screen.getByRole('button', { name: 'Cancel' })).toHaveFocus()
+
+      // Tab to Confirm
+      await user.tab()
+      expect(screen.getByRole('button', { name: 'Delete' })).toHaveFocus()
+
+      // Tab wraps back to Cancel
+      await user.tab()
+      expect(screen.getByRole('button', { name: 'Cancel' })).toHaveFocus()
     })
   })
 })

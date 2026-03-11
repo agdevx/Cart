@@ -2,7 +2,9 @@
 // ABOUTME: Supports customizable title, message, and destructive confirm button styling
 // ABOUTME: Optional holdDuration prop requires long-press to confirm, with smooth CSS transition progress bar
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { useFocusTrap } from '@/hooks/use-focus-trap'
 
 interface ConfirmDialogProps {
   title: string
@@ -18,6 +20,25 @@ interface ConfirmDialogProps {
 export const ConfirmDialog = ({ title, message, confirmLabel, cancelLabel, onConfirm, onCancel, isPending, holdDuration }: ConfirmDialogProps) => {
   const [holding, setHolding] = useState(false)
   const holdingRef = useRef(false)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const cancelRef = useRef<HTMLButtonElement>(null)
+  useFocusTrap(dialogRef, true)
+
+  // Escape key handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onCancel()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [onCancel])
+
+  // Focus Cancel button on mount (override focus trap's default of first element)
+  useEffect(() => {
+    cancelRef.current?.focus()
+  }, [])
 
   const startHold = useCallback(() => {
     if (!holdDuration) return
@@ -41,7 +62,7 @@ export const ConfirmDialog = ({ title, message, confirmLabel, cancelLabel, onCon
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-surface rounded-2xl mx-4 max-w-sm w-full shadow-lg overflow-hidden">
+      <div ref={dialogRef} className="bg-surface rounded-2xl mx-4 max-w-sm w-full shadow-lg overflow-hidden">
         {holdDuration && (
           <div className="w-full h-1 bg-navy/10">
             <div
@@ -60,6 +81,7 @@ export const ConfirmDialog = ({ title, message, confirmLabel, cancelLabel, onCon
           <p className="text-text-secondary mb-5">{message}</p>
           <div className="flex gap-3">
             <button
+              ref={cancelRef}
               onClick={onCancel}
               className="flex-1 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
             >
