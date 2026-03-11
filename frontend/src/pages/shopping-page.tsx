@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { ChevronDown, Plus, ShoppingCart } from 'lucide-react'
 
+import { useAuth } from '@/auth/auth-provider'
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
 import { useDeleteTripMutation } from '@/apis/agdevx-cart-api/trip/delete-trip.mutation'
@@ -20,8 +21,16 @@ import { PageHeader } from './components/page-header'
 import { ScopeSelect } from './components/scope-select'
 import { TripCard } from './components/trip-card'
 
+export function getGreeting(hour: number): string {
+  if (hour >= 5 && hour < 12) return 'Good morning'
+  if (hour >= 12 && hour < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
 export const ShoppingPage = () => {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const greeting = getGreeting(new Date().getHours())
   const { data: trips, isLoading } = useTripsQuery()
   const { data: households } = useHouseholdsQuery()
   const createMutation = useCreateTripMutation()
@@ -97,6 +106,13 @@ export const ShoppingPage = () => {
 
   return (
     <div className="pb-4">
+      {user?.name && (
+        <div className="px-5 pt-5">
+          <p className="text-sm font-semibold text-teal">
+            {greeting}, {user.name} 👋
+          </p>
+        </div>
+      )}
       <PageHeader>Your <span className="text-teal">Trips</span></PageHeader>
       <div className="px-5">
       {/* New Trip Button */}
@@ -117,6 +133,7 @@ export const ShoppingPage = () => {
             <input
               id="tripName"
               type="text"
+              autoFocus
               value={tripName}
               onChange={(e) => setTripName(e.target.value)}
               placeholder="e.g., Weekly Groceries"
