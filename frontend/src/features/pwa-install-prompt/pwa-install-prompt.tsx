@@ -1,8 +1,9 @@
 // ABOUTME: PWA install prompt component
 // ABOUTME: Shows "Add to Home Screen" prompt for installable PWAs
 
-import { X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+
+import { X } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>

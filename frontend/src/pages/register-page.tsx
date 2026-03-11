@@ -4,8 +4,8 @@
 import { useState } from 'react';
 import { Link,useNavigate } from 'react-router-dom';
 
-import { ApiError } from '@/apis/api-error';
 import { useRegisterMutation } from '@/apis/agdevx-cart-api/auth/register.mutation';
+import { ApiError } from '@/apis/api-error';
 import { useAuth } from '@/auth/use-auth';
 import { ROUTES } from '@/routes';
 

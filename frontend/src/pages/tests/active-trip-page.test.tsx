@@ -1,24 +1,25 @@
 // ABOUTME: Tests for the ActiveTripPage with TripItemRow integration
 // ABOUTME: Verifies checkbox toggle, kebab menu edit/remove, and checked item styling
 
+import { BrowserRouter } from 'react-router-dom'
+
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { queryClient } from '@/apis/tanstack-query/query-client'
+import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
+import type { Household } from '@/apis/agdevx-cart-api/models/household'
+import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import type { TripItem } from '@/apis/agdevx-cart-api/models/trip-item'
-import type { Store } from '@/apis/agdevx-cart-api/models/store'
-import type { Household } from '@/apis/agdevx-cart-api/models/household'
-import * as tripQueryModule from '@/apis/agdevx-cart-api/trip/use-trip.query'
-import * as tripItemsQueryModule from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
+import * as storesQueryModule from '@/apis/agdevx-cart-api/store/use-stores.query'
 import * as checkTripItemModule from '@/apis/agdevx-cart-api/trip/check-trip-item.mutation'
 import * as completeTripModule from '@/apis/agdevx-cart-api/trip/complete-trip.mutation'
-import * as updateTripItemModule from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
 import * as deleteTripItemModule from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
-import * as storesQueryModule from '@/apis/agdevx-cart-api/store/use-stores.query'
-import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
+import * as updateTripItemModule from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
+import * as tripQueryModule from '@/apis/agdevx-cart-api/trip/use-trip.query'
+import * as tripItemsQueryModule from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
+import { queryClient } from '@/apis/tanstack-query/query-client'
 
 import { ActiveTripPage } from '../active-trip-page'
 

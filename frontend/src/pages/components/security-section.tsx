@@ -1,7 +1,7 @@
 // ABOUTME: Security section component for the settings page
 // ABOUTME: Displays password change form with live requirements checklist
 
-import { useState, useEffect } from 'react'
+import { useEffect,useState } from 'react'
 
 import { useChangePasswordMutation } from '@/apis/agdevx-cart-api/auth/change-password.mutation'
 

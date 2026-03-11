@@ -4,9 +4,9 @@
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { ApiError } from '../api-error'
-
 import { AUTH_USER_STORAGE_KEY } from '@/state/auth-atoms'
+
+import { ApiError } from '../api-error'
 
 /**
  * Handle 401 by clearing auth state and redirecting to login.

@@ -1,8 +1,9 @@
+import { BrowserRouter } from 'react-router-dom'
+
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { BrowserRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
@@ -19,8 +20,8 @@ import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import * as storesQueryModule from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 
-import { PantryItemsView } from '../pantry-items-view'
 import type { InventoryFilter } from '../pantry-items-view'
+import { PantryItemsView } from '../pantry-items-view'
 
 const mockHouseholds: Household[] = [
   { id: 'h1', name: 'Smith Family', createdBy: null, createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },

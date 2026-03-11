@@ -1,23 +1,24 @@
 // ABOUTME: Tests for AddTripItemsPage batch item selection page
 // ABOUTME: Verifies search, filtering, selection, quantity input, and add items button
 
+import { BrowserRouter } from 'react-router-dom'
+
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { queryClient } from '@/apis/tanstack-query/query-client'
+import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
+import * as inventoryQueryModule from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
+import type { Household } from '@/apis/agdevx-cart-api/models/household'
+import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
+import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import type { TripItem } from '@/apis/agdevx-cart-api/models/trip-item'
-import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
-import type { Household } from '@/apis/agdevx-cart-api/models/household'
-import type { Store } from '@/apis/agdevx-cart-api/models/store'
+import * as storesQueryModule from '@/apis/agdevx-cart-api/store/use-stores.query'
+import * as addTripItemModule from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
 import * as tripQueryModule from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import * as tripItemsQueryModule from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
-import * as inventoryQueryModule from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
-import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
-import * as addTripItemModule from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
-import * as storesQueryModule from '@/apis/agdevx-cart-api/store/use-stores.query'
+import { queryClient } from '@/apis/tanstack-query/query-client'
 
 import { AddTripItemsPage } from '../add-trip-items-page'
 

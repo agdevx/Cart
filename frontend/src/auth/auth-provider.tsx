@@ -5,9 +5,9 @@ import { useEffect } from 'react'
 
 import { useSetAtom } from 'jotai'
 
-import { ApiError } from '@/apis/api-error'
 import { apiFetch } from '@/apis/agdevx-cart-api/agdevx-cart-api-config'
 import type { User } from '@/apis/agdevx-cart-api/models/user'
+import { ApiError } from '@/apis/api-error'
 import { AUTH_USER_STORAGE_KEY, currentUserAtom } from '@/state/auth-atoms'
 
 interface AuthProviderProps {

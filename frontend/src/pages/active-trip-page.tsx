@@ -1,11 +1,11 @@
 // ABOUTME: Active trip page for shopping mode
 // ABOUTME: Shows checklist of items to purchase with check/uncheck functionality
 
-import { ArrowLeft } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { ArrowLeft } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
@@ -16,9 +16,7 @@ import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-tr
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { useSSE } from '@/hooks/use-sse'
-
 import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
-
 import { ROUTES, tripDetailPath } from '@/routes'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 

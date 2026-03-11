@@ -1,9 +1,10 @@
 // ABOUTME: TripCard component for displaying a trip with kebab menu actions
 // ABOUTME: Supports inline edit form (name + scope), delete, reopen actions with active/completed visual states
 
-import { MoreVertical, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+
+import { MoreVertical, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import { tripDetailPath } from '@/routes'

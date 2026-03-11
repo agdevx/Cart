@@ -1,20 +1,19 @@
 // ABOUTME: Trip detail page for planning mode
 // ABOUTME: Allows adding items to trip and starting shopping session
 
-import { ArrowLeft, Plus, ShoppingCart } from 'lucide-react'
 import { useMemo } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
+import { ArrowLeft, Plus, ShoppingCart } from 'lucide-react'
+
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
-import { useStartTripMutation } from '@/apis/agdevx-cart-api/trip/start-trip.mutation'
 import { useDeleteTripItemMutation } from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
+import { useStartTripMutation } from '@/apis/agdevx-cart-api/trip/start-trip.mutation'
 import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
-
 import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
-
 import { activeTripPath, ROUTES, tripAddItemsPath } from '@/routes'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 

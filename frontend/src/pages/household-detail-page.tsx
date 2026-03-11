@@ -1,9 +1,10 @@
 // ABOUTME: Household detail page with member management
 // ABOUTME: Shows invite code, member list, and role-based actions (remove, transfer, leave)
 
-import { ArrowLeft, ChevronDown, Copy, Pencil, RefreshCw } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+
+import { ArrowLeft, ChevronDown, Copy, Pencil, RefreshCw } from 'lucide-react'
 
 import { useDeleteHouseholdMutation } from '@/apis/agdevx-cart-api/household/delete-household.mutation'
 import { useRegenerateInviteCodeMutation } from '@/apis/agdevx-cart-api/household/regenerate-invite-code.mutation'
@@ -14,7 +15,6 @@ import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-househol
 import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-household-members.query'
 import { useInviteCodeQuery } from '@/apis/agdevx-cart-api/household/use-invite-code.query'
 import { useAuth } from '@/auth/use-auth'
-
 import { ROUTES } from '@/routes'
 
 import { ConfirmDialog } from './components/confirm-dialog'

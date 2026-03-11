@@ -1,9 +1,10 @@
 // ABOUTME: Shopping page displaying active trip and trip history
 // ABOUTME: Shows current trip in progress and completed trips list
 
-import { ChevronDown, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import { ChevronDown, Plus } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
@@ -11,7 +12,6 @@ import { useDeleteTripMutation } from '@/apis/agdevx-cart-api/trip/delete-trip.m
 import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.mutation'
 import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
-
 import { tripDetailPath } from '@/routes'
 
 import { ConfirmDialog } from './components/confirm-dialog'
