@@ -46,7 +46,8 @@ public class StoreRepository(CartDbContext context) : IStoreRepository
             query = query.Where(s => s.Id != excludeStoreId.Value);
         }
 
-        return await query.AnyAsync(s => s.Name.ToLower() == name.ToLower());
+        var lowerName = name.ToLower();
+        return await query.AnyAsync(s => s.Name.ToLower() == lowerName);
     }
 
     public async Task<Store> Create(Store store)
