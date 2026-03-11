@@ -4,6 +4,7 @@
 import { BrowserRouter, Navigate,Route, Routes } from 'react-router-dom'
 
 import { QueryClientProvider } from '@tanstack/react-query'
+import { Toaster } from 'sonner'
 
 import { queryClient } from '@/apis/tanstack-query/query-client'
 import { AuthProvider } from '@/auth/auth-provider'
@@ -15,9 +16,9 @@ import { AddTripItemsPage } from '@/pages/add-trip-items-page'
 import { CreateHouseholdPage } from '@/pages/create-household-page'
 import { HouseholdDetailPage } from '@/pages/household-detail-page'
 import { HouseholdPage } from '@/pages/household-page'
-import { PantryPage } from '@/pages/pantry-page'
 import { JoinHouseholdPage } from '@/pages/join-household-page'
 import { LoginPage } from '@/pages/login-page'
+import { PantryPage } from '@/pages/pantry-page'
 import { RegisterPage } from '@/pages/register-page'
 import { SettingsPage } from '@/pages/settings-page'
 import { ShoppingPage } from '@/pages/shopping-page'
@@ -59,13 +60,16 @@ export const AppRoutes = () => (
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </AuthProvider>
-    </QueryClientProvider>
+    <>
+      <Toaster position="bottom-right" />
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </AuthProvider>
+      </QueryClientProvider>
+    </>
   )
 }
 

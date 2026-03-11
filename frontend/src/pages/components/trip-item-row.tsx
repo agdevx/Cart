@@ -1,8 +1,9 @@
 // ABOUTME: TripItemRow component for displaying a trip item in planning or shopping mode
 // ABOUTME: Supports kebab menu with edit/remove, inline edit form, and shopping checkbox toggle
 
-import { Check, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+
+import { Check, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 
 import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import type { TripItem } from '@/apis/agdevx-cart-api/models/trip-item'

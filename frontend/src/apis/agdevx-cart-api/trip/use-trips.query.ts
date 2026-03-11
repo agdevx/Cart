@@ -15,11 +15,9 @@ export const useTripsQuery = () => {
     queryKey: ['trips'],
     queryFn: async (): Promise<Trip[]> => {
       const response = await apiFetch('/api/trip/user');
-      if (!response.ok) {
-        throw new Error('Failed to fetch trips');
-      }
       return response.json();
     },
     enabled: isAuthenticated,
+    refetchOnWindowFocus: true,
   })
 }

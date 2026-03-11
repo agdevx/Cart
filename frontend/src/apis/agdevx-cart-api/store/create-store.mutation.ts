@@ -15,14 +15,12 @@ export const useCreateStoreMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['stores', 'create'],
     mutationFn: async (request: CreateStoreRequest): Promise<Store> => {
       const response = await apiFetch('/api/store', {
         method: 'POST',
         body: JSON.stringify(request),
       })
-      if (!response.ok) {
-        throw new Error('Failed to create store')
-      }
       return response.json() as Promise<Store>
     },
     onSuccess: () => {

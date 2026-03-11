@@ -1,13 +1,14 @@
 // ABOUTME: Tests for TripCard component covering rendering, kebab menu, inline edit form, and action callbacks
 // ABOUTME: Validates active vs completed trip behavior, link navigation, and outside-click menu dismissal
 
+import { BrowserRouter } from 'react-router-dom'
+
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { queryClient } from '@/apis/tanstack-query/query-client'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
+import { queryClient } from '@/apis/tanstack-query/query-client'
 
 import { TripCard } from '../trip-card'
 

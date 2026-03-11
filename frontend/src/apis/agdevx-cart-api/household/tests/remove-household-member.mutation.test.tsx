@@ -2,6 +2,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { ApiError } from '@/apis/api-error'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 import * as useAuthModule from '@/auth/use-auth'
 
@@ -74,7 +75,7 @@ describe('useRemoveHouseholdMemberMutation', () => {
     })
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockRejectedValue(
-      new Error('Failed to remove member')
+      new ApiError(400, 'Bad Request', null)
     )
 
     const { result } = renderHook(() => useRemoveHouseholdMemberMutation(), { wrapper })
@@ -83,6 +84,6 @@ describe('useRemoveHouseholdMemberMutation', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 
-    expect(result.current.error).toEqual(new Error('Failed to remove member'))
+    expect(result.current.error).toBeInstanceOf(ApiError)
   })
 })

@@ -9,13 +9,11 @@ export const useDeleteTripMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['trips', 'delete'],
     mutationFn: async (tripId: string): Promise<void> => {
-      const response = await apiFetch(`/api/trip/${tripId}`, {
+      await apiFetch(`/api/trip/${tripId}`, {
         method: 'DELETE',
       })
-      if (!response.ok) {
-        throw new Error('Failed to delete trip')
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trips'] })

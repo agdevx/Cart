@@ -7,6 +7,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach,describe, expect, it, vi } from 'vitest';
 
+import { ApiError } from '@/apis/api-error';
 import { queryClient } from '@/apis/tanstack-query/query-client';
 
 import { useLoginMutation } from '../login.mutation';
@@ -62,6 +63,7 @@ describe('useLoginMutation', () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 401,
+      statusText: 'Unauthorized',
       json: async () => ({
         errorCode: 'UNAUTHORIZED',
         message: 'Invalid credentials',
@@ -77,11 +79,17 @@ describe('useLoginMutation', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 
-    expect(result.current.error).toBeDefined();
+    expect(result.current.error).toBeInstanceOf(ApiError);
+    expect((result.current.error as ApiError).status).toBe(401);
   });
 
   it('should handle network errors', async () => {
-    globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      statusText: 'Bad Request',
+      json: async () => null,
+    });
 
     const { result } = renderHook(() => useLoginMutation(), { wrapper });
 
@@ -92,6 +100,6 @@ describe('useLoginMutation', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 
-    expect(result.current.error).toBeDefined();
+    expect(result.current.error).toBeInstanceOf(ApiError);
   });
 });

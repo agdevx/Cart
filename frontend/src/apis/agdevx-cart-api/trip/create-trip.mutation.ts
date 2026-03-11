@@ -15,14 +15,12 @@ export const useCreateTripMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['trips', 'create'],
     mutationFn: async (request: CreateTripRequest): Promise<Trip> => {
       const response = await apiFetch('/api/trip', {
         method: 'POST',
         body: JSON.stringify(request),
       })
-      if (!response.ok) {
-        throw new Error('Failed to create trip')
-      }
       return response.json() as Promise<Trip>
     },
     onSuccess: () => {

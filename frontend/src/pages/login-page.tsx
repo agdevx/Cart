@@ -31,8 +31,8 @@ export const LoginPage = () => {
           modifiedDate: null,
         })
       navigate(ROUTES.SHOPPING)
-    } catch (error) {
-      console.error('Login failed:', error)
+    } catch {
+      // Error displayed inline via loginMutation.isError
     }
   }
 

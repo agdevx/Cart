@@ -1,7 +1,7 @@
 // ABOUTME: Query hook for fetching merged inventory (household + personal items)
 // ABOUTME: Calls GET /api/inventory/merged/{id}, returns household items combined with user's personal items
 
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 import { useAuth } from '@/auth/use-auth'
 
@@ -15,11 +15,9 @@ export const useMergedInventoryQuery = (householdId: string | null) => {
     queryKey: ['inventory', 'merged', householdId],
     queryFn: async (): Promise<InventoryItem[]> => {
       const response = await apiFetch(`/api/inventory/merged/${householdId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch merged inventory');
-      }
       return response.json();
     },
     enabled: isAuthenticated && householdId !== null,
+    placeholderData: keepPreviousData,
   })
 }

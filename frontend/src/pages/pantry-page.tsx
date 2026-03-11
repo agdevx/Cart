@@ -6,8 +6,8 @@ import { useState } from 'react'
 import { Plus } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
-import { PantryItemsView } from '@/pages/pantry-items-view'
 import type { InventoryFilter } from '@/pages/pantry-items-view'
+import { PantryItemsView } from '@/pages/pantry-items-view'
 import { PantryStoresView } from '@/pages/pantry-stores-view'
 
 import { PageHeader } from './components/page-header'

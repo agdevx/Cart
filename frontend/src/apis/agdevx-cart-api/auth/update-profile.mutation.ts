@@ -26,16 +26,12 @@ async function updateProfile(request: UpdateProfileRequest): Promise<UpdateProfi
     body: JSON.stringify(request),
   })
 
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Profile update failed')
-  }
-
   return response.json()
 }
 
 export function useUpdateProfileMutation() {
   return useMutation({
+    mutationKey: ['auth', 'update-profile'],
     mutationFn: updateProfile,
   })
 }

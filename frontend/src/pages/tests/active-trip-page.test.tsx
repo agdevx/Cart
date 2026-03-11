@@ -1,24 +1,25 @@
 // ABOUTME: Tests for the ActiveTripPage with TripItemRow integration
 // ABOUTME: Verifies checkbox toggle, kebab menu edit/remove, and checked item styling
 
+import { BrowserRouter } from 'react-router-dom'
+
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { queryClient } from '@/apis/tanstack-query/query-client'
+import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
+import type { Household } from '@/apis/agdevx-cart-api/models/household'
+import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import type { TripItem } from '@/apis/agdevx-cart-api/models/trip-item'
-import type { Store } from '@/apis/agdevx-cart-api/models/store'
-import type { Household } from '@/apis/agdevx-cart-api/models/household'
-import * as tripQueryModule from '@/apis/agdevx-cart-api/trip/use-trip.query'
-import * as tripItemsQueryModule from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
+import * as storesQueryModule from '@/apis/agdevx-cart-api/store/use-stores.query'
 import * as checkTripItemModule from '@/apis/agdevx-cart-api/trip/check-trip-item.mutation'
 import * as completeTripModule from '@/apis/agdevx-cart-api/trip/complete-trip.mutation'
-import * as updateTripItemModule from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
 import * as deleteTripItemModule from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
-import * as storesQueryModule from '@/apis/agdevx-cart-api/store/use-stores.query'
-import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
+import * as updateTripItemModule from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
+import * as tripQueryModule from '@/apis/agdevx-cart-api/trip/use-trip.query'
+import * as tripItemsQueryModule from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
+import { queryClient } from '@/apis/tanstack-query/query-client'
 
 import { ActiveTripPage } from '../active-trip-page'
 
@@ -115,7 +116,7 @@ const mockHouseholds: Household[] = [
   },
 ]
 
-const checkMutateAsyncFn = vi.fn()
+const checkMutateFn = vi.fn()
 const completeMutateAsyncFn = vi.fn()
 const updateMutateFn = vi.fn()
 const deleteMutateFn = vi.fn()
@@ -132,7 +133,8 @@ const setupMocks = () => {
   } as any)
 
   vi.spyOn(checkTripItemModule, 'useCheckTripItemMutation').mockReturnValue({
-    mutateAsync: checkMutateAsyncFn,
+    mutate: checkMutateFn,
+    mutateAsync: vi.fn(),
     isPending: false,
   } as any)
 
@@ -198,7 +200,7 @@ describe('ActiveTripPage', () => {
     //== Click the unchecked item (Milk) — the row itself should toggle
     fireEvent.click(screen.getByText('Milk'))
 
-    expect(checkMutateAsyncFn).toHaveBeenCalledWith({
+    expect(checkMutateFn).toHaveBeenCalledWith({
       tripId: 'trip1',
       tripItemId: 'ti1',
       isChecked: true,
@@ -354,7 +356,7 @@ describe('ActiveTripPage', () => {
     fireEvent.click(milkKebab)
 
     //== Check mutation should NOT have been called — kebab tap should not toggle checkbox
-    expect(checkMutateAsyncFn).not.toHaveBeenCalled()
+    expect(checkMutateFn).not.toHaveBeenCalled()
 
     //== Kebab menu should be open (Edit/Remove options visible)
     expect(screen.getByText('Edit')).toBeInTheDocument()
@@ -383,12 +385,12 @@ describe('ActiveTripPage', () => {
     fireEvent.click(screen.getByText('Edit'))
 
     //== Clear any calls from setup
-    checkMutateAsyncFn.mockClear()
+    checkMutateFn.mockClear()
 
     //== Click on the item row — should NOT toggle check because editing
     fireEvent.click(screen.getByText('Milk'))
 
-    expect(checkMutateAsyncFn).not.toHaveBeenCalled()
+    expect(checkMutateFn).not.toHaveBeenCalled()
   })
 
   describe('dual notes display', () => {

@@ -9,13 +9,11 @@ export const useDeleteStoreMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['stores', 'delete'],
     mutationFn: async (id: string): Promise<void> => {
-      const response = await apiFetch(`/api/store/${id}`, {
+      await apiFetch(`/api/store/${id}`, {
         method: 'DELETE',
       })
-      if (!response.ok) {
-        throw new Error('Failed to delete store')
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stores'] })

@@ -15,9 +15,6 @@ export const useTripQuery = (tripId: string) => {
     queryKey: ['trips', tripId],
     queryFn: async (): Promise<Trip> => {
       const response = await apiFetch(`/api/trip/${tripId}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch trip')
-      }
       return response.json() as Promise<Trip>
     },
     enabled: isAuthenticated,

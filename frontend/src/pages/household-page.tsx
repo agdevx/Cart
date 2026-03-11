@@ -1,8 +1,9 @@
 // ABOUTME: Household management page
 // ABOUTME: Displays user's households with options to create or join new ones
 
-import { Plus, UserPlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
+
+import { Plus, UserPlus } from 'lucide-react'
 
 import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-household-members.query'
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'

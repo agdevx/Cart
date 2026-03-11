@@ -10,13 +10,11 @@ export const useReopenTripMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['trips', 'reopen'],
     mutationFn: async (tripId: string): Promise<Trip> => {
       const response = await apiFetch(`/api/trip/${tripId}/reopen`, {
         method: 'POST',
       })
-      if (!response.ok) {
-        throw new Error('Failed to reopen trip')
-      }
       return response.json() as Promise<Trip>
     },
     onSuccess: () => {

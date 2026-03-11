@@ -1,7 +1,7 @@
 // ABOUTME: Hook managing accordion expand/collapse state for store-grouped trip items
 // ABOUTME: Persists state to localStorage per-trip per-view-context, supports auto-collapse with user override
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef,useState } from 'react';
 
 type AccordionState = Record<string, boolean>; // storeName -> isExpanded
 type ViewContext = 'planning' | 'shopping';

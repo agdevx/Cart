@@ -1,9 +1,10 @@
 // ABOUTME: Full-screen page for selecting pantry items to add to a shopping trip
 // ABOUTME: Supports search, source filtering, batch selection, and quantity editing
 
-import { ArrowLeft, Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+
+import { ArrowLeft, Search } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'

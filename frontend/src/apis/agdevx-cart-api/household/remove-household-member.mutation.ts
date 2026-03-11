@@ -14,14 +14,12 @@ export const useRemoveHouseholdMemberMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['households', 'remove-member'],
     mutationFn: async (request: RemoveMemberRequest): Promise<void> => {
-      const response = await apiFetch(
+      await apiFetch(
         `/api/household/${request.householdId}/members/${request.userId}`,
         { method: 'DELETE' }
       )
-      if (!response.ok) {
-        throw new Error('Failed to remove member')
-      }
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['household', variables.householdId, 'members'] })

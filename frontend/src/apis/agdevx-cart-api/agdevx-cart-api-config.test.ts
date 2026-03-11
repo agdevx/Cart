@@ -3,6 +3,8 @@
 
 import { beforeEach,describe, expect, it, vi } from 'vitest';
 
+import { ApiError } from '../api-error';
+
 import { apiFetch } from './agdevx-cart-api-config';
 
 describe('apiFetch', () => {
@@ -144,4 +146,47 @@ describe('apiFetch', () => {
     clearTimeoutSpy.mockRestore();
     vi.useRealTimers();
   });
+
+  it('should throw ApiError when response is not ok', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+      statusText: 'Not Found',
+      json: async () => ({ message: 'Resource not found' }),
+    })
+
+    await expect(apiFetch('/test-endpoint')).rejects.toThrow(ApiError)
+    await expect(apiFetch('/test-endpoint')).rejects.toMatchObject({
+      status: 404,
+      statusText: 'Not Found',
+      body: { message: 'Resource not found' },
+    })
+  })
+
+  it('should handle non-JSON error responses gracefully', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+      json: async () => { throw new SyntaxError('Unexpected token') },
+    })
+
+    await expect(apiFetch('/test-endpoint')).rejects.toThrow(ApiError)
+    await expect(apiFetch('/test-endpoint')).rejects.toMatchObject({
+      status: 500,
+      body: null,
+    })
+  })
+
+  it('should return Response normally when response is ok', async () => {
+    const mockResponse = {
+      ok: true,
+      status: 200,
+      json: async () => ({ data: 'test' }),
+    }
+    globalThis.fetch = vi.fn().mockResolvedValue(mockResponse)
+
+    const result = await apiFetch('/test-endpoint')
+    expect(result.ok).toBe(true)
+  })
 });

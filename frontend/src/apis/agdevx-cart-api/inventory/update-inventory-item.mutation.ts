@@ -19,15 +19,13 @@ export const useUpdateInventoryItemMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['inventory', 'update'],
     mutationFn: async (request: UpdateInventoryItemRequest): Promise<InventoryItem> => {
       const { id, ...updateData } = request
       const response = await apiFetch(`/api/inventory/${id}`, {
         method: 'PUT',
         body: JSON.stringify(updateData),
       })
-      if (!response.ok) {
-        throw new Error('Failed to update inventory item')
-      }
       return response.json() as Promise<InventoryItem>
     },
     onSuccess: () => {

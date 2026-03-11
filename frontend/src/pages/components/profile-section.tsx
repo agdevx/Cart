@@ -1,7 +1,7 @@
 // ABOUTME: Profile section component for the settings page
 // ABOUTME: Displays user name and email in view mode, with inline editing and conditional password field
 
-import { useState, useEffect } from 'react'
+import { useEffect,useState } from 'react'
 
 import type { UpdateProfileResponse } from '@/apis/agdevx-cart-api/auth/update-profile.mutation'
 import { useUpdateProfileMutation } from '@/apis/agdevx-cart-api/auth/update-profile.mutation'

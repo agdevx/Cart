@@ -15,9 +15,6 @@ export const useHouseholdQuery = (householdId: string) => {
     queryKey: ['household', householdId],
     queryFn: async (): Promise<Household> => {
       const response = await apiFetch(`/api/household/${householdId}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch household')
-      }
       return response.json()
     },
     enabled: isAuthenticated && !!householdId,

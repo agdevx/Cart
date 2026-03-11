@@ -1,24 +1,25 @@
 // ABOUTME: Tests for TripDetailPage trip item edit/remove integration
 // ABOUTME: Verifies TripItemRow kebab menus, inline edit, and remove actions
 
+import { BrowserRouter } from 'react-router-dom'
+
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { queryClient } from '@/apis/tanstack-query/query-client'
+import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
+import type { Household } from '@/apis/agdevx-cart-api/models/household'
+import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import type { TripItem } from '@/apis/agdevx-cart-api/models/trip-item'
-import type { Store } from '@/apis/agdevx-cart-api/models/store'
-import type { Household } from '@/apis/agdevx-cart-api/models/household'
+import * as storesQueryModule from '@/apis/agdevx-cart-api/store/use-stores.query'
+import * as addTripItemModule from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
+import * as deleteTripItemModule from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
+import * as startTripModule from '@/apis/agdevx-cart-api/trip/start-trip.mutation'
+import * as updateTripItemModule from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
 import * as tripQueryModule from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import * as tripItemsQueryModule from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
-import * as startTripModule from '@/apis/agdevx-cart-api/trip/start-trip.mutation'
-import * as addTripItemModule from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
-import * as updateTripItemModule from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
-import * as deleteTripItemModule from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
-import * as storesQueryModule from '@/apis/agdevx-cart-api/store/use-stores.query'
-import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
+import { queryClient } from '@/apis/tanstack-query/query-client'
 
 import { TripDetailPage } from '../trip-detail-page'
 

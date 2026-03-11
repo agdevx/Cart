@@ -30,11 +30,6 @@ async function login(credentials: LoginRequest): Promise<LoginResponse> {
     body: JSON.stringify(credentials),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Login failed');
-  }
-
   return response.json();
 }
 
@@ -44,6 +39,7 @@ async function login(credentials: LoginRequest): Promise<LoginResponse> {
  */
 export function useLoginMutation() {
   return useMutation({
+    mutationKey: ['auth', 'login'],
     mutationFn: login,
   });
 }

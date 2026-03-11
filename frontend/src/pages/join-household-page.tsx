@@ -24,7 +24,7 @@ export const JoinHouseholdPage = () => {
       await joinMutation.mutateAsync({ inviteCode: inviteCode.trim() })
       navigate(ROUTES.HOUSEHOLD)
     } catch {
-      // Error is handled by mutation state
+      // Error displayed inline via getErrorMessage(mutation.error)
     }
   }
 

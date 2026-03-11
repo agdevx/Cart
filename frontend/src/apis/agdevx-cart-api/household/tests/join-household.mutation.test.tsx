@@ -2,6 +2,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { ApiError } from '@/apis/api-error'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 import * as useAuthModule from '@/auth/use-auth'
 
@@ -96,7 +97,7 @@ describe('useJoinHouseholdMutation', () => {
     })
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockRejectedValue(
-      new Error('Invalid invite code')
+      new ApiError(400, 'Bad Request', { message: 'Invalid invite code' })
     )
 
     const { result } = renderHook(() => useJoinHouseholdMutation(), { wrapper })
@@ -105,6 +106,6 @@ describe('useJoinHouseholdMutation', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 
-    expect(result.current.error).toEqual(new Error('Invalid invite code'))
+    expect(result.current.error).toBeInstanceOf(ApiError)
   })
 })

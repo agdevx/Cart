@@ -10,13 +10,11 @@ export const useCompleteTripMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['trips', 'complete'],
     mutationFn: async (tripId: string): Promise<Trip> => {
       const response = await apiFetch(`/api/trip/${tripId}/complete`, {
         method: 'POST',
       })
-      if (!response.ok) {
-        throw new Error('Failed to complete trip')
-      }
       return response.json() as Promise<Trip>
     },
     onSuccess: () => {

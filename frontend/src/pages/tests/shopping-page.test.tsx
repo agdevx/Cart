@@ -1,20 +1,21 @@
 // ABOUTME: Tests for the ShoppingPage trip management features
 // ABOUTME: Verifies kebab menu actions (rename, delete, reopen) on trip cards
 
+import { BrowserRouter } from 'react-router-dom'
+
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { queryClient } from '@/apis/tanstack-query/query-client'
-import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
-import type { Household } from '@/apis/agdevx-cart-api/models/household'
-import * as tripsQueryModule from '@/apis/agdevx-cart-api/trip/use-trips.query'
 import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
-import * as updateTripModule from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
+import type { Household } from '@/apis/agdevx-cart-api/models/household'
+import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
+import * as createTripModule from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
 import * as deleteTripModule from '@/apis/agdevx-cart-api/trip/delete-trip.mutation'
 import * as reopenTripModule from '@/apis/agdevx-cart-api/trip/reopen-trip.mutation'
-import * as createTripModule from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
+import * as updateTripModule from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
+import * as tripsQueryModule from '@/apis/agdevx-cart-api/trip/use-trips.query'
+import { queryClient } from '@/apis/tanstack-query/query-client'
 
 import { ShoppingPage } from '../shopping-page'
 

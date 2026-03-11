@@ -5,7 +5,7 @@ import { atom } from 'jotai';
 
 import type { User } from '@/apis/agdevx-cart-api/models/user';
 
-const AUTH_USER_STORAGE_KEY = 'authUser';
+export const AUTH_USER_STORAGE_KEY = 'authUser';
 
 //== Synchronously restore user from localStorage so ProtectedRoute
 //== doesn't redirect to /login on the first render before useEffect fires

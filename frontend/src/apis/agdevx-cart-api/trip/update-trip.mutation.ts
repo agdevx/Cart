@@ -15,14 +15,12 @@ export const useUpdateTripMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['trips', 'update'],
     mutationFn: async ({ tripId, name, householdId }: UpdateTripRequest): Promise<void> => {
-      const response = await apiFetch(`/api/trip/${tripId}`, {
+      await apiFetch(`/api/trip/${tripId}`, {
         method: 'PUT',
         body: JSON.stringify({ name, householdId: householdId ?? null }),
       })
-      if (!response.ok) {
-        throw new Error('Failed to update trip')
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trips'] })

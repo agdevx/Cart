@@ -17,15 +17,13 @@ export const useUpdateTripItemMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['trip-items', 'update'],
     mutationFn: async (request: UpdateTripItemRequest): Promise<void> => {
       const { tripItemId, quantity, notes, storeId } = request
-      const response = await apiFetch(`/api/tripitem/${tripItemId}`, {
+      await apiFetch(`/api/tripitem/${tripItemId}`, {
         method: 'PUT',
         body: JSON.stringify({ quantity, notes, storeId }),
       })
-      if (!response.ok) {
-        throw new Error('Failed to update trip item')
-      }
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['trips', variables.tripId, 'items'] })

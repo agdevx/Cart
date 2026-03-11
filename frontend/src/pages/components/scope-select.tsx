@@ -1,8 +1,9 @@
 // ABOUTME: Custom dropdown for selecting personal vs household scope
 // ABOUTME: Renders household description text in muted styling, which native selects cannot do
 
-import { ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+
+import { ChevronDown } from 'lucide-react'
 
 interface ScopeSelectProps {
   value: string

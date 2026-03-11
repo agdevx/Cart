@@ -1,7 +1,8 @@
+import { BrowserRouter } from 'react-router-dom'
+
 import type { UseQueryResult } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'

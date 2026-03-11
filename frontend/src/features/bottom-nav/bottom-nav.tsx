@@ -1,8 +1,9 @@
 // ABOUTME: Bottom tab navigation component
 // ABOUTME: Mobile-first navigation with 4 tabs
 
-import { Package, Settings, ShoppingCart, Users } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
+
+import { Package, Settings, ShoppingCart, Users } from 'lucide-react'
 
 import { ROUTES } from '@/routes'
 
