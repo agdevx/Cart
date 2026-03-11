@@ -1,5 +1,6 @@
 // ABOUTME: Main entry point for the Cart API application
 // ABOUTME: Configures services, database context, authentication, and HTTP pipeline
+using AGDevX.Cart.Api.Middleware;
 using AGDevX.Cart.Auth;
 using AGDevX.Cart.Data;
 using AGDevX.Cart.Data.Repositories;
@@ -33,6 +34,9 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
+
+//== Rate Limiting Configuration
+builder.Services.AddRateLimiting();
 
 //== Cookie Configuration
 var cookieSettings = builder.Configuration.GetSection("CookieSettings").Get<CookieSettings>()
@@ -96,16 +100,30 @@ using (var scope = app.Services.CreateScope())
 }
 
 //== HTTP Pipeline Configuration
+
+//== Global exception handler (catches everything — must be first)
+app.UseGlobalExceptionHandler();
+
+//== Security headers on all responses
+app.UseSecurityHeaders();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
+//== CORS before rate limiter so 429 responses include CORS headers
 app.UseCors();
+
+//== Rate limiting
+app.UseRateLimiter();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
