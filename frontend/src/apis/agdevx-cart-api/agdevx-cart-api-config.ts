@@ -1,6 +1,8 @@
 // ABOUTME: API configuration and base fetch wrapper for AGDevX Cart API
 // ABOUTME: Provides request handling with automatic cookie-based authentication via credentials: 'include'
 
+const REQUEST_TIMEOUT_MS = 15_000;
+
 /**
  * Base fetch wrapper that includes credentials for cookie-based auth
  * @param endpoint - API endpoint path (e.g., '/api/users')
@@ -36,9 +38,23 @@ export async function apiFetch(
     headers['Content-Type'] = 'application/json';
   }
 
-  return fetch(endpoint, {
-    ...options,
-    headers,
-    credentials: 'include',
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(endpoint, {
+      ...options,
+      headers,
+      credentials: 'include',
+      signal: controller.signal,
+    });
+    return response;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('Request timed out');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
