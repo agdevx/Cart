@@ -288,6 +288,8 @@ public class StoreServiceTests
         var existing = new Store { Id = storeId, Name = "Old", UserId = userId };
 
         _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("New", userId, null, storeId))
+                            .ReturnsAsync(false);
         _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>()))
                             .ReturnsAsync((Store s) => s);
 
@@ -307,6 +309,8 @@ public class StoreServiceTests
         var existing = new Store { Id = storeId, Name = "Old", UserId = userId };
 
         _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Renamed", userId, null, storeId))
+                            .ReturnsAsync(false);
         _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>()))
                             .ReturnsAsync((Store s) => s);
 
@@ -335,6 +339,8 @@ public class StoreServiceTests
 
         _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
         _mockHouseholdRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Renamed", null, householdId, storeId))
+                            .ReturnsAsync(false);
         _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>()))
                             .ReturnsAsync((Store s) => s);
 
@@ -417,6 +423,8 @@ public class StoreServiceTests
         var existing = new Store { Id = storeId, Name = "Old Store", UserId = userId };
 
         _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Renamed Store", userId, null, storeId))
+                            .ReturnsAsync(false);
         _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>()))
                             .ReturnsAsync((Store s) => s);
         _mockTripItemRepository.Setup(r => r.UpdateStoreNameByStoreId(storeId, "Renamed Store"))
@@ -511,6 +519,8 @@ public class StoreServiceTests
 
         _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
         _mockHouseholdRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Shared Store", null, householdId, storeId))
+                            .ReturnsAsync(false);
         _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>()))
                             .ReturnsAsync((Store s) => s);
 
@@ -521,5 +531,74 @@ public class StoreServiceTests
         result.HouseholdId.Should().Be(householdId);
         result.UserId.Should().BeNull();
         result.Name.Should().Be("Shared Store");
+    }
+
+    [Fact]
+    public async Task UpdateStore_Should_Throw_When_DuplicateNameInSameScope()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var storeId = Guid.NewGuid();
+        var existing = new Store { Id = storeId, Name = "Target", UserId = userId };
+
+        _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", userId, null, storeId))
+                            .ReturnsAsync(true);
+
+        // Act
+        var act = () => _storeService.UpdateStore(storeId, "Costco", null, userId);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>()
+                 .WithMessage("*already exists*");
+    }
+
+    [Fact]
+    public async Task UpdateStore_Should_Throw_When_DuplicateNameInDestinationScope()
+    {
+        // Arrange — moving personal store to household that already has same name
+        var userId = Guid.NewGuid();
+        var storeId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        var existing = new Store { Id = storeId, Name = "Costco", UserId = userId };
+        var household = new Household
+        {
+            Id = householdId,
+            Name = "Home",
+            Members = new List<HouseholdMember> { new() { UserId = userId, HouseholdId = householdId } }
+        };
+
+        _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
+        _mockHouseholdRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", null, householdId, storeId))
+                            .ReturnsAsync(true);
+
+        // Act
+        var act = () => _storeService.UpdateStore(storeId, "Costco", householdId, userId);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>()
+                 .WithMessage("*already exists*");
+    }
+
+    [Fact]
+    public async Task UpdateStore_Should_AllowCaseOnlyRename()
+    {
+        // Arrange — "costco" → "Costco" should NOT 409
+        var userId = Guid.NewGuid();
+        var storeId = Guid.NewGuid();
+        var existing = new Store { Id = storeId, Name = "costco", UserId = userId };
+
+        _mockStoreRepository.Setup(r => r.GetById(storeId)).ReturnsAsync(existing);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", userId, null, storeId))
+                            .ReturnsAsync(false);
+        _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>()))
+                            .ReturnsAsync((Store s) => s);
+
+        // Act
+        var result = await _storeService.UpdateStore(storeId, "Costco", null, userId);
+
+        // Assert
+        result.Name.Should().Be("Costco");
     }
 }

@@ -113,6 +113,15 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
             existingStore.HouseholdId = null;
         }
 
+        //== Check for duplicate name in the destination scope
+        var duplicateExists = await storeRepository.ExistsWithName(
+            name, existingStore.UserId, existingStore.HouseholdId, excludeStoreId: storeId);
+
+        if (duplicateExists)
+        {
+            throw new InvalidOperationException($"A store named \"{name}\" already exists in this scope");
+        }
+
         var result = await storeRepository.Update(existingStore);
 
         //== Live mirror: update denormalized StoreName on all TripItems
