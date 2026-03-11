@@ -18,5 +18,6 @@ export const useTripItemsQuery = (tripId: string) => {
       return response.json() as Promise<TripItem[]>
     },
     enabled: isAuthenticated && !!tripId,
+    refetchOnWindowFocus: true,
   })
 }

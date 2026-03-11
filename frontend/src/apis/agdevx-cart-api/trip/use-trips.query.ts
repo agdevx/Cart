@@ -18,5 +18,6 @@ export const useTripsQuery = () => {
       return response.json();
     },
     enabled: isAuthenticated,
+    refetchOnWindowFocus: true,
   })
 }
