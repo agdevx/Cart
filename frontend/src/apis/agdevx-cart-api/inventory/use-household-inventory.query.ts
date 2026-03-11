@@ -1,7 +1,7 @@
 // ABOUTME: Query hook for fetching a single household's inventory items
 // ABOUTME: Calls GET /api/inventory/household/{id}, returns items belonging to that household
 
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 import { useAuth } from '@/auth/use-auth'
 
@@ -18,5 +18,6 @@ export const useHouseholdInventoryQuery = (householdId: string | null) => {
       return response.json();
     },
     enabled: isAuthenticated && householdId !== null,
+    placeholderData: keepPreviousData,
   })
 }

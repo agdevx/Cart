@@ -1,7 +1,7 @@
 // ABOUTME: Query hook for fetching merged inventory (household + personal items)
 // ABOUTME: Calls GET /api/inventory/merged/{id}, returns household items combined with user's personal items
 
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 import { useAuth } from '@/auth/use-auth'
 
@@ -18,5 +18,6 @@ export const useMergedInventoryQuery = (householdId: string | null) => {
       return response.json();
     },
     enabled: isAuthenticated && householdId !== null,
+    placeholderData: keepPreviousData,
   })
 }
