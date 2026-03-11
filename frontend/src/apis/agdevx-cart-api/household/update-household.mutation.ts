@@ -1,5 +1,5 @@
 // ABOUTME: Mutation hook for renaming a household
-// ABOUTME: Sends PUT request with name as JSON string body
+// ABOUTME: Sends PUT request with JSON object body
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -17,8 +17,7 @@ export const useUpdateHouseholdMutation = () => {
     mutationFn: async (request: UpdateHouseholdRequest): Promise<void> => {
       const response = await apiFetch(`/api/household/${request.householdId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(request.name),
+        body: JSON.stringify({ name: request.name }),
       })
       if (!response.ok) {
         throw new Error('Failed to update household')

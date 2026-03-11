@@ -50,7 +50,7 @@ describe('useCreateHouseholdMutation', () => {
     expect(result.current.data).toEqual(mockHousehold)
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household', {
       method: 'POST',
-      body: JSON.stringify('New Household'),
+      body: JSON.stringify({ name: 'New Household' }),
     })
   })
 
