@@ -235,7 +235,7 @@ describe('PantryItemsView', () => {
 
     renderView('personal')
 
-    expect(screen.getByText('No inventory items yet. Add your first item!')).toBeInTheDocument()
+    expect(screen.getByText('No inventory items yet')).toBeInTheDocument()
   })
 
   it('shows loading state', () => {
@@ -261,9 +261,11 @@ describe('PantryItemsView', () => {
       isLoading: false,
     } as UseQueryResult<InventoryItem[]>)
 
-    renderView('all')
+    const { container } = renderView('all')
 
-    expect(screen.getByText('Loading inventory...')).toBeInTheDocument()
+    //== Skeleton loader divs should be visible with animate-pulse class
+    const skeletons = container.querySelectorAll('.animate-pulse')
+    expect(skeletons.length).toBeGreaterThan(0)
   })
 
   it('renders kebab menu buttons instead of delete buttons', () => {

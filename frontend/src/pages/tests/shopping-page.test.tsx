@@ -7,6 +7,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import * as useAuthModule from '@/auth/use-auth'
 import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
 import type { Household } from '@/apis/agdevx-cart-api/models/household'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
@@ -85,6 +86,13 @@ const deleteMutateFn = vi.fn()
 const reopenMutateFn = vi.fn()
 
 const setupMocks = () => {
+  vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+    isAuthenticated: true,
+    user: { id: 'user1', email: 'test@test.com', name: 'Test User', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+    setAuth: vi.fn(),
+    logout: vi.fn(),
+  })
+
   vi.spyOn(tripsQueryModule, 'useTripsQuery').mockReturnValue({
     data: mockTrips,
     isLoading: false,
@@ -135,12 +143,16 @@ describe('ShoppingPage', () => {
     expect(screen.getByText('Planning')).toBeInTheDocument()
     expect(screen.getByText('Completed (1)')).toBeInTheDocument()
 
-    //== Completed trips are hidden by default (accordion collapsed)
-    expect(screen.queryByText('Holiday Shopping')).not.toBeInTheDocument()
+    //== Completed trips are in the DOM but inside a collapsed grid container
+    const holidayElement = screen.getByText('Holiday Shopping')
+    const overflowContainer = holidayElement.closest('.overflow-hidden')
+    expect(overflowContainer).toBeInTheDocument()
+    const gridContainer = overflowContainer?.parentElement
+    expect(gridContainer?.className).toContain('grid-rows-[0fr]')
 
-    //== In Progress and Planning trips should have kebab menu buttons
+    //== All three trips have kebab menu buttons (completed trip is in DOM but visually collapsed)
     const kebabButtons = screen.getAllByLabelText('Trip actions')
-    expect(kebabButtons).toHaveLength(2)
+    expect(kebabButtons).toHaveLength(3)
   })
 
   it('expands completed accordion to show completed trips', () => {

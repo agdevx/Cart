@@ -260,13 +260,17 @@ describe('ActiveTripPage', () => {
     //== Expand Costco accordion to reveal items
     fireEvent.click(screen.getByText('Costco'))
 
-    //== Bread (ti2) is checked — should have line-through styling
+    //== Bread (ti2) is checked — should have text-text-tertiary class and animated strikethrough span at 100% width
     const breadElement = screen.getByText('Bread')
-    expect(breadElement).toHaveClass('line-through')
+    expect(breadElement).toHaveClass('text-text-tertiary')
+    const breadStrikethrough = breadElement.querySelector('span')
+    expect(breadStrikethrough).toHaveStyle({ width: '100%' })
 
-    //== Milk (ti1) is not checked — should NOT have line-through styling
+    //== Milk (ti1) is not checked — should NOT have text-text-tertiary class
     const milkElement = screen.getByText('Milk')
-    expect(milkElement).not.toHaveClass('line-through')
+    expect(milkElement).not.toHaveClass('text-text-tertiary')
+    const milkStrikethrough = milkElement.querySelector('span')
+    expect(milkStrikethrough).toHaveStyle({ width: '0%' })
   })
 
   it('shows styled confirmation dialog when completing with unchecked items', () => {
@@ -496,9 +500,13 @@ describe('ActiveTripPage', () => {
       localStorage.removeItem('accordion-trip1-shopping')
       render(<ActiveTripPage />, { wrapper })
 
-      //== Item names should NOT be visible because accordions default to collapsed
-      expect(screen.queryByText('Milk')).not.toBeInTheDocument()
-      expect(screen.queryByText('Bread')).not.toBeInTheDocument()
+      //== Items are in the DOM (grid-rows animation keeps them rendered) but inside a collapsed container
+      //== The grid container should have grid-rows-[0fr] class when collapsed
+      const milkElement = screen.getByText('Milk')
+      const overflowContainer = milkElement.closest('.overflow-hidden')
+      expect(overflowContainer).toBeInTheDocument()
+      const gridContainer = overflowContainer?.parentElement
+      expect(gridContainer?.className).toContain('grid-rows-[0fr]')
     })
 
     it('should auto-collapse store group when all items are checked', () => {
@@ -516,9 +524,12 @@ describe('ActiveTripPage', () => {
       render(<ActiveTripPage />, { wrapper })
 
       //== Costco should have auto-collapsed because all items are checked
-      //== Items should not be visible
-      expect(screen.queryByText('Milk')).not.toBeInTheDocument()
-      expect(screen.queryByText('Bread')).not.toBeInTheDocument()
+      //== Items are still in the DOM but the grid container should be collapsed
+      const milkElement = screen.getByText('Milk')
+      const overflowContainer = milkElement.closest('.overflow-hidden')
+      expect(overflowContainer).toBeInTheDocument()
+      const gridContainer = overflowContainer?.parentElement
+      expect(gridContainer?.className).toContain('grid-rows-[0fr]')
     })
   })
 })
