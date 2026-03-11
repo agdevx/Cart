@@ -27,6 +27,15 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
             store.UserId = userId;
         }
 
+        //== Check for duplicate name in the destination scope
+        var duplicateExists = await storeRepository.ExistsWithName(
+            store.Name, store.UserId, store.HouseholdId, excludeStoreId: null);
+
+        if (duplicateExists)
+        {
+            throw new InvalidOperationException($"A store named \"{store.Name}\" already exists in this scope");
+        }
+
         return await storeRepository.Create(store);
     }
 

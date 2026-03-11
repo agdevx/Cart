@@ -431,6 +431,70 @@ public class StoreServiceTests
     }
 
     [Fact]
+    public async Task CreateStore_Should_Throw_When_DuplicateNameInPersonalScope()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var store = new Store { Name = "Costco" };
+
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", userId, null, null))
+                            .ReturnsAsync(true);
+
+        // Act
+        var act = () => _storeService.CreateStore(store, userId);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>()
+                 .WithMessage("*already exists*");
+    }
+
+    [Fact]
+    public async Task CreateStore_Should_Throw_When_DuplicateNameInHouseholdScope()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        var store = new Store { Name = "Costco", HouseholdId = householdId };
+        var household = new Household
+        {
+            Id = householdId,
+            Name = "Home",
+            Members = new List<HouseholdMember> { new() { UserId = userId } }
+        };
+
+        _mockHouseholdRepository.Setup(r => r.GetById(householdId)).ReturnsAsync(household);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", null, householdId, null))
+                            .ReturnsAsync(true);
+
+        // Act
+        var act = () => _storeService.CreateStore(store, userId);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>()
+                 .WithMessage("*already exists*");
+    }
+
+    [Fact]
+    public async Task CreateStore_Should_Succeed_When_SameNameDifferentScope()
+    {
+        // Arrange — "Costco" exists in household, creating personal "Costco"
+        var userId = Guid.NewGuid();
+        var store = new Store { Name = "Costco" };
+
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", userId, null, null))
+                            .ReturnsAsync(false);
+        _mockStoreRepository.Setup(r => r.Create(It.IsAny<Store>()))
+                            .ReturnsAsync(store);
+
+        // Act
+        var result = await _storeService.CreateStore(store, userId);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Name.Should().Be("Costco");
+    }
+
+    [Fact]
     public async Task UpdateStore_CanChangeScopeToHousehold()
     {
         // Arrange
