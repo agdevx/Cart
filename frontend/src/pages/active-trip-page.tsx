@@ -18,6 +18,7 @@ import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.qu
 import { useSSE } from '@/hooks/use-sse'
 import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
 import { ROUTES, tripDetailPath } from '@/routes'
+import { fireCompletionConfetti } from '@/utils/confetti'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 
 import { ConfirmDialog } from './components/confirm-dialog'
@@ -118,8 +119,9 @@ export const ActiveTripPage = () => {
 
     try {
       await completeMutation.mutateAsync(tripId)
+      fireCompletionConfetti()
       cleanup()
-      navigate(ROUTES.SHOPPING)
+      setTimeout(() => navigate(ROUTES.SHOPPING), 1500)
     } catch {
       // Error toast shown by global MutationCache handler
     }
