@@ -5,11 +5,10 @@ import { useEffect } from 'react'
 
 import { useSetAtom } from 'jotai'
 
+import { ApiError } from '@/apis/api-error'
 import { apiFetch } from '@/apis/agdevx-cart-api/agdevx-cart-api-config'
 import type { User } from '@/apis/agdevx-cart-api/models/user'
-import { currentUserAtom } from '@/state/auth-atoms'
-
-const AUTH_USER_STORAGE_KEY = 'authUser'
+import { AUTH_USER_STORAGE_KEY, currentUserAtom } from '@/state/auth-atoms'
 
 interface AuthProviderProps {
   children: React.ReactNode
@@ -26,26 +25,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const validateSession = async () => {
       try {
         const response = await apiFetch('/api/auth/me')
-        if (response.ok) {
-          const userData = await response.json()
-          const user: User = {
-            id: userData.userId,
-            email: userData.email,
-            name: userData.name,
-            createdBy: null,
-            createdDate: new Date().toISOString(),
-            modifiedBy: null,
-            modifiedDate: null,
-          }
-          setUser(user)
-          localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(user))
-        } else {
-          //== Cookie expired or invalid — clear local state
+        const userData = await response.json()
+        const user: User = {
+          id: userData.userId,
+          email: userData.email,
+          name: userData.name,
+          createdBy: null,
+          createdDate: new Date().toISOString(),
+          modifiedBy: null,
+          modifiedDate: null,
+        }
+        setUser(user)
+        localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(user))
+      } catch (error) {
+        if (error instanceof ApiError) {
+          //== HTTP error (e.g. 401 expired session) — clear local state
           setUser(null)
           localStorage.removeItem(AUTH_USER_STORAGE_KEY)
         }
-      } catch {
-        //== Network error — keep optimistic local state
+        //== Network error (TypeError) — keep optimistic local state
       }
     }
 

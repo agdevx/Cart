@@ -2,6 +2,7 @@
 // ABOUTME: Configures routes and navigation structure
 
 import { BrowserRouter, Navigate,Route, Routes } from 'react-router-dom'
+import { Toaster } from 'sonner'
 
 import { QueryClientProvider } from '@tanstack/react-query'
 
@@ -59,13 +60,16 @@ export const AppRoutes = () => (
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </AuthProvider>
-    </QueryClientProvider>
+    <>
+      <Toaster position="bottom-right" />
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </AuthProvider>
+      </QueryClientProvider>
+    </>
   )
 }
 

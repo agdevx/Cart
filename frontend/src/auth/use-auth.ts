@@ -7,9 +7,7 @@ import { useAtom } from 'jotai';
 
 import { apiFetch } from '@/apis/agdevx-cart-api/agdevx-cart-api-config';
 import type { User } from '@/apis/agdevx-cart-api/models/user';
-import { currentUserAtom } from '@/state/auth-atoms';
-
-const AUTH_USER_STORAGE_KEY = 'authUser';
+import { AUTH_USER_STORAGE_KEY, currentUserAtom } from '@/state/auth-atoms';
 
 /**
  * Hook for managing authentication state
