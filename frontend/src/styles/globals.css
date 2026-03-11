@@ -33,8 +33,19 @@ body {
   animation: fadeIn 350ms ease-out;
 }
 
+@keyframes checkBounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+.animate-check-bounce {
+  animation: checkBounce 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-in {
+  .animate-fade-in,
+  .animate-check-bounce {
     animation: none;
   }
 

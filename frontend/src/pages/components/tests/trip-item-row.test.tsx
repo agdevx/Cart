@@ -257,6 +257,10 @@ describe('TripItemRow', () => {
     )
 
     const itemName = screen.getByText('Bananas')
-    expect(itemName).toHaveClass('line-through')
+    // Strikethrough is now an animated pseudo-element (inline width transition),
+    // not a CSS class — the parent span gets text-text-tertiary when checked
+    expect(itemName.closest('span')).toHaveClass('text-text-tertiary')
+    const strikeEl = itemName.closest('span')?.querySelector('span')
+    expect(strikeEl).toHaveStyle({ width: '100%' })
   })
 })
