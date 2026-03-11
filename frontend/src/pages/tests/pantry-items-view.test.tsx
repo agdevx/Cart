@@ -52,13 +52,14 @@ const mockStores: Store[] = [
   { id: 's2', name: 'Corner Market', householdId: null, userId: 'user1', createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
 ]
 
-const renderView = (filter: InventoryFilter = 'all', options?: { showCreateForm?: boolean; onCloseCreateForm?: () => void }) => {
+const renderView = (filter: InventoryFilter = 'all', options?: { showCreateForm?: boolean; onOpenCreateForm?: () => void; onCloseCreateForm?: () => void }) => {
   return render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <PantryItemsView
           filter={filter}
           showCreateForm={options?.showCreateForm ?? false}
+          onOpenCreateForm={options?.onOpenCreateForm ?? vi.fn()}
           onCloseCreateForm={options?.onCloseCreateForm ?? vi.fn()}
         />
       </BrowserRouter>

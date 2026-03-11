@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import { MoreVertical, Package, Pencil, Trash2 } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/create-inventory-item.mutation'
@@ -18,6 +18,7 @@ import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 
 import { ConfirmDialog } from './components/confirm-dialog'
+import { EmptyState } from './components/empty-state'
 import { ScopeSelect } from './components/scope-select'
 
 export type InventoryFilter = 'all' | 'personal' | `household:${string}` | `merged:${string}`
@@ -25,6 +26,7 @@ export type InventoryFilter = 'all' | 'personal' | `household:${string}` | `merg
 interface PantryItemsViewProps {
   filter: InventoryFilter
   showCreateForm: boolean
+  onOpenCreateForm: () => void
   onCloseCreateForm: () => void
 }
 
@@ -38,7 +40,7 @@ const parseFilter = (filter: InventoryFilter): { type: FilterType; id: string | 
   return { type: type as FilterType, id }
 }
 
-export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: PantryItemsViewProps) => {
+export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCloseCreateForm }: PantryItemsViewProps) => {
   const { type: filterType, id: filterId } = parseFilter(filter)
   const { data: households } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
@@ -275,11 +277,34 @@ export const PantryItemsView = ({ filter, showCreateForm, onCloseCreateForm }: P
   )
 
   if (isLoading) {
-    return <>{createForm}<p className="text-text-secondary">Loading inventory...</p></>
+    return (
+      <>
+        {createForm}
+        <div className="space-y-2 mt-2">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="p-4 bg-surface rounded-xl shadow-sm space-y-2">
+              <div className="h-3 w-1/2 bg-navy/8 animate-pulse rounded-lg" />
+              <div className="h-2.5 w-1/3 bg-navy/8 animate-pulse rounded-lg" />
+            </div>
+          ))}
+        </div>
+      </>
+    )
   }
 
   if (!items || items.length === 0) {
-    return <>{createForm}<p className="text-text-secondary mt-4">No inventory items yet. Add your first item!</p></>
+    return (
+      <>
+        {createForm}
+        <EmptyState
+          icon={Package}
+          title="No inventory items yet"
+          subtitle="Add your first item to start building your pantry"
+          actionLabel="Add Item"
+          onAction={onOpenCreateForm}
+        />
+      </>
+    )
   }
 
   const renderEditForm = (item: InventoryItem) => (

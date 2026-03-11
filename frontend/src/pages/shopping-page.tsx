@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { ChevronDown, Plus } from 'lucide-react'
+import { ChevronDown, Plus, ShoppingCart } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
@@ -15,6 +15,7 @@ import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
 import { tripDetailPath } from '@/routes'
 
 import { ConfirmDialog } from './components/confirm-dialog'
+import { EmptyState } from './components/empty-state'
 import { PageHeader } from './components/page-header'
 import { ScopeSelect } from './components/scope-select'
 import { TripCard } from './components/trip-card'
@@ -80,7 +81,16 @@ export const ShoppingPage = () => {
   if (isLoading) {
     return (
       <div className="px-5 pt-7">
-        <p className="text-text-secondary">Loading trips...</p>
+        <div className="h-9 w-48 bg-navy/8 animate-pulse rounded-lg mb-6" />
+        <div className="space-y-4">
+          {[0, 1].map((i) => (
+            <div key={i} className="p-4 bg-surface rounded-2xl shadow-sm space-y-3">
+              <div className="h-3 w-3/5 bg-navy/8 animate-pulse rounded-lg" />
+              <div className="h-2.5 w-2/5 bg-navy/8 animate-pulse rounded-lg" />
+              <div className="h-2 w-full bg-navy/8 animate-pulse rounded-full" />
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
@@ -203,7 +213,13 @@ export const ShoppingPage = () => {
       )}
 
       {trips && trips.length === 0 && (
-        <p className="text-text-secondary mt-4">No trips yet. Create your first shopping trip!</p>
+        <EmptyState
+          icon={ShoppingCart}
+          title="No trips yet"
+          subtitle="Create your first shopping trip to get started"
+          actionLabel="Create Trip"
+          onAction={() => setShowCreateForm(true)}
+        />
       )}
 
       {/* Delete confirmation dialog */}
