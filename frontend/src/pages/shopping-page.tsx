@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { ChevronDown, Plus, ShoppingCart } from 'lucide-react'
 
-import { useAuth } from '@/auth/auth-provider'
+import { useAuth } from '@/auth/use-auth'
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
 import { useDeleteTripMutation } from '@/apis/agdevx-cart-api/trip/delete-trip.mutation'
