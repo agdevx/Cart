@@ -1,42 +1,22 @@
-// ABOUTME: Error message utility for consistent user-facing error messages
-// ABOUTME: Maps error codes to human-readable messages
+// ABOUTME: Error message utility for extracting user-facing messages from errors
+// ABOUTME: Handles ApiError (with HTTP body), standard Error, and unknown values
+
+import { ApiError } from '@/apis/api-error'
 
 /**
- * Dictionary of error codes to user-friendly messages
- */
-export const ERROR_MESSAGES = {
-  UNKNOWN_ERROR: 'An unexpected error occurred. Please try again.',
-  NETWORK_ERROR: 'Network error. Please check your connection and try again.',
-  UNAUTHORIZED: 'You are not authorized to perform this action.',
-  INVALID_CREDENTIALS: 'Invalid email or password.',
-  NOT_FOUND: 'The requested resource was not found.',
-  VALIDATION_ERROR: 'Please check your input and try again.',
-  SERVER_ERROR: 'Server error. Please try again later.',
-} as const;
-
-export type ErrorCode = keyof typeof ERROR_MESSAGES;
-
-/**
- * Gets a user-friendly error message from an error code string, Error object, or unknown value.
- * - String: looks up as error code, returns the mapped message or UNKNOWN_ERROR
- * - Error object: extracts .message, tries it as an error code, otherwise returns .message directly
- * - Anything else: returns UNKNOWN_ERROR
+ * Extracts a user-friendly error message from any error type.
+ * - ApiError: uses body.message if available, falls back to statusText
+ * - Error: returns .message
+ * - Anything else: returns generic fallback
  */
 export function getErrorMessage(error: unknown): string {
-  const message = error instanceof Error ? error.message : typeof error === 'string' ? error : null;
-
-  if (!message) {
-    return ERROR_MESSAGES.UNKNOWN_ERROR;
+  if (error instanceof ApiError) {
+    const body = error.body as Record<string, unknown> | null
+    if (body && typeof body.message === 'string') return body.message
+    return error.statusText
   }
 
-  if (message in ERROR_MESSAGES) {
-    return ERROR_MESSAGES[message as ErrorCode];
-  }
+  if (error instanceof Error) return error.message
 
-  // For Error objects with non-code messages, return the message directly
-  if (error instanceof Error) {
-    return message;
-  }
-
-  return ERROR_MESSAGES.UNKNOWN_ERROR;
+  return 'An unexpected error occurred. Please try again.'
 }
