@@ -458,7 +458,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
     const personalItems = items.filter((item) => item.ownerUserId !== null)
 
     return (
-      <>
+      <div className="animate-fade-in">
         {createForm}
         {(households || []).map((household) => {
           const householdItems = householdItemsMap.get(household.id) || []
@@ -498,13 +498,13 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
             isPending={deleteMutation.isPending}
           />
         )}
-      </>
+      </div>
     )
   }
 
   //== For scoped filters, render a flat list
   return (
-    <>
+    <div className="animate-fade-in">
       {createForm}
       <div className="space-y-2">
         {items.map(renderItem)}
@@ -520,6 +520,6 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           isPending={deleteMutation.isPending}
         />
       )}
-    </>
+    </div>
   )
 }

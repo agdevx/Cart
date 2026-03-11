@@ -168,7 +168,7 @@ export const AddTripItemsPage = () => {
   }
 
   return (
-    <div className="px-5 pt-7 pb-28">
+    <div className="px-5 pt-7 pb-28 animate-fade-in">
       {/* Back button */}
       <button
         onClick={() => navigate(tripDetailPath(tripId!))}

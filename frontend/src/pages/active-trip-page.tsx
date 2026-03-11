@@ -148,7 +148,7 @@ export const ActiveTripPage = () => {
   const progressPercent = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0
 
   return (
-    <div className="px-5 pt-7 pb-8">
+    <div className="px-5 pt-7 pb-8 animate-fade-in">
       <div className="mb-6">
         <button
           onClick={() => navigate(tripDetailPath(tripId!))}

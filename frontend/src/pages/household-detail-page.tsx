@@ -140,7 +140,7 @@ export const HouseholdDetailPage = () => {
   }
 
   return (
-    <div className="px-5 pt-7 pb-8">
+    <div className="px-5 pt-7 pb-8 animate-fade-in">
       {/* Header */}
       <div className="mb-6">
         <button

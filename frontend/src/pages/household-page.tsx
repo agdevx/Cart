@@ -52,7 +52,7 @@ export const HouseholdPage = () => {
   }
 
   return (
-    <div className="pb-4">
+    <div className="pb-4 animate-fade-in">
       <PageHeader>Your <span className="text-teal">Household</span></PageHeader>
       <div className="px-5">
       {households && households.length > 0 ? (

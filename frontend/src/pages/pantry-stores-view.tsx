@@ -254,7 +254,7 @@ export const PantryStoresView = () => {
   )
 
   return (
-    <>
+    <div className="animate-fade-in">
       {/* Add Store toggle button */}
       <button
         onClick={() => setShowCreateForm(!showCreateForm)}
@@ -374,6 +374,6 @@ export const PantryStoresView = () => {
           isPending={deleteMutation.isPending}
         />
       )}
-    </>
+    </div>
   )
 }
