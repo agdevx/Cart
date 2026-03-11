@@ -1,7 +1,7 @@
 // ABOUTME: Traps Tab/Shift+Tab focus cycling within a container element
 // ABOUTME: Used in ConfirmDialog to prevent focus from escaping the modal
 
-import { useEffect, type RefObject } from 'react'
+import { type RefObject,useEffect } from 'react'
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'

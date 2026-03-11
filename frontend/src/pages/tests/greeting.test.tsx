@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getGreeting } from '../shopping-page'
+import { getGreeting } from '@/utils/greeting'
 
 describe('getGreeting', () => {
   it('returns "Good morning" at 5:00 AM', () => {

@@ -7,7 +7,6 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import * as useAuthModule from '@/auth/use-auth'
 import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
 import type { Household } from '@/apis/agdevx-cart-api/models/household'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
@@ -17,6 +16,7 @@ import * as reopenTripModule from '@/apis/agdevx-cart-api/trip/reopen-trip.mutat
 import * as updateTripModule from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
 import * as tripsQueryModule from '@/apis/agdevx-cart-api/trip/use-trips.query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
+import * as useAuthModule from '@/auth/use-auth'
 
 import { ShoppingPage } from '../shopping-page'
 

@@ -6,26 +6,21 @@ import { useNavigate } from 'react-router-dom'
 
 import { ChevronDown, Plus, ShoppingCart } from 'lucide-react'
 
-import { useAuth } from '@/auth/use-auth'
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
 import { useDeleteTripMutation } from '@/apis/agdevx-cart-api/trip/delete-trip.mutation'
 import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.mutation'
 import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
+import { useAuth } from '@/auth/use-auth'
 import { tripDetailPath } from '@/routes'
+import { getGreeting } from '@/utils/greeting'
 
 import { ConfirmDialog } from './components/confirm-dialog'
 import { EmptyState } from './components/empty-state'
 import { PageHeader } from './components/page-header'
 import { ScopeSelect } from './components/scope-select'
 import { TripCard } from './components/trip-card'
-
-export function getGreeting(hour: number): string {
-  if (hour >= 5 && hour < 12) return 'Good morning'
-  if (hour >= 12 && hour < 17) return 'Good afternoon'
-  return 'Good evening'
-}
 
 export const ShoppingPage = () => {
   const navigate = useNavigate()
