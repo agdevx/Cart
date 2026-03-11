@@ -3,7 +3,9 @@
 using AGDevX.Cart.Auth;
 using AGDevX.Cart.Data;
 using AGDevX.Cart.Shared.DTOs;
+using AGDevX.Cart.Shared.Security;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
 namespace AGDevX.Cart.Auth.Tests;
@@ -19,7 +21,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {
@@ -47,7 +49,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {
@@ -82,7 +84,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {
@@ -114,7 +116,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {
@@ -145,7 +147,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {
@@ -179,7 +181,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {
@@ -213,7 +215,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {
@@ -245,7 +247,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {
@@ -276,7 +278,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         await authService.Register(new RegisterRequest
         {
@@ -313,7 +315,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registered = await authService.Register(new RegisterRequest
         {
@@ -342,7 +344,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registered = await authService.Register(new RegisterRequest
         {
@@ -371,7 +373,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registered = await authService.Register(new RegisterRequest
         {
@@ -400,7 +402,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {
@@ -438,7 +440,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {
@@ -469,7 +471,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {
@@ -500,7 +502,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {
@@ -531,7 +533,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {
@@ -562,7 +564,7 @@ public class AuthServiceTests
                       .Options;
 
         using var context = new CartDbContext(options);
-        var authService = new AuthService(context);
+        var authService = new AuthService(context, new Mock<ISecurityAuditLogger>().Object);
 
         var registerRequest = new RegisterRequest
         {

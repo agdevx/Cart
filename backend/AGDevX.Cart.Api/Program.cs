@@ -6,6 +6,7 @@ using AGDevX.Cart.Data;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Shared.Configuration;
+using AGDevX.Cart.Shared.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -83,6 +84,7 @@ builder.Services.AddScoped<ITripItemRepository, TripItemRepository>();
 
 //== Service registrations
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISecurityAuditLogger, SecurityAuditLogger>();
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 builder.Services.AddScoped<IStoreService, StoreService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
