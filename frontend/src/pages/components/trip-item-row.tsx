@@ -330,6 +330,7 @@ const EditForm = ({
       <input
         id="edit-quantity"
         type="number"
+        autoFocus
         min="1"
         value={editQuantity}
         onChange={(e) => onQuantityChange(Number(e.target.value))}

@@ -105,7 +105,7 @@ export const ShoppingPage = () => {
   }
 
   return (
-    <div className="pb-4">
+    <div className="pb-4 animate-fade-in">
       {user?.name && (
         <div className="px-5 pt-5">
           <p className="text-sm font-semibold text-teal">

@@ -207,6 +207,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
         <input
           id="itemName"
           type="text"
+          autoFocus
           value={itemName}
           onChange={(e) => setItemName(e.target.value)}
           placeholder="e.g., Milk"
@@ -325,6 +326,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
         <input
           id={`editName-${item.id}`}
           type="text"
+          autoFocus
           value={editName}
           onChange={(e) => setEditName(e.target.value)}
           placeholder="e.g., Milk"

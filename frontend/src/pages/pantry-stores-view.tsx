@@ -274,6 +274,7 @@ export const PantryStoresView = () => {
             <input
               id="storeName"
               type="text"
+              autoFocus
               value={storeName}
               onChange={(e) => setStoreName(e.target.value)}
               placeholder="e.g., Costco"
