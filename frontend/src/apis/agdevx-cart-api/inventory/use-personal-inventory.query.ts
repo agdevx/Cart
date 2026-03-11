@@ -15,9 +15,6 @@ export const usePersonalInventoryQuery = () => {
     queryKey: ['inventory', 'personal'],
     queryFn: async (): Promise<InventoryItem[]> => {
       const response = await apiFetch('/api/inventory/personal');
-      if (!response.ok) {
-        throw new Error('Failed to fetch personal inventory');
-      }
       return response.json();
     },
     enabled: isAuthenticated,

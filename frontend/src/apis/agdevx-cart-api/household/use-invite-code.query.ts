@@ -14,9 +14,6 @@ export const useInviteCodeQuery = (householdId: string) => {
     queryKey: ['household', householdId, 'invite-code'],
     queryFn: async (): Promise<string> => {
       const response = await apiFetch(`/api/household/${householdId}/invite-code`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch invite code')
-      }
       const data = await response.json()
       return data.inviteCode
     },

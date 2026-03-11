@@ -15,9 +15,6 @@ export const useHouseholdInventoryQuery = (householdId: string | null) => {
     queryKey: ['inventory', 'household', householdId],
     queryFn: async (): Promise<InventoryItem[]> => {
       const response = await apiFetch(`/api/inventory/household/${householdId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch household inventory');
-      }
       return response.json();
     },
     enabled: isAuthenticated && householdId !== null,

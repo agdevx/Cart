@@ -21,9 +21,6 @@ export const useStoresQuery = (householdIds: string[]) => {
 
       const allStores: Store[] = []
       for (const response of responses) {
-        if (!response.ok) {
-          throw new Error('Failed to fetch stores')
-        }
         const stores: Store[] = await response.json()
         allStores.push(...stores)
       }
