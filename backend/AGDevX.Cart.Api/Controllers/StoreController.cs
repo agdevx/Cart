@@ -4,6 +4,7 @@
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Auth.Extensions;
 using AGDevX.Cart.Data.Models;
+using AGDevX.Cart.Shared.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -70,11 +71,12 @@ public class StoreController(IStoreService storeService) : ControllerBase
 
     //== Create a new store
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] Store store)
+    public async Task<IActionResult> Create([FromBody] CreateStoreRequest request)
     {
         try
         {
             var userId = User.GetUserId();
+            var store = new Store { Name = request.Name, HouseholdId = request.HouseholdId };
             var created = await storeService.CreateStore(store, userId);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
@@ -90,12 +92,12 @@ public class StoreController(IStoreService storeService) : ControllerBase
 
     //== Update an existing store
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] Store store)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateStoreRequest request)
     {
         try
         {
             var userId = User.GetUserId();
-            await storeService.UpdateStore(id, store.Name, store.HouseholdId, userId);
+            await storeService.UpdateStore(id, request.Name, request.HouseholdId, userId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

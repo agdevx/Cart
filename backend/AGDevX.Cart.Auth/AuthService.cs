@@ -2,12 +2,13 @@
 // ABOUTME: Uses BCrypt for password hashing. Cookie session management is handled by the controller.
 using AGDevX.Cart.Data;
 using AGDevX.Cart.Shared.DTOs;
+using AGDevX.Cart.Shared.Security;
 using AGDevX.Cart.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AGDevX.Cart.Auth;
 
-public class AuthService(CartDbContext context) : IAuthService
+public class AuthService(CartDbContext context, ISecurityAuditLogger securityAuditLogger) : IAuthService
 {
     public async Task<AuthResponse> Register(RegisterRequest request)
     {
@@ -33,6 +34,8 @@ public class AuthService(CartDbContext context) : IAuthService
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
+        securityAuditLogger.LogRegistration(request.Email);
+
         return new AuthResponse
         {
             UserId = user.Id,
@@ -44,12 +47,11 @@ public class AuthService(CartDbContext context) : IAuthService
     public async Task<AuthResponse> Login(LoginRequest request)
     {
         //== Find user by email
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email)
-                        ?? throw new UnauthorizedAccessException("Invalid email or password.");
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 
-        //== Verify password with BCrypt
-        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
+            securityAuditLogger.LogFailedLogin(request.Email);
             throw new UnauthorizedAccessException("Invalid email or password.");
         }
 
@@ -105,7 +107,9 @@ public class AuthService(CartDbContext context) : IAuthService
                 throw new InvalidOperationException("A user with this email already exists.");
             }
 
+            var oldEmail = user.Email ?? string.Empty;
             user.Email = request.Email;
+            securityAuditLogger.LogEmailChange(userId, oldEmail);
         }
 
         user.Name = request.Name.Trim();
@@ -149,5 +153,7 @@ public class AuthService(CartDbContext context) : IAuthService
         //== Hash and save new password
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
         await context.SaveChangesAsync();
+
+        securityAuditLogger.LogPasswordChange(userId);
     }
 }

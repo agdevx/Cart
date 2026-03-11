@@ -3,6 +3,7 @@
 
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Auth.Extensions;
+using AGDevX.Cart.Shared.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -52,18 +53,13 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
     }
 
     //== Add a new item to a trip
-    [HttpPost]
-    public async Task<IActionResult> Add(
-        [FromQuery] Guid tripId,
-        [FromQuery] Guid inventoryItemId,
-        [FromQuery] int quantity,
-        [FromQuery] string? notes = null,
-        [FromQuery] Guid? storeId = null)
+    [HttpPost("trip/{tripId}")]
+    public async Task<IActionResult> Add(Guid tripId, [FromBody] AddTripItemRequest request)
     {
         try
         {
             var userId = User.GetUserId();
-            var tripItem = await tripItemService.AddTripItem(tripId, inventoryItemId, quantity, userId, notes, storeId);
+            var tripItem = await tripItemService.AddTripItem(tripId, request.InventoryItemId!.Value, request.Quantity, userId, request.Notes, request.StoreId);
             return CreatedAtAction(nameof(GetById), new { id = tripItem.Id }, tripItem);
         }
         catch (UnauthorizedAccessException ex)
@@ -78,16 +74,12 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
 
     //== Update an existing trip item
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(
-        Guid id,
-        [FromQuery] int quantity,
-        [FromQuery] string? notes = null,
-        [FromQuery] Guid? storeId = null)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTripItemRequest request)
     {
         try
         {
             var userId = User.GetUserId();
-            await tripItemService.UpdateTripItem(id, quantity, userId, notes, storeId);
+            await tripItemService.UpdateTripItem(id, request.Quantity, userId, request.Notes, request.StoreId);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

@@ -1,5 +1,5 @@
 // ABOUTME: Mutation hook for updating trip item details
-// ABOUTME: Sends PUT request with query params for quantity, notes, and storeId
+// ABOUTME: Sends PUT request with JSON body for quantity, notes, and storeId
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -19,14 +19,9 @@ export const useUpdateTripItemMutation = () => {
   return useMutation({
     mutationFn: async (request: UpdateTripItemRequest): Promise<void> => {
       const { tripItemId, quantity, notes, storeId } = request
-      const params = new URLSearchParams({
-        quantity: quantity.toString(),
-      })
-      if (notes) params.append('notes', notes)
-      if (storeId) params.append('storeId', storeId)
-
-      const response = await apiFetch(`/api/tripitem/${tripItemId}?${params.toString()}`, {
+      const response = await apiFetch(`/api/tripitem/${tripItemId}`, {
         method: 'PUT',
+        body: JSON.stringify({ quantity, notes, storeId }),
       })
       if (!response.ok) {
         throw new Error('Failed to update trip item')

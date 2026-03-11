@@ -45,9 +45,10 @@ describe('useUpdateTripItemMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith(
-      '/api/tripitem/ti1?quantity=3&notes=get+the+big+one&storeId=store1',
+      '/api/tripitem/ti1',
       {
         method: 'PUT',
+        body: JSON.stringify({ quantity: 3, notes: 'get the big one', storeId: 'store1' }),
       }
     )
   })

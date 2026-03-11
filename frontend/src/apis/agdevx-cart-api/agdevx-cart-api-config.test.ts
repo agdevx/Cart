@@ -105,4 +105,43 @@ describe('apiFetch', () => {
     const calledUrl = mockFetch.mock.calls[0][0];
     expect(calledUrl).toContain('/test-endpoint');
   });
+
+  it('should abort request after 15 second timeout', async () => {
+    vi.useFakeTimers();
+
+    const mockFetch = vi.fn().mockImplementation(
+      (_url: string, options: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          options.signal?.addEventListener('abort', () => {
+            reject(new DOMException('The operation was aborted.', 'AbortError'));
+          });
+        }),
+    );
+    globalThis.fetch = mockFetch;
+
+    const fetchPromise = apiFetch('/slow-endpoint', { method: 'GET' });
+
+    vi.advanceTimersByTime(15000);
+
+    await expect(fetchPromise).rejects.toThrow('Request timed out');
+
+    vi.useRealTimers();
+  });
+
+  it('should clean up timeout on successful response', async () => {
+    vi.useFakeTimers();
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: 'test' }),
+    });
+    globalThis.fetch = mockFetch;
+
+    await apiFetch('/test-endpoint', { method: 'GET' });
+
+    expect(clearTimeoutSpy).toHaveBeenCalled();
+    clearTimeoutSpy.mockRestore();
+    vi.useRealTimers();
+  });
 });

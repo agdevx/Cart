@@ -5,6 +5,7 @@ using System.Security.Claims;
 using AGDevX.Cart.Api.Controllers;
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Data.Models;
+using AGDevX.Cart.Shared.DTOs;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -192,13 +193,14 @@ public class InventoryControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
+        var request = new CreateInventoryItemRequest { Name = "New Item" };
         var item = new InventoryItem { Id = Guid.NewGuid(), Name = "New Item", OwnerUserId = userId };
 
         mockService.Setup(s => s.CreateInventoryItem(It.IsAny<InventoryItem>(), userId))
                    .ReturnsAsync(item);
 
         // Act
-        var result = await controller.Create(item);
+        var result = await controller.Create(request);
 
         // Assert
         var createdResult = result.Should().BeOfType<CreatedAtActionResult>().Subject;
@@ -244,13 +246,13 @@ public class InventoryControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var item = new InventoryItem { Id = itemId, Name = "Updated Item", OwnerUserId = userId };
+        var request = new UpdateInventoryItemRequest { Name = "Updated Item" };
 
         mockService.Setup(s => s.UpdateInventoryItem(It.IsAny<InventoryItem>(), userId))
-                   .ReturnsAsync(item);
+                   .ReturnsAsync(new InventoryItem { Id = itemId, Name = "Updated Item", OwnerUserId = userId });
 
         // Act
-        var result = await controller.Update(itemId, item);
+        var result = await controller.Update(itemId, request);
 
         // Assert
         result.Should().BeOfType<NoContentResult>();
@@ -274,13 +276,13 @@ public class InventoryControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var item = new InventoryItem { Id = itemId, Name = "Updated Item", OwnerUserId = userId };
+        var request = new UpdateInventoryItemRequest { Name = "Updated Item" };
 
         mockService.Setup(s => s.UpdateInventoryItem(It.IsAny<InventoryItem>(), userId))
                    .ThrowsAsync(new ArgumentException("Inventory item not found"));
 
         // Act
-        var result = await controller.Update(itemId, item);
+        var result = await controller.Update(itemId, request);
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -304,13 +306,13 @@ public class InventoryControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var item = new InventoryItem { Id = itemId, Name = "Updated Item", OwnerUserId = userId };
+        var request = new UpdateInventoryItemRequest { Name = "Updated Item" };
 
         mockService.Setup(s => s.UpdateInventoryItem(It.IsAny<InventoryItem>(), userId))
                    .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this inventory item"));
 
         // Act
-        var result = await controller.Update(itemId, item);
+        var result = await controller.Update(itemId, request);
 
         // Assert
         result.Should().BeOfType<UnauthorizedObjectResult>();

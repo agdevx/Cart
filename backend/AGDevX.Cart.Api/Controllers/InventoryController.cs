@@ -4,6 +4,7 @@
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Auth.Extensions;
 using AGDevX.Cart.Data.Models;
+using AGDevX.Cart.Shared.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -102,11 +103,18 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
 
     //== Create a new inventory item
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] InventoryItem item)
+    public async Task<IActionResult> Create([FromBody] CreateInventoryItemRequest request)
     {
         try
         {
             var userId = User.GetUserId();
+            var item = new InventoryItem
+            {
+                Name = request.Name,
+                HouseholdId = request.HouseholdId,
+                DefaultStoreId = request.DefaultStoreId,
+                Notes = request.Notes,
+            };
             var created = await inventoryService.CreateInventoryItem(item, userId);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
@@ -118,11 +126,19 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
 
     //== Update an existing inventory item
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] InventoryItem item)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateInventoryItemRequest request)
     {
         try
         {
             var userId = User.GetUserId();
+            var item = new InventoryItem
+            {
+                Id = id,
+                Name = request.Name,
+                HouseholdId = request.HouseholdId,
+                DefaultStoreId = request.DefaultStoreId,
+                Notes = request.Notes,
+            };
             await inventoryService.UpdateInventoryItem(item, userId);
             return NoContent();
         }

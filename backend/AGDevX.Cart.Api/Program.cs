@@ -1,10 +1,12 @@
 // ABOUTME: Main entry point for the Cart API application
 // ABOUTME: Configures services, database context, authentication, and HTTP pipeline
+using AGDevX.Cart.Api.Middleware;
 using AGDevX.Cart.Auth;
 using AGDevX.Cart.Data;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Shared.Configuration;
+using AGDevX.Cart.Shared.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,16 +21,23 @@ builder.Services.AddControllers()
                 });
 
 //== CORS Configuration
+var corsSettings = builder.Configuration.GetSection("CorsSettings").Get<CorsSettings>()
+    ?? new CorsSettings();
+builder.Services.AddSingleton<ICorsSettings>(corsSettings);
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(corsSettings.AllowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
     });
 });
+
+//== Rate Limiting Configuration
+builder.Services.AddRateLimiting();
 
 //== Cookie Configuration
 var cookieSettings = builder.Configuration.GetSection("CookieSettings").Get<CookieSettings>()
@@ -75,6 +84,7 @@ builder.Services.AddScoped<ITripItemRepository, TripItemRepository>();
 
 //== Service registrations
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISecurityAuditLogger, SecurityAuditLogger>();
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 builder.Services.AddScoped<IStoreService, StoreService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
@@ -92,16 +102,30 @@ using (var scope = app.Services.CreateScope())
 }
 
 //== HTTP Pipeline Configuration
+
+//== Global exception handler (catches everything — must be first)
+app.UseGlobalExceptionHandler();
+
+//== Security headers on all responses
+app.UseSecurityHeaders();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
+//== CORS before rate limiter so 429 responses include CORS headers
 app.UseCors();
+
+//== Rate limiting
+app.UseRateLimiter();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -38,8 +38,7 @@ describe('useUpdateHouseholdMutation', () => {
 
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify('New Name'),
+      body: JSON.stringify({ name: 'New Name' }),
     })
   })
 

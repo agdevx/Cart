@@ -20,16 +20,9 @@ export const useAddTripItemMutation = () => {
   return useMutation({
     mutationFn: async (request: AddTripItemRequest): Promise<TripItem> => {
       const { tripId, inventoryItemId, quantity, storeId, notes } = request
-      const params = new URLSearchParams({
-        tripId,
-        inventoryItemId,
-        quantity: quantity.toString(),
-      })
-      if (storeId) params.append('storeId', storeId)
-      if (notes) params.append('notes', notes)
-
-      const response = await apiFetch(`/api/tripitem?${params.toString()}`, {
+      const response = await apiFetch(`/api/tripitem/trip/${tripId}`, {
         method: 'POST',
+        body: JSON.stringify({ inventoryItemId, quantity, storeId, notes }),
       })
       if (!response.ok) {
         throw new Error('Failed to add trip item')
