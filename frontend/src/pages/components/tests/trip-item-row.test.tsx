@@ -242,6 +242,25 @@ describe('TripItemRow', () => {
     expect(mockOnToggleCheck).not.toHaveBeenCalled()
   })
 
+  it('closes kebab menu on Escape key', () => {
+    render(
+      <TripItemRow
+        tripItem={mockTripItem}
+        itemName="Bananas"
+        stores={mockStores}
+        storeDisplayNames={mockStoreDisplayNames}
+        onUpdate={mockOnUpdate}
+        onDelete={mockOnDelete}
+      />
+    )
+
+    fireEvent.click(screen.getByLabelText('Item actions'))
+    expect(screen.getByText('Edit')).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+  })
+
   it('Shopping variant: checked items show strikethrough', () => {
     render(
       <TripItemRow

@@ -356,6 +356,19 @@ describe('PantryStoresView', () => {
     })
   })
 
+  it('closes store kebab menu on Escape key', () => {
+    setupMocks()
+
+    renderView()
+
+    const kebabButtons = screen.getAllByLabelText('Store actions')
+    fireEvent.click(kebabButtons[0])
+    expect(screen.getByText('Edit')).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+  })
+
   it('cancels delete when Cancel is clicked', () => {
     setupMocks()
 

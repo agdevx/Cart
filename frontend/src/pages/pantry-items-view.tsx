@@ -150,8 +150,17 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
         setMenuOpenId(null)
       }
     }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMenuOpenId(null)
+      }
+    }
     document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [menuOpenId])
 
   //== All four hooks are called unconditionally (React rules of hooks). Inactive scoped hooks

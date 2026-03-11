@@ -40,7 +40,7 @@ export const TripItemRow = ({
   const [editStoreId, setEditStoreId] = useState(tripItem.storeId ?? '')
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // Close menu on outside click (mousedown)
+  // Close menu on outside click (mousedown) or Escape key
   useEffect(() => {
     if (!menuOpen) return
 
@@ -50,8 +50,18 @@ export const TripItemRow = ({
       }
     }
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMenuOpen(false)
+      }
+    }
+
     document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [menuOpen])
 
   const handleKebabClick = (e: React.MouseEvent) => {

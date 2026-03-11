@@ -2,7 +2,7 @@ import { BrowserRouter } from 'react-router-dom'
 
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -445,6 +445,38 @@ describe('PantryItemsView', () => {
 
     //== Dialog should be gone
     expect(screen.queryByText('Delete Item')).not.toBeInTheDocument()
+  })
+
+  it('closes item kebab menu on Escape key', () => {
+    setupDefaultMocks()
+
+    vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(personalInventoryModule, 'usePersonalInventoryQuery').mockReturnValue({
+      data: mockPersonalItems,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(householdInventoryModule, 'useHouseholdInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    vi.spyOn(mergedInventoryModule, 'useMergedInventoryQuery').mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    renderView('personal')
+
+    fireEvent.click(screen.getByLabelText('Item actions'))
+    expect(screen.getByText('Delete')).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByText('Delete')).not.toBeInTheDocument()
   })
 
   describe('inline create form', () => {

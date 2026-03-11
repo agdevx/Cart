@@ -27,7 +27,7 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen, households }: Tri
   const menuRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Close menu on outside click (mousedown)
+  // Close menu on outside click (mousedown) or Escape key
   useEffect(() => {
     if (!menuOpen) return
 
@@ -37,8 +37,18 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen, households }: Tri
       }
     }
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMenuOpen(false)
+      }
+    }
+
     document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [menuOpen])
 
   // Auto-focus and select text when entering edit mode

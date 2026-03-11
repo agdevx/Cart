@@ -62,8 +62,17 @@ export const PantryStoresView = () => {
         setMenuOpenId(null)
       }
     }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMenuOpenId(null)
+      }
+    }
     document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [menuOpenId])
 
   if (storesLoading || householdsLoading) {
