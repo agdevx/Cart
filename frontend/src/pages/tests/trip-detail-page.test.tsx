@@ -164,42 +164,42 @@ const setupMocks = () => {
   vi.spyOn(tripQueryModule, 'useTripQuery').mockReturnValue({
     data: mockTrip,
     isLoading: false,
-  } as any)
+  } as unknown as ReturnType<typeof tripQueryModule.useTripQuery>)
 
   vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
     data: mockTripItems,
     isLoading: false,
-  } as any)
+  } as unknown as ReturnType<typeof tripItemsQueryModule.useTripItemsQuery>)
 
   vi.spyOn(startTripModule, 'useStartTripMutation').mockReturnValue({
     mutateAsync: startMutateAsyncFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof startTripModule.useStartTripMutation>)
 
   vi.spyOn(addTripItemModule, 'useAddTripItemMutation').mockReturnValue({
     mutateAsync: vi.fn(),
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof addTripItemModule.useAddTripItemMutation>)
 
   vi.spyOn(updateTripItemModule, 'useUpdateTripItemMutation').mockReturnValue({
     mutate: updateMutateFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof updateTripItemModule.useUpdateTripItemMutation>)
 
   vi.spyOn(deleteTripItemModule, 'useDeleteTripItemMutation').mockReturnValue({
     mutate: deleteMutateFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof deleteTripItemModule.useDeleteTripItemMutation>)
 
   vi.spyOn(storesQueryModule, 'useStoresQuery').mockReturnValue({
     data: mockStores,
     isLoading: false,
-  } as any)
+  } as unknown as ReturnType<typeof storesQueryModule.useStoresQuery>)
 
   vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
     data: mockHouseholds,
     isLoading: false,
-  } as any)
+  } as unknown as ReturnType<typeof householdsQueryModule.useHouseholdsQuery>)
 }
 
 describe('TripDetailPage', () => {
@@ -285,7 +285,7 @@ describe('TripDetailPage', () => {
     vi.spyOn(tripQueryModule, 'useTripQuery').mockReturnValue({
       data: { ...mockTrip, isStarted: true, startedAt: '2024-01-15' },
       isLoading: false,
-    } as any)
+    } as unknown as ReturnType<typeof tripQueryModule.useTripQuery>)
 
     render(<TripDetailPage />, { wrapper })
 
@@ -314,7 +314,7 @@ describe('TripDetailPage', () => {
     vi.spyOn(tripQueryModule, 'useTripQuery').mockReturnValue({
       data: { ...mockTrip, isStarted: true, startedAt: '2024-01-15' },
       isLoading: false,
-    } as any)
+    } as unknown as ReturnType<typeof tripQueryModule.useTripQuery>)
 
     render(<TripDetailPage />, { wrapper })
 
@@ -371,7 +371,7 @@ describe('TripDetailPage', () => {
           { ...mockTripItems[0], storeName: null, storeId: null },
         ],
         isLoading: false,
-      } as any)
+      } as unknown as ReturnType<typeof tripItemsQueryModule.useTripItemsQuery>)
 
       render(<TripDetailPage />, { wrapper })
 
@@ -430,7 +430,7 @@ describe('TripDetailPage', () => {
           },
         ],
         isLoading: false,
-      } as any)
+      } as unknown as ReturnType<typeof tripItemsQueryModule.useTripItemsQuery>)
 
       render(<TripDetailPage />, { wrapper })
 
@@ -455,7 +455,7 @@ describe('TripDetailPage', () => {
           },
         ],
         isLoading: false,
-      } as any)
+      } as unknown as ReturnType<typeof tripItemsQueryModule.useTripItemsQuery>)
 
       render(<TripDetailPage />, { wrapper })
 
@@ -479,7 +479,7 @@ describe('TripDetailPage', () => {
           },
         ],
         isLoading: false,
-      } as any)
+      } as unknown as ReturnType<typeof tripItemsQueryModule.useTripItemsQuery>)
 
       render(<TripDetailPage />, { wrapper })
 
@@ -502,7 +502,7 @@ describe('TripDetailPage', () => {
           },
         ],
         isLoading: false,
-      } as any)
+      } as unknown as ReturnType<typeof tripItemsQueryModule.useTripItemsQuery>)
 
       render(<TripDetailPage />, { wrapper })
 

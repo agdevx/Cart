@@ -3,6 +3,7 @@
 
 import { BrowserRouter } from 'react-router-dom'
 
+import type { UseQueryResult } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -163,32 +164,32 @@ const setupMocks = () => {
   vi.spyOn(tripQueryModule, 'useTripQuery').mockReturnValue({
     data: mockTrip,
     isLoading: false,
-  } as any)
+  } as unknown as UseQueryResult<Trip>)
 
   vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
     data: mockTripItems,
     isLoading: false,
-  } as any)
+  } as unknown as UseQueryResult<TripItem[]>)
 
   vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
     data: mockInventory,
     isLoading: false,
-  } as any)
+  } as unknown as UseQueryResult<InventoryItem[]>)
 
   vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
     data: mockHouseholds,
     isLoading: false,
-  } as any)
+  } as unknown as UseQueryResult<Household[]>)
 
   vi.spyOn(storesQueryModule, 'useStoresQuery').mockReturnValue({
     data: mockStores,
     isLoading: false,
-  } as any)
+  } as unknown as UseQueryResult<Store[]>)
 
   vi.spyOn(addTripItemModule, 'useAddTripItemMutation').mockReturnValue({
     mutateAsync: addMutateAsyncFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof addTripItemModule.useAddTripItemMutation>)
 }
 
 describe('AddTripItemsPage', () => {
@@ -338,27 +339,27 @@ describe('AddTripItemsPage', () => {
     vi.spyOn(tripQueryModule, 'useTripQuery').mockReturnValue({
       data: mockTrip,
       isLoading: false,
-    } as any)
+    } as unknown as UseQueryResult<Trip>)
     vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
       data: mockTripItems,
       isLoading: false,
-    } as any)
+    } as unknown as UseQueryResult<TripItem[]>)
     vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
       data: mockInventory,
       isLoading: false,
-    } as any)
+    } as unknown as UseQueryResult<InventoryItem[]>)
     vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
       data: mockHouseholds,
       isLoading: false,
-    } as any)
+    } as unknown as UseQueryResult<Household[]>)
     vi.spyOn(storesQueryModule, 'useStoresQuery').mockReturnValue({
       data: [...mockStores, householdStore],
       isLoading: false,
-    } as any)
+    } as unknown as UseQueryResult<Store[]>)
     vi.spyOn(addTripItemModule, 'useAddTripItemMutation').mockReturnValue({
       mutateAsync: addMutateAsyncFn,
       isPending: false,
-    } as any)
+    } as unknown as ReturnType<typeof addTripItemModule.useAddTripItemMutation>)
 
     render(<AddTripItemsPage />, { wrapper })
 

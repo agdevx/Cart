@@ -96,32 +96,32 @@ const setupMocks = () => {
   vi.spyOn(tripsQueryModule, 'useTripsQuery').mockReturnValue({
     data: mockTrips,
     isLoading: false,
-  } as any)
+  } as unknown as ReturnType<typeof tripsQueryModule.useTripsQuery>)
 
   vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
     data: [] as Household[],
     isLoading: false,
-  } as any)
+  } as unknown as ReturnType<typeof householdsQueryModule.useHouseholdsQuery>)
 
   vi.spyOn(createTripModule, 'useCreateTripMutation').mockReturnValue({
     mutateAsync: vi.fn(),
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof createTripModule.useCreateTripMutation>)
 
   vi.spyOn(updateTripModule, 'useUpdateTripMutation').mockReturnValue({
     mutate: updateMutateFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof updateTripModule.useUpdateTripMutation>)
 
   vi.spyOn(deleteTripModule, 'useDeleteTripMutation').mockReturnValue({
     mutate: deleteMutateFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof deleteTripModule.useDeleteTripMutation>)
 
   vi.spyOn(reopenTripModule, 'useReopenTripMutation').mockReturnValue({
     mutate: reopenMutateFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof reopenTripModule.useReopenTripMutation>)
 }
 
 describe('ShoppingPage', () => {
@@ -284,7 +284,7 @@ describe('ShoppingPage', () => {
     vi.spyOn(createTripModule, 'useCreateTripMutation').mockReturnValue({
       mutateAsync: mutateAsyncFn,
       isPending: false,
-    } as any)
+    } as unknown as ReturnType<typeof createTripModule.useCreateTripMutation>)
 
     render(<ShoppingPage />, { wrapper })
 

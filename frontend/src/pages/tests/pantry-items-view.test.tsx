@@ -495,7 +495,7 @@ describe('PantryItemsView', () => {
         isPending: false,
         isError: false,
         error: null,
-      } as any)
+      } as unknown as ReturnType<typeof createInventoryItemModule.useCreateInventoryItemMutation>)
 
       vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
         data: [] as InventoryItem[],
@@ -550,7 +550,7 @@ describe('PantryItemsView', () => {
         isPending: false,
         isError: false,
         error: null,
-      } as any)
+      } as unknown as ReturnType<typeof createInventoryItemModule.useCreateInventoryItemMutation>)
 
       const user = userEvent.setup()
 
@@ -584,7 +584,7 @@ describe('PantryItemsView', () => {
         isPending: false,
         isError: false,
         error: null,
-      } as any)
+      } as unknown as ReturnType<typeof createInventoryItemModule.useCreateInventoryItemMutation>)
 
       const user = userEvent.setup()
 
@@ -620,7 +620,7 @@ describe('PantryItemsView', () => {
         isPending: false,
         isError: false,
         error: null,
-      } as any)
+      } as unknown as ReturnType<typeof createInventoryItemModule.useCreateInventoryItemMutation>)
 
       const user = userEvent.setup()
 
@@ -655,7 +655,7 @@ describe('PantryItemsView', () => {
         isPending: false,
         isError: false,
         error: null,
-      } as any)
+      } as unknown as ReturnType<typeof createInventoryItemModule.useCreateInventoryItemMutation>)
 
       const user = userEvent.setup()
 
@@ -681,14 +681,14 @@ describe('PantryItemsView', () => {
         isPending: false,
         isError: false,
         error: null,
-      } as any)
+      } as unknown as ReturnType<typeof createInventoryItemModule.useCreateInventoryItemMutation>)
 
       vi.spyOn(updateInventoryItemModule, 'useUpdateInventoryItemMutation').mockReturnValue({
         mutateAsync: vi.fn().mockResolvedValue({}),
         isPending: false,
         isError: false,
         error: null,
-      } as any)
+      } as unknown as ReturnType<typeof updateInventoryItemModule.useUpdateInventoryItemMutation>)
 
       vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
         data: undefined,
@@ -753,7 +753,7 @@ describe('PantryItemsView', () => {
         isPending: false,
         isError: false,
         error: null,
-      } as any)
+      } as unknown as ReturnType<typeof updateInventoryItemModule.useUpdateInventoryItemMutation>)
 
       const user = userEvent.setup()
 
@@ -831,7 +831,7 @@ describe('PantryItemsView', () => {
         isPending: false,
         isError: false,
         error: null,
-      } as any)
+      } as unknown as ReturnType<typeof updateInventoryItemModule.useUpdateInventoryItemMutation>)
 
       const user = userEvent.setup()
 

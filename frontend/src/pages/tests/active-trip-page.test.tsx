@@ -3,6 +3,7 @@
 
 import { BrowserRouter } from 'react-router-dom'
 
+import type { UseQueryResult } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -125,43 +126,43 @@ const setupMocks = () => {
   vi.spyOn(tripQueryModule, 'useTripQuery').mockReturnValue({
     data: mockTrip,
     isLoading: false,
-  } as any)
+  } as unknown as UseQueryResult<Trip>)
 
   vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
     data: mockTripItems,
     isLoading: false,
-  } as any)
+  } as unknown as UseQueryResult<TripItem[]>)
 
   vi.spyOn(checkTripItemModule, 'useCheckTripItemMutation').mockReturnValue({
     mutate: checkMutateFn,
     mutateAsync: vi.fn(),
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof checkTripItemModule.useCheckTripItemMutation>)
 
   vi.spyOn(completeTripModule, 'useCompleteTripMutation').mockReturnValue({
     mutateAsync: completeMutateAsyncFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof completeTripModule.useCompleteTripMutation>)
 
   vi.spyOn(updateTripItemModule, 'useUpdateTripItemMutation').mockReturnValue({
     mutate: updateMutateFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof updateTripItemModule.useUpdateTripItemMutation>)
 
   vi.spyOn(deleteTripItemModule, 'useDeleteTripItemMutation').mockReturnValue({
     mutate: deleteMutateFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof deleteTripItemModule.useDeleteTripItemMutation>)
 
   vi.spyOn(storesQueryModule, 'useStoresQuery').mockReturnValue({
     data: mockStores,
     isLoading: false,
-  } as any)
+  } as unknown as UseQueryResult<Store[]>)
 
   vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
     data: mockHouseholds,
     isLoading: false,
-  } as any)
+  } as unknown as UseQueryResult<Household[]>)
 }
 
 describe('ActiveTripPage', () => {
@@ -327,7 +328,7 @@ describe('ActiveTripPage', () => {
     vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
       data: mockTripItems.map((item) => ({ ...item, isChecked: true })),
       isLoading: false,
-    } as any)
+    } as unknown as UseQueryResult<TripItem[]>)
 
     render(<ActiveTripPage />, { wrapper })
 
@@ -410,7 +411,7 @@ describe('ActiveTripPage', () => {
           },
         ],
         isLoading: false,
-      } as any)
+      } as unknown as UseQueryResult<TripItem[]>)
 
       render(<ActiveTripPage />, { wrapper })
 
@@ -437,7 +438,7 @@ describe('ActiveTripPage', () => {
           },
         ],
         isLoading: false,
-      } as any)
+      } as unknown as UseQueryResult<TripItem[]>)
 
       render(<ActiveTripPage />, { wrapper })
 
@@ -463,7 +464,7 @@ describe('ActiveTripPage', () => {
           },
         ],
         isLoading: false,
-      } as any)
+      } as unknown as UseQueryResult<TripItem[]>)
 
       render(<ActiveTripPage />, { wrapper })
 
@@ -516,7 +517,7 @@ describe('ActiveTripPage', () => {
       vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
         data: mockTripItems.map((item) => ({ ...item, isChecked: true, checkedAt: '2024-01-16' })),
         isLoading: false,
-      } as any)
+      } as unknown as UseQueryResult<TripItem[]>)
 
       //== Pre-set localStorage with Costco expanded
       localStorage.setItem('accordion-trip1-shopping', JSON.stringify({ Costco: true }))
