@@ -190,7 +190,7 @@ public class TripController(ITripService tripService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            await tripService.AddCollaborator(id, userId, request.UserId);
+            await tripService.AddCollaborator(id, userId, request.UserId!.Value);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
