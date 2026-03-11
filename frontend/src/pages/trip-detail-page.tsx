@@ -60,7 +60,7 @@ export const TripDetailPage = () => {
       }
       navigate(activeTripPath(tripId!))
     } catch {
-      // Error handled by mutation state
+      // Error toast shown by global MutationCache handler
     }
   }
 

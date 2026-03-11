@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { Link,useNavigate } from 'react-router-dom';
 
+import { ApiError } from '@/apis/api-error';
 import { useRegisterMutation } from '@/apis/agdevx-cart-api/auth/register.mutation';
 import { useAuth } from '@/auth/use-auth';
 import { ROUTES } from '@/routes';
@@ -101,12 +102,13 @@ export const RegisterPage = () => {
 
       navigate(ROUTES.SHOPPING);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('already exists') || errorMessage.includes('DUPLICATE_EMAIL')) {
-        setServerEmailError('This email is already registered');
-      } else {
-        console.error('Registration failed:', error);
+      if (error instanceof ApiError) {
+        const body = error.body as Record<string, unknown> | null
+        if (body?.errorCode === 'DUPLICATE_EMAIL') {
+          setServerEmailError('This email is already registered')
+        }
       }
+      // Other errors: no toast (auth mutation), inline state via registerMutation.isError
     }
   };
 

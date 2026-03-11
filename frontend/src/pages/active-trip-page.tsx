@@ -90,7 +90,7 @@ export const ActiveTripPage = () => {
         isChecked: !currentlyChecked,
       })
     } catch {
-      // Error handled by mutation state
+      // Error toast shown by global MutationCache handler
     }
   }
 
@@ -127,7 +127,7 @@ export const ActiveTripPage = () => {
       cleanup()
       navigate(ROUTES.SHOPPING)
     } catch {
-      // Error handled by mutation state
+      // Error toast shown by global MutationCache handler
     }
   }
 

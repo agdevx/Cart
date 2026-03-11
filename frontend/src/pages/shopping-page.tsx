@@ -54,7 +54,7 @@ export const ShoppingPage = () => {
       setShowCreateForm(false)
       navigate(tripDetailPath(newTrip.id))
     } catch {
-      // Error handled by mutation state
+      // Error toast shown by global MutationCache handler
     }
   }
 

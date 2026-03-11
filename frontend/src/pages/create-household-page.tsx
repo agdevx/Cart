@@ -24,7 +24,7 @@ export const CreateHouseholdPage = () => {
       await createMutation.mutateAsync({ name: name.trim() })
       navigate(ROUTES.HOUSEHOLD)
     } catch {
-      // Error is handled by mutation state
+      // Error displayed inline via getErrorMessage(mutation.error)
     }
   }
 
