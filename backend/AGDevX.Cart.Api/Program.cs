@@ -19,11 +19,15 @@ builder.Services.AddControllers()
                 });
 
 //== CORS Configuration
+var corsSettings = builder.Configuration.GetSection("CorsSettings").Get<CorsSettings>()
+    ?? new CorsSettings();
+builder.Services.AddSingleton<ICorsSettings>(corsSettings);
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(corsSettings.AllowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
