@@ -115,7 +115,7 @@ const mockHouseholds: Household[] = [
   },
 ]
 
-const checkMutateAsyncFn = vi.fn()
+const checkMutateFn = vi.fn()
 const completeMutateAsyncFn = vi.fn()
 const updateMutateFn = vi.fn()
 const deleteMutateFn = vi.fn()
@@ -132,7 +132,8 @@ const setupMocks = () => {
   } as any)
 
   vi.spyOn(checkTripItemModule, 'useCheckTripItemMutation').mockReturnValue({
-    mutateAsync: checkMutateAsyncFn,
+    mutate: checkMutateFn,
+    mutateAsync: vi.fn(),
     isPending: false,
   } as any)
 
@@ -198,7 +199,7 @@ describe('ActiveTripPage', () => {
     //== Click the unchecked item (Milk) — the row itself should toggle
     fireEvent.click(screen.getByText('Milk'))
 
-    expect(checkMutateAsyncFn).toHaveBeenCalledWith({
+    expect(checkMutateFn).toHaveBeenCalledWith({
       tripId: 'trip1',
       tripItemId: 'ti1',
       isChecked: true,
@@ -354,7 +355,7 @@ describe('ActiveTripPage', () => {
     fireEvent.click(milkKebab)
 
     //== Check mutation should NOT have been called — kebab tap should not toggle checkbox
-    expect(checkMutateAsyncFn).not.toHaveBeenCalled()
+    expect(checkMutateFn).not.toHaveBeenCalled()
 
     //== Kebab menu should be open (Edit/Remove options visible)
     expect(screen.getByText('Edit')).toBeInTheDocument()
@@ -383,12 +384,12 @@ describe('ActiveTripPage', () => {
     fireEvent.click(screen.getByText('Edit'))
 
     //== Clear any calls from setup
-    checkMutateAsyncFn.mockClear()
+    checkMutateFn.mockClear()
 
     //== Click on the item row — should NOT toggle check because editing
     fireEvent.click(screen.getByText('Milk'))
 
-    expect(checkMutateAsyncFn).not.toHaveBeenCalled()
+    expect(checkMutateFn).not.toHaveBeenCalled()
   })
 
   describe('dual notes display', () => {

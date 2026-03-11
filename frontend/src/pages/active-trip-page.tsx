@@ -80,18 +80,13 @@ export const ActiveTripPage = () => {
     !!tripId
   )
 
-  const handleToggleItem = async (tripItemId: string, currentlyChecked: boolean) => {
+  const handleToggleItem = (tripItemId: string, currentlyChecked: boolean) => {
     if (!tripId) return
-
-    try {
-      await checkMutation.mutateAsync({
-        tripId,
-        tripItemId,
-        isChecked: !currentlyChecked,
-      })
-    } catch {
-      // Error toast shown by global MutationCache handler
-    }
+    checkMutation.mutate({
+      tripId,
+      tripItemId,
+      isChecked: !currentlyChecked,
+    })
   }
 
   const handleUpdateItem = (tripItemId: string, quantity: number, notes: string | null, storeId: string | null) => {
