@@ -190,7 +190,7 @@ Add `animate-fade-in` CSS class to the outer content wrapper in these page compo
 - `shopping-page.tsx`, `pantry-items-view.tsx`, `pantry-stores-view.tsx`
 - `trip-detail-page.tsx`, `active-trip-page.tsx`, `add-trip-items-page.tsx`
 - `household-page.tsx`, `household-detail-page.tsx`
-- `profile-page.tsx`
+- `settings-page.tsx`
 
 Uses the `@keyframes fadeIn` defined in globals.css — 350ms opacity-only, ease-out.
 
@@ -219,6 +219,7 @@ No other new dependencies. Skeletons are pure CSS, focus trap is a custom hook, 
 |------|---------|
 | `pages/components/empty-state.tsx` | Reusable empty state component |
 | `hooks/use-focus-trap.ts` | Focus trap hook for modals |
+| `utils/confetti.ts` | Confetti utility with reduced-motion check |
 
 ## 7. Modified Files
 
@@ -237,7 +238,7 @@ No other new dependencies. Skeletons are pure CSS, focus trap is a custom hook, 
 | `household-detail-page.tsx` | Fade-in |
 | `add-trip-items-page.tsx` | Empty state, fade-in |
 | `trip-card.tsx` | Escape on kebab |
-| `profile-page.tsx` | Fade-in |
+| `settings-page.tsx` | Fade-in |
 
 ## 8. Testing
 
