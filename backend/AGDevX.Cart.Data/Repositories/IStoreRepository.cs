@@ -10,6 +10,7 @@ public interface IStoreRepository
     Task<Store?> GetById(Guid id);
     Task<IEnumerable<Store>> GetHouseholdStores(Guid householdId);
     Task<IEnumerable<Store>> GetPersonalStores(Guid userId);
+    Task<bool> ExistsWithName(string name, Guid? userId, Guid? householdId, Guid? excludeStoreId);
     Task<Store> Create(Store store);
     Task<Store> Update(Store store);
     Task Delete(Guid id);

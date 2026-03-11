@@ -188,4 +188,101 @@ public class StoreRepositoryTests
         // Assert
         await act.Should().NotThrowAsync();
     }
+
+    [Fact]
+    public async Task ExistsWithName_Should_ReturnTrue_When_PersonalStoreDuplicateExists()
+    {
+        // Arrange
+        var dbName = Guid.NewGuid().ToString();
+        using var context = CreateContext(dbName);
+        var repo = new StoreRepository(context);
+        var userId = Guid.NewGuid();
+        var existing = new Store { Id = Guid.NewGuid(), Name = "Costco", UserId = userId };
+        context.Stores.Add(existing);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repo.ExistsWithName("costco", userId: userId, householdId: null, excludeStoreId: null);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ExistsWithName_Should_ReturnFalse_When_NoPersonalStoreDuplicateExists()
+    {
+        // Arrange
+        var dbName = Guid.NewGuid().ToString();
+        using var context = CreateContext(dbName);
+        var repo = new StoreRepository(context);
+        var userId = Guid.NewGuid();
+        var existing = new Store { Id = Guid.NewGuid(), Name = "Target", UserId = userId };
+        context.Stores.Add(existing);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repo.ExistsWithName("costco", userId: userId, householdId: null, excludeStoreId: null);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ExistsWithName_Should_ReturnTrue_When_HouseholdStoreDuplicateExists()
+    {
+        // Arrange
+        var dbName = Guid.NewGuid().ToString();
+        using var context = CreateContext(dbName);
+        var repo = new StoreRepository(context);
+        var householdId = Guid.NewGuid();
+        var existing = new Store { Id = Guid.NewGuid(), Name = "Costco", HouseholdId = householdId };
+        context.Stores.Add(existing);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repo.ExistsWithName("COSTCO", userId: null, householdId: householdId, excludeStoreId: null);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ExistsWithName_Should_ReturnFalse_When_ExcludedStoreId()
+    {
+        // Arrange
+        var dbName = Guid.NewGuid().ToString();
+        using var context = CreateContext(dbName);
+        var repo = new StoreRepository(context);
+        var userId = Guid.NewGuid();
+        var storeId = Guid.NewGuid();
+        var existing = new Store { Id = storeId, Name = "Costco", UserId = userId };
+        context.Stores.Add(existing);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repo.ExistsWithName("costco", userId: userId, householdId: null, excludeStoreId: storeId);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ExistsWithName_Should_NotMatchAcrossScopes()
+    {
+        // Arrange — "Costco" exists as personal, check household scope
+        var dbName = Guid.NewGuid().ToString();
+        using var context = CreateContext(dbName);
+        var repo = new StoreRepository(context);
+        var userId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        var existing = new Store { Id = Guid.NewGuid(), Name = "Costco", UserId = userId };
+        context.Stores.Add(existing);
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repo.ExistsWithName("costco", userId: null, householdId: householdId, excludeStoreId: null);
+
+        // Assert
+        result.Should().BeFalse();
+    }
 }

@@ -38,6 +38,8 @@ const mockStores: Store[] = [
   { id: 'store2', name: 'Costco', householdId: null, userId: 'user1', createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
 ]
 
+const mockStoreDisplayNames = new Map(mockStores.map(s => [s.id, s.name]))
+
 describe('TripItemRow', () => {
   const mockOnUpdate = vi.fn()
   const mockOnDelete = vi.fn()
@@ -53,6 +55,7 @@ describe('TripItemRow', () => {
         tripItem={mockTripItem}
         itemName="Bananas"
         stores={mockStores}
+        storeDisplayNames={mockStoreDisplayNames}
         onUpdate={mockOnUpdate}
         onDelete={mockOnDelete}
       />
@@ -71,6 +74,7 @@ describe('TripItemRow', () => {
         tripItem={mockTripItem}
         itemName="Bananas"
         stores={mockStores}
+        storeDisplayNames={mockStoreDisplayNames}
         onUpdate={mockOnUpdate}
         onDelete={mockOnDelete}
       />
@@ -88,6 +92,7 @@ describe('TripItemRow', () => {
         tripItem={mockTripItem}
         itemName="Bananas"
         stores={mockStores}
+        storeDisplayNames={mockStoreDisplayNames}
         onUpdate={mockOnUpdate}
         onDelete={mockOnDelete}
       />
@@ -115,6 +120,7 @@ describe('TripItemRow', () => {
         tripItem={mockTripItem}
         itemName="Bananas"
         stores={mockStores}
+        storeDisplayNames={mockStoreDisplayNames}
         onUpdate={mockOnUpdate}
         onDelete={mockOnDelete}
       />
@@ -138,6 +144,7 @@ describe('TripItemRow', () => {
         tripItem={mockTripItem}
         itemName="Bananas"
         stores={mockStores}
+        storeDisplayNames={mockStoreDisplayNames}
         onUpdate={mockOnUpdate}
         onDelete={mockOnDelete}
       />
@@ -161,6 +168,7 @@ describe('TripItemRow', () => {
         tripItem={mockTripItem}
         itemName="Bananas"
         stores={mockStores}
+        storeDisplayNames={mockStoreDisplayNames}
         onUpdate={mockOnUpdate}
         onDelete={mockOnDelete}
       />
@@ -178,6 +186,7 @@ describe('TripItemRow', () => {
         tripItem={mockTripItem}
         itemName="Bananas"
         stores={mockStores}
+        storeDisplayNames={mockStoreDisplayNames}
         onUpdate={mockOnUpdate}
         onDelete={mockOnDelete}
         showCheckbox={true}
@@ -195,6 +204,7 @@ describe('TripItemRow', () => {
         tripItem={mockTripItem}
         itemName="Bananas"
         stores={mockStores}
+        storeDisplayNames={mockStoreDisplayNames}
         onUpdate={mockOnUpdate}
         onDelete={mockOnDelete}
         showCheckbox={true}
@@ -214,6 +224,7 @@ describe('TripItemRow', () => {
         tripItem={mockTripItem}
         itemName="Bananas"
         stores={mockStores}
+        storeDisplayNames={mockStoreDisplayNames}
         onUpdate={mockOnUpdate}
         onDelete={mockOnDelete}
         showCheckbox={true}
@@ -237,6 +248,7 @@ describe('TripItemRow', () => {
         tripItem={mockCheckedItem}
         itemName="Bananas"
         stores={mockStores}
+        storeDisplayNames={mockStoreDisplayNames}
         onUpdate={mockOnUpdate}
         onDelete={mockOnDelete}
         showCheckbox={true}

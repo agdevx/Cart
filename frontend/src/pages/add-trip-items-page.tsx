@@ -12,6 +12,7 @@ import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-ite
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { tripDetailPath } from '@/routes'
+import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 
 type SourceFilter = 'all' | 'personal' | string
 
@@ -58,6 +59,11 @@ export const AddTripItemsPage = () => {
     // sourceFilter is a household ID
     return stores.filter((s) => s.householdId === sourceFilter)
   }, [stores, sourceFilter])
+
+  const storeDisplayNames = useMemo(
+    () => getStoreDisplayNames(stores ?? [], households ?? []),
+    [stores, households]
+  )
 
   // Filter inventory items based on source filter, store filter, search text, and existing trip items
   const filteredItems = useMemo(() => {
@@ -261,7 +267,7 @@ export const AddTripItemsPage = () => {
                     : 'text-text-secondary hover:text-navy'
                 }`}
               >
-                {store.name}
+                {storeDisplayNames.get(store.id) ?? store.name}
               </button>
             ))}
           </div>
@@ -317,7 +323,7 @@ export const AddTripItemsPage = () => {
                     <option value="">Any Store</option>
                     {(stores ?? []).map((store) => (
                       <option key={store.id} value={store.id}>
-                        {store.name}
+                        {storeDisplayNames.get(store.id) ?? store.name}
                       </option>
                     ))}
                   </select>

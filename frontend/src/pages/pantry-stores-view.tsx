@@ -32,6 +32,28 @@ export const PantryStoresView = () => {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
+  const createDuplicateError = useMemo(() => {
+    if (!storeName.trim() || !stores) return null
+    const scopeStores = storeScope === 'personal'
+      ? stores.filter((s) => s.userId !== null)
+      : stores.filter((s) => s.householdId === storeScope)
+    const isDuplicate = scopeStores.some(
+      (s) => s.name.toLowerCase() === storeName.trim().toLowerCase()
+    )
+    return isDuplicate ? 'A store with this name already exists in this scope' : null
+  }, [storeName, storeScope, stores])
+
+  const editDuplicateError = useMemo(() => {
+    if (!editingName.trim() || !stores || !editingStoreId) return null
+    const scopeStores = editingScope === 'personal'
+      ? stores.filter((s) => s.userId !== null)
+      : stores.filter((s) => s.householdId === editingScope)
+    const isDuplicate = scopeStores.some(
+      (s) => s.id !== editingStoreId && s.name.toLowerCase() === editingName.trim().toLowerCase()
+    )
+    return isDuplicate ? 'A store with this name already exists in this scope' : null
+  }, [editingName, editingScope, editingStoreId, stores])
+
   useEffect(() => {
     if (!menuOpenId) return
     const handleMouseDown = (e: MouseEvent) => {
@@ -171,6 +193,9 @@ export const PantryStoresView = () => {
               className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
               autoFocus
             />
+            {editDuplicateError && (
+              <p className="text-coral text-sm mt-1">{editDuplicateError}</p>
+            )}
           </div>
 
           <div className="mb-4">
@@ -198,7 +223,7 @@ export const PantryStoresView = () => {
             </button>
             <button
               onClick={handleSaveEdit}
-              disabled={updateMutation.isPending || !editingName.trim()}
+              disabled={updateMutation.isPending || !editingName.trim() || !!editDuplicateError}
               className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
             >
               {updateMutation.isPending ? 'Saving...' : 'Save'}
@@ -236,6 +261,9 @@ export const PantryStoresView = () => {
               className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
               disabled={createMutation.isPending}
             />
+            {createDuplicateError && (
+              <p className="text-coral text-sm mt-1">{createDuplicateError}</p>
+            )}
           </div>
 
           <div className="mb-4">
@@ -263,7 +291,7 @@ export const PantryStoresView = () => {
             </button>
             <button
               type="submit"
-              disabled={createMutation.isPending || !storeName.trim()}
+              disabled={createMutation.isPending || !storeName.trim() || !!createDuplicateError}
               className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
             >
               {createMutation.isPending ? 'Creating...' : 'Create'}

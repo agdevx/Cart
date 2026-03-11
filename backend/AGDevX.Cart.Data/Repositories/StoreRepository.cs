@@ -28,6 +28,28 @@ public class StoreRepository(CartDbContext context) : IStoreRepository
                                    .ToListAsync();
     }
 
+    public async Task<bool> ExistsWithName(string name, Guid? userId, Guid? householdId, Guid? excludeStoreId)
+    {
+        var query = context.Stores.AsQueryable();
+
+        if (householdId.HasValue)
+        {
+            query = query.Where(s => s.HouseholdId == householdId.Value);
+        }
+        else if (userId.HasValue)
+        {
+            query = query.Where(s => s.UserId == userId.Value);
+        }
+
+        if (excludeStoreId.HasValue)
+        {
+            query = query.Where(s => s.Id != excludeStoreId.Value);
+        }
+
+        var lowerName = name.ToLower();
+        return await query.AnyAsync(s => s.Name.ToLower() == lowerName);
+    }
+
     public async Task<Store> Create(Store store)
     {
         context.Stores.Add(store);

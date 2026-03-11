@@ -39,7 +39,8 @@
       "@/services/*": ["src/services/*"],
       "@/state/*": ["src/state/*"],
       "@/styles/*": ["src/styles/*"],
-      "@/utilities/*": ["src/utilities/*"]
+      "@/utilities/*": ["src/utilities/*"],
+      "@/utils/*": ["src/utils/*"]
     }
   },
   "include": ["src", "integration-tests"]
