@@ -202,13 +202,15 @@ export const ShoppingPage = () => {
             <span className="flex-1 h-px bg-navy/8" />
             <ChevronDown className={`w-4 h-4 text-text-tertiary transition-transform ${showCompleted ? 'rotate-180' : ''}`} />
           </button>
-          {showCompleted && (
-            <div className="space-y-3">
-              {completedTrips.map((trip) => (
-                <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} households={households} onDelete={handleDelete} onReopen={handleReopen} />
-              ))}
+          <div className={`grid transition-all duration-200 ${showCompleted ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+            <div className="overflow-hidden">
+              <div className="space-y-3">
+                {completedTrips.map((trip) => (
+                  <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} households={households} onDelete={handleDelete} onReopen={handleReopen} />
+                ))}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 
