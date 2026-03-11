@@ -161,13 +161,13 @@ All 39 hooks (12 queries + 27 mutations): remove `if (!response.ok) throw new Er
 
 The 10+ empty `try/catch` blocks in pages become unnecessary — global MutationCache `onError` is the safety net. Remove empty try/catch wrappers; switch `mutateAsync` to `mutate` where result isn't awaited.
 
-### `error-messages.ts` deletion
+### `error-messages.ts` simplification
 
-Generic error message strings become unused with `ApiError` providing structured error info. Delete both `error-messages.ts` and `error-messages.test.ts`. Remove imports of `getErrorMessage`/`ERROR_MESSAGES` from `join-household-page.tsx` and `create-household-page.tsx`.
+Rewrite `getErrorMessage` to handle `ApiError` (extracting `body.message` with fallback to `statusText`). Remove the `ERROR_MESSAGES` dict and error code mapping — `ApiError` provides structured error info directly. Keep the file and its imports in `join-household-page.tsx` and `create-household-page.tsx` for inline error display (better UX than generic toast for form submissions).
 
 ### Auth provider (`auth-provider.tsx`)
 
-Keeps its own `response.ok` check for session validation on mount — the "no session" case is handled differently from a mid-session 401 (it silently clears state without redirecting).
+Updated to handle `ApiError` from `apiFetch`. Since `apiFetch` now throws on non-ok responses, the provider catches `ApiError` (e.g., 401 expired session) and clears local state. Network errors (`TypeError`) are caught separately and preserve optimistic local state. The provider does NOT redirect — `ProtectedRoute` handles that.
 
 ### Login/register page error handling
 
