@@ -40,7 +40,7 @@ export const TripItemRow = ({
   const [editStoreId, setEditStoreId] = useState(tripItem.storeId ?? '')
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // Close menu on outside click (mousedown)
+  // Close menu on outside click (mousedown) or Escape key
   useEffect(() => {
     if (!menuOpen) return
 
@@ -50,8 +50,18 @@ export const TripItemRow = ({
       }
     }
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMenuOpen(false)
+      }
+    }
+
     document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [menuOpen])
 
   const handleKebabClick = (e: React.MouseEvent) => {
@@ -95,6 +105,9 @@ export const TripItemRow = ({
 
   const handleRowClick = () => {
     if (!showCheckbox || editing || !onToggleCheck) return
+    if (!tripItem.isChecked) {
+      navigator.vibrate?.(10)
+    }
     onToggleCheck(tripItem.id, tripItem.isChecked)
   }
 
@@ -184,7 +197,7 @@ export const TripItemRow = ({
       {/* Custom checkbox */}
       <div data-testid="item-checkbox" className="flex-shrink-0">
         {tripItem.isChecked ? (
-          <div className="w-7 h-7 rounded-[10px] bg-teal border-2 border-teal flex items-center justify-center">
+          <div className="w-7 h-7 rounded-[10px] bg-teal border-2 border-teal flex items-center justify-center animate-check-bounce">
             <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
         ) : (
@@ -194,8 +207,12 @@ export const TripItemRow = ({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <span className={`text-base font-bold ${tripItem.isChecked ? 'line-through text-text-tertiary' : 'text-navy'}`}>
+        <span className={`text-base font-bold relative ${tripItem.isChecked ? 'text-text-tertiary' : 'text-navy'}`}>
           {itemName}
+          <span
+            className="absolute left-0 top-1/2 h-[1.5px] bg-text-tertiary transition-all duration-300 ease-out"
+            style={{ width: tripItem.isChecked ? '100%' : '0%' }}
+          />
         </span>
         {/* Item details — hidden during edit */}
         {!editing && (
@@ -313,6 +330,7 @@ const EditForm = ({
       <input
         id="edit-quantity"
         type="number"
+        autoFocus
         min="1"
         value={editQuantity}
         onChange={(e) => onQuantityChange(Number(e.target.value))}

@@ -16,6 +16,7 @@ import * as reopenTripModule from '@/apis/agdevx-cart-api/trip/reopen-trip.mutat
 import * as updateTripModule from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
 import * as tripsQueryModule from '@/apis/agdevx-cart-api/trip/use-trips.query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
+import * as useAuthModule from '@/auth/use-auth'
 
 import { ShoppingPage } from '../shopping-page'
 
@@ -85,35 +86,42 @@ const deleteMutateFn = vi.fn()
 const reopenMutateFn = vi.fn()
 
 const setupMocks = () => {
+  vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+    isAuthenticated: true,
+    user: { id: 'user1', email: 'test@test.com', name: 'Test User', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+    setAuth: vi.fn(),
+    logout: vi.fn(),
+  })
+
   vi.spyOn(tripsQueryModule, 'useTripsQuery').mockReturnValue({
     data: mockTrips,
     isLoading: false,
-  } as any)
+  } as unknown as ReturnType<typeof tripsQueryModule.useTripsQuery>)
 
   vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
     data: [] as Household[],
     isLoading: false,
-  } as any)
+  } as unknown as ReturnType<typeof householdsQueryModule.useHouseholdsQuery>)
 
   vi.spyOn(createTripModule, 'useCreateTripMutation').mockReturnValue({
     mutateAsync: vi.fn(),
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof createTripModule.useCreateTripMutation>)
 
   vi.spyOn(updateTripModule, 'useUpdateTripMutation').mockReturnValue({
     mutate: updateMutateFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof updateTripModule.useUpdateTripMutation>)
 
   vi.spyOn(deleteTripModule, 'useDeleteTripMutation').mockReturnValue({
     mutate: deleteMutateFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof deleteTripModule.useDeleteTripMutation>)
 
   vi.spyOn(reopenTripModule, 'useReopenTripMutation').mockReturnValue({
     mutate: reopenMutateFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof reopenTripModule.useReopenTripMutation>)
 }
 
 describe('ShoppingPage', () => {
@@ -135,12 +143,16 @@ describe('ShoppingPage', () => {
     expect(screen.getByText('Planning')).toBeInTheDocument()
     expect(screen.getByText('Completed (1)')).toBeInTheDocument()
 
-    //== Completed trips are hidden by default (accordion collapsed)
-    expect(screen.queryByText('Holiday Shopping')).not.toBeInTheDocument()
+    //== Completed trips are in the DOM but inside a collapsed grid container
+    const holidayElement = screen.getByText('Holiday Shopping')
+    const overflowContainer = holidayElement.closest('.overflow-hidden')
+    expect(overflowContainer).toBeInTheDocument()
+    const gridContainer = overflowContainer?.parentElement
+    expect(gridContainer?.className).toContain('grid-rows-[0fr]')
 
-    //== In Progress and Planning trips should have kebab menu buttons
+    //== All three trips have kebab menu buttons (completed trip is in DOM but visually collapsed)
     const kebabButtons = screen.getAllByLabelText('Trip actions')
-    expect(kebabButtons).toHaveLength(2)
+    expect(kebabButtons).toHaveLength(3)
   })
 
   it('expands completed accordion to show completed trips', () => {
@@ -272,7 +284,7 @@ describe('ShoppingPage', () => {
     vi.spyOn(createTripModule, 'useCreateTripMutation').mockReturnValue({
       mutateAsync: mutateAsyncFn,
       isPending: false,
-    } as any)
+    } as unknown as ReturnType<typeof createTripModule.useCreateTripMutation>)
 
     render(<ShoppingPage />, { wrapper })
 

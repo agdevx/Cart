@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { ChevronDown, Plus } from 'lucide-react'
+import { ChevronDown, Plus, ShoppingCart } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
@@ -12,15 +12,20 @@ import { useDeleteTripMutation } from '@/apis/agdevx-cart-api/trip/delete-trip.m
 import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.mutation'
 import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
+import { useAuth } from '@/auth/use-auth'
 import { tripDetailPath } from '@/routes'
+import { getGreeting } from '@/utils/greeting'
 
 import { ConfirmDialog } from './components/confirm-dialog'
+import { EmptyState } from './components/empty-state'
 import { PageHeader } from './components/page-header'
 import { ScopeSelect } from './components/scope-select'
 import { TripCard } from './components/trip-card'
 
 export const ShoppingPage = () => {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const greeting = getGreeting(new Date().getHours())
   const { data: trips, isLoading } = useTripsQuery()
   const { data: households } = useHouseholdsQuery()
   const createMutation = useCreateTripMutation()
@@ -80,13 +85,29 @@ export const ShoppingPage = () => {
   if (isLoading) {
     return (
       <div className="px-5 pt-7">
-        <p className="text-text-secondary">Loading trips...</p>
+        <div className="h-9 w-48 bg-navy/8 animate-pulse rounded-lg mb-6" />
+        <div className="space-y-4">
+          {[0, 1].map((i) => (
+            <div key={i} className="p-4 bg-surface rounded-2xl shadow-sm space-y-3">
+              <div className="h-3 w-3/5 bg-navy/8 animate-pulse rounded-lg" />
+              <div className="h-2.5 w-2/5 bg-navy/8 animate-pulse rounded-lg" />
+              <div className="h-2 w-full bg-navy/8 animate-pulse rounded-full" />
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="pb-4">
+    <div className="pb-4 animate-fade-in">
+      {user?.name && (
+        <div className="px-5 pt-5">
+          <p className="text-sm font-semibold text-teal">
+            {greeting}, {user.name} 👋
+          </p>
+        </div>
+      )}
       <PageHeader>Your <span className="text-teal">Trips</span></PageHeader>
       <div className="px-5">
       {/* New Trip Button */}
@@ -107,6 +128,7 @@ export const ShoppingPage = () => {
             <input
               id="tripName"
               type="text"
+              autoFocus
               value={tripName}
               onChange={(e) => setTripName(e.target.value)}
               placeholder="e.g., Weekly Groceries"
@@ -192,18 +214,26 @@ export const ShoppingPage = () => {
             <span className="flex-1 h-px bg-navy/8" />
             <ChevronDown className={`w-4 h-4 text-text-tertiary transition-transform ${showCompleted ? 'rotate-180' : ''}`} />
           </button>
-          {showCompleted && (
-            <div className="space-y-3">
-              {completedTrips.map((trip) => (
-                <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} households={households} onDelete={handleDelete} onReopen={handleReopen} />
-              ))}
+          <div className={`grid transition-all duration-200 ${showCompleted ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+            <div className="overflow-hidden">
+              <div className="space-y-3">
+                {completedTrips.map((trip) => (
+                  <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} households={households} onDelete={handleDelete} onReopen={handleReopen} />
+                ))}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 
       {trips && trips.length === 0 && (
-        <p className="text-text-secondary mt-4">No trips yet. Create your first shopping trip!</p>
+        <EmptyState
+          icon={ShoppingCart}
+          title="No trips yet"
+          subtitle="Create your first shopping trip to get started"
+          actionLabel="Create Trip"
+          onAction={() => setShowCreateForm(true)}
+        />
       )}
 
       {/* Delete confirmation dialog */}

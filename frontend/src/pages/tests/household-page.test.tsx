@@ -113,9 +113,11 @@ describe('HouseholdPage', () => {
   it('renders loading state', () => {
     setupMocks({ householdsLoading: true })
 
-    renderPage()
+    const { container } = renderPage()
 
-    expect(screen.getByText('Loading households...')).toBeInTheDocument()
+    //== Skeleton loader divs should be visible with animate-pulse class
+    const skeletons = container.querySelectorAll('.animate-pulse')
+    expect(skeletons.length).toBeGreaterThan(0)
   })
 
   it('renders empty state when no households', () => {
@@ -123,7 +125,7 @@ describe('HouseholdPage', () => {
 
     renderPage()
 
-    expect(screen.getByText('You are not a member of any households yet.')).toBeInTheDocument()
+    expect(screen.getByText('No households yet')).toBeInTheDocument()
   })
 
   it('renders household cards', () => {

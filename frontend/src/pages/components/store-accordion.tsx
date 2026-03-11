@@ -41,11 +41,11 @@ export function StoreAccordion({
           className={`text-text-secondary transition-transform ${isExpanded ? 'rotate-180' : ''}`}
         />
       </button>
-      {isExpanded && (
-        <div className="mt-1">
+      <div className={`grid transition-all duration-200 ${isExpanded ? 'grid-rows-[1fr] mt-1' : 'grid-rows-[0fr]'}`}>
+        <div className="overflow-hidden">
           {children}
         </div>
-      )}
+      </div>
     </div>
   );
 }

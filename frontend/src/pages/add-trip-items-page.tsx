@@ -15,6 +15,8 @@ import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.qu
 import { tripDetailPath } from '@/routes'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 
+import { EmptyState } from './components/empty-state'
+
 type SourceFilter = 'all' | 'personal' | string
 
 interface SelectedItem {
@@ -166,7 +168,7 @@ export const AddTripItemsPage = () => {
   }
 
   return (
-    <div className="px-5 pt-7 pb-28">
+    <div className="px-5 pt-7 pb-28 animate-fade-in">
       {/* Back button */}
       <button
         onClick={() => navigate(tripDetailPath(tripId!))}
@@ -344,7 +346,11 @@ export const AddTripItemsPage = () => {
         })}
 
         {filteredItems.length === 0 && (
-          <p className="text-text-secondary text-center py-8">No items found</p>
+          <EmptyState
+            icon={Search}
+            title="No items found"
+            subtitle="Try a different search term"
+          />
         )}
       </div>
 

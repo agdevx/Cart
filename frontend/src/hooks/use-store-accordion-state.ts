@@ -24,7 +24,9 @@ export function useStoreAccordionState(tripId: string, viewContext: ViewContext,
 
   // Keep a ref to expandedStores for use in stable callbacks
   const expandedStoresRef = useRef(expandedStores);
-  expandedStoresRef.current = expandedStores;
+  useEffect(() => {
+    expandedStoresRef.current = expandedStores;
+  }, [expandedStores]);
 
   // Persist to localStorage (only for non-completed trips)
   useEffect(() => {

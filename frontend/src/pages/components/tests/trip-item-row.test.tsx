@@ -242,6 +242,25 @@ describe('TripItemRow', () => {
     expect(mockOnToggleCheck).not.toHaveBeenCalled()
   })
 
+  it('closes kebab menu on Escape key', () => {
+    render(
+      <TripItemRow
+        tripItem={mockTripItem}
+        itemName="Bananas"
+        stores={mockStores}
+        storeDisplayNames={mockStoreDisplayNames}
+        onUpdate={mockOnUpdate}
+        onDelete={mockOnDelete}
+      />
+    )
+
+    fireEvent.click(screen.getByLabelText('Item actions'))
+    expect(screen.getByText('Edit')).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+  })
+
   it('Shopping variant: checked items show strikethrough', () => {
     render(
       <TripItemRow
@@ -257,6 +276,10 @@ describe('TripItemRow', () => {
     )
 
     const itemName = screen.getByText('Bananas')
-    expect(itemName).toHaveClass('line-through')
+    // Strikethrough is now an animated pseudo-element (inline width transition),
+    // not a CSS class — the parent span gets text-text-tertiary when checked
+    expect(itemName.closest('span')).toHaveClass('text-text-tertiary')
+    const strikeEl = itemName.closest('span')?.querySelector('span')
+    expect(strikeEl).toHaveStyle({ width: '100%' })
   })
 })

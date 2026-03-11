@@ -3,13 +3,14 @@
 
 import { Link } from 'react-router-dom'
 
-import { Plus, UserPlus } from 'lucide-react'
+import { Plus, UserPlus, Users } from 'lucide-react'
 
 import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-household-members.query'
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useAuth } from '@/auth/use-auth'
 import { householdDetailPath, ROUTES } from '@/routes'
 
+import { EmptyState } from './components/empty-state'
 import { PageHeader } from './components/page-header'
 
 const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
@@ -37,13 +38,21 @@ export const HouseholdPage = () => {
   if (isLoading) {
     return (
       <div className="px-5 pt-7">
-        <p className="text-text-secondary">Loading households...</p>
+        <div className="h-9 w-44 bg-navy/8 animate-pulse rounded-lg mb-6" />
+        <div className="space-y-4">
+          {[0, 1].map((i) => (
+            <div key={i} className="p-5 bg-surface rounded-2xl shadow-sm space-y-2">
+              <div className="h-3 w-1/2 bg-navy/8 animate-pulse rounded-lg" />
+              <div className="h-2.5 w-1/4 bg-navy/8 animate-pulse rounded-lg" />
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="pb-4">
+    <div className="pb-4 animate-fade-in">
       <PageHeader>Your <span className="text-teal">Household</span></PageHeader>
       <div className="px-5">
       {households && households.length > 0 ? (
@@ -62,7 +71,11 @@ export const HouseholdPage = () => {
           ))}
         </div>
       ) : (
-        <p className="text-text-secondary mb-6">You are not a member of any households yet.</p>
+        <EmptyState
+          icon={Users}
+          title="No households yet"
+          subtitle="Create or join a household to share shopping trips"
+        />
       )}
 
       <div className="space-y-3">

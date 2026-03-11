@@ -3,6 +3,7 @@
 
 import { BrowserRouter } from 'react-router-dom'
 
+import type { UseQueryResult } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -125,43 +126,43 @@ const setupMocks = () => {
   vi.spyOn(tripQueryModule, 'useTripQuery').mockReturnValue({
     data: mockTrip,
     isLoading: false,
-  } as any)
+  } as unknown as UseQueryResult<Trip>)
 
   vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
     data: mockTripItems,
     isLoading: false,
-  } as any)
+  } as unknown as UseQueryResult<TripItem[]>)
 
   vi.spyOn(checkTripItemModule, 'useCheckTripItemMutation').mockReturnValue({
     mutate: checkMutateFn,
     mutateAsync: vi.fn(),
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof checkTripItemModule.useCheckTripItemMutation>)
 
   vi.spyOn(completeTripModule, 'useCompleteTripMutation').mockReturnValue({
     mutateAsync: completeMutateAsyncFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof completeTripModule.useCompleteTripMutation>)
 
   vi.spyOn(updateTripItemModule, 'useUpdateTripItemMutation').mockReturnValue({
     mutate: updateMutateFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof updateTripItemModule.useUpdateTripItemMutation>)
 
   vi.spyOn(deleteTripItemModule, 'useDeleteTripItemMutation').mockReturnValue({
     mutate: deleteMutateFn,
     isPending: false,
-  } as any)
+  } as unknown as ReturnType<typeof deleteTripItemModule.useDeleteTripItemMutation>)
 
   vi.spyOn(storesQueryModule, 'useStoresQuery').mockReturnValue({
     data: mockStores,
     isLoading: false,
-  } as any)
+  } as unknown as UseQueryResult<Store[]>)
 
   vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
     data: mockHouseholds,
     isLoading: false,
-  } as any)
+  } as unknown as UseQueryResult<Household[]>)
 }
 
 describe('ActiveTripPage', () => {
@@ -260,13 +261,17 @@ describe('ActiveTripPage', () => {
     //== Expand Costco accordion to reveal items
     fireEvent.click(screen.getByText('Costco'))
 
-    //== Bread (ti2) is checked — should have line-through styling
+    //== Bread (ti2) is checked — should have text-text-tertiary class and animated strikethrough span at 100% width
     const breadElement = screen.getByText('Bread')
-    expect(breadElement).toHaveClass('line-through')
+    expect(breadElement).toHaveClass('text-text-tertiary')
+    const breadStrikethrough = breadElement.querySelector('span')
+    expect(breadStrikethrough).toHaveStyle({ width: '100%' })
 
-    //== Milk (ti1) is not checked — should NOT have line-through styling
+    //== Milk (ti1) is not checked — should NOT have text-text-tertiary class
     const milkElement = screen.getByText('Milk')
-    expect(milkElement).not.toHaveClass('line-through')
+    expect(milkElement).not.toHaveClass('text-text-tertiary')
+    const milkStrikethrough = milkElement.querySelector('span')
+    expect(milkStrikethrough).toHaveStyle({ width: '0%' })
   })
 
   it('shows styled confirmation dialog when completing with unchecked items', () => {
@@ -323,7 +328,7 @@ describe('ActiveTripPage', () => {
     vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
       data: mockTripItems.map((item) => ({ ...item, isChecked: true })),
       isLoading: false,
-    } as any)
+    } as unknown as UseQueryResult<TripItem[]>)
 
     render(<ActiveTripPage />, { wrapper })
 
@@ -406,7 +411,7 @@ describe('ActiveTripPage', () => {
           },
         ],
         isLoading: false,
-      } as any)
+      } as unknown as UseQueryResult<TripItem[]>)
 
       render(<ActiveTripPage />, { wrapper })
 
@@ -433,7 +438,7 @@ describe('ActiveTripPage', () => {
           },
         ],
         isLoading: false,
-      } as any)
+      } as unknown as UseQueryResult<TripItem[]>)
 
       render(<ActiveTripPage />, { wrapper })
 
@@ -459,7 +464,7 @@ describe('ActiveTripPage', () => {
           },
         ],
         isLoading: false,
-      } as any)
+      } as unknown as UseQueryResult<TripItem[]>)
 
       render(<ActiveTripPage />, { wrapper })
 
@@ -496,9 +501,13 @@ describe('ActiveTripPage', () => {
       localStorage.removeItem('accordion-trip1-shopping')
       render(<ActiveTripPage />, { wrapper })
 
-      //== Item names should NOT be visible because accordions default to collapsed
-      expect(screen.queryByText('Milk')).not.toBeInTheDocument()
-      expect(screen.queryByText('Bread')).not.toBeInTheDocument()
+      //== Items are in the DOM (grid-rows animation keeps them rendered) but inside a collapsed container
+      //== The grid container should have grid-rows-[0fr] class when collapsed
+      const milkElement = screen.getByText('Milk')
+      const overflowContainer = milkElement.closest('.overflow-hidden')
+      expect(overflowContainer).toBeInTheDocument()
+      const gridContainer = overflowContainer?.parentElement
+      expect(gridContainer?.className).toContain('grid-rows-[0fr]')
     })
 
     it('should auto-collapse store group when all items are checked', () => {
@@ -508,7 +517,7 @@ describe('ActiveTripPage', () => {
       vi.spyOn(tripItemsQueryModule, 'useTripItemsQuery').mockReturnValue({
         data: mockTripItems.map((item) => ({ ...item, isChecked: true, checkedAt: '2024-01-16' })),
         isLoading: false,
-      } as any)
+      } as unknown as UseQueryResult<TripItem[]>)
 
       //== Pre-set localStorage with Costco expanded
       localStorage.setItem('accordion-trip1-shopping', JSON.stringify({ Costco: true }))
@@ -516,9 +525,12 @@ describe('ActiveTripPage', () => {
       render(<ActiveTripPage />, { wrapper })
 
       //== Costco should have auto-collapsed because all items are checked
-      //== Items should not be visible
-      expect(screen.queryByText('Milk')).not.toBeInTheDocument()
-      expect(screen.queryByText('Bread')).not.toBeInTheDocument()
+      //== Items are still in the DOM but the grid container should be collapsed
+      const milkElement = screen.getByText('Milk')
+      const overflowContainer = milkElement.closest('.overflow-hidden')
+      expect(overflowContainer).toBeInTheDocument()
+      const gridContainer = overflowContainer?.parentElement
+      expect(gridContainer?.className).toContain('grid-rows-[0fr]')
     })
   })
 })

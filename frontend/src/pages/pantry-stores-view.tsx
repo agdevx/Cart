@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react'
+import { MoreVertical, Package, Pencil, Plus, Trash2 } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateStoreMutation } from '@/apis/agdevx-cart-api/store/create-store.mutation'
@@ -12,6 +12,7 @@ import { useUpdateStoreMutation } from '@/apis/agdevx-cart-api/store/update-stor
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 
 import { ConfirmDialog } from './components/confirm-dialog'
+import { EmptyState } from './components/empty-state'
 import { ScopeSelect } from './components/scope-select'
 
 export const PantryStoresView = () => {
@@ -61,12 +62,30 @@ export const PantryStoresView = () => {
         setMenuOpenId(null)
       }
     }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMenuOpenId(null)
+      }
+    }
     document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [menuOpenId])
 
   if (storesLoading || householdsLoading) {
-    return <p className="text-text-secondary">Loading stores...</p>
+    return (
+      <div className="space-y-2 mt-2">
+        {[0, 1].map((i) => (
+          <div key={i} className="p-4 bg-surface rounded-xl shadow-sm space-y-2">
+            <div className="h-3 w-[45%] bg-navy/8 animate-pulse rounded-lg" />
+            <div className="h-2.5 w-1/5 bg-navy/8 animate-pulse rounded-lg" />
+          </div>
+        ))}
+      </div>
+    )
   }
 
   const householdStoresMap = new Map<string, typeof stores>()
@@ -235,7 +254,7 @@ export const PantryStoresView = () => {
   )
 
   return (
-    <>
+    <div className="animate-fade-in">
       {/* Add Store toggle button */}
       <button
         onClick={() => setShowCreateForm(!showCreateForm)}
@@ -255,6 +274,7 @@ export const PantryStoresView = () => {
             <input
               id="storeName"
               type="text"
+              autoFocus
               value={storeName}
               onChange={(e) => setStoreName(e.target.value)}
               placeholder="e.g., Costco"
@@ -302,7 +322,13 @@ export const PantryStoresView = () => {
 
       {/* Empty state */}
       {isEmpty && (
-        <p className="text-text-secondary mt-4">No stores yet. Add your first store!</p>
+        <EmptyState
+          icon={Package}
+          title="No stores yet"
+          subtitle="Add your first store to organize your shopping"
+          actionLabel="Add Store"
+          onAction={() => setShowCreateForm(true)}
+        />
       )}
 
       {/* Household store sections */}
@@ -348,6 +374,6 @@ export const PantryStoresView = () => {
           isPending={deleteMutation.isPending}
         />
       )}
-    </>
+    </div>
   )
 }

@@ -1,7 +1,7 @@
 // ABOUTME: Security section component for the settings page
 // ABOUTME: Displays password change form with live requirements checklist
 
-import { useEffect,useState } from 'react'
+import { useState } from 'react'
 
 import { useChangePasswordMutation } from '@/apis/agdevx-cart-api/auth/change-password.mutation'
 
@@ -21,15 +21,18 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
 
   const changePasswordMutation = useChangePasswordMutation()
 
-  //== Reset form state when exiting edit mode
-  useEffect(() => {
-    if (isEditing) {
-      setCurrentPassword('')
-      setNewPassword('')
-      setConfirmPassword('')
-      setPasswordError('')
-    }
-  }, [isEditing])
+  //== Reset form state when entering edit mode (adjust-state-during-render pattern)
+  const [prevIsEditing, setPrevIsEditing] = useState(false)
+  if (isEditing && !prevIsEditing) {
+    setPrevIsEditing(true)
+    setCurrentPassword('')
+    setNewPassword('')
+    setConfirmPassword('')
+    setPasswordError('')
+  }
+  if (!isEditing && prevIsEditing) {
+    setPrevIsEditing(false)
+  }
 
   //== Password validation
   const hasMinLength = newPassword.length >= 8

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ShoppingCart } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
@@ -18,9 +18,11 @@ import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.qu
 import { useSSE } from '@/hooks/use-sse'
 import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
 import { ROUTES, tripDetailPath } from '@/routes'
+import { fireCompletionConfetti } from '@/utils/confetti'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 
 import { ConfirmDialog } from './components/confirm-dialog'
+import { EmptyState } from './components/empty-state'
 import { StoreAccordion } from './components/store-accordion'
 import { TripItemRow } from './components/trip-item-row'
 
@@ -117,8 +119,9 @@ export const ActiveTripPage = () => {
 
     try {
       await completeMutation.mutateAsync(tripId)
+      fireCompletionConfetti()
       cleanup()
-      navigate(ROUTES.SHOPPING)
+      setTimeout(() => navigate(ROUTES.SHOPPING), 1500)
     } catch {
       // Error toast shown by global MutationCache handler
     }
@@ -145,7 +148,7 @@ export const ActiveTripPage = () => {
   const progressPercent = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0
 
   return (
-    <div className="px-5 pt-7 pb-8">
+    <div className="px-5 pt-7 pb-8 animate-fade-in">
       <div className="mb-6">
         <button
           onClick={() => navigate(tripDetailPath(tripId!))}
@@ -205,7 +208,7 @@ export const ActiveTripPage = () => {
           })}
         </div>
       ) : (
-        <p className="text-text-secondary mb-6">No items in this trip.</p>
+        <EmptyState icon={ShoppingCart} title="No items in this trip" />
       )}
 
       <button

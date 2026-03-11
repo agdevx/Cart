@@ -84,9 +84,11 @@ describe('PantryStoresView', () => {
   it('renders loading state', () => {
     setupMocks({ storesLoading: true, householdsLoading: true })
 
-    renderView()
+    const { container } = renderView()
 
-    expect(screen.getByText('Loading stores...')).toBeInTheDocument()
+    //== Skeleton loader divs should be visible with animate-pulse class
+    const skeletons = container.querySelectorAll('.animate-pulse')
+    expect(skeletons.length).toBeGreaterThan(0)
   })
 
   it('renders household and personal store sections', () => {
@@ -110,7 +112,7 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    expect(screen.getByText('No stores yet. Add your first store!')).toBeInTheDocument()
+    expect(screen.getByText('No stores yet')).toBeInTheDocument()
   })
 
   it('shows create form when Add Store button is clicked', () => {
@@ -354,6 +356,19 @@ describe('PantryStoresView', () => {
         householdId: 'h1',
       })
     })
+  })
+
+  it('closes store kebab menu on Escape key', () => {
+    setupMocks()
+
+    renderView()
+
+    const kebabButtons = screen.getAllByLabelText('Store actions')
+    fireEvent.click(kebabButtons[0])
+    expect(screen.getByText('Edit')).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument()
   })
 
   it('cancels delete when Cancel is clicked', () => {

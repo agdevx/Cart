@@ -114,6 +114,7 @@ export const PantryPage = () => {
         <PantryItemsView
           filter={filter}
           showCreateForm={showItemCreateForm}
+          onOpenCreateForm={() => setShowItemCreateForm(true)}
           onCloseCreateForm={() => setShowItemCreateForm(false)}
         />
       )}

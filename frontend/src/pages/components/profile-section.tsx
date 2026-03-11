@@ -1,7 +1,7 @@
 // ABOUTME: Profile section component for the settings page
 // ABOUTME: Displays user name and email in view mode, with inline editing and conditional password field
 
-import { useEffect,useState } from 'react'
+import { useState } from 'react'
 
 import type { UpdateProfileResponse } from '@/apis/agdevx-cart-api/auth/update-profile.mutation'
 import { useUpdateProfileMutation } from '@/apis/agdevx-cart-api/auth/update-profile.mutation'
@@ -24,16 +24,19 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
 
   const updateProfileMutation = useUpdateProfileMutation()
 
-  //== Reset form state when entering/exiting edit mode
-  useEffect(() => {
-    if (isEditing) {
-      setName(user.name ?? '')
-      setEmail(user.email ?? '')
-      setCurrentPassword('')
-      setEmailError('')
-      setPasswordError('')
-    }
-  }, [isEditing, user.name, user.email])
+  //== Reset form state when entering edit mode (adjust-state-during-render pattern)
+  const [prevIsEditing, setPrevIsEditing] = useState(false)
+  if (isEditing && !prevIsEditing) {
+    setPrevIsEditing(true)
+    setName(user.name ?? '')
+    setEmail(user.email ?? '')
+    setCurrentPassword('')
+    setEmailError('')
+    setPasswordError('')
+  }
+  if (!isEditing && prevIsEditing) {
+    setPrevIsEditing(false)
+  }
 
   const emailChanged = email.toLowerCase() !== (user.email ?? '').toLowerCase()
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)

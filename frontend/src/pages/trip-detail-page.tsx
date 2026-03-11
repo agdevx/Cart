@@ -17,6 +17,7 @@ import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
 import { activeTripPath, ROUTES, tripAddItemsPath } from '@/routes'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 
+import { EmptyState } from './components/empty-state'
 import { StoreAccordion } from './components/store-accordion'
 import { TripItemRow } from './components/trip-item-row'
 
@@ -74,7 +75,18 @@ export const TripDetailPage = () => {
   if (tripLoading || itemsLoading) {
     return (
       <div className="px-5 pt-7">
-        <p className="text-text-secondary">Loading trip...</p>
+        <div className="h-9 w-40 bg-navy/8 animate-pulse rounded-lg mb-6" />
+        <div className="space-y-3">
+          <div className="p-4 bg-bg-warm rounded-xl">
+            <div className="h-3 w-2/5 bg-navy/8 animate-pulse rounded-lg" />
+          </div>
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="p-4 bg-surface rounded-xl shadow-sm space-y-2">
+              <div className="h-3 w-1/2 bg-navy/8 animate-pulse rounded-lg" />
+              <div className="h-2.5 w-1/3 bg-navy/8 animate-pulse rounded-lg" />
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
@@ -90,7 +102,7 @@ export const TripDetailPage = () => {
   const readOnly = trip.isCompleted ?? false
 
   return (
-    <div className="px-5 pt-7 pb-8">
+    <div className="px-5 pt-7 pb-8 animate-fade-in">
       <div className="mb-6">
         <button
           onClick={() => navigate(ROUTES.SHOPPING)}
@@ -160,7 +172,13 @@ export const TripDetailPage = () => {
             ))}
           </div>
         ) : (
-          <p className="text-text-secondary">No items in this trip yet. Add some items to get started!</p>
+          <EmptyState
+            icon={ShoppingCart}
+            title="No items in this trip"
+            subtitle="Add some items to get started"
+            actionLabel="Add Items"
+            onAction={() => navigate(tripAddItemsPath(tripId!))}
+          />
         )}
       </div>
     </div>

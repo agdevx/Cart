@@ -276,6 +276,19 @@ describe('TripCard', () => {
     expect(screen.queryByText('Edit')).not.toBeInTheDocument()
   })
 
+  it('closes kebab menu on Escape key', () => {
+    render(
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      { wrapper }
+    )
+
+    fireEvent.click(screen.getByLabelText('Trip actions'))
+    expect(screen.getByText('Edit')).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+  })
+
   it('active trip card links to /shopping/{tripId}', () => {
     render(
       <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
