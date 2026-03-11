@@ -10,13 +10,11 @@ export const useStartTripMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['trips', 'start'],
     mutationFn: async (tripId: string): Promise<Trip> => {
       const response = await apiFetch(`/api/trip/${tripId}/start`, {
         method: 'POST',
       })
-      if (!response.ok) {
-        throw new Error('Failed to start trip')
-      }
       return response.json() as Promise<Trip>
     },
     onSuccess: () => {

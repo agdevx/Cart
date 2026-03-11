@@ -7,6 +7,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { ApiError } from '@/apis/api-error';
 import { queryClient } from '@/apis/tanstack-query/query-client';
 
 import { useRegisterMutation } from '../register.mutation';
@@ -83,6 +84,8 @@ describe('useRegisterMutation', () => {
     globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: false,
+        status: 409,
+        statusText: 'Conflict',
         json: () => Promise.resolve({
           errorCode: 'DUPLICATE_EMAIL',
           message: 'Email already exists'
@@ -98,6 +101,6 @@ describe('useRegisterMutation', () => {
         password: 'TestPass123',
         name: 'Test User'
       })
-    ).rejects.toThrow();
+    ).rejects.toThrow(ApiError);
   });
 });

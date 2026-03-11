@@ -15,15 +15,13 @@ export const useUpdateStoreMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['stores', 'update'],
     mutationFn: async (request: UpdateStoreRequest): Promise<void> => {
       const { id, ...updateData } = request
-      const response = await apiFetch(`/api/store/${id}`, {
+      await apiFetch(`/api/store/${id}`, {
         method: 'PUT',
         body: JSON.stringify(updateData),
       })
-      if (!response.ok) {
-        throw new Error('Failed to update store')
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stores'] })

@@ -18,15 +18,13 @@ export const useAddTripItemMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['trip-items', 'add'],
     mutationFn: async (request: AddTripItemRequest): Promise<TripItem> => {
       const { tripId, inventoryItemId, quantity, storeId, notes } = request
       const response = await apiFetch(`/api/tripitem/trip/${tripId}`, {
         method: 'POST',
         body: JSON.stringify({ inventoryItemId, quantity, storeId, notes }),
       })
-      if (!response.ok) {
-        throw new Error('Failed to add trip item')
-      }
       return response.json() as Promise<TripItem>
     },
     onSuccess: (_, variables) => {

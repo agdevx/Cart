@@ -14,14 +14,12 @@ export const useUpdateHouseholdMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['households', 'update'],
     mutationFn: async (request: UpdateHouseholdRequest): Promise<void> => {
-      const response = await apiFetch(`/api/household/${request.householdId}`, {
+      await apiFetch(`/api/household/${request.householdId}`, {
         method: 'PUT',
         body: JSON.stringify({ name: request.name }),
       })
-      if (!response.ok) {
-        throw new Error('Failed to update household')
-      }
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['households'] })

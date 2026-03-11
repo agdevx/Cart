@@ -31,11 +31,6 @@ async function register(credentials: RegisterRequest): Promise<RegisterResponse>
     body: JSON.stringify(credentials),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Registration failed');
-  }
-
   return response.json();
 }
 
@@ -45,6 +40,7 @@ async function register(credentials: RegisterRequest): Promise<RegisterResponse>
  */
 export function useRegisterMutation() {
   return useMutation({
+    mutationKey: ['auth', 'register'],
     mutationFn: register,
   });
 }

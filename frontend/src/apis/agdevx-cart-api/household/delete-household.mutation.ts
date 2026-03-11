@@ -9,13 +9,11 @@ export const useDeleteHouseholdMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: ['households', 'delete'],
     mutationFn: async (householdId: string): Promise<void> => {
-      const response = await apiFetch(`/api/household/${householdId}`, {
+      await apiFetch(`/api/household/${householdId}`, {
         method: 'DELETE',
       })
-      if (!response.ok) {
-        throw new Error('Failed to delete household')
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['households'] })

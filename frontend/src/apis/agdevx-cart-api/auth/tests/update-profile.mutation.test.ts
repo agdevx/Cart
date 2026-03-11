@@ -7,6 +7,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { ApiError } from '@/apis/api-error'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 
 import { useUpdateProfileMutation } from '../update-profile.mutation'
@@ -55,6 +56,7 @@ describe('useUpdateProfileMutation', () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 409,
+      statusText: 'Conflict',
       json: async () => ({
         errorCode: 'DUPLICATE_EMAIL',
         message: 'A user with this email already exists.',
@@ -70,13 +72,15 @@ describe('useUpdateProfileMutation', () => {
     })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(result.current.error?.message).toContain('already exists')
+    expect(result.current.error).toBeInstanceOf(ApiError)
+    expect((result.current.error as ApiError).status).toBe(409)
   })
 
   it('should handle wrong password error', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 401,
+      statusText: 'Unauthorized',
       json: async () => ({
         errorCode: 'UNAUTHORIZED',
         message: 'Incorrect password.',
@@ -92,6 +96,7 @@ describe('useUpdateProfileMutation', () => {
     })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(result.current.error?.message).toContain('Incorrect password')
+    expect(result.current.error).toBeInstanceOf(ApiError)
+    expect((result.current.error as ApiError).status).toBe(401)
   })
 })

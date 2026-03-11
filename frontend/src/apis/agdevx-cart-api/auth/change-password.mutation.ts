@@ -11,7 +11,7 @@ export interface ChangePasswordRequest {
 }
 
 async function changePassword(request: ChangePasswordRequest): Promise<void> {
-  const response = await apiFetch('/api/auth/password', {
+  await apiFetch('/api/auth/password', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -19,14 +19,11 @@ async function changePassword(request: ChangePasswordRequest): Promise<void> {
     body: JSON.stringify(request),
   })
 
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Password change failed')
-  }
 }
 
 export function useChangePasswordMutation() {
   return useMutation({
+    mutationKey: ['auth', 'change-password'],
     mutationFn: changePassword,
   })
 }
