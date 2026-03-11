@@ -5,6 +5,7 @@ using System.Security.Claims;
 using AGDevX.Cart.Api.Controllers;
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Data.Models;
+using AGDevX.Cart.Shared.DTOs;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -154,7 +155,7 @@ public class TripItemControllerTests
                    .ReturnsAsync(tripItem);
 
         // Act
-        var result = await controller.Add(tripId, inventoryItemId, 3, "Test notes");
+        var result = await controller.Add(tripId, new AddTripItemRequest { InventoryItemId = inventoryItemId, Quantity = 3, Notes = "Test notes" });
 
         // Assert
         var createdResult = result.Should().BeOfType<CreatedAtActionResult>().Subject;
@@ -213,7 +214,7 @@ public class TripItemControllerTests
                    .ReturnsAsync(tripItem);
 
         // Act
-        var result = await controller.Update(tripItemId, 5, null);
+        var result = await controller.Update(tripItemId, new UpdateTripItemRequest { Quantity = 5 });
 
         // Assert
         result.Should().BeOfType<NoContentResult>();
@@ -241,7 +242,7 @@ public class TripItemControllerTests
                    .ThrowsAsync(new ArgumentException("Trip item not found"));
 
         // Act
-        var result = await controller.Update(tripItemId, 5, null);
+        var result = await controller.Update(tripItemId, new UpdateTripItemRequest { Quantity = 5 });
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -269,7 +270,7 @@ public class TripItemControllerTests
                    .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this trip item"));
 
         // Act
-        var result = await controller.Update(tripItemId, 5, null);
+        var result = await controller.Update(tripItemId, new UpdateTripItemRequest { Quantity = 5 });
 
         // Assert
         result.Should().BeOfType<UnauthorizedObjectResult>();

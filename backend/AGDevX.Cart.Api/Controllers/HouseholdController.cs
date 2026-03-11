@@ -3,21 +3,11 @@
 
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Auth.Extensions;
-using AGDevX.Cart.Data.Models;
+using AGDevX.Cart.Shared.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AGDevX.Cart.Api.Controllers;
-
-public record JoinHouseholdRequest
-{
-    public string InviteCode { get; init; } = string.Empty;
-}
-
-public record TransferOwnershipRequest
-{
-    public Guid UserId { get; init; }
-}
 
 [Authorize]
 [ApiController]
@@ -64,12 +54,12 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
 
     //== Create a new household
     [HttpPost]
-    public async Task<IActionResult> CreateHousehold([FromBody] string name)
+    public async Task<IActionResult> CreateHousehold([FromBody] CreateHouseholdRequest request)
     {
         try
         {
             var userId = User.GetUserId();
-            var created = await householdService.CreateHousehold(userId, name);
+            var created = await householdService.CreateHousehold(userId, request.Name);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
         catch (UnauthorizedAccessException ex)
@@ -80,12 +70,12 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
 
     //== Update an existing household
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateHousehold(Guid id, [FromBody] string name)
+    public async Task<IActionResult> UpdateHousehold(Guid id, [FromBody] UpdateHouseholdRequest request)
     {
         try
         {
             var userId = User.GetUserId();
-            await householdService.UpdateHousehold(userId, id, name);
+            await householdService.UpdateHousehold(userId, id, request.Name);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -189,7 +179,7 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
         try
         {
             var userId = User.GetUserId();
-            await householdService.TransferOwnership(userId, id, request.UserId);
+            await householdService.TransferOwnership(userId, id, request.UserId!.Value);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

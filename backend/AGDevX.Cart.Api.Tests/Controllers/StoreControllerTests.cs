@@ -5,6 +5,7 @@ using System.Security.Claims;
 using AGDevX.Cart.Api.Controllers;
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Data.Models;
+using AGDevX.Cart.Shared.DTOs;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -157,13 +158,14 @@ public class StoreControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
+        var request = new CreateStoreRequest { Name = "New Store" };
         var store = new Store { Id = Guid.NewGuid(), Name = "New Store", UserId = userId };
 
         mockService.Setup(s => s.CreateStore(It.IsAny<Store>(), userId))
                    .ReturnsAsync(store);
 
         // Act
-        var result = await controller.Create(store);
+        var result = await controller.Create(request);
 
         // Assert
         var createdResult = result.Should().BeOfType<CreatedAtActionResult>().Subject;
@@ -209,13 +211,13 @@ public class StoreControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var store = new Store { Id = storeId, Name = "Updated Store", UserId = userId };
+        var request = new UpdateStoreRequest { Name = "Updated Store" };
 
-        mockService.Setup(s => s.UpdateStore(storeId, store.Name, store.HouseholdId, userId))
-                   .ReturnsAsync(store);
+        mockService.Setup(s => s.UpdateStore(storeId, request.Name, request.HouseholdId, userId))
+                   .ReturnsAsync(new Store { Id = storeId, Name = "Updated Store", UserId = userId });
 
         // Act
-        var result = await controller.Update(storeId, store);
+        var result = await controller.Update(storeId, request);
 
         // Assert
         result.Should().BeOfType<NoContentResult>();
@@ -239,13 +241,13 @@ public class StoreControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var store = new Store { Id = storeId, Name = "Updated Store", UserId = userId };
+        var request = new UpdateStoreRequest { Name = "Updated Store" };
 
-        mockService.Setup(s => s.UpdateStore(storeId, store.Name, store.HouseholdId, userId))
+        mockService.Setup(s => s.UpdateStore(storeId, request.Name, request.HouseholdId, userId))
                    .ThrowsAsync(new ArgumentException("Store not found"));
 
         // Act
-        var result = await controller.Update(storeId, store);
+        var result = await controller.Update(storeId, request);
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -269,13 +271,13 @@ public class StoreControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var store = new Store { Id = storeId, Name = "Updated Store", UserId = userId };
+        var request = new UpdateStoreRequest { Name = "Updated Store" };
 
-        mockService.Setup(s => s.UpdateStore(storeId, store.Name, store.HouseholdId, userId))
+        mockService.Setup(s => s.UpdateStore(storeId, request.Name, request.HouseholdId, userId))
                    .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this store"));
 
         // Act
-        var result = await controller.Update(storeId, store);
+        var result = await controller.Update(storeId, request);
 
         // Assert
         result.Should().BeOfType<UnauthorizedObjectResult>();
@@ -382,13 +384,13 @@ public class StoreControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var store = new Store { Name = "Costco" };
+        var request = new CreateStoreRequest { Name = "Costco" };
 
-        mockService.Setup(s => s.CreateStore(store, userId))
+        mockService.Setup(s => s.CreateStore(It.IsAny<Store>(), userId))
                    .ThrowsAsync(new InvalidOperationException("A store named \"Costco\" already exists in this scope"));
 
         // Act
-        var result = await controller.Create(store);
+        var result = await controller.Create(request);
 
         // Assert
         var conflictResult = result.Should().BeOfType<ConflictObjectResult>().Subject;
@@ -414,13 +416,13 @@ public class StoreControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var store = new Store { Name = "Costco" };
+        var request = new UpdateStoreRequest { Name = "Costco" };
 
         mockService.Setup(s => s.UpdateStore(storeId, "Costco", null, userId))
                    .ThrowsAsync(new InvalidOperationException("A store named \"Costco\" already exists in this scope"));
 
         // Act
-        var result = await controller.Update(storeId, store);
+        var result = await controller.Update(storeId, request);
 
         // Assert
         var conflictResult = result.Should().BeOfType<ConflictObjectResult>().Subject;

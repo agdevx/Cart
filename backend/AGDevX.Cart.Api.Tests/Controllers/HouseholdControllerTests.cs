@@ -5,6 +5,7 @@ using System.Security.Claims;
 using AGDevX.Cart.Api.Controllers;
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Data.Models;
+using AGDevX.Cart.Shared.DTOs;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -71,7 +72,7 @@ public class HouseholdControllerTests
                    .ReturnsAsync(created);
 
         // Act
-        var result = await controller.CreateHousehold(householdName);
+        var result = await controller.CreateHousehold(new CreateHouseholdRequest { Name = householdName });
 
         // Assert
         var createdResult = result.Should().BeOfType<CreatedAtActionResult>().Subject;
@@ -183,7 +184,7 @@ public class HouseholdControllerTests
                    .ReturnsAsync(updated);
 
         // Act
-        var result = await controller.UpdateHousehold(householdId, householdName);
+        var result = await controller.UpdateHousehold(householdId, new UpdateHouseholdRequest { Name = householdName });
 
         // Assert
         result.Should().BeOfType<NoContentResult>();
@@ -240,7 +241,7 @@ public class HouseholdControllerTests
                    .ThrowsAsync(new ArgumentException("Household not found"));
 
         // Act
-        var result = await controller.UpdateHousehold(householdId, householdName);
+        var result = await controller.UpdateHousehold(householdId, new UpdateHouseholdRequest { Name = householdName });
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -269,7 +270,7 @@ public class HouseholdControllerTests
                    .ThrowsAsync(new UnauthorizedAccessException("User is not a member of this household"));
 
         // Act
-        var result = await controller.UpdateHousehold(householdId, householdName);
+        var result = await controller.UpdateHousehold(householdId, new UpdateHouseholdRequest { Name = householdName });
 
         // Assert
         result.Should().BeOfType<UnauthorizedObjectResult>();
