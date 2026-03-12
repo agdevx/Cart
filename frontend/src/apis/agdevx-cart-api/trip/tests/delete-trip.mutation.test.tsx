@@ -39,7 +39,7 @@ describe('useDeleteTripMutation', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trip/trip1', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/trip/trip1', {
       method: 'DELETE',
     })
   })

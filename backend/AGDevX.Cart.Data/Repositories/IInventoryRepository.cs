@@ -7,11 +7,11 @@ namespace AGDevX.Cart.Data.Repositories;
 
 public interface IInventoryRepository
 {
-    Task<InventoryItem?> GetById(Guid id);
-    Task<IEnumerable<InventoryItem>> GetHouseholdItems(Guid householdId);
-    Task<IEnumerable<InventoryItem>> GetPersonalItems(Guid userId);
-    Task<IEnumerable<InventoryItem>> GetMergedInventory(Guid householdId, Guid userId);
-    Task<InventoryItem> Create(InventoryItem inventoryItem);
-    Task<InventoryItem> Update(InventoryItem inventoryItem);
-    Task Delete(Guid id);
+    Task<InventoryItem?> GetById(Guid id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<InventoryItem>> GetHouseholdItems(Guid householdId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<InventoryItem>> GetPersonalItems(Guid userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<InventoryItem>> GetMergedInventory(Guid householdId, Guid userId, CancellationToken cancellationToken = default);
+    Task<InventoryItem> Create(InventoryItem inventoryItem, CancellationToken cancellationToken = default);
+    Task<InventoryItem> Update(InventoryItem inventoryItem, CancellationToken cancellationToken = default);
+    Task Delete(Guid id, CancellationToken cancellationToken = default);
 }

@@ -11,17 +11,17 @@ namespace AGDevX.Cart.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class HouseholdController(IHouseholdService householdService) : ControllerBase
 {
     //== Get all households for the authenticated user
     [HttpGet]
-    public async Task<IActionResult> GetUserHouseholds()
+    public async Task<IActionResult> GetUserHouseholds(CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var households = await householdService.GetUserHouseholds(userId);
+            var households = await householdService.GetUserHouseholds(userId, cancellationToken);
             return Ok(households);
         }
         catch (UnauthorizedAccessException ex)
@@ -32,12 +32,12 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
 
     //== Get a specific household by ID
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(Guid id)
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var household = await householdService.GetById(userId, id);
+            var household = await householdService.GetById(userId, id, cancellationToken);
 
             if (household == null)
             {
@@ -54,12 +54,12 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
 
     //== Create a new household
     [HttpPost]
-    public async Task<IActionResult> CreateHousehold([FromBody] CreateHouseholdRequest request)
+    public async Task<IActionResult> CreateHousehold([FromBody] CreateHouseholdRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var created = await householdService.CreateHousehold(userId, request.Name);
+            var created = await householdService.CreateHousehold(userId, request.Name, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
         catch (UnauthorizedAccessException ex)
@@ -70,12 +70,12 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
 
     //== Update an existing household
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateHousehold(Guid id, [FromBody] UpdateHouseholdRequest request)
+    public async Task<IActionResult> UpdateHousehold(Guid id, [FromBody] UpdateHouseholdRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await householdService.UpdateHousehold(userId, id, request.Name);
+            await householdService.UpdateHousehold(userId, id, request.Name, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -90,12 +90,12 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
 
     //== Delete a household
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteHousehold(Guid id)
+    public async Task<IActionResult> DeleteHousehold(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await householdService.DeleteHousehold(userId, id);
+            await householdService.DeleteHousehold(userId, id, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -109,13 +109,13 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
     }
 
     //== Join a household via invite code
-    [HttpPost("/api/households/join")]
-    public async Task<IActionResult> JoinHousehold([FromBody] JoinHouseholdRequest request)
+    [HttpPost("/api/v1/households/join")]
+    public async Task<IActionResult> JoinHousehold([FromBody] JoinHouseholdRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var household = await householdService.JoinHousehold(userId, request.InviteCode);
+            var household = await householdService.JoinHousehold(userId, request.InviteCode, cancellationToken);
             return Ok(household);
         }
         catch (UnauthorizedAccessException ex)
@@ -134,12 +134,12 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
 
     //== Get household members
     [HttpGet("{id}/members")]
-    public async Task<IActionResult> GetMembers(Guid id)
+    public async Task<IActionResult> GetMembers(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var members = await householdService.GetMembers(userId, id);
+            var members = await householdService.GetMembers(userId, id, cancellationToken);
             return Ok(members);
         }
         catch (UnauthorizedAccessException ex)
@@ -150,12 +150,12 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
 
     //== Remove a member from a household
     [HttpDelete("{id}/members/{targetUserId}")]
-    public async Task<IActionResult> RemoveMember(Guid id, Guid targetUserId)
+    public async Task<IActionResult> RemoveMember(Guid id, Guid targetUserId, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await householdService.RemoveMember(userId, id, targetUserId);
+            await householdService.RemoveMember(userId, id, targetUserId, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -174,12 +174,12 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
 
     //== Transfer household ownership
     [HttpPut("{id}/owner")]
-    public async Task<IActionResult> TransferOwnership(Guid id, [FromBody] TransferOwnershipRequest request)
+    public async Task<IActionResult> TransferOwnership(Guid id, [FromBody] TransferOwnershipRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await householdService.TransferOwnership(userId, id, request.UserId!.Value);
+            await householdService.TransferOwnership(userId, id, request.UserId!.Value, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -194,12 +194,12 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
 
     //== Get invite code
     [HttpGet("{id}/invite-code")]
-    public async Task<IActionResult> GetInviteCode(Guid id)
+    public async Task<IActionResult> GetInviteCode(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var code = await householdService.GetInviteCode(userId, id);
+            var code = await householdService.GetInviteCode(userId, id, cancellationToken);
             return Ok(new { inviteCode = code });
         }
         catch (UnauthorizedAccessException ex)
@@ -210,12 +210,12 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
 
     //== Regenerate invite code
     [HttpPost("{id}/invite-code")]
-    public async Task<IActionResult> RegenerateInviteCode(Guid id)
+    public async Task<IActionResult> RegenerateInviteCode(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var code = await householdService.RegenerateInviteCode(userId, id);
+            var code = await householdService.RegenerateInviteCode(userId, id, cancellationToken);
             return Ok(new { inviteCode = code });
         }
         catch (UnauthorizedAccessException ex)

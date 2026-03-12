@@ -14,16 +14,16 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace AGDevX.Cart.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class AuthController(IAuthService authService) : ControllerBase
 {
     [EnableRateLimiting("auth")]
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
-            var response = await authService.Register(request);
+            var response = await authService.Register(request, cancellationToken);
             await SignInUser(response);
             return Ok(response);
         }
@@ -35,11 +35,11 @@ public class AuthController(IAuthService authService) : ControllerBase
 
     [EnableRateLimiting("auth")]
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
-            var response = await authService.Login(request);
+            var response = await authService.Login(request, cancellationToken);
             await SignInUser(response);
             return Ok(response);
         }
@@ -81,12 +81,12 @@ public class AuthController(IAuthService authService) : ControllerBase
 
     [Authorize]
     [HttpPut("profile")]
-    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var response = await authService.UpdateProfile(userId, request);
+            var response = await authService.UpdateProfile(userId, request, cancellationToken);
             await SignInUser(response);
             return Ok(response);
         }
@@ -107,12 +107,12 @@ public class AuthController(IAuthService authService) : ControllerBase
     [Authorize]
     [EnableRateLimiting("auth")]
     [HttpPut("password")]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await authService.ChangePassword(userId, request);
+            await authService.ChangePassword(userId, request, cancellationToken);
             return Ok();
         }
         catch (UnauthorizedAccessException ex)

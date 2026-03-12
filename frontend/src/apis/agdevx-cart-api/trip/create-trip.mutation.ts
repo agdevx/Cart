@@ -17,7 +17,7 @@ export const useCreateTripMutation = () => {
   return useMutation({
     mutationKey: ['trips', 'create'],
     mutationFn: async (request: CreateTripRequest): Promise<Trip> => {
-      const response = await apiFetch('/api/trip', {
+      const response = await apiFetch('/api/v1/trip', {
         method: 'POST',
         body: JSON.stringify(request),
       })

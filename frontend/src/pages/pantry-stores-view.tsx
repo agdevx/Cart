@@ -10,6 +10,8 @@ import { useCreateStoreMutation } from '@/apis/agdevx-cart-api/store/create-stor
 import { useDeleteStoreMutation } from '@/apis/agdevx-cart-api/store/delete-store.mutation'
 import { useUpdateStoreMutation } from '@/apis/agdevx-cart-api/store/update-store.mutation'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
+import { useFieldValidation } from '@/hooks/use-field-validation'
+import { isRequired, maxLength } from '@/utils/validation-rules'
 
 import { ConfirmDialog } from './components/confirm-dialog'
 import { EmptyState } from './components/empty-state'
@@ -32,6 +34,14 @@ export const PantryStoresView = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
+
+  const createSchema = useMemo(() => ({
+    name: [isRequired('Store name'), maxLength(100)],
+  }), [])
+
+  const createValues = useMemo(() => ({ name: storeName }), [storeName])
+
+  const { errors: createErrors, handleBlur: handleCreateBlur, handleChange: handleCreateChange, validateAll: validateCreateAll, isValid: isCreateValid } = useFieldValidation(createSchema, createValues)
 
   const createDuplicateError = useMemo(() => {
     if (!storeName.trim() || !stores) return null
@@ -102,7 +112,7 @@ export const PantryStoresView = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!storeName.trim()) {
+    if (!validateCreateAll()) {
       return
     }
 
@@ -276,11 +286,13 @@ export const PantryStoresView = () => {
               type="text"
               autoFocus
               value={storeName}
-              onChange={(e) => setStoreName(e.target.value)}
+              onChange={(e) => { setStoreName(e.target.value); handleCreateChange('name', e.target.value) }}
+              onBlur={() => handleCreateBlur('name')}
               placeholder="e.g., Costco"
-              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+              className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${createErrors.name ? 'border-coral border-2' : 'border-navy/10'}`}
               disabled={createMutation.isPending}
             />
+            {createErrors.name && <p className="mt-1 text-sm text-coral">{createErrors.name}</p>}
             {createDuplicateError && (
               <p className="text-coral text-sm mt-1">{createDuplicateError}</p>
             )}
@@ -311,7 +323,7 @@ export const PantryStoresView = () => {
             </button>
             <button
               type="submit"
-              disabled={createMutation.isPending || !storeName.trim() || !!createDuplicateError}
+              disabled={createMutation.isPending || !isCreateValid || !!createDuplicateError}
               className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
             >
               {createMutation.isPending ? 'Creating...' : 'Create'}

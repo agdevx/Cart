@@ -11,7 +11,7 @@ export const useDeleteHouseholdMutation = () => {
   return useMutation({
     mutationKey: ['households', 'delete'],
     mutationFn: async (householdId: string): Promise<void> => {
-      await apiFetch(`/api/household/${householdId}`, {
+      await apiFetch(`/api/v1/household/${householdId}`, {
         method: 'DELETE',
       })
     },

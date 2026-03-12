@@ -17,7 +17,7 @@ export const useJoinHouseholdMutation = () => {
     mutationKey: ['households', 'join'],
     meta: { handlesErrors: true },
     mutationFn: async (request: JoinHouseholdRequest): Promise<Household> => {
-      const response = await apiFetch('/api/households/join', {
+      const response = await apiFetch('/api/v1/households/join', {
         method: 'POST',
         body: JSON.stringify(request),
       })

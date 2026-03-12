@@ -12,7 +12,7 @@ export const useStartTripMutation = () => {
   return useMutation({
     mutationKey: ['trips', 'start'],
     mutationFn: async (tripId: string): Promise<Trip> => {
-      const response = await apiFetch(`/api/trip/${tripId}/start`, {
+      const response = await apiFetch(`/api/v1/trip/${tripId}/start`, {
         method: 'POST',
       })
       return response.json() as Promise<Trip>

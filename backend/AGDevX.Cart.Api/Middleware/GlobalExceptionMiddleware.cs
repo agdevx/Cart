@@ -13,6 +13,27 @@ public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExcep
         {
             await next(context);
         }
+        catch (OperationCanceledException)
+        {
+            if (context.RequestAborted.IsCancellationRequested)
+            {
+                logger.LogInformation("Client disconnected");
+                return;
+            }
+
+            logger.LogWarning("Request timed out: {Path}", context.Request.Path);
+
+            if (!context.Response.HasStarted)
+            {
+                context.Response.StatusCode = StatusCodes.Status408RequestTimeout;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    errorCode = "REQUEST_TIMEOUT",
+                    message = "The request timed out."
+                });
+            }
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Unhandled exception");

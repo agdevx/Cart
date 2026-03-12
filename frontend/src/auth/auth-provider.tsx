@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     //== Note: initial user restore is handled synchronously by currentUserAtom
     const validateSession = async () => {
       try {
-        const response = await apiFetch('/api/auth/me')
+        const response = await apiFetch('/api/v1/auth/me')
         const userData = await response.json()
         const user: User = {
           id: userData.userId,

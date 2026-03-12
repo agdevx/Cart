@@ -13,7 +13,7 @@ export async function registerTestUser(
   request: APIRequestContext,
   user: TestUser
 ): Promise<void> {
-  await request.post('http://localhost:5000/api/auth/register', {
+  await request.post('http://localhost:5000/api/v1/auth/register', {
     data: user
   });
 }

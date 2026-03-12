@@ -36,7 +36,7 @@ describe('useInviteCodeQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual('ABC123')
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1/invite-code')
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/household/h1/invite-code')
   })
 
   it('does not fetch when not authenticated', () => {

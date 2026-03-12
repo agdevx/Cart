@@ -26,7 +26,7 @@ test.describe('Authentication', () => {
 
   test('shows error message on failed login', async ({ page }) => {
     // Mock failed login response
-    await page.route('**/api/auth/login', (route) => {
+    await page.route('**/api/v1/auth/login', (route) => {
       route.fulfill({
         status: 401,
         contentType: 'application/json',

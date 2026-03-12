@@ -64,7 +64,7 @@ describe('useInventoryQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockInventory)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/inventory')
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/inventory')
   })
 
   it('does not fetch when not authenticated', () => {

@@ -46,7 +46,7 @@ describe('useHouseholdQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockHousehold)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1')
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/household/h1')
   })
 
   it('handles fetch error', async () => {

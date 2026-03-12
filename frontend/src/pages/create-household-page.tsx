@@ -1,22 +1,32 @@
 // ABOUTME: Create household page
 // ABOUTME: Form for creating a new household
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useCreateHouseholdMutation } from '@/apis/agdevx-cart-api/household/create-household.mutation'
+import { useFieldValidation } from '@/hooks/use-field-validation'
 import { ROUTES } from '@/routes'
 import { getErrorMessage } from '@/utilities/error-messages'
+import { isRequired, maxLength } from '@/utils/validation-rules'
 
 export const CreateHouseholdPage = () => {
   const [name, setName] = useState('')
   const navigate = useNavigate()
   const createMutation = useCreateHouseholdMutation()
 
+  const schema = useMemo(() => ({
+    name: [isRequired('Household name'), maxLength(100)],
+  }), [])
+
+  const values = useMemo(() => ({ name }), [name])
+
+  const { errors, handleBlur, handleChange, validateAll, isValid } = useFieldValidation(schema, values)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!name.trim()) {
+    if (!validateAll()) {
       return
     }
 
@@ -41,11 +51,13 @@ export const CreateHouseholdPage = () => {
             id="name"
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => { setName(e.target.value); handleChange('name', e.target.value) }}
+            onBlur={() => handleBlur('name')}
             placeholder="Enter household name"
-            className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+            className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${errors.name ? 'border-coral border-2' : 'border-navy/10'}`}
             disabled={createMutation.isPending}
           />
+          {errors.name && <p className="mt-1 text-sm text-coral">{errors.name}</p>}
         </div>
 
         {createMutation.isError && (
@@ -64,7 +76,7 @@ export const CreateHouseholdPage = () => {
           </button>
           <button
             type="submit"
-            disabled={createMutation.isPending || !name.trim()}
+            disabled={createMutation.isPending || !isValid}
             className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
           >
             {createMutation.isPending ? 'Creating...' : 'Create Household'}

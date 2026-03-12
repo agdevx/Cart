@@ -52,7 +52,7 @@ describe('usePersonalInventoryQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockItems)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/inventory/personal')
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/inventory/personal')
   })
 
   it('does not fetch when not authenticated', () => {

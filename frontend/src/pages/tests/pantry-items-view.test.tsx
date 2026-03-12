@@ -665,6 +665,25 @@ describe('PantryItemsView', () => {
 
       expect(mockMutateAsync).not.toHaveBeenCalled()
     })
+
+    it('shows item name error on blur when empty and clears when filled', async () => {
+      setupCreateFormMocks()
+      const user = userEvent.setup()
+
+      renderView('all', { showCreateForm: true })
+
+      //== Blur the item name input without typing anything
+      const input = screen.getByLabelText('Item Name')
+      await user.click(input)
+      await user.tab()
+
+      //== Error message should appear
+      expect(screen.getByText('Item name is required')).toBeInTheDocument()
+
+      //== Type a name to clear the error
+      await user.type(input, 'Bananas')
+      expect(screen.queryByText('Item name is required')).not.toBeInTheDocument()
+    })
   })
 
   describe('inline edit form', () => {

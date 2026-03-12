@@ -8,6 +8,7 @@ using AGDevX.Cart.Services;
 using AGDevX.Cart.Auth.Extensions;
 using AGDevX.Cart.Shared.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Timeouts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -15,7 +16,7 @@ namespace AGDevX.Cart.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/trips/{tripId}/events")]
+[Route("api/v1/trips/{tripId}/events")]
 public class TripEventsController(
     ITripEventService tripEventService,
     ITripRepository tripRepository,
@@ -26,6 +27,7 @@ public class TripEventsController(
     private readonly JsonSerializerOptions _jsonSerializerOptions = jsonOptions.Value.JsonSerializerOptions;
 
     [HttpGet]
+    [RequestTimeout("sse")]
     public async Task GetEvents(Guid tripId, CancellationToken cancellationToken)
     {
         try

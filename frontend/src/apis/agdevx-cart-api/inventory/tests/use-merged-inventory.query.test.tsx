@@ -64,7 +64,7 @@ describe('useMergedInventoryQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockItems)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/inventory/merged/h1')
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/inventory/merged/h1')
   })
 
   it('does not fetch when not authenticated', () => {

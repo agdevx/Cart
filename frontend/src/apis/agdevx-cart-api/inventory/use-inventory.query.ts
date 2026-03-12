@@ -14,7 +14,7 @@ export const useInventoryQuery = () => {
   return useQuery({
     queryKey: ['inventory'],
     queryFn: async (): Promise<InventoryItem[]> => {
-      const response = await apiFetch('/api/inventory');
+      const response = await apiFetch('/api/v1/inventory');
       return response.json();
     },
     enabled: isAuthenticated,

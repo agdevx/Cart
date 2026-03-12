@@ -1,12 +1,14 @@
 // ABOUTME: Login page component
 // ABOUTME: Simple username-only authentication for MVP
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link,useNavigate } from 'react-router-dom'
 
 import { useLoginMutation } from '@/apis/agdevx-cart-api/auth/login.mutation'
 import { useAuth } from '@/auth/use-auth'
+import { useFieldValidation } from '@/hooks/use-field-validation'
 import { ROUTES } from '@/routes'
+import { isEmail, isRequired } from '@/utils/validation-rules'
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('')
@@ -15,9 +17,28 @@ export const LoginPage = () => {
   const loginMutation = useLoginMutation()
   const { setAuth } = useAuth()
 
+  const schema = useMemo(() => ({
+    email: [isRequired('Email'), isEmail()],
+    password: [isRequired('Password')],
+  }), [])
+
+  const values = useMemo(() => ({ email, password }), [email, password])
+
+  const { errors, touched, handleBlur, handleChange, validateAll, setFieldError, isValid } = useFieldValidation(schema, values)
+
+  const borderClass = (field: string) =>
+    touched[field] && !errors[field]
+      ? 'border-teal border-2'
+      : errors[field]
+        ? 'border-coral border-2'
+        : 'border-navy/10'
+
+  const labelClass = (field: string) =>
+    errors[field] ? 'text-coral' : 'text-navy-soft'
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim() || !password.trim()) return
+    if (!validateAll()) return
 
     try {
       const response = await loginMutation.mutateAsync({ email, password })
@@ -32,12 +53,12 @@ export const LoginPage = () => {
         })
       navigate(ROUTES.SHOPPING)
     } catch {
-      // Error displayed inline via loginMutation.isError
+      setFieldError('email', 'Invalid email or password')
     }
   }
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4">
+    <div id="main-content" className="min-h-screen bg-bg flex items-center justify-center px-4">
       <div className="bg-surface p-8 rounded-2xl shadow-md w-full max-w-md">
         <h1 className="font-display text-2xl font-extrabold text-navy mb-1">
           AGDevX <span className="text-teal">Cart</span>
@@ -45,47 +66,50 @@ export const LoginPage = () => {
         <p className="text-text-secondary text-sm mb-6">Sign in to continue</p>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-semibold text-navy-soft mb-2">
+            <label htmlFor="email" className={`block text-sm font-semibold ${labelClass('email')} mb-2`}>
               Email
             </label>
             <input
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); handleChange('email', e.target.value); }}
+              onBlur={() => handleBlur('email')}
               placeholder="Enter your email"
               maxLength={254}
-              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+              className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('email')}`}
               autoComplete="email"
             />
+            {errors.email && (
+              <p className="mt-1 text-sm text-coral">{errors.email}</p>
+            )}
           </div>
           <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-semibold text-navy-soft mb-2">
+            <label htmlFor="password" className={`block text-sm font-semibold ${labelClass('password')} mb-2`}>
               Password
             </label>
             <input
               id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => { setPassword(e.target.value); handleChange('password', e.target.value); }}
+              onBlur={() => handleBlur('password')}
               placeholder="Enter your password"
               maxLength={128}
-              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+              className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('password')}`}
               autoComplete="current-password"
             />
+            {errors.password && (
+              <p className="mt-1 text-sm text-coral">{errors.password}</p>
+            )}
           </div>
           <button
             type="submit"
-            disabled={loginMutation.isPending || !email.trim() || !password.trim()}
+            disabled={loginMutation.isPending || !isValid}
             className="w-full bg-teal text-white py-3 px-4 rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
           >
             {loginMutation.isPending ? 'Logging in...' : 'Login'}
           </button>
-          {loginMutation.isError && (
-            <p className="mt-4 text-sm text-coral">
-              Login failed. Please try again.
-            </p>
-          )}
         </form>
         {/* Link to Register */}
         <p className="mt-4 text-center text-sm text-text-secondary">

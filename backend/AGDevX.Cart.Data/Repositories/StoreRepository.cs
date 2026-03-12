@@ -8,27 +8,27 @@ namespace AGDevX.Cart.Data.Repositories;
 
 public class StoreRepository(CartDbContext context) : IStoreRepository
 {
-    public async Task<Store?> GetById(Guid id)
+    public async Task<Store?> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         return await context.Stores.Include(s => s.Household)
-                                   .FirstOrDefaultAsync(s => s.Id == id);
+                                   .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
-    public async Task<IEnumerable<Store>> GetHouseholdStores(Guid householdId)
+    public async Task<IEnumerable<Store>> GetHouseholdStores(Guid householdId, CancellationToken cancellationToken = default)
     {
         return await context.Stores.Where(s => s.HouseholdId == householdId)
                                    .OrderBy(s => s.Name)
-                                   .ToListAsync();
+                                   .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Store>> GetPersonalStores(Guid userId)
+    public async Task<IEnumerable<Store>> GetPersonalStores(Guid userId, CancellationToken cancellationToken = default)
     {
         return await context.Stores.Where(s => s.UserId == userId)
                                    .OrderBy(s => s.Name)
-                                   .ToListAsync();
+                                   .ToListAsync(cancellationToken);
     }
 
-    public async Task<bool> ExistsWithName(string name, Guid? userId, Guid? householdId, Guid? excludeStoreId)
+    public async Task<bool> ExistsWithName(string name, Guid? userId, Guid? householdId, Guid? excludeStoreId, CancellationToken cancellationToken = default)
     {
         var query = context.Stores.AsQueryable();
 
@@ -47,30 +47,30 @@ public class StoreRepository(CartDbContext context) : IStoreRepository
         }
 
         var lowerName = name.ToLower();
-        return await query.AnyAsync(s => s.Name.ToLower() == lowerName);
+        return await query.AnyAsync(s => s.Name.ToLower() == lowerName, cancellationToken);
     }
 
-    public async Task<Store> Create(Store store)
+    public async Task<Store> Create(Store store, CancellationToken cancellationToken = default)
     {
         context.Stores.Add(store);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
         return store;
     }
 
-    public async Task<Store> Update(Store store)
+    public async Task<Store> Update(Store store, CancellationToken cancellationToken = default)
     {
         context.Stores.Update(store);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
         return store;
     }
 
-    public async Task Delete(Guid id)
+    public async Task Delete(Guid id, CancellationToken cancellationToken = default)
     {
-        var store = await context.Stores.FindAsync(id);
+        var store = await context.Stores.FindAsync(new object[] { id }, cancellationToken);
         if (store != null)
         {
             context.Stores.Remove(store);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
         }
     }
 }

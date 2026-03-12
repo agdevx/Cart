@@ -44,7 +44,7 @@ describe('useUpdateProfileMutation', () => {
 
     expect(result.current.data).toEqual(mockResponse)
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/auth/profile'),
+      expect.stringContaining('/api/v1/auth/profile'),
       expect.objectContaining({
         method: 'PUT',
         credentials: 'include',

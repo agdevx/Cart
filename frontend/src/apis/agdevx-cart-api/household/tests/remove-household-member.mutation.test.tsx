@@ -37,7 +37,7 @@ describe('useRemoveHouseholdMemberMutation', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1/members/u1', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/household/h1/members/u1', {
       method: 'DELETE',
     })
   })

@@ -39,7 +39,7 @@ describe('useDeleteInventoryItemMutation', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/inventory/1', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/inventory/1', {
       method: 'DELETE',
     })
   })

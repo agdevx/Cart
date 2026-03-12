@@ -51,7 +51,7 @@ describe('useCreateStoreMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockStore)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/store', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/store', {
       method: 'POST',
       body: JSON.stringify({ name: 'Costco', householdId: 'h1' }),
     })
@@ -87,7 +87,7 @@ describe('useCreateStoreMutation', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/store', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/store', {
       method: 'POST',
       body: JSON.stringify({ name: 'Corner Market' }),
     })

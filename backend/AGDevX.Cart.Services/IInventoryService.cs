@@ -7,12 +7,12 @@ namespace AGDevX.Cart.Services;
 
 public interface IInventoryService
 {
-    Task<InventoryItem> CreateInventoryItem(InventoryItem inventoryItem, Guid userId);
-    Task<IEnumerable<InventoryItem>> GetAllUserInventory(Guid userId);
-    Task<IEnumerable<InventoryItem>> GetHouseholdInventory(Guid householdId, Guid userId);
-    Task<IEnumerable<InventoryItem>> GetPersonalInventory(Guid userId);
-    Task<IEnumerable<InventoryItem>> GetMergedInventory(Guid householdId, Guid userId);
-    Task<InventoryItem?> GetById(Guid id, Guid userId);
-    Task<InventoryItem> UpdateInventoryItem(InventoryItem inventoryItem, Guid userId);
-    Task DeleteInventoryItem(Guid id, Guid userId);
+    Task<InventoryItem> CreateInventoryItem(InventoryItem inventoryItem, Guid userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<InventoryItem>> GetAllUserInventory(Guid userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<InventoryItem>> GetHouseholdInventory(Guid householdId, Guid userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<InventoryItem>> GetPersonalInventory(Guid userId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<InventoryItem>> GetMergedInventory(Guid householdId, Guid userId, CancellationToken cancellationToken = default);
+    Task<InventoryItem?> GetById(Guid id, Guid userId, CancellationToken cancellationToken = default);
+    Task<InventoryItem> UpdateInventoryItem(InventoryItem inventoryItem, Guid userId, CancellationToken cancellationToken = default);
+    Task DeleteInventoryItem(Guid id, Guid userId, CancellationToken cancellationToken = default);
 }

@@ -52,7 +52,7 @@ describe('useTripQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockTrip)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trip/1')
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/trip/1')
   })
 
   it('does not fetch when not authenticated', () => {

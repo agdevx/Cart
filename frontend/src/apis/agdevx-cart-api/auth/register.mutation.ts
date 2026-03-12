@@ -23,7 +23,7 @@ export interface RegisterResponse {
  * @returns Promise resolving to registration response with tokens and user data
  */
 async function register(credentials: RegisterRequest): Promise<RegisterResponse> {
-  const response = await apiFetch('/api/auth/register', {
+  const response = await apiFetch('/api/v1/auth/register', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

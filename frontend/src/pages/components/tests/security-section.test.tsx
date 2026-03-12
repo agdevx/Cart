@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { queryClient } from '@/apis/tanstack-query/query-client'
@@ -93,5 +94,31 @@ describe('SecuritySection', () => {
     // SecuritySection accepts an optional successMessage prop for view mode display
     render(createElement(SecuritySection, { ...defaultProps, successMessage: 'Password updated' }), { wrapper })
     expect(screen.getByText('Password updated')).toBeInTheDocument()
+  })
+
+  it('shows error on currentPassword field when blurred empty', async () => {
+    render(createElement(SecuritySection, { ...defaultProps, isEditing: true }), { wrapper })
+    const input = screen.getByLabelText(/current password/i)
+    await userEvent.click(input)
+    await userEvent.tab()
+    expect(screen.getByText('Current password is required')).toBeInTheDocument()
+  })
+
+  it('clears error on currentPassword when filled after blur', async () => {
+    render(createElement(SecuritySection, { ...defaultProps, isEditing: true }), { wrapper })
+    const input = screen.getByLabelText(/current password/i)
+    await userEvent.click(input)
+    await userEvent.tab()
+    expect(screen.getByText('Current password is required')).toBeInTheDocument()
+    await userEvent.type(input, 'SomePassword1')
+    expect(screen.queryByText('Current password is required')).not.toBeInTheDocument()
+  })
+
+  it('shows error on newPassword when blurred with weak password (no uppercase)', async () => {
+    render(createElement(SecuritySection, { ...defaultProps, isEditing: true }), { wrapper })
+    const input = screen.getByLabelText(/^new password$/i)
+    await userEvent.type(input, 'weakpassword1')
+    await userEvent.tab()
+    expect(screen.getByText('Must contain at least one uppercase letter')).toBeInTheDocument()
   })
 })

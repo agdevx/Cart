@@ -68,7 +68,7 @@ describe('useRegisterMutation', () => {
     });
 
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/auth/register'),
+      expect.stringContaining('/api/v1/auth/register'),
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({

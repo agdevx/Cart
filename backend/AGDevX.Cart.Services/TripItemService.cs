@@ -21,24 +21,24 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
     {
         ReferenceHandler = ReferenceHandler.IgnoreCycles
     };
-    public async Task<TripItem> AddTripItem(Guid tripId, Guid inventoryItemId, int quantity, Guid userId, string? notes = null, Guid? storeId = null)
+    public async Task<TripItem> AddTripItem(Guid tripId, Guid inventoryItemId, int quantity, Guid userId, string? notes = null, Guid? storeId = null, CancellationToken cancellationToken = default)
     {
         //== Verify user is collaborator before adding item to trip
-        var isCollaborator = await _tripRepository.IsUserCollaborator(tripId, userId);
+        var isCollaborator = await _tripRepository.IsUserCollaborator(tripId, userId, cancellationToken);
         if (!isCollaborator)
         {
             throw new UnauthorizedAccessException("User is not a collaborator on this trip");
         }
 
         //== Lookup inventory item to populate denormalized name
-        var inventoryItem = await _inventoryRepository.GetById(inventoryItemId)
+        var inventoryItem = await _inventoryRepository.GetById(inventoryItemId, cancellationToken)
             ?? throw new ArgumentException("Inventory item not found");
 
         //== Lookup store name if a store is specified
         string? storeName = null;
         if (storeId.HasValue)
         {
-            var store = await _storeRepository.GetById(storeId.Value);
+            var store = await _storeRepository.GetById(storeId.Value, cancellationToken);
             storeName = store?.Name;
         }
 
@@ -56,7 +56,7 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
             CheckedAt = null,
         };
 
-        var created = await _tripItemRepository.Create(tripItem);
+        var created = await _tripItemRepository.Create(tripItem, cancellationToken);
 
         //== Broadcast ItemAdded event to connected clients
         _tripEventService.PublishEvent(new TripEvent
@@ -71,28 +71,28 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
         return created;
     }
 
-    public async Task<IEnumerable<TripItem>> GetTripItems(Guid tripId, Guid userId)
+    public async Task<IEnumerable<TripItem>> GetTripItems(Guid tripId, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Verify user is collaborator before retrieving trip items
-        var isCollaborator = await _tripRepository.IsUserCollaborator(tripId, userId);
+        var isCollaborator = await _tripRepository.IsUserCollaborator(tripId, userId, cancellationToken);
         if (!isCollaborator)
         {
             throw new UnauthorizedAccessException("User is not a collaborator on this trip");
         }
 
-        return await _tripItemRepository.GetTripItems(tripId);
+        return await _tripItemRepository.GetTripItems(tripId, cancellationToken);
     }
 
-    public async Task<TripItem?> GetById(Guid id, Guid userId)
+    public async Task<TripItem?> GetById(Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
-        var tripItem = await _tripItemRepository.GetById(id);
+        var tripItem = await _tripItemRepository.GetById(id, cancellationToken);
         if (tripItem == null)
         {
             return null;
         }
 
         //== Verify user is collaborator before retrieving trip item
-        var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId);
+        var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId, cancellationToken);
         if (!isCollaborator)
         {
             throw new UnauthorizedAccessException("User is not a collaborator on this trip");
@@ -101,13 +101,13 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
         return tripItem;
     }
 
-    public async Task<TripItem> UpdateTripItem(Guid id, int quantity, Guid userId, string? notes = null, Guid? storeId = null)
+    public async Task<TripItem> UpdateTripItem(Guid id, int quantity, Guid userId, string? notes = null, Guid? storeId = null, CancellationToken cancellationToken = default)
     {
-        var tripItem = await _tripItemRepository.GetById(id)
+        var tripItem = await _tripItemRepository.GetById(id, cancellationToken)
                             ?? throw new KeyNotFoundException("Trip item not found");
 
         //== Verify user is collaborator before updating trip item
-        var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId);
+        var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId, cancellationToken);
         if (!isCollaborator)
         {
             throw new UnauthorizedAccessException("User is not a collaborator on this trip");
@@ -121,7 +121,7 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
         //== Update denormalized StoreName to match new store
         if (storeId.HasValue)
         {
-            var store = await _storeRepository.GetById(storeId.Value);
+            var store = await _storeRepository.GetById(storeId.Value, cancellationToken);
             tripItem.StoreName = store?.Name;
         }
         else
@@ -129,7 +129,7 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
             tripItem.StoreName = null;
         }
 
-        var updated = await _tripItemRepository.Update(tripItem);
+        var updated = await _tripItemRepository.Update(tripItem, cancellationToken);
 
         //== Broadcast ItemUpdated event to connected clients
         _tripEventService.PublishEvent(new TripEvent
@@ -144,19 +144,19 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
         return updated;
     }
 
-    public async Task DeleteTripItem(Guid id, Guid userId)
+    public async Task DeleteTripItem(Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
-        var tripItem = await _tripItemRepository.GetById(id)
+        var tripItem = await _tripItemRepository.GetById(id, cancellationToken)
                             ?? throw new KeyNotFoundException("Trip item not found");
 
         //== Verify user is collaborator before deleting trip item
-        var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId);
+        var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId, cancellationToken);
         if (!isCollaborator)
         {
             throw new UnauthorizedAccessException("User is not a collaborator on this trip");
         }
 
-        await _tripItemRepository.Delete(id);
+        await _tripItemRepository.Delete(id, cancellationToken);
 
         //== Broadcast ItemRemoved event to connected clients
         _tripEventService.PublishEvent(new TripEvent
@@ -169,13 +169,13 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
         });
     }
 
-    public async Task<TripItem> CheckItem(Guid id, bool isChecked, Guid userId)
+    public async Task<TripItem> CheckItem(Guid id, bool isChecked, Guid userId, CancellationToken cancellationToken = default)
     {
-        var tripItem = await _tripItemRepository.GetById(id)
+        var tripItem = await _tripItemRepository.GetById(id, cancellationToken)
                             ?? throw new KeyNotFoundException("Trip item not found");
 
         //== Verify user is collaborator before checking/unchecking trip item
-        var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId);
+        var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId, cancellationToken);
         if (!isCollaborator)
         {
             throw new UnauthorizedAccessException("User is not a collaborator on this trip");
@@ -193,7 +193,7 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
             tripItem.CheckedAt = null;
         }
 
-        var updated = await _tripItemRepository.Update(tripItem);
+        var updated = await _tripItemRepository.Update(tripItem, cancellationToken);
 
         //== Broadcast ItemChecked event to connected clients
         _tripEventService.PublishEvent(new TripEvent

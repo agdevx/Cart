@@ -63,7 +63,7 @@ describe('useCheckTripItemMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockTripItem)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/tripitem/1/check', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/tripitem/1/check', {
       method: 'POST',
     })
   })
@@ -111,7 +111,7 @@ describe('useCheckTripItemMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockTripItem)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/tripitem/1/uncheck', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/tripitem/1/uncheck', {
       method: 'POST',
     })
   })

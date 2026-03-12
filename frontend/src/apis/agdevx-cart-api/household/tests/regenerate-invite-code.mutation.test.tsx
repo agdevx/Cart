@@ -39,7 +39,7 @@ describe('useRegenerateInviteCodeMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual('NEW456')
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1/invite-code', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/household/h1/invite-code', {
       method: 'POST',
     })
   })

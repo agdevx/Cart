@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { queryClient } from '@/apis/tanstack-query/query-client'
@@ -116,5 +117,36 @@ describe('ProfileSection', () => {
     const emailInput = screen.getByDisplayValue('test@example.com')
     fireEvent.change(emailInput, { target: { value: 'new@example.com' } })
     expect(screen.getByRole('button', { name: /save/i })).toBeDisabled()
+  })
+
+  it('shows error on name field when blurred empty', async () => {
+    const user = userEvent.setup()
+    render(createElement(ProfileSection, { ...defaultProps, isEditing: true }), { wrapper })
+    const nameInput = screen.getByDisplayValue('Test User')
+    await user.clear(nameInput)
+    await user.tab()
+    expect(screen.getByText('Name is required')).toBeInTheDocument()
+  })
+
+  it('clears name error when name is filled back in', async () => {
+    const user = userEvent.setup()
+    render(createElement(ProfileSection, { ...defaultProps, isEditing: true }), { wrapper })
+    const nameInput = screen.getByDisplayValue('Test User')
+    await user.clear(nameInput)
+    await user.tab()
+    expect(screen.getByText('Name is required')).toBeInTheDocument()
+    await user.click(nameInput)
+    await user.type(nameInput, 'New Name')
+    expect(screen.queryByText('Name is required')).not.toBeInTheDocument()
+  })
+
+  it('shows error on email field with invalid email on blur', async () => {
+    const user = userEvent.setup()
+    render(createElement(ProfileSection, { ...defaultProps, isEditing: true }), { wrapper })
+    const emailInput = screen.getByDisplayValue('test@example.com')
+    await user.clear(emailInput)
+    await user.type(emailInput, 'not-an-email')
+    await user.tab()
+    expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument()
   })
 })

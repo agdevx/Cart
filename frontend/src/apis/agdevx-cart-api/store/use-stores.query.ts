@@ -15,8 +15,8 @@ export const useStoresQuery = (householdIds: string[]) => {
     queryKey: ['stores', householdIds],
     queryFn: async (): Promise<Store[]> => {
       const responses = await Promise.all([
-        apiFetch('/api/store/personal'),
-        ...householdIds.map((id) => apiFetch(`/api/store/household/${id}`)),
+        apiFetch('/api/v1/store/personal'),
+        ...householdIds.map((id) => apiFetch(`/api/v1/store/household/${id}`)),
       ])
 
       const allStores: Store[] = []

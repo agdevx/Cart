@@ -60,7 +60,7 @@ describe('useUpdateInventoryItemMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockInventoryItem)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/inventory/1', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/inventory/1', {
       method: 'PUT',
       body: JSON.stringify({
         name: 'Whole Milk',

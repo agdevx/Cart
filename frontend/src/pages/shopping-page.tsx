@@ -1,7 +1,7 @@
 // ABOUTME: Shopping page displaying active trip and trip history
 // ABOUTME: Shows current trip in progress and completed trips list
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { ChevronDown, Plus, ShoppingCart } from 'lucide-react'
@@ -13,8 +13,10 @@ import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.m
 import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
 import { useAuth } from '@/auth/use-auth'
+import { useFieldValidation } from '@/hooks/use-field-validation'
 import { tripDetailPath } from '@/routes'
 import { getGreeting } from '@/utils/greeting'
+import { isRequired } from '@/utils/validation-rules'
 
 import { ConfirmDialog } from './components/confirm-dialog'
 import { EmptyState } from './components/empty-state'
@@ -38,6 +40,16 @@ export const ShoppingPage = () => {
   const [householdId, setHouseholdId] = useState<string>('personal')
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
   const [showCompleted, setShowCompleted] = useState(false)
+  // formKey forces the form element to remount when opened, resetting validation state
+  const [formKey, setFormKey] = useState(0)
+
+  const schema = useMemo(() => ({
+    name: [isRequired('Trip name')],
+  }), [])
+
+  const values = useMemo(() => ({ name: tripName }), [tripName])
+
+  const { errors, handleBlur, handleChange, validateAll, isValid } = useFieldValidation(schema, values)
 
   const inProgressTrips = trips?.filter((trip) => trip.isStarted && !trip.isCompleted) || []
   const planningTrips = trips?.filter((trip) => !trip.isStarted && !trip.isCompleted) || []
@@ -46,7 +58,7 @@ export const ShoppingPage = () => {
   const handleCreateTrip = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!tripName.trim()) {
+    if (!validateAll()) {
       return
     }
 
@@ -112,7 +124,7 @@ export const ShoppingPage = () => {
       <div className="px-5">
       {/* New Trip Button */}
       <button
-        onClick={() => setShowCreateForm(!showCreateForm)}
+        onClick={() => { if (!showCreateForm) setFormKey((k) => k + 1); setShowCreateForm(!showCreateForm) }}
         className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-2"
       >
         <Plus className="w-5 h-5" />
@@ -120,7 +132,7 @@ export const ShoppingPage = () => {
       </button>
 
       {showCreateForm && (
-        <form onSubmit={handleCreateTrip} className="mt-3 mb-4 p-5 bg-surface rounded-2xl shadow-sm">
+        <form key={formKey} onSubmit={handleCreateTrip} className="mt-3 mb-4 p-5 bg-surface rounded-2xl shadow-sm">
           <div className="mb-3">
             <label htmlFor="tripName" className="block text-sm font-semibold text-navy-soft mb-1">
               Trip Name
@@ -130,11 +142,13 @@ export const ShoppingPage = () => {
               type="text"
               autoFocus
               value={tripName}
-              onChange={(e) => setTripName(e.target.value)}
+              onChange={(e) => { setTripName(e.target.value); handleChange('name', e.target.value) }}
+              onBlur={() => handleBlur('name')}
               placeholder="e.g., Weekly Groceries"
-              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+              className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${errors.name ? 'border-coral border-2' : 'border-navy/10'}`}
               disabled={createMutation.isPending}
             />
+            {errors.name && <p className="mt-1 text-sm text-coral">{errors.name}</p>}
           </div>
 
           <div className="mb-4">
@@ -162,7 +176,7 @@ export const ShoppingPage = () => {
             </button>
             <button
               type="submit"
-              disabled={createMutation.isPending || !tripName.trim()}
+              disabled={createMutation.isPending || !isValid}
               className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
             >
               {createMutation.isPending ? 'Creating...' : 'Create Trip'}

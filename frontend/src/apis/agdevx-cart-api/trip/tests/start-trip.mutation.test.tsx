@@ -57,7 +57,7 @@ describe('useStartTripMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockTrip)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trip/trip1/start', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/trip/trip1/start', {
       method: 'POST',
     })
   })

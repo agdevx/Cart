@@ -12,17 +12,17 @@ namespace AGDevX.Cart.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class TripController(ITripService tripService) : ControllerBase
 {
     //== Get all trips for the authenticated user
     [HttpGet("user")]
-    public async Task<IActionResult> GetUserTrips()
+    public async Task<IActionResult> GetUserTrips(CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var trips = await tripService.GetUserTrips(userId);
+            var trips = await tripService.GetUserTrips(userId, cancellationToken);
             return Ok(trips);
         }
         catch (UnauthorizedAccessException ex)
@@ -33,11 +33,11 @@ public class TripController(ITripService tripService) : ControllerBase
 
     //== Get all trips for a specific household
     [HttpGet("household/{householdId}")]
-    public async Task<IActionResult> GetHouseholdTrips(Guid householdId)
+    public async Task<IActionResult> GetHouseholdTrips(Guid householdId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var trips = await tripService.GetHouseholdTrips(householdId);
+            var trips = await tripService.GetHouseholdTrips(householdId, cancellationToken);
             return Ok(trips);
         }
         catch (UnauthorizedAccessException ex)
@@ -48,11 +48,11 @@ public class TripController(ITripService tripService) : ControllerBase
 
     //== Get a specific trip by ID
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(Guid id)
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
-            var trip = await tripService.GetById(id);
+            var trip = await tripService.GetById(id, cancellationToken);
 
             if (trip == null)
             {
@@ -69,12 +69,12 @@ public class TripController(ITripService tripService) : ControllerBase
 
     //== Create a new trip
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateTripRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateTripRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var trip = await tripService.CreateTrip(request.Name, userId, request.HouseholdId);
+            var trip = await tripService.CreateTrip(request.Name, userId, request.HouseholdId, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = trip.Id }, trip);
         }
         catch (UnauthorizedAccessException ex)
@@ -85,12 +85,12 @@ public class TripController(ITripService tripService) : ControllerBase
 
     //== Update an existing trip
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTripRequest request)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTripRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await tripService.UpdateTrip(id, request.Name, request.HouseholdId, userId);
+            await tripService.UpdateTrip(id, request.Name, request.HouseholdId, userId, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -105,12 +105,12 @@ public class TripController(ITripService tripService) : ControllerBase
 
     //== Delete a trip
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await tripService.DeleteTrip(id, userId);
+            await tripService.DeleteTrip(id, userId, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -125,12 +125,12 @@ public class TripController(ITripService tripService) : ControllerBase
 
     //== Start a trip (move from planning to active)
     [HttpPost("{id}/start")]
-    public async Task<IActionResult> Start(Guid id)
+    public async Task<IActionResult> Start(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var trip = await tripService.StartTrip(id, userId);
+            var trip = await tripService.StartTrip(id, userId, cancellationToken);
             return Ok(trip);
         }
         catch (UnauthorizedAccessException ex)
@@ -145,12 +145,12 @@ public class TripController(ITripService tripService) : ControllerBase
 
     //== Mark a trip as completed
     [HttpPost("{id}/complete")]
-    public async Task<IActionResult> Complete(Guid id)
+    public async Task<IActionResult> Complete(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var trip = await tripService.CompleteTrip(id, userId);
+            var trip = await tripService.CompleteTrip(id, userId, cancellationToken);
             return Ok(trip);
         }
         catch (UnauthorizedAccessException ex)
@@ -165,12 +165,12 @@ public class TripController(ITripService tripService) : ControllerBase
 
     //== Reopen a completed trip
     [HttpPost("{id}/reopen")]
-    public async Task<IActionResult> Reopen(Guid id)
+    public async Task<IActionResult> Reopen(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var trip = await tripService.ReopenTrip(id, userId);
+            var trip = await tripService.ReopenTrip(id, userId, cancellationToken);
             return Ok(trip);
         }
         catch (UnauthorizedAccessException ex)
@@ -185,12 +185,12 @@ public class TripController(ITripService tripService) : ControllerBase
 
     //== Add a collaborator to a trip
     [HttpPost("{id}/collaborators")]
-    public async Task<IActionResult> AddCollaborator(Guid id, [FromBody] AddCollaboratorRequest request)
+    public async Task<IActionResult> AddCollaborator(Guid id, [FromBody] AddCollaboratorRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await tripService.AddCollaborator(id, userId, request.UserId!.Value);
+            await tripService.AddCollaborator(id, userId, request.UserId!.Value, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -205,12 +205,12 @@ public class TripController(ITripService tripService) : ControllerBase
 
     //== Remove a collaborator from a trip
     [HttpDelete("{id}/collaborators/{collaboratorUserId}")]
-    public async Task<IActionResult> RemoveCollaborator(Guid id, Guid collaboratorUserId)
+    public async Task<IActionResult> RemoveCollaborator(Guid id, Guid collaboratorUserId, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await tripService.RemoveCollaborator(id, userId, collaboratorUserId);
+            await tripService.RemoveCollaborator(id, userId, collaboratorUserId, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

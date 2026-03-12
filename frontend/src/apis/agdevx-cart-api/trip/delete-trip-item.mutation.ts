@@ -17,7 +17,7 @@ export const useDeleteTripItemMutation = () => {
     mutationKey: ['trip-items', 'delete'],
     mutationFn: async (request: DeleteTripItemRequest): Promise<void> => {
       const { tripItemId } = request
-      await apiFetch(`/api/tripitem/${tripItemId}`, {
+      await apiFetch(`/api/v1/tripitem/${tripItemId}`, {
         method: 'DELETE',
       })
     },

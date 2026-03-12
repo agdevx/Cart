@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom'
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
@@ -369,6 +370,28 @@ describe('PantryStoresView', () => {
 
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+  })
+
+  it('shows store name error on blur when empty and clears when filled', async () => {
+    setupMocks()
+    const user = userEvent.setup()
+
+    renderView()
+
+    //== Open the create form
+    await user.click(screen.getByText('Add Store'))
+
+    //== Blur the store name input without typing anything
+    const input = screen.getByLabelText('Store Name')
+    await user.click(input)
+    await user.tab()
+
+    //== Error message should appear
+    expect(screen.getByText('Store name is required')).toBeInTheDocument()
+
+    //== Type a name to clear the error
+    await user.type(input, 'Whole Foods')
+    expect(screen.queryByText('Store name is required')).not.toBeInTheDocument()
   })
 
   it('cancels delete when Cancel is clicked', () => {
