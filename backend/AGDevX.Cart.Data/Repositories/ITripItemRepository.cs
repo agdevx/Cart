@@ -6,11 +6,11 @@ namespace AGDevX.Cart.Data.Repositories;
 
 public interface ITripItemRepository
 {
-    Task<TripItem?> GetById(Guid id);
-    Task<IEnumerable<TripItem>> GetTripItems(Guid tripId);
-    Task<TripItem> Create(TripItem tripItem);
-    Task<TripItem> Update(TripItem tripItem);
-    Task Delete(Guid id);
-    Task UpdateItemNameByInventoryItemId(Guid inventoryItemId, string itemName);
-    Task UpdateStoreNameByStoreId(Guid storeId, string storeName);
+    Task<TripItem?> GetById(Guid id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TripItem>> GetTripItems(Guid tripId, CancellationToken cancellationToken = default);
+    Task<TripItem> Create(TripItem tripItem, CancellationToken cancellationToken = default);
+    Task<TripItem> Update(TripItem tripItem, CancellationToken cancellationToken = default);
+    Task Delete(Guid id, CancellationToken cancellationToken = default);
+    Task UpdateItemNameByInventoryItemId(Guid inventoryItemId, string itemName, CancellationToken cancellationToken = default);
+    Task UpdateStoreNameByStoreId(Guid storeId, string storeName, CancellationToken cancellationToken = default);
 }

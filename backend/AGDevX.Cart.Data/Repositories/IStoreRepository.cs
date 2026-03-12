@@ -7,11 +7,11 @@ namespace AGDevX.Cart.Data.Repositories;
 
 public interface IStoreRepository
 {
-    Task<Store?> GetById(Guid id);
-    Task<IEnumerable<Store>> GetHouseholdStores(Guid householdId);
-    Task<IEnumerable<Store>> GetPersonalStores(Guid userId);
-    Task<bool> ExistsWithName(string name, Guid? userId, Guid? householdId, Guid? excludeStoreId);
-    Task<Store> Create(Store store);
-    Task<Store> Update(Store store);
-    Task Delete(Guid id);
+    Task<Store?> GetById(Guid id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Store>> GetHouseholdStores(Guid householdId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Store>> GetPersonalStores(Guid userId, CancellationToken cancellationToken = default);
+    Task<bool> ExistsWithName(string name, Guid? userId, Guid? householdId, Guid? excludeStoreId, CancellationToken cancellationToken = default);
+    Task<Store> Create(Store store, CancellationToken cancellationToken = default);
+    Task<Store> Update(Store store, CancellationToken cancellationToken = default);
+    Task Delete(Guid id, CancellationToken cancellationToken = default);
 }

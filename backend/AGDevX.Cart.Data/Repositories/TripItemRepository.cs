@@ -7,58 +7,58 @@ namespace AGDevX.Cart.Data.Repositories;
 
 public class TripItemRepository(CartDbContext context) : ITripItemRepository
 {
-    public async Task<TripItem?> GetById(Guid id)
+    public async Task<TripItem?> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         return await context.TripItems.Include(ti => ti.InventoryItem)
                                       .Include(ti => ti.Store)
-                                      .FirstOrDefaultAsync(ti => ti.Id == id);
+                                      .FirstOrDefaultAsync(ti => ti.Id == id, cancellationToken);
     }
 
-    public async Task<IEnumerable<TripItem>> GetTripItems(Guid tripId)
+    public async Task<IEnumerable<TripItem>> GetTripItems(Guid tripId, CancellationToken cancellationToken = default)
     {
         return await context.TripItems.Include(ti => ti.InventoryItem)
                                       .Include(ti => ti.Store)
                                       .Where(ti => ti.TripId == tripId)
-                                      .ToListAsync();
+                                      .ToListAsync(cancellationToken);
     }
 
-    public async Task<TripItem> Create(TripItem tripItem)
+    public async Task<TripItem> Create(TripItem tripItem, CancellationToken cancellationToken = default)
     {
         context.TripItems.Add(tripItem);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
         return tripItem;
     }
 
-    public async Task<TripItem> Update(TripItem tripItem)
+    public async Task<TripItem> Update(TripItem tripItem, CancellationToken cancellationToken = default)
     {
         context.TripItems.Update(tripItem);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
         return tripItem;
     }
 
-    public async Task Delete(Guid id)
+    public async Task Delete(Guid id, CancellationToken cancellationToken = default)
     {
-        var tripItem = await context.TripItems.FindAsync(id);
+        var tripItem = await context.TripItems.FindAsync(new object[] { id }, cancellationToken);
         if (tripItem != null)
         {
             context.TripItems.Remove(tripItem);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
         }
     }
 
     //== Bulk update denormalized ItemName when inventory item is renamed
-    public async Task UpdateItemNameByInventoryItemId(Guid inventoryItemId, string itemName)
+    public async Task UpdateItemNameByInventoryItemId(Guid inventoryItemId, string itemName, CancellationToken cancellationToken = default)
     {
         await context.TripItems
             .Where(ti => ti.InventoryItemId == inventoryItemId)
-            .ExecuteUpdateAsync(s => s.SetProperty(ti => ti.ItemName, itemName));
+            .ExecuteUpdateAsync(s => s.SetProperty(ti => ti.ItemName, itemName), cancellationToken);
     }
 
     //== Bulk update denormalized StoreName when store is renamed
-    public async Task UpdateStoreNameByStoreId(Guid storeId, string storeName)
+    public async Task UpdateStoreNameByStoreId(Guid storeId, string storeName, CancellationToken cancellationToken = default)
     {
         await context.TripItems
             .Where(ti => ti.StoreId == storeId)
-            .ExecuteUpdateAsync(s => s.SetProperty(ti => ti.StoreName, storeName));
+            .ExecuteUpdateAsync(s => s.SetProperty(ti => ti.StoreName, storeName), cancellationToken);
     }
 }
