@@ -6,8 +6,8 @@ namespace AGDevX.Cart.Auth;
 
 public interface IAuthService
 {
-    Task<AuthResponse> Register(RegisterRequest request);
-    Task<AuthResponse> Login(LoginRequest request);
-    Task<AuthResponse> UpdateProfile(Guid userId, UpdateProfileRequest request);
-    Task ChangePassword(Guid userId, ChangePasswordRequest request);
+    Task<AuthResponse> Register(RegisterRequest request, CancellationToken cancellationToken = default);
+    Task<AuthResponse> Login(LoginRequest request, CancellationToken cancellationToken = default);
+    Task<AuthResponse> UpdateProfile(Guid userId, UpdateProfileRequest request, CancellationToken cancellationToken = default);
+    Task ChangePassword(Guid userId, ChangePasswordRequest request, CancellationToken cancellationToken = default);
 }

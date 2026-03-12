@@ -10,10 +10,10 @@ namespace AGDevX.Cart.Auth;
 
 public class AuthService(CartDbContext context, ISecurityAuditLogger securityAuditLogger) : IAuthService
 {
-    public async Task<AuthResponse> Register(RegisterRequest request)
+    public async Task<AuthResponse> Register(RegisterRequest request, CancellationToken cancellationToken = default)
     {
         //== Check for duplicate email
-        var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
 
         if (existingUser != null)
         {
@@ -32,7 +32,7 @@ public class AuthService(CartDbContext context, ISecurityAuditLogger securityAud
         };
 
         context.Users.Add(user);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
 
         securityAuditLogger.LogRegistration(request.Email);
 
@@ -44,10 +44,10 @@ public class AuthService(CartDbContext context, ISecurityAuditLogger securityAud
         };
     }
 
-    public async Task<AuthResponse> Login(LoginRequest request)
+    public async Task<AuthResponse> Login(LoginRequest request, CancellationToken cancellationToken = default)
     {
         //== Find user by email
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
@@ -63,9 +63,9 @@ public class AuthService(CartDbContext context, ISecurityAuditLogger securityAud
         };
     }
 
-    public async Task<AuthResponse> UpdateProfile(Guid userId, UpdateProfileRequest request)
+    public async Task<AuthResponse> UpdateProfile(Guid userId, UpdateProfileRequest request, CancellationToken cancellationToken = default)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId)
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken)
                         ?? throw new UnauthorizedAccessException("User not found.");
 
         //== Validate name
@@ -101,7 +101,7 @@ public class AuthService(CartDbContext context, ISecurityAuditLogger securityAud
             }
 
             //== Check for duplicate email
-            var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email && u.Id != userId);
+            var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email && u.Id != userId, cancellationToken);
             if (existingUser != null)
             {
                 throw new InvalidOperationException("A user with this email already exists.");
@@ -113,7 +113,7 @@ public class AuthService(CartDbContext context, ISecurityAuditLogger securityAud
         }
 
         user.Name = request.Name.Trim();
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
 
         return new AuthResponse
         {
@@ -123,9 +123,9 @@ public class AuthService(CartDbContext context, ISecurityAuditLogger securityAud
         };
     }
 
-    public async Task ChangePassword(Guid userId, ChangePasswordRequest request)
+    public async Task ChangePassword(Guid userId, ChangePasswordRequest request, CancellationToken cancellationToken = default)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId)
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken)
                         ?? throw new UnauthorizedAccessException("User not found.");
 
         //== Verify current password
@@ -152,7 +152,7 @@ public class AuthService(CartDbContext context, ISecurityAuditLogger securityAud
 
         //== Hash and save new password
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
 
         securityAuditLogger.LogPasswordChange(userId);
     }

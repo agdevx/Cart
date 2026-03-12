@@ -8,12 +8,12 @@ namespace AGDevX.Cart.Services;
 
 public class InventoryService(IInventoryRepository inventoryRepository, IHouseholdRepository householdRepository, ITripItemRepository tripItemRepository) : IInventoryService
 {
-    public async Task<InventoryItem> CreateInventoryItem(InventoryItem inventoryItem, Guid userId)
+    public async Task<InventoryItem> CreateInventoryItem(InventoryItem inventoryItem, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Authorization: validate household membership OR user ownership
         if (inventoryItem.HouseholdId.HasValue)
         {
-            var household = await householdRepository.GetById(inventoryItem.HouseholdId.Value)
+            var household = await householdRepository.GetById(inventoryItem.HouseholdId.Value, cancellationToken)
                                 ?? throw new UnauthorizedAccessException("Household not found");
 
             if (!household.Members.Any(m => m.UserId == userId))
@@ -27,22 +27,22 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
             inventoryItem.OwnerUserId = userId;
         }
 
-        return await inventoryRepository.Create(inventoryItem);
+        return await inventoryRepository.Create(inventoryItem, cancellationToken);
     }
 
-    public async Task<IEnumerable<InventoryItem>> GetAllUserInventory(Guid userId)
+    public async Task<IEnumerable<InventoryItem>> GetAllUserInventory(Guid userId, CancellationToken cancellationToken = default)
     {
         //== Get all households the user is a member of
-        var userHouseholds = await householdRepository.GetUserHouseholds(userId);
+        var userHouseholds = await householdRepository.GetUserHouseholds(userId, cancellationToken);
 
         //== Get personal items
-        var personalItems = await inventoryRepository.GetPersonalItems(userId);
+        var personalItems = await inventoryRepository.GetPersonalItems(userId, cancellationToken);
 
         //== Get items from all user's households
         var householdItems = new List<InventoryItem>();
         foreach (var household in userHouseholds)
         {
-            var items = await inventoryRepository.GetHouseholdItems(household.Id);
+            var items = await inventoryRepository.GetHouseholdItems(household.Id, cancellationToken);
             householdItems.AddRange(items);
         }
 
@@ -50,10 +50,10 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
         return personalItems.Concat(householdItems);
     }
 
-    public async Task<IEnumerable<InventoryItem>> GetHouseholdInventory(Guid householdId, Guid userId)
+    public async Task<IEnumerable<InventoryItem>> GetHouseholdInventory(Guid householdId, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Authorization: verify user is household member
-        var household = await householdRepository.GetById(householdId)
+        var household = await householdRepository.GetById(householdId, cancellationToken)
                             ?? throw new UnauthorizedAccessException("Household not found");
 
         if (!household.Members.Any(m => m.UserId == userId))
@@ -61,19 +61,19 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
             throw new UnauthorizedAccessException("User is not a member of the household");
         }
 
-        return await inventoryRepository.GetHouseholdItems(householdId);
+        return await inventoryRepository.GetHouseholdItems(householdId, cancellationToken);
     }
 
-    public async Task<IEnumerable<InventoryItem>> GetPersonalInventory(Guid userId)
+    public async Task<IEnumerable<InventoryItem>> GetPersonalInventory(Guid userId, CancellationToken cancellationToken = default)
     {
         //== No authorization needed: user always has access to their own items
-        return await inventoryRepository.GetPersonalItems(userId);
+        return await inventoryRepository.GetPersonalItems(userId, cancellationToken);
     }
 
-    public async Task<IEnumerable<InventoryItem>> GetMergedInventory(Guid householdId, Guid userId)
+    public async Task<IEnumerable<InventoryItem>> GetMergedInventory(Guid householdId, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Authorization: verify user is household member
-        var household = await householdRepository.GetById(householdId)
+        var household = await householdRepository.GetById(householdId, cancellationToken)
                             ?? throw new UnauthorizedAccessException("Household not found");
 
         if (!household.Members.Any(m => m.UserId == userId))
@@ -81,12 +81,12 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
             throw new UnauthorizedAccessException("User is not a member of the household");
         }
 
-        return await inventoryRepository.GetMergedInventory(householdId, userId);
+        return await inventoryRepository.GetMergedInventory(householdId, userId, cancellationToken);
     }
 
-    public async Task<InventoryItem?> GetById(Guid id, Guid userId)
+    public async Task<InventoryItem?> GetById(Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
-        var inventoryItem = await inventoryRepository.GetById(id);
+        var inventoryItem = await inventoryRepository.GetById(id, cancellationToken);
         if (inventoryItem == null)
         {
             return null;
@@ -95,7 +95,7 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
         //== Authorization: check household membership OR personal ownership
         if (inventoryItem.HouseholdId.HasValue)
         {
-            var household = await householdRepository.GetById(inventoryItem.HouseholdId.Value);
+            var household = await householdRepository.GetById(inventoryItem.HouseholdId.Value, cancellationToken);
             if (household == null || !household.Members.Any(m => m.UserId == userId))
             {
                 throw new UnauthorizedAccessException("User is not authorized to access this inventory item");
@@ -109,17 +109,17 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
         return inventoryItem;
     }
 
-    public async Task<InventoryItem> UpdateInventoryItem(InventoryItem inventoryItem, Guid userId)
+    public async Task<InventoryItem> UpdateInventoryItem(InventoryItem inventoryItem, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Authorization: verify access before update
-        var existing = await GetById(inventoryItem.Id, userId)
+        var existing = await GetById(inventoryItem.Id, userId, cancellationToken)
                             ?? throw new UnauthorizedAccessException("Inventory item not found or user not authorized");
 
         //== Handle scope change
         if (inventoryItem.HouseholdId.HasValue)
         {
             //== Moving to household: verify membership
-            var household = await householdRepository.GetById(inventoryItem.HouseholdId.Value)
+            var household = await householdRepository.GetById(inventoryItem.HouseholdId.Value, cancellationToken)
                                 ?? throw new UnauthorizedAccessException("Household not found");
 
             if (!household.Members.Any(m => m.UserId == userId))
@@ -137,20 +137,20 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
             inventoryItem.HouseholdId = null;
         }
 
-        var result = await inventoryRepository.Update(inventoryItem);
+        var result = await inventoryRepository.Update(inventoryItem, cancellationToken);
 
         //== Live mirror: update denormalized ItemName on all TripItems
-        await tripItemRepository.UpdateItemNameByInventoryItemId(inventoryItem.Id, inventoryItem.Name);
+        await tripItemRepository.UpdateItemNameByInventoryItemId(inventoryItem.Id, inventoryItem.Name, cancellationToken);
 
         return result;
     }
 
-    public async Task DeleteInventoryItem(Guid id, Guid userId)
+    public async Task DeleteInventoryItem(Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Authorization: verify access before delete
-        var existing = await GetById(id, userId)
+        var existing = await GetById(id, userId, cancellationToken)
                             ?? throw new UnauthorizedAccessException("Inventory item not found or user not authorized");
 
-        await inventoryRepository.Delete(id);
+        await inventoryRepository.Delete(id, cancellationToken);
     }
 }

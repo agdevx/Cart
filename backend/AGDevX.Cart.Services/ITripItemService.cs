@@ -6,10 +6,10 @@ namespace AGDevX.Cart.Services;
 
 public interface ITripItemService
 {
-    Task<TripItem> AddTripItem(Guid tripId, Guid inventoryItemId, int quantity, Guid userId, string? notes = null, Guid? storeId = null);
-    Task<IEnumerable<TripItem>> GetTripItems(Guid tripId, Guid userId);
-    Task<TripItem?> GetById(Guid id, Guid userId);
-    Task<TripItem> UpdateTripItem(Guid id, int quantity, Guid userId, string? notes = null, Guid? storeId = null);
-    Task DeleteTripItem(Guid id, Guid userId);
-    Task<TripItem> CheckItem(Guid id, bool isChecked, Guid userId);
+    Task<TripItem> AddTripItem(Guid tripId, Guid inventoryItemId, int quantity, Guid userId, string? notes = null, Guid? storeId = null, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TripItem>> GetTripItems(Guid tripId, Guid userId, CancellationToken cancellationToken = default);
+    Task<TripItem?> GetById(Guid id, Guid userId, CancellationToken cancellationToken = default);
+    Task<TripItem> UpdateTripItem(Guid id, int quantity, Guid userId, string? notes = null, Guid? storeId = null, CancellationToken cancellationToken = default);
+    Task DeleteTripItem(Guid id, Guid userId, CancellationToken cancellationToken = default);
+    Task<TripItem> CheckItem(Guid id, bool isChecked, Guid userId, CancellationToken cancellationToken = default);
 }

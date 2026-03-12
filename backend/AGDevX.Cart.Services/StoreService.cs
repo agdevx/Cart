@@ -8,12 +8,12 @@ namespace AGDevX.Cart.Services;
 
 public class StoreService(IStoreRepository storeRepository, IHouseholdRepository householdRepository, ITripItemRepository tripItemRepository) : IStoreService
 {
-    public async Task<Store> CreateStore(Store store, Guid userId)
+    public async Task<Store> CreateStore(Store store, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Household-scoped store: verify user is a member
         if (store.HouseholdId.HasValue)
         {
-            var household = await householdRepository.GetById(store.HouseholdId.Value)
+            var household = await householdRepository.GetById(store.HouseholdId.Value, cancellationToken)
                                 ?? throw new UnauthorizedAccessException("Household not found");
 
             if (!household.Members.Any(m => m.UserId == userId))
@@ -29,36 +29,36 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
 
         //== Check for duplicate name in the destination scope
         var duplicateExists = await storeRepository.ExistsWithName(
-            store.Name, store.UserId, store.HouseholdId, excludeStoreId: null);
+            store.Name, store.UserId, store.HouseholdId, excludeStoreId: null, cancellationToken);
 
         if (duplicateExists)
         {
             throw new InvalidOperationException($"A store named \"{store.Name}\" already exists in this scope");
         }
 
-        return await storeRepository.Create(store);
+        return await storeRepository.Create(store, cancellationToken);
     }
 
-    public async Task<IEnumerable<Store>> GetHouseholdStores(Guid householdId, Guid userId)
+    public async Task<IEnumerable<Store>> GetHouseholdStores(Guid householdId, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Verify user is a member of the household
-        var household = await householdRepository.GetById(householdId);
+        var household = await householdRepository.GetById(householdId, cancellationToken);
         if (household == null || !household.Members.Any(m => m.UserId == userId))
         {
             throw new UnauthorizedAccessException("User is not a member of this household");
         }
 
-        return await storeRepository.GetHouseholdStores(householdId);
+        return await storeRepository.GetHouseholdStores(householdId, cancellationToken);
     }
 
-    public async Task<IEnumerable<Store>> GetPersonalStores(Guid userId)
+    public async Task<IEnumerable<Store>> GetPersonalStores(Guid userId, CancellationToken cancellationToken = default)
     {
-        return await storeRepository.GetPersonalStores(userId);
+        return await storeRepository.GetPersonalStores(userId, cancellationToken);
     }
 
-    public async Task<Store?> GetById(Guid id, Guid userId)
+    public async Task<Store?> GetById(Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
-        var store = await storeRepository.GetById(id);
+        var store = await storeRepository.GetById(id, cancellationToken);
         if (store == null)
         {
             return null;
@@ -67,7 +67,7 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
         //== Household store: verify user is a member
         if (store.HouseholdId.HasValue)
         {
-            var household = await householdRepository.GetById(store.HouseholdId.Value);
+            var household = await householdRepository.GetById(store.HouseholdId.Value, cancellationToken);
             if (household == null || !household.Members.Any(m => m.UserId == userId))
             {
                 throw new UnauthorizedAccessException("User is not a member of this household");
@@ -82,10 +82,10 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
         return store;
     }
 
-    public async Task<Store> UpdateStore(Guid storeId, string name, Guid? householdId, Guid userId)
+    public async Task<Store> UpdateStore(Guid storeId, string name, Guid? householdId, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Verify access before updating
-        var existingStore = await GetById(storeId, userId)
+        var existingStore = await GetById(storeId, userId, cancellationToken)
                                 ?? throw new UnauthorizedAccessException("Store not found or access denied");
 
         //== Update name
@@ -95,7 +95,7 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
         if (householdId.HasValue)
         {
             //== Moving to household: verify membership
-            var household = await householdRepository.GetById(householdId.Value)
+            var household = await householdRepository.GetById(householdId.Value, cancellationToken)
                                 ?? throw new UnauthorizedAccessException("Household not found");
 
             if (!household.Members.Any(m => m.UserId == userId))
@@ -115,27 +115,27 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
 
         //== Check for duplicate name in the destination scope
         var duplicateExists = await storeRepository.ExistsWithName(
-            name, existingStore.UserId, existingStore.HouseholdId, excludeStoreId: storeId);
+            name, existingStore.UserId, existingStore.HouseholdId, excludeStoreId: storeId, cancellationToken);
 
         if (duplicateExists)
         {
             throw new InvalidOperationException($"A store named \"{name}\" already exists in this scope");
         }
 
-        var result = await storeRepository.Update(existingStore);
+        var result = await storeRepository.Update(existingStore, cancellationToken);
 
         //== Live mirror: update denormalized StoreName on all TripItems
-        await tripItemRepository.UpdateStoreNameByStoreId(storeId, name);
+        await tripItemRepository.UpdateStoreNameByStoreId(storeId, name, cancellationToken);
 
         return result;
     }
 
-    public async Task DeleteStore(Guid id, Guid userId)
+    public async Task DeleteStore(Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Verify access before deleting
-        var store = await GetById(id, userId)
+        var store = await GetById(id, userId, cancellationToken)
                         ?? throw new UnauthorizedAccessException("Store not found or access denied");
 
-        await storeRepository.Delete(id);
+        await storeRepository.Delete(id, cancellationToken);
     }
 }
