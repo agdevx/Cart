@@ -1,7 +1,8 @@
 // ABOUTME: Main app component with routing
 // ABOUTME: Configures routes and navigation structure
 
-import { BrowserRouter, Navigate,Route, Routes } from 'react-router-dom'
+import { ErrorBoundary } from 'react-error-boundary'
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
@@ -13,6 +14,7 @@ import { BottomNav } from '@/features/bottom-nav/bottom-nav'
 import { PwaInstallPrompt } from '@/features/pwa-install-prompt/pwa-install-prompt'
 import { ActiveTripPage } from '@/pages/active-trip-page'
 import { AddTripItemsPage } from '@/pages/add-trip-items-page'
+import { ErrorFallback } from '@/pages/components/error-fallback'
 import { CreateHouseholdPage } from '@/pages/create-household-page'
 import { HouseholdDetailPage } from '@/pages/household-detail-page'
 import { HouseholdPage } from '@/pages/household-page'
@@ -24,6 +26,19 @@ import { SettingsPage } from '@/pages/settings-page'
 import { ShoppingPage } from '@/pages/shopping-page'
 import { TripDetailPage } from '@/pages/trip-detail-page'
 import { ROUTES } from '@/routes'
+
+function ErrorBoundaryWithReset({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation()
+  return (
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onError={(error) => console.error('Uncaught render error:', error)}
+      resetKeys={[pathname]}
+    >
+      {children}
+    </ErrorBoundary>
+  )
+}
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth()
@@ -65,7 +80,9 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <BrowserRouter>
-            <AppRoutes />
+            <ErrorBoundaryWithReset>
+              <AppRoutes />
+            </ErrorBoundaryWithReset>
           </BrowserRouter>
         </AuthProvider>
       </QueryClientProvider>
