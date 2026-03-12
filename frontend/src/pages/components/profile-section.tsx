@@ -1,11 +1,13 @@
 // ABOUTME: Profile section component for the settings page
 // ABOUTME: Displays user name and email in view mode, with inline editing and conditional password field
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import type { UpdateProfileResponse } from '@/apis/agdevx-cart-api/auth/update-profile.mutation'
 import { useUpdateProfileMutation } from '@/apis/agdevx-cart-api/auth/update-profile.mutation'
 import type { User } from '@/apis/agdevx-cart-api/models/user'
+import { useFieldValidation } from '@/hooks/use-field-validation'
+import { isEmail, isRequired, maxLength } from '@/utils/validation-rules'
 
 interface ProfileSectionProps {
   user: User
@@ -19,8 +21,7 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
   const [name, setName] = useState(user.name ?? '')
   const [email, setEmail] = useState(user.email ?? '')
   const [currentPassword, setCurrentPassword] = useState('')
-  const [emailError, setEmailError] = useState('')
-  const [passwordError, setPasswordError] = useState('')
+  const [formKey, setFormKey] = useState(0)
 
   const updateProfileMutation = useUpdateProfileMutation()
 
@@ -31,26 +32,36 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
     setName(user.name ?? '')
     setEmail(user.email ?? '')
     setCurrentPassword('')
-    setEmailError('')
-    setPasswordError('')
+    setFormKey((k) => k + 1)
   }
   if (!isEditing && prevIsEditing) {
     setPrevIsEditing(false)
   }
 
   const emailChanged = email.toLowerCase() !== (user.email ?? '').toLowerCase()
-  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  const isNameValid = name.trim().length > 0
-  const isFormValid = isNameValid && isEmailValid && (!emailChanged || currentPassword.length > 0)
 
-  const inputClass = (hasError: boolean) =>
-    `w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${
-      hasError ? 'border-coral' : 'border-navy/10'
-    }`
+  const schema = useMemo(() => ({
+    name: [isRequired('Name'), maxLength(64)],
+    email: [isRequired('Email'), isEmail(), maxLength(254)],
+    ...(emailChanged ? { currentPassword: [isRequired('Password')] } : {}),
+  }), [emailChanged])
+
+  const values = useMemo(
+    () => ({ name, email, ...(emailChanged ? { currentPassword } : {}) }),
+    [name, email, emailChanged, currentPassword]
+  )
+
+  const { errors, touched, handleBlur, handleChange, validateAll, setFieldError, isValid } = useFieldValidation(schema, values)
+
+  const borderClass = (field: string) =>
+    touched[field] && !errors[field]
+      ? 'border-teal border-2'
+      : errors[field]
+        ? 'border-coral border-2'
+        : 'border-navy/10'
 
   const handleSave = async () => {
-    setEmailError('')
-    setPasswordError('')
+    if (!validateAll()) return
 
     try {
       const response = await updateProfileMutation.mutateAsync({
@@ -62,9 +73,9 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
       if (errorMessage.includes('already exists')) {
-        setEmailError('This email is already taken')
+        setFieldError('email', 'This email is already taken')
       } else if (errorMessage.includes('Incorrect password')) {
-        setPasswordError('Incorrect password')
+        setFieldError('currentPassword', 'Incorrect password')
       }
     }
   }
@@ -95,34 +106,34 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wider">Profile</span>
       </div>
-      <div className="rounded-xl bg-surface p-4 space-y-3">
+      <div key={formKey} className="rounded-xl bg-surface p-4 space-y-3">
         <div>
-          <label htmlFor="profile-name" className="block text-xs text-text-tertiary mb-1">Name</label>
+          <label htmlFor="profile-name" className={`block text-xs mb-1 ${errors.name ? 'text-coral' : 'text-text-tertiary'}`}>Name</label>
           <input
             id="profile-name"
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => { setName(e.target.value); handleChange('name', e.target.value) }}
+            onBlur={() => handleBlur('name')}
             maxLength={64}
-            className={inputClass(false)}
+            className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('name')}`}
             autoComplete="name"
           />
+          {errors.name && <p className="mt-1 text-sm text-coral">{errors.name}</p>}
         </div>
         <div>
-          <label htmlFor="profile-email" className="block text-xs text-text-tertiary mb-1">Email</label>
+          <label htmlFor="profile-email" className={`block text-xs mb-1 ${errors.email ? 'text-coral' : 'text-text-tertiary'}`}>Email</label>
           <input
             id="profile-email"
             type="email"
             value={email}
-            onChange={(e) => {
-              setEmail(e.target.value)
-              setEmailError('')
-            }}
+            onChange={(e) => { setEmail(e.target.value); handleChange('email', e.target.value) }}
+            onBlur={() => handleBlur('email')}
             maxLength={254}
-            className={inputClass(!!emailError)}
+            className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('email')}`}
             autoComplete="email"
           />
-          {emailError && <p className="mt-1 text-sm text-coral">{emailError}</p>}
+          {errors.email && <p className="mt-1 text-sm text-coral">{errors.email}</p>}
         </div>
 
         {emailChanged && (
@@ -132,16 +143,14 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
               id="profile-current-password"
               type="password"
               value={currentPassword}
-              onChange={(e) => {
-                setCurrentPassword(e.target.value)
-                setPasswordError('')
-              }}
+              onChange={(e) => { setCurrentPassword(e.target.value); handleChange('currentPassword', e.target.value) }}
+              onBlur={() => handleBlur('currentPassword')}
               maxLength={128}
-              className={inputClass(!!passwordError)}
+              className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${errors.currentPassword ? 'border-coral border-2' : 'border-navy/10'}`}
               autoComplete="current-password"
             />
             <p className="mt-1 text-xs text-text-tertiary">Required to change your email</p>
-            {passwordError && <p className="mt-1 text-sm text-coral">{passwordError}</p>}
+            {errors.currentPassword && <p className="mt-1 text-sm text-coral">{errors.currentPassword}</p>}
           </div>
         )}
 
@@ -154,7 +163,7 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
           </button>
           <button
             onClick={handleSave}
-            disabled={!isFormValid || updateProfileMutation.isPending}
+            disabled={!isValid || updateProfileMutation.isPending}
             className="flex-1 py-2.5 bg-teal text-white rounded-xl font-display font-bold disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed"
           >
             {updateProfileMutation.isPending ? 'Saving...' : 'Save'}
