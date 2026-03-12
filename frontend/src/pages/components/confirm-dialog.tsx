@@ -62,7 +62,7 @@ export const ConfirmDialog = ({ title, message, confirmLabel, cancelLabel, onCon
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div ref={dialogRef} className="bg-surface rounded-2xl mx-4 max-w-sm w-full shadow-lg overflow-hidden">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="confirm-dialog-title" className="bg-surface rounded-2xl mx-4 max-w-sm w-full shadow-lg overflow-hidden">
         {holdDuration && (
           <div className="w-full h-1 bg-navy/10">
             <div
@@ -77,7 +77,7 @@ export const ConfirmDialog = ({ title, message, confirmLabel, cancelLabel, onCon
           </div>
         )}
         <div className="p-6">
-          <h3 className="font-display text-lg font-bold text-navy mb-2">{title}</h3>
+          <h3 id="confirm-dialog-title" className="font-display text-lg font-bold text-navy mb-2">{title}</h3>
           <p className="text-text-secondary mb-5">{message}</p>
           <div className="flex gap-3">
             <button

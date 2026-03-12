@@ -284,6 +284,13 @@ describe('ConfirmDialog', () => {
       expect(screen.getByRole('button', { name: 'Cancel' })).toHaveFocus()
     })
 
+    it('has correct ARIA attributes', () => {
+      render(<ConfirmDialog {...a11yProps} />)
+      const dialog = screen.getByRole('dialog')
+      expect(dialog).toHaveAttribute('aria-modal', 'true')
+      expect(dialog).toHaveAttribute('aria-labelledby', 'confirm-dialog-title')
+    })
+
     it('traps Tab focus between Cancel and Confirm buttons', async () => {
       const user = userEvent.setup()
       render(<ConfirmDialog {...a11yProps} />)
