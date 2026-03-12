@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom'
 
 import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
@@ -258,6 +259,28 @@ describe('ShoppingPage', () => {
     fireEvent.click(screen.getByText('Reopen'))
 
     expect(reopenMutateFn).toHaveBeenCalledWith('trip2')
+  })
+
+  it('shows trip name error on blur when empty and clears when filled', async () => {
+    setupMocks()
+    const user = userEvent.setup()
+
+    render(<ShoppingPage />, { wrapper })
+
+    //== Open the create form
+    await user.click(screen.getByText('Plan a new trip'))
+
+    //== Blur the trip name input without typing anything
+    const input = screen.getByPlaceholderText('e.g., Weekly Groceries')
+    await user.click(input)
+    await user.tab()
+
+    //== Error message should appear
+    expect(screen.getByText('Trip name is required')).toBeInTheDocument()
+
+    //== Type a name to clear the error
+    await user.type(input, 'Weekend Run')
+    expect(screen.queryByText('Trip name is required')).not.toBeInTheDocument()
   })
 
   it('navigates to the new trip after creation', async () => {

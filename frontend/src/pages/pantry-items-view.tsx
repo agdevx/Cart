@@ -15,7 +15,9 @@ import { useMergedInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-me
 import { usePersonalInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-personal-inventory.query'
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
+import { useFieldValidation } from '@/hooks/use-field-validation'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
+import { isRequired, maxLength } from '@/utils/validation-rules'
 
 import { ConfirmDialog } from './components/confirm-dialog'
 import { EmptyState } from './components/empty-state'
@@ -65,10 +67,18 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
   const [itemScope, setItemScope] = useState<string>('personal')
   const [itemDefaultStoreId, setItemDefaultStoreId] = useState<string | null>(null)
 
+  const createSchema = useMemo(() => ({
+    name: [isRequired('Item name'), maxLength(200)],
+  }), [])
+
+  const createValues = useMemo(() => ({ name: itemName }), [itemName])
+
+  const { errors: createErrors, handleBlur: handleCreateBlur, handleChange: handleCreateChange, validateAll: validateCreateAll, isValid: isCreateValid } = useFieldValidation(createSchema, createValues)
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!itemName.trim()) {
+    if (!validateCreateAll()) {
       return
     }
 
@@ -209,11 +219,13 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           type="text"
           autoFocus
           value={itemName}
-          onChange={(e) => setItemName(e.target.value)}
+          onChange={(e) => { setItemName(e.target.value); handleCreateChange('name', e.target.value) }}
+          onBlur={() => handleCreateBlur('name')}
           placeholder="e.g., Milk"
-          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+          className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${createErrors.name ? 'border-coral border-2' : 'border-navy/10'}`}
           disabled={createMutation.isPending}
         />
+        {createErrors.name && <p className="mt-1 text-sm text-coral">{createErrors.name}</p>}
       </div>
 
       <div className="mb-3">
@@ -277,7 +289,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
         </button>
         <button
           type="submit"
-          disabled={createMutation.isPending || !itemName.trim()}
+          disabled={createMutation.isPending || !isCreateValid}
           className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
         >
           {createMutation.isPending ? 'Creating...' : 'Create'}
