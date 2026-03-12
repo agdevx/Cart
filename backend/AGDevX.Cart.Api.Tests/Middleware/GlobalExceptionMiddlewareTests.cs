@@ -72,4 +72,50 @@ public class GlobalExceptionMiddlewareTests
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
     }
+
+    [Fact]
+    public async Task Returns408_WhenOperationCanceledByTimeout()
+    {
+        var logger = new Mock<ILogger<GlobalExceptionMiddleware>>();
+        var middleware = new GlobalExceptionMiddleware(
+            _ => throw new OperationCanceledException(),
+            logger.Object
+        );
+
+        var context = new DefaultHttpContext();
+        // RequestAborted is NOT canceled — this is a server timeout, not client disconnect
+        context.Response.Body = new MemoryStream();
+
+        await middleware.InvokeAsync(context);
+
+        context.Response.Body.Seek(0, SeekOrigin.Begin);
+        var body = await new StreamReader(context.Response.Body).ReadToEndAsync();
+
+        Assert.Equal(408, context.Response.StatusCode);
+        Assert.Contains("REQUEST_TIMEOUT", body);
+    }
+
+    [Fact]
+    public async Task ReturnsNoResponse_WhenClientDisconnects()
+    {
+        var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        var logger = new Mock<ILogger<GlobalExceptionMiddleware>>();
+        var middleware = new GlobalExceptionMiddleware(
+            _ => throw new OperationCanceledException(),
+            logger.Object
+        );
+
+        var context = new DefaultHttpContext();
+        context.RequestAborted = cts.Token;
+        context.Response.Body = new MemoryStream();
+
+        await middleware.InvokeAsync(context);
+
+        // Client disconnected — middleware should not try to write a response
+        context.Response.Body.Seek(0, SeekOrigin.Begin);
+        var body = await new StreamReader(context.Response.Body).ReadToEndAsync();
+        Assert.Empty(body);
+    }
 }
