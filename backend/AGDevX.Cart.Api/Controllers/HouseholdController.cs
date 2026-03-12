@@ -11,7 +11,7 @@ namespace AGDevX.Cart.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class HouseholdController(IHouseholdService householdService) : ControllerBase
 {
     //== Get all households for the authenticated user
@@ -109,7 +109,7 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
     }
 
     //== Join a household via invite code
-    [HttpPost("/api/households/join")]
+    [HttpPost("/api/v1/households/join")]
     public async Task<IActionResult> JoinHousehold([FromBody] JoinHouseholdRequest request, CancellationToken cancellationToken = default)
     {
         try

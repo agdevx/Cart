@@ -12,7 +12,7 @@ namespace AGDevX.Cart.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class StoreController(IStoreService storeService) : ControllerBase
 {
     //== Get all stores for a specific household

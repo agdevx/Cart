@@ -11,7 +11,7 @@ namespace AGDevX.Cart.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class TripItemController(ITripItemService tripItemService) : ControllerBase
 {
     //== Get all items for a specific trip

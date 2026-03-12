@@ -12,7 +12,7 @@ namespace AGDevX.Cart.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class InventoryController(IInventoryService inventoryService) : ControllerBase
 {
     //== Get all inventory items for the authenticated user (personal + all households)

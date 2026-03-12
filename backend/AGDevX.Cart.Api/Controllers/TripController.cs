@@ -12,7 +12,7 @@ namespace AGDevX.Cart.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class TripController(ITripService tripService) : ControllerBase
 {
     //== Get all trips for the authenticated user

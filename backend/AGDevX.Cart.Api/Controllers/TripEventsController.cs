@@ -16,7 +16,7 @@ namespace AGDevX.Cart.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/trips/{tripId}/events")]
+[Route("api/v1/trips/{tripId}/events")]
 public class TripEventsController(
     ITripEventService tripEventService,
     ITripRepository tripRepository,

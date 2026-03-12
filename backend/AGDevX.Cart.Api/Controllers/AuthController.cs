@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace AGDevX.Cart.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class AuthController(IAuthService authService) : ControllerBase
 {
     [EnableRateLimiting("auth")]
