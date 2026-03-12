@@ -9,7 +9,7 @@ test.describe('Authentication Integration', () => {
 
   test.beforeAll(async ({ request }) => {
     // Register a test user via API before running tests
-    await request.post('http://localhost:5000/api/auth/register', {
+    await request.post('http://localhost:5000/api/v1/auth/register', {
       data: {
         email,
         password,
