@@ -1,87 +1,45 @@
 // ABOUTME: Registration page component
 // ABOUTME: Handles user registration with validation and auto-login
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link,useNavigate } from 'react-router-dom';
 
 import { useRegisterMutation } from '@/apis/agdevx-cart-api/auth/register.mutation';
 import { ApiError } from '@/apis/api-error';
 import { useAuth } from '@/auth/use-auth';
+import { useFieldValidation } from '@/hooks/use-field-validation';
 import { ROUTES } from '@/routes';
+import { isEmail, isRequired, matchesField, maxLength, minLength, passwordStrength } from '@/utils/validation-rules';
 
 export const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
-  const [serverEmailError, setServerEmailError] = useState('');
-  const [touched, setTouched] = useState({
-    email: false,
-    password: false,
-    confirmPassword: false,
-    name: false,
-  });
 
   const navigate = useNavigate();
   const registerMutation = useRegisterMutation();
   const { setAuth } = useAuth();
 
-  // Password validation
+  const schema = useMemo(() => ({
+    name: [isRequired('Name'), maxLength(64)],
+    email: [isRequired('Email'), isEmail(), maxLength(254)],
+    password: [isRequired('Password'), minLength(8), maxLength(128), passwordStrength()],
+    confirmPassword: [isRequired('Confirm password'), matchesField('password', 'Passwords')],
+  }), []);
+
+  const values = useMemo(() => ({ name, email, password, confirmPassword }), [name, email, password, confirmPassword]);
+
+  const { errors, touched, handleBlur, handleChange, validateAll, setFieldError, isValid } = useFieldValidation(schema, values);
+
+  // Password requirements checklist — reads from password state directly
   const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
-  const isPasswordValid = hasMinLength && hasUppercase && hasNumber;
-
-  // Email validation
-  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  // Confirm password validation
-  const passwordsMatch = password === confirmPassword;
-
-  // Name validation
-  const isNameValid = name.trim().length > 0;
-
-  // Form validation
-  const isFormValid = isEmailValid && isPasswordValid && passwordsMatch && confirmPassword.length > 0 && isNameValid;
-
-  // Compute error messages directly from state
-  const emailError = touched.email
-    ? !email.trim()
-      ? 'Email is required'
-      : !isEmailValid
-      ? 'Please enter a valid email address'
-      : serverEmailError
-    : '';
-
-  const passwordError = touched.password
-    ? !password
-      ? 'Password is required'
-      : !hasMinLength
-      ? 'Password must be at least 8 characters'
-      : !hasUppercase
-      ? 'Password must contain at least one uppercase letter'
-      : !hasNumber
-      ? 'Password must contain at least one number'
-      : ''
-    : '';
-
-  const confirmPasswordError = touched.confirmPassword
-    ? !confirmPassword
-      ? 'Please confirm your password'
-      : !passwordsMatch
-      ? 'Passwords do not match'
-      : ''
-    : '';
-
-  const nameError = touched.name && !name.trim()
-    ? 'Name is required'
-    : '';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isFormValid) return;
-
-    setServerEmailError('');
+    if (!validateAll()) return;
 
     try {
       const response = await registerMutation.mutateAsync({
@@ -105,17 +63,22 @@ export const RegisterPage = () => {
       if (error instanceof ApiError) {
         const body = error.body as Record<string, unknown> | null
         if (body?.errorCode === 'DUPLICATE_EMAIL') {
-          setServerEmailError('This email is already registered')
+          setFieldError('email', 'This email is already registered')
         }
       }
       // Other errors: no toast (auth mutation), inline state via registerMutation.isError
     }
   };
 
-  const inputClass = (hasError: boolean) =>
-    `w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${
-      hasError ? 'border-coral' : 'border-navy/10'
-    }`;
+  const borderClass = (field: string) =>
+    touched[field] && !errors[field]
+      ? 'border-teal border-2'
+      : errors[field]
+        ? 'border-coral border-2'
+        : 'border-navy/10';
+
+  const labelClass = (field: string) =>
+    errors[field] ? 'text-coral' : 'text-navy-soft';
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center px-4">
@@ -127,39 +90,39 @@ export const RegisterPage = () => {
         <form onSubmit={handleSubmit}>
           {/* Email Field */}
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-semibold text-navy-soft mb-2">
+            <label htmlFor="email" className={`block text-sm font-semibold ${labelClass('email')} mb-2`}>
               Email
             </label>
             <input
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onBlur={() => setTouched({ ...touched, email: true })}
+              onChange={(e) => { setEmail(e.target.value); handleChange('email', e.target.value); }}
+              onBlur={() => handleBlur('email')}
               placeholder="Enter your email"
               maxLength={254}
-              className={inputClass(!!emailError)}
+              className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('email')}`}
               autoComplete="email"
             />
-            {emailError && (
-              <p className="mt-1 text-sm text-coral">{emailError}</p>
+            {errors.email && (
+              <p className="mt-1 text-sm text-coral">{errors.email}</p>
             )}
           </div>
 
           {/* Password Field */}
           <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-semibold text-navy-soft mb-2">
+            <label htmlFor="password" className={`block text-sm font-semibold ${labelClass('password')} mb-2`}>
               Password
             </label>
             <input
               id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onBlur={() => setTouched({ ...touched, password: true })}
+              onChange={(e) => { setPassword(e.target.value); handleChange('password', e.target.value); }}
+              onBlur={() => handleBlur('password')}
               placeholder="Enter your password"
               maxLength={128}
-              className={inputClass(!!passwordError)}
+              className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('password')}`}
               autoComplete="new-password"
             />
 
@@ -179,57 +142,57 @@ export const RegisterPage = () => {
               </div>
             </div>
 
-            {passwordError && (
-              <p className="mt-1 text-sm text-coral">{passwordError}</p>
+            {errors.password && (
+              <p className="mt-1 text-sm text-coral">{errors.password}</p>
             )}
           </div>
 
           {/* Confirm Password Field */}
           <div className="mb-4">
-            <label htmlFor="confirmPassword" className="block text-sm font-semibold text-navy-soft mb-2">
+            <label htmlFor="confirmPassword" className={`block text-sm font-semibold ${labelClass('confirmPassword')} mb-2`}>
               Confirm Password
             </label>
             <input
               id="confirmPassword"
               type="password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              onBlur={() => setTouched({ ...touched, confirmPassword: true })}
+              onChange={(e) => { setConfirmPassword(e.target.value); handleChange('confirmPassword', e.target.value); }}
+              onBlur={() => handleBlur('confirmPassword')}
               placeholder="Confirm your password"
               maxLength={128}
-              className={inputClass(!!confirmPasswordError)}
+              className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('confirmPassword')}`}
               autoComplete="new-password"
             />
-            {confirmPasswordError && (
-              <p className="mt-1 text-sm text-coral">{confirmPasswordError}</p>
+            {errors.confirmPassword && (
+              <p className="mt-1 text-sm text-coral">{errors.confirmPassword}</p>
             )}
           </div>
 
           {/* Name Field */}
           <div className="mb-6">
-            <label htmlFor="name" className="block text-sm font-semibold text-navy-soft mb-2">
+            <label htmlFor="name" className={`block text-sm font-semibold ${labelClass('name')} mb-2`}>
               Name
             </label>
             <input
               id="name"
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              onBlur={() => setTouched({ ...touched, name: true })}
+              onChange={(e) => { setName(e.target.value); handleChange('name', e.target.value); }}
+              onBlur={() => handleBlur('name')}
               placeholder="Enter your name"
               maxLength={64}
-              className={inputClass(!!nameError)}
+              className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('name')}`}
               autoComplete="name"
             />
-            {nameError && (
-              <p className="mt-1 text-sm text-coral">{nameError}</p>
+            {errors.name && (
+              <p className="mt-1 text-sm text-coral">{errors.name}</p>
             )}
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={registerMutation.isPending || !isFormValid}
+            disabled={registerMutation.isPending || !isValid}
             className="w-full bg-teal text-white py-3 px-4 rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
           >
             {registerMutation.isPending ? 'Signing up...' : 'Sign up'}
