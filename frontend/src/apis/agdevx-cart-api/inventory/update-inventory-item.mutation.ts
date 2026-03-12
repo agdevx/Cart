@@ -22,7 +22,7 @@ export const useUpdateInventoryItemMutation = () => {
     mutationKey: ['inventory', 'update'],
     mutationFn: async (request: UpdateInventoryItemRequest): Promise<InventoryItem> => {
       const { id, ...updateData } = request
-      const response = await apiFetch(`/api/inventory/${id}`, {
+      const response = await apiFetch(`/api/v1/inventory/${id}`, {
         method: 'PUT',
         body: JSON.stringify(updateData),
       })

@@ -17,7 +17,7 @@ export const useRemoveHouseholdMemberMutation = () => {
     mutationKey: ['households', 'remove-member'],
     mutationFn: async (request: RemoveMemberRequest): Promise<void> => {
       await apiFetch(
-        `/api/household/${request.householdId}/members/${request.userId}`,
+        `/api/v1/household/${request.householdId}/members/${request.userId}`,
         { method: 'DELETE' }
       )
     },

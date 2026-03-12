@@ -75,7 +75,7 @@ export const ActiveTripPage = () => {
 
   // Connect to SSE for real-time updates
   useSSE(
-    `/api/trips/${tripId}/events`,
+    `/api/v1/trips/${tripId}/events`,
     handleSSEMessage,
     !!tripId
   )

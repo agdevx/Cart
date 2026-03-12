@@ -11,7 +11,7 @@ export interface ChangePasswordRequest {
 }
 
 async function changePassword(request: ChangePasswordRequest): Promise<void> {
-  await apiFetch('/api/auth/password', {
+  await apiFetch('/api/v1/auth/password', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

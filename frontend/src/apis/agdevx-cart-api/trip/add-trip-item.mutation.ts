@@ -21,7 +21,7 @@ export const useAddTripItemMutation = () => {
     mutationKey: ['trip-items', 'add'],
     mutationFn: async (request: AddTripItemRequest): Promise<TripItem> => {
       const { tripId, inventoryItemId, quantity, storeId, notes } = request
-      const response = await apiFetch(`/api/tripitem/trip/${tripId}`, {
+      const response = await apiFetch(`/api/v1/tripitem/trip/${tripId}`, {
         method: 'POST',
         body: JSON.stringify({ inventoryItemId, quantity, storeId, notes }),
       })

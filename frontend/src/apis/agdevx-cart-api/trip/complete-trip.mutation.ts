@@ -12,7 +12,7 @@ export const useCompleteTripMutation = () => {
   return useMutation({
     mutationKey: ['trips', 'complete'],
     mutationFn: async (tripId: string): Promise<Trip> => {
-      const response = await apiFetch(`/api/trip/${tripId}/complete`, {
+      const response = await apiFetch(`/api/v1/trip/${tripId}/complete`, {
         method: 'POST',
       })
       return response.json() as Promise<Trip>

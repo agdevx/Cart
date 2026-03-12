@@ -44,7 +44,7 @@ describe('useLoginMutation', () => {
 
     expect(result.current.data).toEqual(mockResponse);
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/auth/login'),
+      expect.stringContaining('/api/v1/auth/login'),
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({

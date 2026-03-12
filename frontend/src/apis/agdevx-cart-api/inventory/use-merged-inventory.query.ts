@@ -14,7 +14,7 @@ export const useMergedInventoryQuery = (householdId: string | null) => {
   return useQuery({
     queryKey: ['inventory', 'merged', householdId],
     queryFn: async (): Promise<InventoryItem[]> => {
-      const response = await apiFetch(`/api/inventory/merged/${householdId}`);
+      const response = await apiFetch(`/api/v1/inventory/merged/${householdId}`);
       return response.json();
     },
     enabled: isAuthenticated && householdId !== null,

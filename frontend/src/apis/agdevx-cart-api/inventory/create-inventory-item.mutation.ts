@@ -19,7 +19,7 @@ export const useCreateInventoryItemMutation = () => {
   return useMutation({
     mutationKey: ['inventory', 'create'],
     mutationFn: async (request: CreateInventoryItemRequest): Promise<InventoryItem> => {
-      const response = await apiFetch('/api/inventory', {
+      const response = await apiFetch('/api/v1/inventory', {
         method: 'POST',
         body: JSON.stringify(request),
       })

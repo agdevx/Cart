@@ -18,7 +18,7 @@ export interface UpdateProfileResponse {
 }
 
 async function updateProfile(request: UpdateProfileRequest): Promise<UpdateProfileResponse> {
-  const response = await apiFetch('/api/auth/profile', {
+  const response = await apiFetch('/api/v1/auth/profile', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

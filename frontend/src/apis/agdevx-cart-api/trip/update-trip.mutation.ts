@@ -17,7 +17,7 @@ export const useUpdateTripMutation = () => {
   return useMutation({
     mutationKey: ['trips', 'update'],
     mutationFn: async ({ tripId, name, householdId }: UpdateTripRequest): Promise<void> => {
-      await apiFetch(`/api/trip/${tripId}`, {
+      await apiFetch(`/api/v1/trip/${tripId}`, {
         method: 'PUT',
         body: JSON.stringify({ name, householdId: householdId ?? null }),
       })

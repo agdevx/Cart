@@ -37,7 +37,7 @@ describe('useUpdateStoreMutation', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/store/store1', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/store/store1', {
       method: 'PUT',
       body: JSON.stringify({ name: 'Costco Wholesale' }),
     })

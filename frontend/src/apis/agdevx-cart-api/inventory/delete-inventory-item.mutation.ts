@@ -11,7 +11,7 @@ export const useDeleteInventoryItemMutation = () => {
   return useMutation({
     mutationKey: ['inventory', 'delete'],
     mutationFn: async (id: string): Promise<void> => {
-      await apiFetch(`/api/inventory/${id}`, {
+      await apiFetch(`/api/v1/inventory/${id}`, {
         method: 'DELETE',
       })
     },

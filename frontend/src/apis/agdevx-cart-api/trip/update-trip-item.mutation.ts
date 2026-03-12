@@ -20,7 +20,7 @@ export const useUpdateTripItemMutation = () => {
     mutationKey: ['trip-items', 'update'],
     mutationFn: async (request: UpdateTripItemRequest): Promise<void> => {
       const { tripItemId, quantity, notes, storeId } = request
-      await apiFetch(`/api/tripitem/${tripItemId}`, {
+      await apiFetch(`/api/v1/tripitem/${tripItemId}`, {
         method: 'PUT',
         body: JSON.stringify({ quantity, notes, storeId }),
       })

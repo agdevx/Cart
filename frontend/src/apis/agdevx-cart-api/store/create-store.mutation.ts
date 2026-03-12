@@ -17,7 +17,7 @@ export const useCreateStoreMutation = () => {
   return useMutation({
     mutationKey: ['stores', 'create'],
     mutationFn: async (request: CreateStoreRequest): Promise<Store> => {
-      const response = await apiFetch('/api/store', {
+      const response = await apiFetch('/api/v1/store', {
         method: 'POST',
         body: JSON.stringify(request),
       })

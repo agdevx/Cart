@@ -49,7 +49,7 @@ describe('useJoinHouseholdMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockHousehold)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/households/join', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/households/join', {
       method: 'POST',
       body: JSON.stringify({ inviteCode: 'ABC123' }),
     })

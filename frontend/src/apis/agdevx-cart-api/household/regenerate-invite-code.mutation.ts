@@ -12,7 +12,7 @@ export const useRegenerateInviteCodeMutation = () => {
     mutationKey: ['households', 'regenerate-invite-code'],
     mutationFn: async (householdId: string): Promise<string> => {
       const response = await apiFetch(
-        `/api/household/${householdId}/invite-code`,
+        `/api/v1/household/${householdId}/invite-code`,
         { method: 'POST' }
       )
       const data = await response.json()

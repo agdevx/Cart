@@ -65,8 +65,8 @@ describe('useStoresQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual([mockPersonalStore, mockHouseholdStore])
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/store/personal')
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/store/household/h1')
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/store/personal')
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/store/household/h1')
   })
 
   it('fetches only personal stores when no household IDs provided', async () => {
@@ -88,7 +88,7 @@ describe('useStoresQuery', () => {
 
     expect(result.current.data).toEqual([mockPersonalStore])
     expect(apiFetchModule.apiFetch).toHaveBeenCalledTimes(1)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/store/personal')
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/store/personal')
   })
 
   it('does not fetch when not authenticated', () => {

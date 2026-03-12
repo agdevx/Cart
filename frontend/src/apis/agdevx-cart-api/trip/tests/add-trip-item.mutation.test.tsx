@@ -64,7 +64,7 @@ describe('useAddTripItemMutation', () => {
 
     expect(result.current.data).toEqual(mockTripItem)
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith(
-      '/api/tripitem/trip/trip1',
+      '/api/v1/tripitem/trip/trip1',
       {
         method: 'POST',
         body: JSON.stringify({ inventoryItemId: 'item1', quantity: 2, storeId: undefined, notes: undefined }),

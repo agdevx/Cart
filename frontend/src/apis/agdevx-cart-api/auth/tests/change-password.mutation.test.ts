@@ -37,7 +37,7 @@ describe('useChangePasswordMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/auth/password'),
+      expect.stringContaining('/api/v1/auth/password'),
       expect.objectContaining({
         method: 'PUT',
         credentials: 'include',

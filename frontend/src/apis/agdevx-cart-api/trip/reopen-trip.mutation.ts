@@ -12,7 +12,7 @@ export const useReopenTripMutation = () => {
   return useMutation({
     mutationKey: ['trips', 'reopen'],
     mutationFn: async (tripId: string): Promise<Trip> => {
-      const response = await apiFetch(`/api/trip/${tripId}/reopen`, {
+      const response = await apiFetch(`/api/v1/trip/${tripId}/reopen`, {
         method: 'POST',
       })
       return response.json() as Promise<Trip>

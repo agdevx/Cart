@@ -16,7 +16,7 @@ export const useUpdateHouseholdMutation = () => {
   return useMutation({
     mutationKey: ['households', 'update'],
     mutationFn: async (request: UpdateHouseholdRequest): Promise<void> => {
-      await apiFetch(`/api/household/${request.householdId}`, {
+      await apiFetch(`/api/v1/household/${request.householdId}`, {
         method: 'PUT',
         body: JSON.stringify({ name: request.name }),
       })

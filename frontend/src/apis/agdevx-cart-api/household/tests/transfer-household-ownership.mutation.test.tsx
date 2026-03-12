@@ -37,7 +37,7 @@ describe('useTransferHouseholdOwnershipMutation', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1/owner', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/household/h1/owner', {
       method: 'PUT',
       body: JSON.stringify({ userId: 'u2' }),
     })

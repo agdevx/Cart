@@ -51,7 +51,7 @@ describe('useHouseholdMembersQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockMembers)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household/h1/members')
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/household/h1/members')
   })
 
   it('does not fetch when not authenticated', () => {

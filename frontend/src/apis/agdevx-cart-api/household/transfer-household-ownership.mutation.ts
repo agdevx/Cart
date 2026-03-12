@@ -17,7 +17,7 @@ export const useTransferHouseholdOwnershipMutation = () => {
     mutationKey: ['households', 'transfer-ownership'],
     mutationFn: async (request: TransferOwnershipRequest): Promise<void> => {
       await apiFetch(
-        `/api/household/${request.householdId}/owner`,
+        `/api/v1/household/${request.householdId}/owner`,
         {
           method: 'PUT',
           body: JSON.stringify({ userId: request.userId }),

@@ -68,7 +68,7 @@ describe('useTripsQuery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockTrips)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/trip/user')
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/trip/user')
   })
 
   it('does not fetch when not authenticated', () => {

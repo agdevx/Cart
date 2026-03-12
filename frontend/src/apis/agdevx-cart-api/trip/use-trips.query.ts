@@ -14,7 +14,7 @@ export const useTripsQuery = () => {
   return useQuery({
     queryKey: ['trips'],
     queryFn: async (): Promise<Trip[]> => {
-      const response = await apiFetch('/api/trip/user');
+      const response = await apiFetch('/api/v1/trip/user');
       return response.json();
     },
     enabled: isAuthenticated,

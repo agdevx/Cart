@@ -18,7 +18,7 @@ export const useUpdateStoreMutation = () => {
     mutationKey: ['stores', 'update'],
     mutationFn: async (request: UpdateStoreRequest): Promise<void> => {
       const { id, ...updateData } = request
-      await apiFetch(`/api/store/${id}`, {
+      await apiFetch(`/api/v1/store/${id}`, {
         method: 'PUT',
         body: JSON.stringify(updateData),
       })

@@ -49,7 +49,7 @@ describe('useCreateHouseholdMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockHousehold)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/household', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/household', {
       method: 'POST',
       body: JSON.stringify({ name: 'New Household' }),
     })

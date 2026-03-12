@@ -22,7 +22,7 @@ export interface LoginResponse {
  * @returns Promise resolving to login response with tokens and user data
  */
 async function login(credentials: LoginRequest): Promise<LoginResponse> {
-  const response = await apiFetch('/api/auth/login', {
+  const response = await apiFetch('/api/v1/auth/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -11,7 +11,7 @@ export const useDeleteStoreMutation = () => {
   return useMutation({
     mutationKey: ['stores', 'delete'],
     mutationFn: async (id: string): Promise<void> => {
-      await apiFetch(`/api/store/${id}`, {
+      await apiFetch(`/api/v1/store/${id}`, {
         method: 'DELETE',
       })
     },

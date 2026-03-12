@@ -42,7 +42,7 @@ describe('useDeleteTripItemMutation', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/tripitem/ti1', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/tripitem/ti1', {
       method: 'DELETE',
     })
   })

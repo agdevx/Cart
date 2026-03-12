@@ -34,7 +34,7 @@ export function useAuth() {
    */
   const logout = useCallback(async () => {
     try {
-      await apiFetch('/api/auth/logout', { method: 'POST' });
+      await apiFetch('/api/v1/auth/logout', { method: 'POST' });
     } catch {
       // Best-effort logout — clear local state regardless
     }

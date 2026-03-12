@@ -14,7 +14,7 @@ export const useHouseholdQuery = (householdId: string) => {
   return useQuery({
     queryKey: ['household', householdId],
     queryFn: async (): Promise<Household> => {
-      const response = await apiFetch(`/api/household/${householdId}`)
+      const response = await apiFetch(`/api/v1/household/${householdId}`)
       return response.json()
     },
     enabled: isAuthenticated && !!householdId,
