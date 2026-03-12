@@ -17,12 +17,12 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
 {
     //== Get all inventory items for the authenticated user (personal + all households)
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var items = await inventoryService.GetAllUserInventory(userId);
+            var items = await inventoryService.GetAllUserInventory(userId, cancellationToken);
             return Ok(items);
         }
         catch (UnauthorizedAccessException ex)
@@ -33,12 +33,12 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
 
     //== Get all inventory items for a specific household
     [HttpGet("household/{householdId}")]
-    public async Task<IActionResult> GetHouseholdInventory(Guid householdId)
+    public async Task<IActionResult> GetHouseholdInventory(Guid householdId, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var items = await inventoryService.GetHouseholdInventory(householdId, userId);
+            var items = await inventoryService.GetHouseholdInventory(householdId, userId, cancellationToken);
             return Ok(items);
         }
         catch (UnauthorizedAccessException ex)
@@ -49,12 +49,12 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
 
     //== Get all personal inventory items for the authenticated user
     [HttpGet("personal")]
-    public async Task<IActionResult> GetPersonalInventory()
+    public async Task<IActionResult> GetPersonalInventory(CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var items = await inventoryService.GetPersonalInventory(userId);
+            var items = await inventoryService.GetPersonalInventory(userId, cancellationToken);
             return Ok(items);
         }
         catch (UnauthorizedAccessException ex)
@@ -65,12 +65,12 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
 
     //== Get merged inventory (household + personal) for the authenticated user
     [HttpGet("merged/{householdId}")]
-    public async Task<IActionResult> GetMergedInventory(Guid householdId)
+    public async Task<IActionResult> GetMergedInventory(Guid householdId, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var items = await inventoryService.GetMergedInventory(householdId, userId);
+            var items = await inventoryService.GetMergedInventory(householdId, userId, cancellationToken);
             return Ok(items);
         }
         catch (UnauthorizedAccessException ex)
@@ -81,12 +81,12 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
 
     //== Get a specific inventory item by ID
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(Guid id)
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var item = await inventoryService.GetById(id, userId);
+            var item = await inventoryService.GetById(id, userId, cancellationToken);
 
             if (item == null)
             {
@@ -103,7 +103,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
 
     //== Create a new inventory item
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateInventoryItemRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateInventoryItemRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -115,7 +115,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
                 DefaultStoreId = request.DefaultStoreId,
                 Notes = request.Notes,
             };
-            var created = await inventoryService.CreateInventoryItem(item, userId);
+            var created = await inventoryService.CreateInventoryItem(item, userId, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
         catch (UnauthorizedAccessException ex)
@@ -126,7 +126,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
 
     //== Update an existing inventory item
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateInventoryItemRequest request)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateInventoryItemRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -139,7 +139,7 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
                 DefaultStoreId = request.DefaultStoreId,
                 Notes = request.Notes,
             };
-            await inventoryService.UpdateInventoryItem(item, userId);
+            await inventoryService.UpdateInventoryItem(item, userId, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -154,12 +154,12 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
 
     //== Delete an inventory item
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await inventoryService.DeleteInventoryItem(id, userId);
+            await inventoryService.DeleteInventoryItem(id, userId, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

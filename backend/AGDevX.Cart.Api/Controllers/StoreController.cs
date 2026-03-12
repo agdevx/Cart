@@ -17,12 +17,12 @@ public class StoreController(IStoreService storeService) : ControllerBase
 {
     //== Get all stores for a specific household
     [HttpGet("household/{householdId}")]
-    public async Task<IActionResult> GetHouseholdStores(Guid householdId)
+    public async Task<IActionResult> GetHouseholdStores(Guid householdId, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var stores = await storeService.GetHouseholdStores(householdId, userId);
+            var stores = await storeService.GetHouseholdStores(householdId, userId, cancellationToken);
             return Ok(stores);
         }
         catch (UnauthorizedAccessException ex)
@@ -33,12 +33,12 @@ public class StoreController(IStoreService storeService) : ControllerBase
 
     //== Get all personal stores for the authenticated user
     [HttpGet("personal")]
-    public async Task<IActionResult> GetPersonalStores()
+    public async Task<IActionResult> GetPersonalStores(CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var stores = await storeService.GetPersonalStores(userId);
+            var stores = await storeService.GetPersonalStores(userId, cancellationToken);
             return Ok(stores);
         }
         catch (UnauthorizedAccessException ex)
@@ -49,12 +49,12 @@ public class StoreController(IStoreService storeService) : ControllerBase
 
     //== Get a specific store by ID
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(Guid id)
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var store = await storeService.GetById(id, userId);
+            var store = await storeService.GetById(id, userId, cancellationToken);
 
             if (store == null)
             {
@@ -71,13 +71,13 @@ public class StoreController(IStoreService storeService) : ControllerBase
 
     //== Create a new store
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateStoreRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateStoreRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
             var store = new Store { Name = request.Name, HouseholdId = request.HouseholdId };
-            var created = await storeService.CreateStore(store, userId);
+            var created = await storeService.CreateStore(store, userId, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
         catch (UnauthorizedAccessException ex)
@@ -92,12 +92,12 @@ public class StoreController(IStoreService storeService) : ControllerBase
 
     //== Update an existing store
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateStoreRequest request)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateStoreRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await storeService.UpdateStore(id, request.Name, request.HouseholdId, userId);
+            await storeService.UpdateStore(id, request.Name, request.HouseholdId, userId, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -116,12 +116,12 @@ public class StoreController(IStoreService storeService) : ControllerBase
 
     //== Delete a store
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await storeService.DeleteStore(id, userId);
+            await storeService.DeleteStore(id, userId, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

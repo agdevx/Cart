@@ -16,12 +16,12 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
 {
     //== Get all items for a specific trip
     [HttpGet("trip/{tripId}")]
-    public async Task<IActionResult> GetTripItems(Guid tripId)
+    public async Task<IActionResult> GetTripItems(Guid tripId, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var tripItems = await tripItemService.GetTripItems(tripId, userId);
+            var tripItems = await tripItemService.GetTripItems(tripId, userId, cancellationToken);
             return Ok(tripItems);
         }
         catch (UnauthorizedAccessException ex)
@@ -32,12 +32,12 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
 
     //== Get a specific trip item by ID
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(Guid id)
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var tripItem = await tripItemService.GetById(id, userId);
+            var tripItem = await tripItemService.GetById(id, userId, cancellationToken);
 
             if (tripItem == null)
             {
@@ -54,12 +54,12 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
 
     //== Add a new item to a trip
     [HttpPost("trip/{tripId}")]
-    public async Task<IActionResult> Add(Guid tripId, [FromBody] AddTripItemRequest request)
+    public async Task<IActionResult> Add(Guid tripId, [FromBody] AddTripItemRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var tripItem = await tripItemService.AddTripItem(tripId, request.InventoryItemId!.Value, request.Quantity, userId, request.Notes, request.StoreId);
+            var tripItem = await tripItemService.AddTripItem(tripId, request.InventoryItemId!.Value, request.Quantity, userId, request.Notes, request.StoreId, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = tripItem.Id }, tripItem);
         }
         catch (UnauthorizedAccessException ex)
@@ -74,12 +74,12 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
 
     //== Update an existing trip item
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTripItemRequest request)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTripItemRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await tripItemService.UpdateTripItem(id, request.Quantity, userId, request.Notes, request.StoreId);
+            await tripItemService.UpdateTripItem(id, request.Quantity, userId, request.Notes, request.StoreId, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -94,12 +94,12 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
 
     //== Delete a trip item
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await tripItemService.DeleteTripItem(id, userId);
+            await tripItemService.DeleteTripItem(id, userId, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
@@ -114,12 +114,12 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
 
     //== Mark an item as checked (picked up during shopping)
     [HttpPost("{id}/check")]
-    public async Task<IActionResult> Check(Guid id)
+    public async Task<IActionResult> Check(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var tripItem = await tripItemService.CheckItem(id, true, userId);
+            var tripItem = await tripItemService.CheckItem(id, true, userId, cancellationToken);
             return Ok(tripItem);
         }
         catch (UnauthorizedAccessException ex)
@@ -134,12 +134,12 @@ public class TripItemController(ITripItemService tripItemService) : ControllerBa
 
     //== Mark an item as unchecked (not picked up)
     [HttpPost("{id}/uncheck")]
-    public async Task<IActionResult> Uncheck(Guid id)
+    public async Task<IActionResult> Uncheck(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var tripItem = await tripItemService.CheckItem(id, false, userId);
+            var tripItem = await tripItemService.CheckItem(id, false, userId, cancellationToken);
             return Ok(tripItem);
         }
         catch (UnauthorizedAccessException ex)
