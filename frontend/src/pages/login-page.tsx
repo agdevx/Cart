@@ -58,7 +58,7 @@ export const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4">
+    <div id="main-content" className="min-h-screen bg-bg flex items-center justify-center px-4">
       <div className="bg-surface p-8 rounded-2xl shadow-md w-full max-w-md">
         <h1 className="font-display text-2xl font-extrabold text-navy mb-1">
           AGDevX <span className="text-teal">Cart</span>
