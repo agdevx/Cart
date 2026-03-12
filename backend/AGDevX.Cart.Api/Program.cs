@@ -39,6 +39,9 @@ builder.Services.AddCors(options =>
 //== Rate Limiting Configuration
 builder.Services.AddRateLimiting();
 
+//== Request Timeout Configuration
+builder.Services.AddRequestTimeoutPolicies();
+
 //== Cookie Configuration
 var cookieSettings = builder.Configuration.GetSection("CookieSettings").Get<CookieSettings>()
     ?? new CookieSettings();
@@ -125,6 +128,9 @@ app.UseCors();
 
 //== Rate limiting
 app.UseRateLimiter();
+
+//== Request timeouts (after rate limiter, before auth)
+app.UseRequestTimeouts();
 
 app.UseAuthentication();
 app.UseAuthorization();
