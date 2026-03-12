@@ -1,12 +1,13 @@
 // ABOUTME: Tests for shared validation rule functions used across all forms
 
-import { describe, it, expect } from 'vitest'
+import { describe, expect,it } from 'vitest'
+
 import {
-  isRequired,
   isEmail,
+  isRequired,
+  matchesField,
   maxLength,
   minLength,
-  matchesField,
   passwordStrength,
 } from '../validation-rules'
 
