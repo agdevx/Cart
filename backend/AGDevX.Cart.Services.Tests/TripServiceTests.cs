@@ -30,11 +30,11 @@ public class TripServiceTests
         var householdId = Guid.NewGuid();
         var tripName = "Weekly Grocery Run";
 
-        _mockHouseholdRepository.Setup(x => x.IsUserMember(householdId, userId))
+        _mockHouseholdRepository.Setup(x => x.IsUserMember(householdId, userId, It.IsAny<CancellationToken>()))
                                 .ReturnsAsync(true);
 
-        _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>()))
-                           .ReturnsAsync((Trip t) => t);
+        _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>(), It.IsAny<CancellationToken>()))
+                           .ReturnsAsync((Trip t, CancellationToken _) => t);
 
         // Act
         var result = await _tripService.CreateTrip(tripName, userId, householdId);
@@ -60,14 +60,14 @@ public class TripServiceTests
             IsCompleted = false
         };
 
-        _mockTripRepository.Setup(x => x.GetById(tripId))
+        _mockTripRepository.Setup(x => x.GetById(tripId, It.IsAny<CancellationToken>()))
                            .ReturnsAsync(trip);
 
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId))
+        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>()))
                            .ReturnsAsync(true);
 
-        _mockTripRepository.Setup(x => x.Update(It.IsAny<Trip>()))
-                           .ReturnsAsync((Trip t) => t);
+        _mockTripRepository.Setup(x => x.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>()))
+                           .ReturnsAsync((Trip t, CancellationToken _) => t);
 
         // Act
         var result = await _tripService.CompleteTrip(tripId, userId);
@@ -86,7 +86,7 @@ public class TripServiceTests
         var householdId = Guid.NewGuid();
         var tripName = "Weekly Grocery Run";
 
-        _mockHouseholdRepository.Setup(x => x.IsUserMember(householdId, userId))
+        _mockHouseholdRepository.Setup(x => x.IsUserMember(householdId, userId, It.IsAny<CancellationToken>()))
                                 .ReturnsAsync(false);
 
         // Act & Assert
@@ -107,10 +107,10 @@ public class TripServiceTests
             IsCompleted = false
         };
 
-        _mockTripRepository.Setup(x => x.GetById(tripId))
+        _mockTripRepository.Setup(x => x.GetById(tripId, It.IsAny<CancellationToken>()))
                            .ReturnsAsync(trip);
 
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId))
+        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>()))
                            .ReturnsAsync(false);
 
         // Act & Assert
@@ -125,7 +125,7 @@ public class TripServiceTests
         var userId = Guid.NewGuid();
         var trips = new List<Trip> { new() { Id = Guid.NewGuid(), Name = "Trip 1", IsCompleted = false } };
 
-        _mockTripRepository.Setup(r => r.GetUserTrips(userId)).ReturnsAsync(trips);
+        _mockTripRepository.Setup(r => r.GetUserTrips(userId, It.IsAny<CancellationToken>())).ReturnsAsync(trips);
 
         // Act
         var result = await _tripService.GetUserTrips(userId);
@@ -141,7 +141,7 @@ public class TripServiceTests
         var householdId = Guid.NewGuid();
         var trips = new List<Trip> { new() { Id = Guid.NewGuid(), Name = "Household Trip", IsCompleted = false } };
 
-        _mockTripRepository.Setup(r => r.GetHouseholdTrips(householdId)).ReturnsAsync(trips);
+        _mockTripRepository.Setup(r => r.GetHouseholdTrips(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(trips);
 
         // Act
         var result = await _tripService.GetHouseholdTrips(householdId);
@@ -157,7 +157,7 @@ public class TripServiceTests
         var tripId = Guid.NewGuid();
         var trip = new Trip { Id = tripId, Name = "My Trip", IsCompleted = false };
 
-        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
 
         // Act
         var result = await _tripService.GetById(tripId);
@@ -175,9 +175,9 @@ public class TripServiceTests
         var tripId = Guid.NewGuid();
         var trip = new Trip { Id = tripId, Name = "Old Name", IsCompleted = false };
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync(trip);
-        _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>())).ReturnsAsync((Trip t) => t);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip t, CancellationToken _) => t);
 
         // Act
         var result = await _tripService.UpdateTrip(tripId, "New Name", null, userId);
@@ -193,7 +193,7 @@ public class TripServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(false);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var act = () => _tripService.UpdateTrip(tripId, "New Name", null, userId);
@@ -209,8 +209,8 @@ public class TripServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync((Trip?)null);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync((Trip?)null);
 
         // Act
         var act = () => _tripService.UpdateTrip(tripId, "New Name", null, userId);
@@ -227,14 +227,14 @@ public class TripServiceTests
         var tripId = Guid.NewGuid();
         var trip = new Trip { Id = tripId, Name = "Doomed", IsCompleted = false, CreatedBy = userId.ToString() };
 
-        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync(trip);
-        _mockTripRepository.Setup(r => r.Delete(tripId)).Returns(Task.CompletedTask);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.Delete(tripId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
         await _tripService.DeleteTrip(tripId, userId);
 
         // Assert
-        _mockTripRepository.Verify(r => r.Delete(tripId), Times.Once);
+        _mockTripRepository.Verify(r => r.Delete(tripId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -245,7 +245,7 @@ public class TripServiceTests
         var tripId = Guid.NewGuid();
         var trip = new Trip { Id = tripId, Name = "Not Yours", IsCompleted = false, CreatedBy = Guid.NewGuid().ToString() };
 
-        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
 
         // Act
         var act = () => _tripService.DeleteTrip(tripId, userId);
@@ -258,7 +258,7 @@ public class TripServiceTests
     public async Task Should_ThrowKeyNotFoundException_When_DeletingNonExistingTrip()
     {
         // Arrange
-        _mockTripRepository.Setup(r => r.GetById(It.IsAny<Guid>())).ReturnsAsync((Trip?)null);
+        _mockTripRepository.Setup(r => r.GetById(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip?)null);
 
         // Act
         var act = () => _tripService.DeleteTrip(Guid.NewGuid(), Guid.NewGuid());
@@ -275,9 +275,9 @@ public class TripServiceTests
         var tripId = Guid.NewGuid();
         var trip = new Trip { Id = tripId, Name = "Completed", IsCompleted = true, CompletedAt = DateTime.UtcNow };
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync(trip);
-        _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>())).ReturnsAsync((Trip t) => t);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip t, CancellationToken _) => t);
 
         // Act
         var result = await _tripService.ReopenTrip(tripId, userId);
@@ -294,7 +294,7 @@ public class TripServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(false);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var act = () => _tripService.ReopenTrip(tripId, userId);
@@ -313,16 +313,16 @@ public class TripServiceTests
         var householdId = Guid.NewGuid();
         var trip = new Trip { Id = tripId, Name = "Trip", IsCompleted = false, HouseholdId = householdId };
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync(trip);
-        _mockHouseholdRepository.Setup(r => r.IsUserMember(householdId, collaboratorUserId)).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.AddCollaborator(tripId, collaboratorUserId)).Returns(Task.CompletedTask);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
+        _mockHouseholdRepository.Setup(r => r.IsUserMember(householdId, collaboratorUserId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.AddCollaborator(tripId, collaboratorUserId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
         await _tripService.AddCollaborator(tripId, userId, collaboratorUserId);
 
         // Assert
-        _mockTripRepository.Verify(r => r.AddCollaborator(tripId, collaboratorUserId), Times.Once);
+        _mockTripRepository.Verify(r => r.AddCollaborator(tripId, collaboratorUserId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -332,7 +332,7 @@ public class TripServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(false);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var act = () => _tripService.AddCollaborator(tripId, userId, Guid.NewGuid());
@@ -351,9 +351,9 @@ public class TripServiceTests
         var householdId = Guid.NewGuid();
         var trip = new Trip { Id = tripId, Name = "Trip", IsCompleted = false, HouseholdId = householdId };
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync(trip);
-        _mockHouseholdRepository.Setup(r => r.IsUserMember(householdId, collaboratorUserId)).ReturnsAsync(false);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
+        _mockHouseholdRepository.Setup(r => r.IsUserMember(householdId, collaboratorUserId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var act = () => _tripService.AddCollaborator(tripId, userId, collaboratorUserId);
@@ -370,14 +370,14 @@ public class TripServiceTests
         var collaboratorUserId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.RemoveCollaborator(tripId, collaboratorUserId)).Returns(Task.CompletedTask);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.RemoveCollaborator(tripId, collaboratorUserId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
         await _tripService.RemoveCollaborator(tripId, userId, collaboratorUserId);
 
         // Assert
-        _mockTripRepository.Verify(r => r.RemoveCollaborator(tripId, collaboratorUserId), Times.Once);
+        _mockTripRepository.Verify(r => r.RemoveCollaborator(tripId, collaboratorUserId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -387,7 +387,7 @@ public class TripServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(false);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var act = () => _tripService.RemoveCollaborator(tripId, userId, Guid.NewGuid());
@@ -404,9 +404,9 @@ public class TripServiceTests
         var tripId = Guid.NewGuid();
         var trip = new Trip { Id = tripId, Name = "Planning Trip", IsCompleted = false, IsStarted = false };
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync(trip);
-        _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>())).ReturnsAsync((Trip t) => t);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip t, CancellationToken _) => t);
 
         // Act
         var result = await _tripService.StartTrip(tripId, userId);
@@ -424,7 +424,7 @@ public class TripServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(false);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var act = () => _tripService.StartTrip(tripId, userId);
@@ -440,8 +440,8 @@ public class TripServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync((Trip?)null);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync((Trip?)null);
 
         // Act
         var act = () => _tripService.StartTrip(tripId, userId);
@@ -466,9 +466,9 @@ public class TripServiceTests
             StartedAt = DateTime.UtcNow.AddHours(-1)
         };
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId)).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.GetById(tripId)).ReturnsAsync(trip);
-        _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>())).ReturnsAsync((Trip t) => t);
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip t, CancellationToken _) => t);
 
         // Act
         var result = await _tripService.ReopenTrip(tripId, userId);
@@ -487,8 +487,8 @@ public class TripServiceTests
         var userId = Guid.NewGuid();
         var tripName = "New Trip";
 
-        _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>()))
-                           .ReturnsAsync((Trip t) => t);
+        _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>(), It.IsAny<CancellationToken>()))
+                           .ReturnsAsync((Trip t, CancellationToken _) => t);
 
         // Act
         var result = await _tripService.CreateTrip(tripName, userId);
