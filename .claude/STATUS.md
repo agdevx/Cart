@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated:** 2026-03-24
+**Last Updated:** 2026-03-25
 
 ## How to Use This File
 
@@ -21,15 +21,14 @@ This is the single source of truth for where the project stands. Read it at the 
 
 | Suite | Tests | Files |
 |-------|-------|-------|
+| Backend — Data | 74 | AGDevX.Cart.Data.Tests |
 | Backend — Services | 115 | AGDevX.Cart.Services.Tests |
 | Backend — API | 111 | AGDevX.Cart.Api.Tests |
 | Backend — Auth | 22 | AGDevX.Cart.Auth.Tests |
-| Backend — Data | ⚠️ Did not run (investigate) | AGDevX.Cart.Data.Tests |
 | Frontend — Vitest | 508 | 80 test files |
 
 ## Known Issues / Tech Debt
 
-- `AGDevX.Cart.Data.Tests` did not execute during last full test run — needs investigation
 - Trip collaborator management has backend endpoints but no frontend UI
 - No CI/CD pipeline (`.github/workflows/` exists but is empty)
 
