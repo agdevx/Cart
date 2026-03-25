@@ -71,8 +71,9 @@ AGDevX.Cart/                          # Monorepo root
 │   │   ├── styles/                  # globals.css (Tailwind theme, animations)
 │   │   ├── utils/                   # Validation rules, helpers
 │   │   └── utilities/               # Test setup, error messages
-│   ├── e2e/                         # Playwright E2E tests (mocked API)
-│   ├── e2e-integration/             # Integration tests (real backend)
+│   ├── tests/
+│   │   ├── browser-tests/           # Playwright browser tests (mocked API)
+│   │   └── e2e-integration-tests/   # Playwright E2E tests (real backend)
 │   └── public/                      # Static assets + PWA manifest
 ├── docs/
 │   ├── DEVELOPMENT.md               # Setup, running, testing guide
@@ -193,7 +194,7 @@ All endpoints use the `/api/v1/` prefix.
 ## Documentation
 
 - **[Development Guide](docs/DEVELOPMENT.md)** - Setup, running, testing, troubleshooting
-- **[Integration Tests](frontend/e2e-integration/README.md)** - Full-stack integration testing
+- **[Integration Tests](frontend/tests/e2e-integration-tests/README.md)** - Full-stack integration testing
 - **[Enhancement Tracking](.claude/STATUS.md)** - Planned, in progress, and completed enhancements
 - **[Archive](docs/archive/)** - Design specs and implementation plans for all completed work
 

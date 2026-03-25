@@ -4,7 +4,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './e2e-integration',
+  testDir: './tests/e2e-integration-tests',
   fullyParallel: false, // Run tests serially to avoid database conflicts
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
