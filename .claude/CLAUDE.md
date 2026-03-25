@@ -2,6 +2,10 @@
 
 Monorepo: .NET 10 API + React 19 PWA. Cookie-based auth, SQLite, TanStack Query, Tailwind CSS 4.
 
+## Project State
+
+Read `.claude/STATUS.md` first — it tracks all enhancements (planned / in progress / completed), test health, and known issues. That file also contains instructions for how to maintain it.
+
 ## Commands
 
 ```bash

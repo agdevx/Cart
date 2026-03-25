@@ -76,7 +76,8 @@ AGDevX.Cart/                          # Monorepo root
 │   └── public/                      # Static assets + PWA manifest
 ├── docs/
 │   ├── DEVELOPMENT.md               # Setup, running, testing guide
-│   └── archive/                     # Completed enhancement specs and plans
+│   ├── active/                      # Specs and plans for in-progress or planned work
+│   └── archive/                     # Specs and plans for completed enhancements
 └── .claude/
     ├── CLAUDE.md                     # Project conventions and patterns
     └── STATUS.md                     # Enhancement tracking (planned / in progress / completed)

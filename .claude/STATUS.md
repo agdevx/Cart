@@ -2,6 +2,21 @@
 
 **Last Updated:** 2026-03-24
 
+## How to Use This File
+
+This is the single source of truth for where the project stands. Read it at the start of every conversation to understand current state.
+
+### Maintenance Rules
+
+- **Update "Last Updated"** whenever you modify this file.
+- **Enhancement lifecycle:** Planned → In Progress → Completed. Move rows between sections as work progresses. Add the "Completed" date column when moving to Completed.
+- **Completion dates** come from the **git merge date** of the PR that delivered the work (not the spec date or commit date). Use `git log --merges --oneline --date=short` to find them.
+- **Test Health** should be updated after running a full test suite when counts change.
+- **New planning docs** go in `docs/active/` using the naming convention `YYYY-MM-DD-slug.md`. Each doc has two clearly labeled sections: `## Design Spec` and `## Implementation Plan`. When an enhancement is completed, move its planning doc from `docs/active/` to `docs/archive/`.
+- **Links** use relative paths from `.claude/` → `../docs/archive/filename.md`.
+
+---
+
 ## Test Health
 
 | Suite | Tests | Files |
