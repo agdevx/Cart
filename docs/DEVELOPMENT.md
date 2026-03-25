@@ -103,7 +103,7 @@ npm run test:integration
 #### Backend Tests
 ```bash
 cd backend
-dotnet test                                    # Run all backend tests (134 tests)
+dotnet test                                    # Run all backend tests
 dotnet test --filter "Category=Unit"          # Run only unit tests
 dotnet test --logger "console;verbosity=detailed"  # Verbose output
 ```
@@ -111,7 +111,7 @@ dotnet test --logger "console;verbosity=detailed"  # Verbose output
 #### Frontend Tests
 ```bash
 cd frontend
-npm test                           # Run unit/integration tests (149 tests)
+npm test                           # Run unit/integration tests
 npm run test:ui                    # Run with Vitest UI
 npm run test:e2e                   # Run E2E tests with mocked API
 npm run test:e2e:ui                # Run E2E tests with Playwright UI
@@ -129,7 +129,7 @@ The app uses **cookie-based authentication**. On login or registration, the back
 2. Backend validates credentials, calls `HttpContext.SignInAsync()` with claims
 3. Browser receives `.Cart.Auth` cookie (HttpOnly, SameSite=Lax)
 4. Frontend `apiFetch()` includes `credentials: 'include'` — cookie sent automatically
-5. On page refresh, `AuthProvider` calls `GET /api/auth/me` to validate the session
+5. On page refresh, `AuthProvider` calls `GET /api/v1/auth/me` to validate the session
 
 ### Vite Proxy
 
@@ -137,9 +137,8 @@ The frontend dev server proxies all `/api/*` requests to `http://localhost:5000`
 
 ## API Documentation
 
-When running in development mode, API documentation is available at:
-- OpenAPI/Swagger: `http://localhost:5000/openapi/v1.json`
-- Scalar UI: `http://localhost:5000/scalar/v1`
+When running in development mode, the OpenAPI spec is available at:
+- `http://localhost:5000/openapi/v1.json`
 
 ## Database
 
@@ -240,5 +239,5 @@ cd frontend && npm update
 ## Next Steps
 
 - See `README.md` for project overview
-- See `docs/plans/` for implementation details
-- See `.claude/NOTES.md` for project status and history
+- See `.claude/STATUS.md` for enhancement tracking (planned / in progress / completed)
+- See `docs/archive/` for design specs and implementation plans
