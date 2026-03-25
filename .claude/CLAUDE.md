@@ -2,13 +2,17 @@
 
 Monorepo: .NET 10 API + React 19 PWA. Cookie-based auth, SQLite, TanStack Query, Tailwind CSS 4.
 
+## Project State
+
+Read `.claude/STATUS.md` first — it tracks all enhancements (planned / in progress / completed), test health, and known issues. That file also contains instructions for how to maintain it.
+
 ## Commands
 
 ```bash
 # Backend (run from backend/)
 dotnet build
 dotnet test
-dotnet run --project AGDevX.Cart.Api          # localhost:5000, Scalar docs at /scalar/v1
+dotnet run --project AGDevX.Cart.Api          # localhost:5000, OpenAPI at /openapi/v1.json
 
 # Frontend (run from frontend/)
 npm run dev                                    # Vite dev server, proxies /api → localhost:5000
@@ -66,7 +70,7 @@ frontend/src/
 ## Frontend Testing Patterns
 
 - **Framework:** Vitest + React Testing Library
-- **Test dirs:** `pages/tests/` for page tests, `pages/components/tests/` for component tests (some legacy files use `__tests__/`)
+- **Test dirs:** `pages/tests/` for page tests, `pages/components/tests/` for component tests
 - **Query mocks:** `vi.mock()` the hook module, shape return via `vi.mocked(useXQuery).mockReturnValue({ data, isLoading, ... })`
 - **Mutation mocks:** Mock `globalThis.fetch`, render with `QueryClientProvider`
 - **User interactions:** Prefer `userEvent` over `fireEvent` for new tests

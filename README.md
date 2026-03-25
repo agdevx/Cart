@@ -2,36 +2,27 @@
 
 Self-hosted grocery shopping list application with real-time collaboration.
 
-## Status
-
-- ✅ **Backend API** - Complete with 258 tests passing
-- ✅ **Frontend PWA** - Complete with 270 unit tests, E2E, and integration tests
-- 📋 **Docker** - Planned but not started
-- 📋 **Deployment** - Planned but not started
-
 ## Features
 
-### Current (Implemented)
 - Cookie-based authentication with email + password (BCrypt hashing)
 - Session persistence across page reloads
+- User profile management (name, email, password)
 - Household management (create/join with invite codes, ownership transfer)
 - Personal and household inventory items with filtered views (all, personal, per-household, merged)
-- Store management (personal and household)
-- Shopping trip workflow (create → rename → complete → reopen → delete)
+- Store management (personal and household) with uniqueness enforcement
+- Shopping trip workflow (create → start → complete → reopen → delete)
 - Trip item editing (quantity, notes, store assignment) and removal
 - Trip collaborators with authorization checks
-- Household rename and delete (owner only)
+- Field-level form validation across all forms
+- Top-level error boundary with recovery UI
 - Automatic audit fields (CreatedBy, ModifiedBy, timestamps) via EF Core SaveChanges override
 - Real-time collaboration via Server-Sent Events
 - Progressive Web App (installable, offline support)
 - Mobile-first design with bottom navigation
-
-### Planned (Future)
-- Camera/barcode scanning for inventory items
-- Category support for inventory
-- Quantity tracking for trip items
-- User profile management
-- Auth0 OAuth integration
+- Request timeouts (30s default, SSE excluded) with CancellationToken propagation
+- Rate limiting (5/min auth, 30/min general)
+- Security headers (CSP, X-Frame-Options, etc.)
+- Security audit logging
 
 ## Tech Stack
 
@@ -41,21 +32,17 @@ Self-hosted grocery shopping list application with real-time collaboration.
 - Entity Framework Core
 - SQLite
 - System.Reactive (for SSE)
-- xUnit (testing)
+- xUnit + Moq (testing)
 
 **Frontend:**
 - React 19
 - TypeScript
 - Vite
-- TailwindCSS
+- Tailwind CSS 4
 - TanStack Query (React Query)
 - Jotai (state management)
 - Vitest + React Testing Library (unit tests)
 - Playwright (E2E tests)
-
-**Deployment (Planned):**
-- Docker + Docker Compose
-- Caddy (reverse proxy)
 
 ## Project Structure
 
@@ -63,31 +50,37 @@ Self-hosted grocery shopping list application with real-time collaboration.
 AGDevX.Cart/                          # Monorepo root
 ├── backend/                          # All .NET API code
 │   ├── AGDevX.Cart.slnx             # Solution file
-│   ├── AGDevX.Cart.Api/             # Controllers, Program.cs
-│   ├── AGDevX.Cart.Api.Tests/       # Controller tests
+│   ├── AGDevX.Cart.Api/             # Controllers, middleware, Program.cs
+│   ├── AGDevX.Cart.Api.Tests/       # Controller + middleware tests
 │   ├── AGDevX.Cart.Services/        # Business logic
 │   ├── AGDevX.Cart.Services.Tests/  # Service tests
-│   ├── AGDevX.Cart.Auth/            # Authentication
+│   ├── AGDevX.Cart.Auth/            # Authentication (BCrypt, cookie sessions)
 │   ├── AGDevX.Cart.Auth.Tests/      # Auth tests
 │   ├── AGDevX.Cart.Data/            # EF Core, DbContext, models, repositories
 │   ├── AGDevX.Cart.Data.Tests/      # Data layer tests
-│   └── AGDevX.Cart.Shared/          # DTOs, configuration
+│   └── AGDevX.Cart.Shared/          # DTOs, configuration, security
 ├── frontend/                         # React 19 PWA
 │   ├── src/
-│   │   ├── apis/                    # API client code
-│   │   ├── auth/                    # Auth provider
-│   │   ├── features/                # Feature components
-│   │   ├── hooks/                   # Custom hooks
-│   │   ├── libs/                    # Third-party wrappers
-│   │   ├── pages/                   # Page components
-│   │   ├── state/                   # Jotai atoms
-│   │   └── utilities/               # Helpers
+│   │   ├── apis/                    # API client (TanStack Query hooks)
+│   │   ├── auth/                    # Auth provider + useAuth hook
+│   │   ├── features/                # Feature components (bottom-nav, PWA install)
+│   │   ├── hooks/                   # Custom hooks (field validation, focus trap, SSE)
+│   │   ├── libs/                    # SSE client
+│   │   ├── pages/                   # Page components + shared UI
+│   │   ├── state/                   # Jotai atoms (auth, household scope)
+│   │   ├── styles/                  # globals.css (Tailwind theme, animations)
+│   │   ├── utils/                   # Validation rules, helpers
+│   │   └── utilities/               # Test setup, error messages
 │   ├── e2e/                         # Playwright E2E tests (mocked API)
 │   ├── e2e-integration/             # Integration tests (real backend)
-│   └── public/                      # Static assets
+│   └── public/                      # Static assets + PWA manifest
 ├── docs/
-│   └── plans/                       # Design & implementation docs
-└── README.md
+│   ├── DEVELOPMENT.md               # Setup, running, testing guide
+│   ├── active/                      # Specs and plans for in-progress or planned work
+│   └── archive/                     # Specs and plans for completed enhancements
+└── .claude/
+    ├── CLAUDE.md                     # Project conventions and patterns
+    └── STATUS.md                     # Enhancement tracking (planned / in progress / completed)
 ```
 
 ## Getting Started
@@ -115,7 +108,7 @@ AGDevX.Cart/                          # Monorepo root
 
 ### Running Tests
 
-**Backend (134 tests):**
+**Backend:**
 ```bash
 cd backend
 dotnet test
@@ -129,123 +122,87 @@ npm run test:e2e              # Playwright E2E with mocks
 npm run test:integration      # Integration tests with real backend
 ```
 
-## Development
-
-### Backend Development
-
-```bash
-cd backend
-dotnet build                              # Build solution
-dotnet test                               # Run all tests
-dotnet run --project AGDevX.Cart.Api     # Run API
-```
-
-### Frontend Development
-
-```bash
-cd frontend
-npm run dev          # Dev server with HMR
-npm run build        # Production build
-npm run preview      # Preview production build
-npm test             # Run Vitest tests
-npm run test:ui      # Vitest UI
-npx playwright test  # Run E2E tests
-```
-
-### Code Quality
-
-**Backend:**
-- Follow .NET coding conventions
-- All public APIs must have XML documentation
-- Maintain test coverage for business logic
-
-**Frontend:**
-```bash
-cd frontend
-npm run lint         # ESLint
-npx tsc --noEmit     # TypeScript check
-```
-- Follows kebab-case for files/folders
-- Path aliases (@/apis, @/auth, etc.)
-- ESLint with TypeScript rules
-- All tests must pass before commit
-
 ## API Endpoints
 
+All endpoints use the `/api/v1/` prefix.
+
 ### Authentication
-- `POST /api/auth/register` - Register with email + password
-- `POST /api/auth/login` - Login with email + password
-- `POST /api/auth/logout` - Logout (clear session cookie)
-- `GET /api/auth/me` - Get current user info
+- `POST /api/v1/auth/register` - Register with email + password
+- `POST /api/v1/auth/login` - Login with email + password
+- `POST /api/v1/auth/logout` - Logout (clear session cookie)
+- `GET /api/v1/auth/me` - Get current user info
+- `PUT /api/v1/auth/profile` - Update user profile
+- `PUT /api/v1/auth/password` - Change password
 
 ### Households
-- `GET /api/household` - List user's households
-- `GET /api/household/{id}` - Get household by ID
-- `POST /api/household` - Create household
-- `PUT /api/household/{id}` - Update household
-- `DELETE /api/household/{id}` - Delete household (owner only)
-- `POST /api/households/join` - Join household with invite code
-- `GET /api/household/{id}/members` - List members
-- `DELETE /api/household/{id}/members/{userId}` - Remove member
-- `PUT /api/household/{id}/owner` - Transfer ownership
-- `GET /api/household/{id}/invite-code` - Get invite code
-- `POST /api/household/{id}/invite-code` - Regenerate invite code
+- `GET /api/v1/household` - List user's households
+- `GET /api/v1/household/{id}` - Get household by ID
+- `POST /api/v1/household` - Create household
+- `PUT /api/v1/household/{id}` - Update household
+- `DELETE /api/v1/household/{id}` - Delete household (owner only)
+- `POST /api/v1/households/join` - Join household with invite code
+- `GET /api/v1/household/{id}/members` - List members
+- `DELETE /api/v1/household/{id}/members/{userId}` - Remove member
+- `PUT /api/v1/household/{id}/owner` - Transfer ownership
+- `GET /api/v1/household/{id}/invite-code` - Get invite code
+- `POST /api/v1/household/{id}/invite-code` - Regenerate invite code
 
 ### Stores
-- `GET /api/store/household/{householdId}` - List household stores
-- `GET /api/store/personal` - List personal stores
-- `GET /api/store/{id}` - Get store by ID
-- `POST /api/store` - Create store
-- `PUT /api/store/{id}` - Update store
-- `DELETE /api/store/{id}` - Delete store
+- `GET /api/v1/store/household/{householdId}` - List household stores
+- `GET /api/v1/store/personal` - List personal stores
+- `GET /api/v1/store/{id}` - Get store by ID
+- `POST /api/v1/store` - Create store
+- `PUT /api/v1/store/{id}` - Update store
+- `DELETE /api/v1/store/{id}` - Delete store
 
 ### Inventory
-- `GET /api/inventory` - List all inventory items
-- `GET /api/inventory/household/{householdId}` - List household items
-- `GET /api/inventory/personal` - List personal items
-- `GET /api/inventory/merged/{householdId}` - List merged (personal + household) items
-- `GET /api/inventory/{id}` - Get item by ID
-- `POST /api/inventory` - Create inventory item
-- `PUT /api/inventory/{id}` - Update inventory item
-- `DELETE /api/inventory/{id}` - Delete inventory item
+- `GET /api/v1/inventory` - List all inventory items
+- `GET /api/v1/inventory/household/{householdId}` - List household items
+- `GET /api/v1/inventory/personal` - List personal items
+- `GET /api/v1/inventory/merged/{householdId}` - List merged (personal + household) items
+- `GET /api/v1/inventory/{id}` - Get item by ID
+- `POST /api/v1/inventory` - Create inventory item
+- `PUT /api/v1/inventory/{id}` - Update inventory item
+- `DELETE /api/v1/inventory/{id}` - Delete inventory item
 
 ### Trips
-- `GET /api/trip/user` - List user's trips
-- `GET /api/trip/household/{householdId}` - List household trips
-- `GET /api/trip/{id}` - Get trip details
-- `POST /api/trip` - Create trip
-- `PUT /api/trip/{id}` - Update trip
-- `DELETE /api/trip/{id}` - Delete trip (creator only)
-- `POST /api/trip/{id}/complete` - Mark trip completed
-- `POST /api/trip/{id}/reopen` - Reopen completed trip
-- `POST /api/trip/{id}/collaborators` - Add collaborator
-- `DELETE /api/trip/{id}/collaborators/{userId}` - Remove collaborator
+- `GET /api/v1/trip/user` - List user's trips
+- `GET /api/v1/trip/household/{householdId}` - List household trips
+- `GET /api/v1/trip/{id}` - Get trip details
+- `POST /api/v1/trip` - Create trip
+- `PUT /api/v1/trip/{id}` - Update trip
+- `DELETE /api/v1/trip/{id}` - Delete trip (creator only)
+- `POST /api/v1/trip/{id}/start` - Start trip (planning → active)
+- `POST /api/v1/trip/{id}/complete` - Mark trip completed
+- `POST /api/v1/trip/{id}/reopen` - Reopen completed trip
+- `POST /api/v1/trip/{id}/collaborators` - Add collaborator
+- `DELETE /api/v1/trip/{id}/collaborators/{userId}` - Remove collaborator
 
 ### Trip Items
-- `GET /api/tripitem/trip/{tripId}` - List items for a trip
-- `GET /api/tripitem/{id}` - Get trip item by ID
-- `POST /api/tripitem` - Add item to trip
-- `PUT /api/tripitem/{id}` - Update trip item
-- `DELETE /api/tripitem/{id}` - Delete trip item
-- `POST /api/tripitem/{id}/check` - Check item off
-- `POST /api/tripitem/{id}/uncheck` - Uncheck item
+- `GET /api/v1/tripitem/trip/{tripId}` - List items for a trip
+- `GET /api/v1/tripitem/{id}` - Get trip item by ID
+- `POST /api/v1/tripitem/trip/{tripId}` - Add item to trip
+- `PUT /api/v1/tripitem/{id}` - Update trip item
+- `DELETE /api/v1/tripitem/{id}` - Delete trip item
+- `POST /api/v1/tripitem/{id}/check` - Check item off
+- `POST /api/v1/tripitem/{id}/uncheck` - Uncheck item
 
 ### Real-Time Events
-- `GET /api/trips/{tripId}/events` - SSE endpoint for trip updates
+- `GET /api/v1/trips/{tripId}/events` - SSE endpoint for trip updates
 
 ## Documentation
 
 - **[Development Guide](docs/DEVELOPMENT.md)** - Setup, running, testing, troubleshooting
 - **[Integration Tests](frontend/e2e-integration/README.md)** - Full-stack integration testing
-- **`docs/plans/`** - Design documents and implementation plans
-- **`.claude/NOTES.md`** - Project status and history
+- **[Enhancement Tracking](.claude/STATUS.md)** - Planned, in progress, and completed enhancements
+- **[Archive](docs/archive/)** - Design specs and implementation plans for all completed work
 
 ## Contributing
 
 This is a personal project but follows standard practices:
 - TDD workflow (test first, then implement)
 - Conventional commits (`feat:`, `fix:`, `refactor:`, `docs:`)
-- Feature branches prefixed with `ag/`
+- Feature branches
 - Never commit directly to `main`
 
 ## License
