@@ -24,6 +24,12 @@ body {
   color: var(--color-text);
 }
 
+/* Tailwind's preflight can leave caret-color unset or inheriting from a context
+   that makes it invisible. This ensures a consistent visible caret in all inputs. */
+input, textarea, select {
+  caret-color: var(--color-navy);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
