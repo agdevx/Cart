@@ -158,9 +158,9 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    //== Open kebab menu on the first store
+    //== Personal section is first; household stores follow. Costco is the 2nd kebab button (index 1).
     const kebabButtons = screen.getAllByLabelText('Store actions')
-    fireEvent.click(kebabButtons[0])
+    fireEvent.click(kebabButtons[1])
 
     //== Click Edit from the dropdown menu
     fireEvent.click(screen.getByText('Edit'))
@@ -187,9 +187,9 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    //== Open kebab menu and click Edit
+    //== Personal section is first; Costco is the 2nd kebab button (index 1)
     const kebabButtons = screen.getAllByLabelText('Store actions')
-    fireEvent.click(kebabButtons[0])
+    fireEvent.click(kebabButtons[1])
     fireEvent.click(screen.getByText('Edit'))
 
     const editInput = screen.getByLabelText('Edit store name')
@@ -210,9 +210,9 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    //== Open kebab menu and click Edit
+    //== Personal section is first; Costco is the 2nd kebab button (index 1)
     const kebabButtons = screen.getAllByLabelText('Store actions')
-    fireEvent.click(kebabButtons[0])
+    fireEvent.click(kebabButtons[1])
     fireEvent.click(screen.getByText('Edit'))
 
     //== Cancel button should be visible in edit form
@@ -254,9 +254,9 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    //== Open kebab menu and click Delete
+    //== Personal section is first; Costco is the 2nd kebab button (index 1)
     const kebabButtons = screen.getAllByLabelText('Store actions')
-    fireEvent.click(kebabButtons[0])
+    fireEvent.click(kebabButtons[1])
     fireEvent.click(screen.getByText('Delete'))
 
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
@@ -271,9 +271,9 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    //== Open kebab menu on the first store and click Edit
+    //== Personal section is first; Costco is the 2nd kebab button (index 1)
     const kebabButtons = screen.getAllByLabelText('Store actions')
-    fireEvent.click(kebabButtons[0])
+    fireEvent.click(kebabButtons[1])
     fireEvent.click(screen.getByText('Edit'))
 
     //== Expandable form appears below store row (NOT inline name replacement)
@@ -302,9 +302,9 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    //== Open edit form on Costco (household store)
+    //== Personal section is first; Costco is the 2nd kebab button (index 1)
     const kebabButtons = screen.getAllByLabelText('Store actions')
-    fireEvent.click(kebabButtons[0])
+    fireEvent.click(kebabButtons[1])
     fireEvent.click(screen.getByText('Edit'))
 
     //== Change name
@@ -336,9 +336,9 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    //== Open edit form on Corner Market (personal store — it's the 3rd kebab button)
+    //== Personal section is first; Corner Market is the 1st kebab button (index 0)
     const kebabButtons = screen.getAllByLabelText('Store actions')
-    fireEvent.click(kebabButtons[2])
+    fireEvent.click(kebabButtons[0])
     fireEvent.click(screen.getByText('Edit'))
 
     //== Change scope from personal to household

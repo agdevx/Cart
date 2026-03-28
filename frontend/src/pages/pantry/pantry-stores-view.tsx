@@ -13,6 +13,7 @@ import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
 import { SectionHeader } from '@/shared/section-header'
+import { sortHouseholds } from '@/utils/sort-households'
 import { sortStores } from '@/utils/sort-stores'
 
 import type { PantryStoreFormData } from './pantry-store-form'
@@ -210,8 +211,20 @@ export const PantryStoresView = () => {
         />
       )}
 
-      {/* Household store sections */}
-      {(households || []).map((household) => {
+      {/* Personal stores section — always first */}
+      {personalStores.length > 0 && (
+        <div className="mb-6">
+          <div className="mt-4">
+            <SectionHeader title="Personal Stores" />
+          </div>
+          <div className="space-y-2">
+            {personalStores.map(renderStoreRow)}
+          </div>
+        </div>
+      )}
+
+      {/* Household store sections — sorted alphabetically by household name */}
+      {sortHouseholds(households || []).map((household) => {
         const householdStores = householdStoresMap.get(household.id) || []
         if (householdStores.length === 0) {
           return null
@@ -227,18 +240,6 @@ export const PantryStoresView = () => {
           </div>
         )
       })}
-
-      {/* Personal stores section */}
-      {personalStores.length > 0 && (
-        <div className="mb-6">
-          <div className="mt-4">
-            <SectionHeader title="Personal Stores" />
-          </div>
-          <div className="space-y-2">
-            {personalStores.map(renderStoreRow)}
-          </div>
-        </div>
-      )}
 
       {/* Delete confirmation modal */}
       {deleteConfirm && (

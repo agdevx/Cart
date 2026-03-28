@@ -20,6 +20,7 @@ import { DropdownMenu } from '@/shared/dropdown-menu'
 import { EmptyState } from '@/shared/empty-state'
 import { SectionHeader } from '@/shared/section-header'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
+import { sortHouseholds } from '@/utils/sort-households'
 import { sortItems } from '@/utils/sort-items'
 
 import type { PantryItemFormData } from './pantry-item-form'
@@ -257,7 +258,17 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
     return (
       <div className="animate-fade-in">
         {createForm}
-        {(households || []).map((household) => {
+
+        {personalItems.length > 0 && (
+          <div className="mb-6">
+            <SectionHeader title="Personal Items" />
+            <div className="space-y-2">
+              {personalItems.map(renderItem)}
+            </div>
+          </div>
+        )}
+
+        {sortHouseholds(households || []).map((household) => {
           const householdItems = householdItemsMap.get(household.id) || []
           if (householdItems.length === 0) return null
           return (
@@ -269,15 +280,6 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
             </div>
           )
         })}
-
-        {personalItems.length > 0 && (
-          <div className="mb-6">
-            <SectionHeader title="Personal Items" />
-            <div className="space-y-2">
-              {personalItems.map(renderItem)}
-            </div>
-          </div>
-        )}
 
         {deleteConfirm && (
           <ConfirmDialog
