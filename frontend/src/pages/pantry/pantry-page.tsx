@@ -11,6 +11,7 @@ import type { InventoryFilter } from '@/pages/pantry/pantry-items-view'
 import { PantryItemsView } from '@/pages/pantry/pantry-items-view'
 import { PantryStoresView } from '@/pages/pantry/pantry-stores-view'
 import { PageHeader } from '@/shared/page-header'
+import { sortHouseholds } from '@/utils/sort-households'
 
 type InventoryTab = 'items' | 'stores'
 
@@ -23,7 +24,7 @@ export const PantryPage = () => {
   const hasItems = (allItems?.length ?? 0) > 0
 
   const sortedHouseholds = useMemo(
-    () => [...(households || [])].sort((a, b) => (a.name || '').localeCompare(b.name || '')),
+    () => sortHouseholds(households || []),
     [households]
   )
 
