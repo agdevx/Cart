@@ -130,8 +130,8 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
               className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('newPassword')}`}
               autoComplete="new-password"
             />
+            <PasswordCriteria password={newPassword} />
           </FormField>
-          <PasswordCriteria password={newPassword} />
         </div>
         <FormField label="Confirm New Password" htmlFor="security-confirm-password" error={errors.confirmPassword} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
           <input
