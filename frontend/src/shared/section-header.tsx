@@ -1,9 +1,11 @@
 // ABOUTME: Section divider with uppercase title and horizontal rule
 // ABOUTME: Used across shopping, pantry, household, and trip pages for grouping content
 
+import type { ReactNode } from 'react'
+
 interface SectionHeaderProps {
   readonly title: string
-  readonly action?: React.ReactNode
+  readonly action?: ReactNode
 }
 
 export const SectionHeader = ({ title, action }: SectionHeaderProps) => (
