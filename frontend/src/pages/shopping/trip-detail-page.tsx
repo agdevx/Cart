@@ -13,14 +13,13 @@ import { useStartTripMutation } from '@/apis/agdevx-cart-api/trip/start-trip.mut
 import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
-import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
 import { activeTripPath, ROUTES, tripAddItemsPath } from '@/routes'
+import { useStoreAccordionState } from '@/services/use-store-accordion-state.service'
+import { EmptyState } from '@/shared/empty-state'
+import { Spinner } from '@/shared/spinner'
+import { StoreAccordion } from '@/shared/store-accordion'
+import { TripItemRow } from '@/shared/trip-item-row'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
-
-import { EmptyState } from './components/empty-state'
-import { Spinner } from './components/spinner'
-import { StoreAccordion } from './components/store-accordion'
-import { TripItemRow } from './components/trip-item-row'
 
 export const TripDetailPage = () => {
   const { tripId } = useParams<{ tripId: string }>()

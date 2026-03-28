@@ -4,10 +4,9 @@
 import { useMemo, useState } from 'react'
 
 import { useChangePasswordMutation } from '@/apis/agdevx-cart-api/auth/change-password.mutation'
-import { useFieldValidation } from '@/hooks/use-field-validation'
+import { useFieldValidation } from '@/services/use-field-validation.service'
+import { Spinner } from '@/shared/spinner'
 import { isRequired, matchesField, maxLength, minLength, passwordStrength } from '@/utils/validation-rules'
-
-import { Spinner } from './spinner'
 
 interface SecuritySectionProps {
   isEditing: boolean

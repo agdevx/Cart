@@ -8,11 +8,10 @@ import { ShoppingCart } from 'lucide-react'
 
 import { useLoginMutation } from '@/apis/agdevx-cart-api/auth/login.mutation'
 import { useAuth } from '@/auth/use-auth'
-import { useFieldValidation } from '@/hooks/use-field-validation'
 import { ROUTES } from '@/routes'
+import { useFieldValidation } from '@/services/use-field-validation.service'
+import { Spinner } from '@/shared/spinner'
 import { isEmail, isRequired } from '@/utils/validation-rules'
-
-import { Spinner } from './components/spinner'
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('')

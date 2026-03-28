@@ -12,16 +12,15 @@ import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.m
 import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
 import { useAuth } from '@/auth/use-auth'
-import { useFieldValidation } from '@/hooks/use-field-validation'
 import { tripDetailPath } from '@/routes'
+import { useFieldValidation } from '@/services/use-field-validation.service'
+import { ConfirmDialog } from '@/shared/confirm-dialog'
+import { EmptyState } from '@/shared/empty-state'
+import { PageHeader } from '@/shared/page-header'
+import { Spinner } from '@/shared/spinner'
+import { TripCard } from '@/shared/trip-card'
 import { getGreeting } from '@/utils/greeting'
 import { isRequired } from '@/utils/validation-rules'
-
-import { ConfirmDialog } from './components/confirm-dialog'
-import { EmptyState } from './components/empty-state'
-import { PageHeader } from './components/page-header'
-import { Spinner } from './components/spinner'
-import { TripCard } from './components/trip-card'
 
 export const ShoppingPage = () => {
   const navigate = useNavigate()

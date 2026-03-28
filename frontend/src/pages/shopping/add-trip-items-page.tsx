@@ -13,10 +13,9 @@ import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-ite
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { tripDetailPath } from '@/routes'
+import { EmptyState } from '@/shared/empty-state'
+import { Spinner } from '@/shared/spinner'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
-
-import { EmptyState } from './components/empty-state'
-import { Spinner } from './components/spinner'
 
 type SourceFilter = 'all' | 'personal' | string
 

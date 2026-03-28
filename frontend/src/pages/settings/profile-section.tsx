@@ -6,10 +6,9 @@ import { useMemo, useState } from 'react'
 import type { UpdateProfileResponse } from '@/apis/agdevx-cart-api/auth/update-profile.mutation'
 import { useUpdateProfileMutation } from '@/apis/agdevx-cart-api/auth/update-profile.mutation'
 import type { User } from '@/apis/agdevx-cart-api/models/user'
-import { useFieldValidation } from '@/hooks/use-field-validation'
+import { useFieldValidation } from '@/services/use-field-validation.service'
+import { Spinner } from '@/shared/spinner'
 import { isEmail, isRequired, maxLength } from '@/utils/validation-rules'
-
-import { Spinner } from './spinner'
 
 interface ProfileSectionProps {
   user: User

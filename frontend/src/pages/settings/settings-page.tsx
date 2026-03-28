@@ -7,10 +7,10 @@ import { LogOut } from 'lucide-react'
 
 import type { UpdateProfileResponse } from '@/apis/agdevx-cart-api/auth/update-profile.mutation'
 import { useAuth } from '@/auth/use-auth'
+import { PageHeader } from '@/shared/page-header'
 
-import { PageHeader } from './components/page-header'
-import { ProfileSection } from './components/profile-section'
-import { SecuritySection } from './components/security-section'
+import { ProfileSection } from './profile-section'
+import { SecuritySection } from './security-section'
 
 type EditingSection = 'none' | 'profile' | 'password'
 

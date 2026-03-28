@@ -9,11 +9,10 @@ import { ShoppingCart } from 'lucide-react';
 import { useRegisterMutation } from '@/apis/agdevx-cart-api/auth/register.mutation';
 import { ApiError } from '@/apis/api-error';
 import { useAuth } from '@/auth/use-auth';
-import { useFieldValidation } from '@/hooks/use-field-validation';
 import { ROUTES } from '@/routes';
+import { useFieldValidation } from '@/services/use-field-validation.service';
+import { Spinner } from '@/shared/spinner';
 import { isEmail, isRequired, matchesField, maxLength, minLength, passwordStrength } from '@/utils/validation-rules';
-
-import { Spinner } from './components/spinner';
 
 export const RegisterPage = () => {
   const [email, setEmail] = useState('');

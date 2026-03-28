@@ -33,7 +33,7 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
-vi.mock('@/hooks/use-sse', () => ({
+vi.mock('@/services/use-sse.service', () => ({
   useSSE: vi.fn(),
 }))
 

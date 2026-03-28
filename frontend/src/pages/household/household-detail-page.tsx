@@ -16,8 +16,7 @@ import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-h
 import { useInviteCodeQuery } from '@/apis/agdevx-cart-api/household/use-invite-code.query'
 import { useAuth } from '@/auth/use-auth'
 import { ROUTES } from '@/routes'
-
-import { ConfirmDialog } from './components/confirm-dialog'
+import { ConfirmDialog } from '@/shared/confirm-dialog'
 
 export const HouseholdDetailPage = () => {
   const { id: householdId } = useParams<{ id: string }>()

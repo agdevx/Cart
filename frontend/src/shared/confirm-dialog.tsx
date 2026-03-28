@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { useFocusTrap } from '@/hooks/use-focus-trap'
+import { useFocusTrap } from '@/services/use-focus-trap.service'
 
 interface ConfirmDialogProps {
   title: string

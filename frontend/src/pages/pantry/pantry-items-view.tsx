@@ -15,15 +15,14 @@ import { useMergedInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-me
 import { usePersonalInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-personal-inventory.query'
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
-import { useFieldValidation } from '@/hooks/use-field-validation'
+import { useFieldValidation } from '@/services/use-field-validation.service'
+import { ConfirmDialog } from '@/shared/confirm-dialog'
+import { DropdownMenu } from '@/shared/dropdown-menu'
+import { EmptyState } from '@/shared/empty-state'
+import { ScopeSelect } from '@/shared/scope-select'
+import { Spinner } from '@/shared/spinner'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 import { isRequired, maxLength } from '@/utils/validation-rules'
-
-import { ConfirmDialog } from './components/confirm-dialog'
-import { DropdownMenu } from './components/dropdown-menu'
-import { EmptyState } from './components/empty-state'
-import { ScopeSelect } from './components/scope-select'
-import { Spinner } from './components/spinner'
 
 export type InventoryFilter = 'all' | 'personal' | `household:${string}` | `merged:${string}`
 

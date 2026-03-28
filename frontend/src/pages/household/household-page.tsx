@@ -10,9 +10,8 @@ import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-h
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useAuth } from '@/auth/use-auth'
 import { householdDetailPath, ROUTES } from '@/routes'
-
-import { EmptyState } from './components/empty-state'
-import { PageHeader } from './components/page-header'
+import { EmptyState } from '@/shared/empty-state'
+import { PageHeader } from '@/shared/page-header'
 
 const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
   const { user } = useAuth()

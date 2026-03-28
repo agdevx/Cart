@@ -37,6 +37,7 @@
       "@/models/*": ["src/models/*"],
       "@/pages/*": ["src/pages/*"],
       "@/services/*": ["src/services/*"],
+      "@/shared/*": ["src/shared/*"],
       "@/state/*": ["src/state/*"],
       "@/styles/*": ["src/styles/*"],
       "@/utilities/*": ["src/utilities/*"],

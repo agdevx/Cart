@@ -5,12 +5,11 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useCreateHouseholdMutation } from '@/apis/agdevx-cart-api/household/create-household.mutation'
-import { useFieldValidation } from '@/hooks/use-field-validation'
 import { ROUTES } from '@/routes'
+import { useFieldValidation } from '@/services/use-field-validation.service'
+import { Spinner } from '@/shared/spinner'
 import { getErrorMessage } from '@/utilities/error-messages'
 import { isRequired, maxLength } from '@/utils/validation-rules'
-
-import { Spinner } from './components/spinner'
 
 export const CreateHouseholdPage = () => {
   const [name, setName] = useState('')

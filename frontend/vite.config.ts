@@ -65,6 +65,7 @@ export default defineConfig({
       '@/models': path.resolve(__dirname, './src/models'),
       '@/pages': path.resolve(__dirname, './src/pages'),
       '@/services': path.resolve(__dirname, './src/services'),
+      '@/shared': path.resolve(__dirname, './src/shared'),
       '@/state': path.resolve(__dirname, './src/state'),
       '@/styles': path.resolve(__dirname, './src/styles'),
       '@/utilities': path.resolve(__dirname, './src/utilities'),

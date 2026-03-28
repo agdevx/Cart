@@ -15,17 +15,16 @@ import { useDeleteTripItemMutation } from '@/apis/agdevx-cart-api/trip/delete-tr
 import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
-import { useSSE } from '@/hooks/use-sse'
-import { useStoreAccordionState } from '@/hooks/use-store-accordion-state'
 import { ROUTES, tripDetailPath } from '@/routes'
+import { useSSE } from '@/services/use-sse.service'
+import { useStoreAccordionState } from '@/services/use-store-accordion-state.service'
+import { ConfirmDialog } from '@/shared/confirm-dialog'
+import { EmptyState } from '@/shared/empty-state'
+import { Spinner } from '@/shared/spinner'
+import { StoreAccordion } from '@/shared/store-accordion'
+import { TripItemRow } from '@/shared/trip-item-row'
 import { fireCompletionConfetti } from '@/utils/confetti'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
-
-import { ConfirmDialog } from './components/confirm-dialog'
-import { EmptyState } from './components/empty-state'
-import { Spinner } from './components/spinner'
-import { StoreAccordion } from './components/store-accordion'
-import { TripItemRow } from './components/trip-item-row'
 
 export const ActiveTripPage = () => {
   const { tripId } = useParams<{ tripId: string }>()

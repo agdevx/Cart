@@ -10,13 +10,12 @@ import { useCreateStoreMutation } from '@/apis/agdevx-cart-api/store/create-stor
 import { useDeleteStoreMutation } from '@/apis/agdevx-cart-api/store/delete-store.mutation'
 import { useUpdateStoreMutation } from '@/apis/agdevx-cart-api/store/update-store.mutation'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
-import { useFieldValidation } from '@/hooks/use-field-validation'
+import { useFieldValidation } from '@/services/use-field-validation.service'
+import { ConfirmDialog } from '@/shared/confirm-dialog'
+import { EmptyState } from '@/shared/empty-state'
+import { ScopeSelect } from '@/shared/scope-select'
+import { Spinner } from '@/shared/spinner'
 import { isRequired, maxLength } from '@/utils/validation-rules'
-
-import { ConfirmDialog } from './components/confirm-dialog'
-import { EmptyState } from './components/empty-state'
-import { ScopeSelect } from './components/scope-select'
-import { Spinner } from './components/spinner'
 
 export const PantryStoresView = () => {
   const { data: households, isLoading: householdsLoading } = useHouseholdsQuery()

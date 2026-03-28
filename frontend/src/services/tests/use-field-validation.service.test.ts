@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 
 import { isEmail, isRequired } from '@/utils/validation-rules'
 
-import { useFieldValidation } from '../use-field-validation'
+import { useFieldValidation } from '../use-field-validation.service'
 
 const schema = {
   name: [isRequired('Name')],
