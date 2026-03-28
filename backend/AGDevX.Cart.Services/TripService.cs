@@ -100,9 +100,13 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
         var trip = await tripRepository.GetById(tripId, cancellationToken)
                         ?? throw new KeyNotFoundException("Trip not found");
 
-        //== Set IsStarted and StartedAt timestamp
         trip.IsStarted = true;
-        trip.StartedAt = DateTime.UtcNow;
+
+        //== Only set StartedAt on first start — historical timestamp
+        if (!trip.StartedAt.HasValue)
+        {
+            trip.StartedAt = DateTime.UtcNow;
+        }
 
         return await tripRepository.Update(trip, cancellationToken);
     }
@@ -119,9 +123,13 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
         var trip = await tripRepository.GetById(tripId, cancellationToken)
                         ?? throw new KeyNotFoundException("Trip not found");
 
-        //== Set IsCompleted and CompletedAt timestamp
         trip.IsCompleted = true;
-        trip.CompletedAt = DateTime.UtcNow;
+
+        //== Only set CompletedAt on first completion — historical timestamp
+        if (!trip.CompletedAt.HasValue)
+        {
+            trip.CompletedAt = DateTime.UtcNow;
+        }
 
         return await tripRepository.Update(trip, cancellationToken);
     }
@@ -138,11 +146,9 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
         var trip = await tripRepository.GetById(tripId, cancellationToken)
                         ?? throw new KeyNotFoundException("Trip not found");
 
-        //== Reset completion and started state when reopening
+        //== Reset status flags but preserve StartedAt and CompletedAt — historical records
         trip.IsCompleted = false;
-        trip.CompletedAt = null;
         trip.IsStarted = false;
-        trip.StartedAt = null;
 
         return await tripRepository.Update(trip, cancellationToken);
     }

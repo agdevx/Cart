@@ -284,7 +284,7 @@ public class TripServiceTests
 
         // Assert
         result.IsCompleted.Should().BeFalse();
-        result.CompletedAt.Should().BeNull();
+        result.CompletedAt.Should().NotBeNull("CompletedAt is a historical record and is preserved on reopen");
     }
 
     [Fact]
@@ -475,9 +475,9 @@ public class TripServiceTests
 
         // Assert
         result.IsStarted.Should().BeFalse();
-        result.StartedAt.Should().BeNull();
+        result.StartedAt.Should().NotBeNull("StartedAt is a historical record and is preserved on reopen");
         result.IsCompleted.Should().BeFalse();
-        result.CompletedAt.Should().BeNull();
+        result.CompletedAt.Should().NotBeNull("CompletedAt is a historical record and is preserved on reopen");
     }
 
     [Fact]
