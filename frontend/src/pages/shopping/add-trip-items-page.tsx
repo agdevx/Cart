@@ -16,6 +16,7 @@ import { tripDetailPath } from '@/routes'
 import { EmptyState } from '@/shared/empty-state'
 import { ScopeFilter } from '@/shared/scope-filter'
 import { Spinner } from '@/shared/spinner'
+import { StoreFilter } from '@/shared/store-filter'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 import { sortItems } from '@/utils/sort-items'
 
@@ -208,37 +209,12 @@ export const AddTripItemsPage = () => {
         />
 
         {/* Store filter */}
-        <div className="overflow-x-auto">
-          <div role="tablist" className="flex bg-bg-warm rounded-xl p-1">
-            <button
-              role="tab"
-              aria-selected={storeFilter === 'all'}
-              onClick={() => setStoreFilter('all')}
-              className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-                storeFilter === 'all'
-                  ? 'bg-teal text-white shadow-sm'
-                  : 'text-text-secondary hover:text-navy'
-              }`}
-            >
-              All
-            </button>
-            {filteredStores.map((store) => (
-              <button
-                key={store.id}
-                role="tab"
-                aria-selected={storeFilter === store.id}
-                onClick={() => setStoreFilter(store.id)}
-                className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-                  storeFilter === store.id
-                    ? 'bg-teal text-white shadow-sm'
-                    : 'text-text-secondary hover:text-navy'
-                }`}
-              >
-                {storeDisplayNames.get(store.id) ?? store.name}
-              </button>
-            ))}
-          </div>
-        </div>
+        <StoreFilter
+          value={storeFilter}
+          onChange={setStoreFilter}
+          stores={filteredStores}
+          storeDisplayNames={storeDisplayNames}
+        />
       </div>
 
       {/* Item list */}
