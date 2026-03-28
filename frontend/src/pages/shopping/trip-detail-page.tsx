@@ -16,6 +16,7 @@ import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.qu
 import { activeTripPath, ROUTES, tripAddItemsPath } from '@/routes'
 import { useStoreAccordionState } from '@/services/use-store-accordion-state.service'
 import { EmptyState } from '@/shared/empty-state'
+import { SectionHeader } from '@/shared/section-header'
 import { Spinner } from '@/shared/spinner'
 import { StoreAccordion } from '@/shared/store-accordion'
 import { TripItemRow } from '@/shared/trip-item-row'
@@ -128,10 +129,7 @@ export const TripDetailPage = () => {
       )}
 
       <div className="mb-4">
-        <div className="flex items-center gap-2.5 mb-3">
-          <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Shopping List</span>
-          <span className="flex-1 h-px bg-navy/8" />
-        </div>
+        <SectionHeader title="Shopping List" />
 
         {!readOnly && tripItems && tripItems.length > 0 && (
           <button

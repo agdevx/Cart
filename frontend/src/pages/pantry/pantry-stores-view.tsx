@@ -14,6 +14,7 @@ import { useFieldValidation } from '@/services/use-field-validation.service'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
 import { ScopeSelect } from '@/shared/scope-select'
+import { SectionHeader } from '@/shared/section-header'
 import { Spinner } from '@/shared/spinner'
 import { sortStores } from '@/utils/sort-stores'
 import { isRequired, maxLength } from '@/utils/validation-rules'
@@ -354,9 +355,8 @@ export const PantryStoresView = () => {
         }
         return (
           <div key={household.id} className="mb-6">
-            <div className="flex items-center gap-2.5 mt-4 mb-3">
-              <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">{household.name}</span>
-              <span className="flex-1 h-px bg-navy/8" />
+            <div className="mt-4">
+              <SectionHeader title={household.name} />
             </div>
             <div className="space-y-2">
               {householdStores.map(renderStoreRow)}
@@ -368,9 +368,8 @@ export const PantryStoresView = () => {
       {/* Personal stores section */}
       {personalStores.length > 0 && (
         <div className="mb-6">
-          <div className="flex items-center gap-2.5 mt-4 mb-3">
-            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Personal Stores</span>
-            <span className="flex-1 h-px bg-navy/8" />
+          <div className="mt-4">
+            <SectionHeader title="Personal Stores" />
           </div>
           <div className="space-y-2">
             {personalStores.map(renderStoreRow)}

@@ -17,6 +17,7 @@ import { useFieldValidation } from '@/services/use-field-validation.service'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
 import { PageHeader } from '@/shared/page-header'
+import { SectionHeader } from '@/shared/section-header'
 import { Spinner } from '@/shared/spinner'
 import { TripCard } from '@/shared/trip-card'
 import { getGreeting } from '@/utils/greeting'
@@ -170,9 +171,8 @@ export const ShoppingPage = () => {
       {/* In Progress section */}
       {inProgressTrips.length > 0 && (
         <div className="mb-6">
-          <div className="flex items-center gap-2.5 mt-6 mb-3">
-            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">In Progress</span>
-            <span className="flex-1 h-px bg-navy/8" />
+          <div className="mt-6">
+            <SectionHeader title="In Progress" />
           </div>
           <div className="space-y-3">
             {inProgressTrips.map((trip) => (
@@ -185,9 +185,8 @@ export const ShoppingPage = () => {
       {/* Planning section */}
       {planningTrips.length > 0 && (
         <div className="mb-6">
-          <div className="flex items-center gap-2.5 mt-6 mb-3">
-            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Planning</span>
-            <span className="flex-1 h-px bg-navy/8" />
+          <div className="mt-6">
+            <SectionHeader title="Planning" />
           </div>
           <div className="space-y-3">
             {planningTrips.map((trip) => (
@@ -202,13 +201,12 @@ export const ShoppingPage = () => {
         <div className="mt-6">
           <button
             onClick={() => setShowCompleted(!showCompleted)}
-            className="flex items-center gap-2.5 w-full mb-3"
+            className="w-full"
           >
-            <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">
-              Completed ({completedTrips.length})
-            </span>
-            <span className="flex-1 h-px bg-navy/8" />
-            <ChevronDown className={`w-4 h-4 text-text-tertiary transition-transform ${showCompleted ? 'rotate-180' : ''}`} />
+            <SectionHeader
+              title={`Completed (${completedTrips.length})`}
+              action={<ChevronDown className={`w-4 h-4 text-text-tertiary transition-transform ${showCompleted ? 'rotate-180' : ''}`} />}
+            />
           </button>
           <div className={`grid transition-all duration-200 ${showCompleted ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
             <div className="overflow-hidden">

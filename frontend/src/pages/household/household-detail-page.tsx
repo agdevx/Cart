@@ -17,6 +17,7 @@ import { useInviteCodeQuery } from '@/apis/agdevx-cart-api/household/use-invite-
 import { useAuth } from '@/auth/use-auth'
 import { ROUTES } from '@/routes'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
+import { SectionHeader } from '@/shared/section-header'
 
 export const HouseholdDetailPage = () => {
   const { id: householdId } = useParams<{ id: string }>()
@@ -210,12 +211,7 @@ export const HouseholdDetailPage = () => {
 
       {/* Members List */}
       <div className="mb-4">
-        <div className="flex items-center gap-2.5 mb-3">
-          <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">
-            Members ({members?.length || 0})
-          </span>
-          <span className="flex-1 h-px bg-navy/8" />
-        </div>
+        <SectionHeader title={`Members (${members?.length || 0})`} />
         <div className="space-y-2">
           {members?.map((member) => {
             const isSelf = member.userId === user?.id

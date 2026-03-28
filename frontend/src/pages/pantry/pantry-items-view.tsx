@@ -20,6 +20,7 @@ import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { DropdownMenu } from '@/shared/dropdown-menu'
 import { EmptyState } from '@/shared/empty-state'
 import { ScopeSelect } from '@/shared/scope-select'
+import { SectionHeader } from '@/shared/section-header'
 import { Spinner } from '@/shared/spinner'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 import { sortItems } from '@/utils/sort-items'
@@ -476,10 +477,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           if (householdItems.length === 0) return null
           return (
             <div key={household.id} className="mb-6">
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">{household.name}</span>
-                <span className="flex-1 h-px bg-navy/8" />
-              </div>
+              <SectionHeader title={household.name} />
               <div className="space-y-2">
                 {householdItems.map(renderItem)}
               </div>
@@ -489,10 +487,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
 
         {personalItems.length > 0 && (
           <div className="mb-6">
-            <div className="flex items-center gap-2.5 mb-3">
-              <span className="font-display text-xs font-semibold uppercase tracking-[2px] text-text-tertiary">Personal Items</span>
-              <span className="flex-1 h-px bg-navy/8" />
-            </div>
+            <SectionHeader title="Personal Items" />
             <div className="space-y-2">
               {personalItems.map(renderItem)}
             </div>
