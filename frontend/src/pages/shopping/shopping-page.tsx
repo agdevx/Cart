@@ -40,7 +40,11 @@ export const ShoppingPage = () => {
 
   const inProgressTrips = trips?.filter((trip) => trip.isStarted && !trip.isCompleted) || []
   const planningTrips = trips?.filter((trip) => !trip.isStarted && !trip.isCompleted) || []
-  const completedTrips = trips?.filter((trip) => trip.isCompleted) || []
+  const completedTrips = trips?.filter((trip) => trip.isCompleted)
+    .sort((a, b) => {
+      if (!a.completedAt || !b.completedAt) { return 0 }
+      return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+    }) || []
 
   const handleCreateTrip = async ({ name }: { name: string }) => {
     try {
