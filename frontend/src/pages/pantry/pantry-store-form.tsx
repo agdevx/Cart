@@ -127,6 +127,14 @@ export const EditPantryStoreForm = ({
   const [editingName, setEditingName] = useState(initialName)
   const [editingScope, setEditingScope] = useState<string>(initialScope)
 
+  const schema = useMemo(() => ({
+    name: [isRequired('Store name'), maxLength(100)],
+  }), [])
+
+  const values = useMemo(() => ({ name: editingName }), [editingName])
+
+  const { errors, handleBlur, handleChange, validateAll, isValid } = useFieldValidation(schema, values)
+
   const duplicateError = useMemo(() => {
     if (!editingName.trim() || !stores) return null
     const scopeStores = editingScope === 'personal'
@@ -139,7 +147,7 @@ export const EditPantryStoreForm = ({
   }, [editingName, editingScope, storeId, stores])
 
   const handleSubmit = () => {
-    if (!editingName.trim()) {
+    if (!validateAll()) {
       return
     }
 
@@ -151,14 +159,15 @@ export const EditPantryStoreForm = ({
 
   return (
     <div className="mt-2 p-5 bg-surface rounded-2xl shadow-sm">
-      <FormField label="Store Name" htmlFor={`editStoreName-${storeId}`} error={duplicateError ?? undefined}>
+      <FormField label="Store Name" htmlFor={`editStoreName-${storeId}`} error={errors.name ?? duplicateError ?? undefined}>
         <input
           id={`editStoreName-${storeId}`}
           type="text"
           value={editingName}
-          onChange={(e) => setEditingName(e.target.value)}
+          onChange={(e) => { setEditingName(e.target.value); handleChange('name', e.target.value) }}
+          onBlur={() => handleBlur('name')}
           aria-label="Edit store name"
-          className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${duplicateError ? 'border-coral border-2' : 'border-navy/10'}`}
+          className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${(errors.name || duplicateError) ? 'border-coral border-2' : 'border-navy/10'}`}
           autoFocus
         />
       </FormField>
@@ -179,7 +188,7 @@ export const EditPantryStoreForm = ({
         onCancel={onCancel}
         submitLabel="Save"
         isPending={isPending}
-        disabled={!editingName.trim() || !!duplicateError}
+        disabled={!isValid || !!duplicateError}
         type="button"
         onSubmit={handleSubmit}
       />
