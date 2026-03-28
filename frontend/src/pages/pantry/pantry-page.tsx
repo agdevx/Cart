@@ -11,6 +11,7 @@ import type { InventoryFilter } from '@/pages/pantry/pantry-items-view'
 import { PantryItemsView } from '@/pages/pantry/pantry-items-view'
 import { PantryStoresView } from '@/pages/pantry/pantry-stores-view'
 import { PageHeader } from '@/shared/page-header'
+import { ScopeFilter } from '@/shared/scope-filter'
 import { sortHouseholds } from '@/utils/sort-households'
 
 type InventoryTab = 'items' | 'stores'
@@ -63,46 +64,13 @@ export const PantryPage = () => {
 
       {/* Filter Tabs — Items tab only */}
       {activeTab === 'items' && (
-        <div role="tablist" aria-label="Filter inventory" className="flex bg-bg-warm rounded-xl p-1 mb-4 overflow-x-auto">
-          <button
-            role="tab"
-            aria-selected={filter === 'all'}
-            onClick={() => setFilter('all')}
-            className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-              filter === 'all'
-                ? 'bg-teal text-white shadow-sm'
-                : 'text-text-secondary hover:text-navy'
-            }`}
-          >
-            All
-          </button>
-          <button
-            role="tab"
-            aria-selected={filter === 'personal'}
-            onClick={() => setFilter('personal')}
-            className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-              filter === 'personal'
-                ? 'bg-teal text-white shadow-sm'
-                : 'text-text-secondary hover:text-navy'
-            }`}
-          >
-            Personal
-          </button>
-          {sortedHouseholds.map((household) => (
-            <button
-              key={household.id}
-              role="tab"
-              aria-selected={filter === `household:${household.id}`}
-              onClick={() => setFilter(`household:${household.id}`)}
-              className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-                filter === `household:${household.id}`
-                  ? 'bg-teal text-white shadow-sm'
-                  : 'text-text-secondary hover:text-navy'
-              }`}
-            >
-              {household.name}
-            </button>
-          ))}
+        <div className="mb-4">
+          <ScopeFilter
+            aria-label="Filter inventory"
+            value={filter === 'all' ? 'all' : filter === 'personal' ? 'personal' : filter.split(':')[1]}
+            onChange={(v) => setFilter(v === 'all' ? 'all' : v === 'personal' ? 'personal' : `household:${v}`)}
+            households={sortedHouseholds}
+          />
         </div>
       )}
 

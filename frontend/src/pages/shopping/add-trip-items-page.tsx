@@ -14,6 +14,7 @@ import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { tripDetailPath } from '@/routes'
 import { EmptyState } from '@/shared/empty-state'
+import { ScopeFilter } from '@/shared/scope-filter'
 import { Spinner } from '@/shared/spinner'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 import { sortItems } from '@/utils/sort-items'
@@ -200,49 +201,11 @@ export const AddTripItemsPage = () => {
       {/* Source and store filter toggles */}
       <div className="space-y-3 mb-4">
         {/* Source filter */}
-        <div className="overflow-x-auto">
-          <div role="tablist" className="flex bg-bg-warm rounded-xl p-1">
-            <button
-              role="tab"
-              aria-selected={sourceFilter === 'all'}
-              onClick={() => setSourceFilter('all')}
-              className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-                sourceFilter === 'all'
-                  ? 'bg-teal text-white shadow-sm'
-                  : 'text-text-secondary hover:text-navy'
-              }`}
-            >
-              All
-            </button>
-            <button
-              role="tab"
-              aria-selected={sourceFilter === 'personal'}
-              onClick={() => setSourceFilter('personal')}
-              className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-                sourceFilter === 'personal'
-                  ? 'bg-teal text-white shadow-sm'
-                  : 'text-text-secondary hover:text-navy'
-              }`}
-            >
-              Personal
-            </button>
-            {(households || []).map((household) => (
-              <button
-                key={household.id}
-                role="tab"
-                aria-selected={sourceFilter === household.id}
-                onClick={() => setSourceFilter(household.id)}
-                className={`flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
-                  sourceFilter === household.id
-                    ? 'bg-teal text-white shadow-sm'
-                    : 'text-text-secondary hover:text-navy'
-                }`}
-              >
-                {household.name}
-              </button>
-            ))}
-          </div>
-        </div>
+        <ScopeFilter
+          value={sourceFilter}
+          onChange={setSourceFilter}
+          households={households}
+        />
 
         {/* Store filter */}
         <div className="overflow-x-auto">
