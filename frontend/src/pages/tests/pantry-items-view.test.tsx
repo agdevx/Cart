@@ -554,9 +554,15 @@ describe('PantryItemsView', () => {
 
       const user = userEvent.setup()
 
+      //== filter='all' leaves scope blank — user must select one before submitting
       renderView('all', { showCreateForm: true, onCloseCreateForm: mockOnClose })
 
       await user.type(screen.getByLabelText('Item Name'), 'Bananas')
+
+      //== Select personal scope to enable submit
+      await user.click(screen.getByLabelText('Scope'))
+      await user.click(screen.getByRole('button', { name: 'Personal' }))
+
       await user.click(screen.getByRole('button', { name: 'Create' }))
 
       await waitFor(() => {
@@ -624,10 +630,15 @@ describe('PantryItemsView', () => {
 
       const user = userEvent.setup()
 
+      //== filter='all' leaves scope blank — select personal first so the personal store appears
       renderView('all', { showCreateForm: true })
 
       await user.type(screen.getByLabelText('Item Name'), 'Eggs')
       await user.type(screen.getByLabelText('Notes (optional)'), 'Free range')
+
+      //== Select personal scope to populate the store list
+      await user.click(screen.getByLabelText('Scope'))
+      await user.click(screen.getByRole('button', { name: 'Personal' }))
 
       //== Select a default store (s2 is the personal store "Corner Market")
       const storeSelect = screen.getByLabelText('Default Store (optional)')

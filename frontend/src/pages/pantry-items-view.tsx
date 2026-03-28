@@ -154,6 +154,20 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
     return stores.filter((s) => s.householdId === editScope)
   }, [stores, editScope])
 
+  //== When the create form opens, default itemScope based on the active filter so the user
+  //== doesn't have to manually set it. Empty string means "All" filter — scope must be chosen.
+  useEffect(() => {
+    if (showCreateForm) {
+      if (filter === 'personal') {
+        setItemScope('personal')
+      } else if (filter.startsWith('household:')) {
+        setItemScope(filter.split(':')[1])
+      } else {
+        setItemScope('')
+      }
+    }
+  }, [showCreateForm, filter])
+
   useEffect(() => {
     if (!menuOpenId) return
     const handleMouseDown = (e: MouseEvent) => {
@@ -295,7 +309,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
         </button>
         <button
           type="submit"
-          disabled={createMutation.isPending || !isCreateValid}
+          disabled={createMutation.isPending || !isCreateValid || itemScope === ''}
           className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
         >
           {createMutation.isPending ? <Spinner /> : 'Create'}

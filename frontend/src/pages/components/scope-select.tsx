@@ -37,6 +37,10 @@ export const ScopeSelect = ({ value, onChange, personalLabel, households, househ
   }, [isOpen])
 
   const getSelectedLabel = () => {
+    if (value === '') {
+      return <span className="text-text-tertiary">Select scope...</span>
+    }
+
     if (value === 'personal') {
       return personalLabel
     }
