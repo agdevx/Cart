@@ -827,8 +827,8 @@ describe('PantryItemsView', () => {
       await user.click(kebabButtons[0])
       await user.click(screen.getByText('Edit'))
 
-      //== First item's edit form should be open
-      expect(screen.getByLabelText('Item Name')).toHaveValue('My Snacks')
+      //== First item's edit form should be open (sorted: My Drinks before My Snacks)
+      expect(screen.getByLabelText('Item Name')).toHaveValue('My Drinks')
 
       //== Click edit on second item
       await user.click(kebabButtons[1])
@@ -838,7 +838,7 @@ describe('PantryItemsView', () => {
       //== Only one form should be present at a time
       const nameInputs = screen.getAllByLabelText('Item Name')
       expect(nameInputs).toHaveLength(1)
-      expect(nameInputs[0]).toHaveValue('My Drinks')
+      expect(nameInputs[0]).toHaveValue('My Snacks')
     })
 
     it('should allow changing scope from Personal to Household', async () => {

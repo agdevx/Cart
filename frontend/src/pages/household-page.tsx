@@ -1,6 +1,7 @@
 // ABOUTME: Household management page
 // ABOUTME: Displays user's households with options to create or join new ones
 
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Plus, UserPlus, Users } from 'lucide-react'
@@ -35,6 +36,12 @@ const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
 
 export const HouseholdPage = () => {
   const { data: households, isLoading } = useHouseholdsQuery()
+
+  const sortedHouseholds = useMemo(
+    () => [...(households || [])].sort((a, b) => (a.name || '').localeCompare(b.name || '')),
+    [households]
+  )
+
   if (isLoading) {
     return (
       <div className="px-5 pt-7">
@@ -57,7 +64,7 @@ export const HouseholdPage = () => {
       <div className="px-5">
       {households && households.length > 0 ? (
         <div className="space-y-3 mb-6">
-          {households.map((household) => (
+          {sortedHouseholds.map((household) => (
             <Link
               key={household.id}
               to={householdDetailPath(household.id)}

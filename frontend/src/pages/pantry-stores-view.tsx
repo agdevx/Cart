@@ -102,10 +102,10 @@ export const PantryStoresView = () => {
   for (const household of households || []) {
     householdStoresMap.set(
       household.id,
-      stores?.filter((s) => s.householdId === household.id) || []
+      [...(stores?.filter((s) => s.householdId === household.id) || [])].sort((a, b) => a.name.localeCompare(b.name))
     )
   }
-  const personalStores = stores?.filter((s) => s.userId !== null) || []
+  const personalStores = [...(stores?.filter((s) => s.userId !== null) || [])].sort((a, b) => a.name.localeCompare(b.name))
 
   const isEmpty = !stores || stores.length === 0
 

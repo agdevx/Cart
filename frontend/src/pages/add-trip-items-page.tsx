@@ -93,7 +93,7 @@ export const AddTripItemsPage = () => {
       items = items.filter((item) => item.name.toLowerCase().includes(search))
     }
 
-    return items
+    return items.sort((a, b) => a.name.localeCompare(b.name))
   }, [inventory, existingItemIds, sourceFilter, storeFilter, searchText])
 
   const selectedCount = Object.keys(selectedItems).length

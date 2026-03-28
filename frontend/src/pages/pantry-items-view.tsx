@@ -197,6 +197,11 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
   const items = activeQuery.data
   const isLoading = activeQuery.isLoading
 
+  const sortedItems = useMemo(
+    () => [...(items || [])].sort((a, b) => a.name.localeCompare(b.name)),
+    [items]
+  )
+
   const handleDelete = (id: string, name: string) => {
     setMenuOpenId(null)
     setDeleteConfirm({ id, name })
@@ -464,10 +469,10 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
     for (const household of households || []) {
       householdItemsMap.set(
         household.id,
-        items.filter((item) => item.householdId === household.id)
+        sortedItems.filter((item) => item.householdId === household.id)
       )
     }
-    const personalItems = items.filter((item) => item.ownerUserId !== null)
+    const personalItems = sortedItems.filter((item) => item.ownerUserId !== null)
 
     return (
       <div className="animate-fade-in">
@@ -519,7 +524,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
     <div className="animate-fade-in">
       {createForm}
       <div className="space-y-2">
-        {items.map(renderItem)}
+        {sortedItems.map(renderItem)}
       </div>
 
       {deleteConfirm && (

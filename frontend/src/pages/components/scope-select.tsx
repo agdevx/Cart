@@ -85,7 +85,7 @@ export const ScopeSelect = ({ value, onChange, personalLabel, households, househ
             {personalLabel}
           </button>
 
-          {households?.map((household) => (
+          {[...(households ?? [])].sort((a, b) => (a.name || '').localeCompare(b.name || '')).map((household) => (
             <button
               key={household.id}
               type="button"
