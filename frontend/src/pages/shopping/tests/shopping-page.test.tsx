@@ -257,8 +257,8 @@ describe('ShoppingPage', () => {
 
     render(<ShoppingPage />, { wrapper })
 
-    //== Open the create form
-    await user.click(screen.getByText('Plan a new trip'))
+    //== Open the create form via FAB
+    await user.click(screen.getByRole('button', { name: 'Plan a Trip' }))
 
     //== Blur the trip name input without typing anything
     const input = screen.getByPlaceholderText('e.g., Weekly Groceries')
@@ -300,8 +300,8 @@ describe('ShoppingPage', () => {
 
     render(<ShoppingPage />, { wrapper })
 
-    //== Open the create form
-    fireEvent.click(screen.getByText('Plan a new trip'))
+    //== Open the create form via FAB
+    fireEvent.click(screen.getByRole('button', { name: 'Plan a Trip' }))
 
     //== Fill in the trip name
     const input = screen.getByPlaceholderText('e.g., Weekly Groceries')

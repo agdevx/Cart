@@ -4,7 +4,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { MoreVertical, Package, Pencil, Plus, Trash2 } from 'lucide-react'
+import { MoreVertical, Package, Pencil, Trash2 } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateStoreMutation } from '@/apis/agdevx-cart-api/store/create-store.mutation'
@@ -22,18 +22,20 @@ import type { PantryStoreFormData } from './pantry-store-form'
 import { CreatePantryStoreForm, EditPantryStoreForm } from './pantry-store-form'
 
 interface PantryStoresViewProps {
-  filter: InventoryFilter
+  readonly filter: InventoryFilter
+  /* Controlled visibility for the create form — driven by the parent FAB */
+  readonly showCreateForm: boolean
+  readonly onOpenCreateForm: () => void
+  readonly onCloseCreateForm: () => void
 }
 
-export const PantryStoresView = ({ filter }: PantryStoresViewProps) => {
+export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onCloseCreateForm }: PantryStoresViewProps) => {
   const { data: households, isLoading: householdsLoading } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores, isLoading: storesLoading } = useStoresQuery(householdIds)
   const createMutation = useCreateStoreMutation()
   const updateMutation = useUpdateStoreMutation()
   const deleteMutation = useDeleteStoreMutation()
-
-  const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingStoreId, setEditingStoreId] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
@@ -98,7 +100,7 @@ export const PantryStoresView = ({ filter }: PantryStoresViewProps) => {
         name: data.name,
         householdId: data.householdId,
       })
-      setShowCreateForm(false)
+      onCloseCreateForm()
     } catch {
       // Error handled by mutation state
     }
@@ -193,25 +195,14 @@ export const PantryStoresView = ({ filter }: PantryStoresViewProps) => {
 
   return (
     <div className="animate-fade-in">
-      {/* Add Store toggle button — hidden when empty state is showing */}
-      {(showCreateForm || (stores && stores.length > 0)) && (
-        <button
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-2"
-        >
-          <Plus className="w-5 h-5" />
-          {showCreateForm ? 'Cancel' : 'Add Store'}
-        </button>
-      )}
-
-      {/* Inline create form */}
+      {/* Inline create form — visibility controlled by parent FAB */}
       {showCreateForm && (
         <CreatePantryStoreForm
           stores={stores ?? []}
           households={households}
           isPending={createMutation.isPending}
           onSubmit={handleCreate}
-          onCancel={() => setShowCreateForm(false)}
+          onCancel={onCloseCreateForm}
         />
       )}
 
@@ -222,7 +213,7 @@ export const PantryStoresView = ({ filter }: PantryStoresViewProps) => {
           title="No stores yet"
           subtitle="Add your first store to organize your shopping"
           actionLabel="Add Store"
-          onAction={() => setShowCreateForm(true)}
+          onAction={onOpenCreateForm}
         />
       )}
 

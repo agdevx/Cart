@@ -27,14 +27,28 @@ const mockStores: Store[] = [
   { id: 'ps1', name: 'Corner Market', householdId: null, userId: 'user1', createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
 ]
 
-const renderView = (filter: 'all' | 'personal' | `household:${string}` = 'all') => {
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <PantryStoresView filter={filter} />
-      </BrowserRouter>
-    </QueryClientProvider>
-  )
+const renderView = (
+  filter: 'all' | 'personal' | `household:${string}` = 'all',
+  showCreateForm = false
+) => {
+  const onOpenCreateForm = vi.fn()
+  const onCloseCreateForm = vi.fn()
+  return {
+    ...render(
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <PantryStoresView
+            filter={filter}
+            showCreateForm={showCreateForm}
+            onOpenCreateForm={onOpenCreateForm}
+            onCloseCreateForm={onCloseCreateForm}
+          />
+        </BrowserRouter>
+      </QueryClientProvider>
+    ),
+    onOpenCreateForm,
+    onCloseCreateForm,
+  }
 }
 
 const setupMocks = (options?: {
@@ -116,12 +130,10 @@ describe('PantryStoresView', () => {
     expect(screen.getByText('No stores yet')).toBeInTheDocument()
   })
 
-  it('shows create form when Add Store button is clicked', () => {
+  it('shows create form when showCreateForm is true', () => {
     setupMocks()
 
-    renderView()
-
-    fireEvent.click(screen.getByText('Add Store'))
+    renderView('all', true)
 
     expect(screen.getByLabelText('Store Name')).toBeInTheDocument()
     expect(screen.getByLabelText('Scope')).toBeInTheDocument()
@@ -138,9 +150,8 @@ describe('PantryStoresView', () => {
       isPending: false,
     } as unknown as UseMutationResult<Store, Error, { name: string; householdId?: string | null }>)
 
-    renderView()
-
-    fireEvent.click(screen.getByText('Add Store'))
+    //== Render with create form already open (controlled by parent)
+    renderView('all', true)
 
     fireEvent.change(screen.getByLabelText('Store Name'), { target: { value: 'Whole Foods' } })
     fireEvent.click(screen.getByRole('button', { name: 'Create' }))
@@ -376,10 +387,8 @@ describe('PantryStoresView', () => {
     setupMocks()
     const user = userEvent.setup()
 
-    renderView()
-
-    //== Open the create form
-    await user.click(screen.getByText('Add Store'))
+    //== Render with create form already open (controlled by parent)
+    renderView('all', true)
 
     //== Blur the store name input without typing anything
     const input = screen.getByLabelText('Store Name')

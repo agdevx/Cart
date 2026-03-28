@@ -115,28 +115,30 @@ describe('PantryPage', () => {
     expect(view).toHaveAttribute('data-filter', 'household:h1')
   })
 
-  it('renders Add Item button that toggles inline create form', () => {
+  it('renders FAB button for adding items', () => {
     renderPage()
 
-    const button = screen.getByRole('button', { name: /add item/i })
+    //== FAB is always visible on the items tab
+    const button = screen.getByRole('button', { name: 'Add Item' })
     expect(button).toBeInTheDocument()
 
     //== Initially, create form should not be visible
     expect(screen.getByTestId('pantry-items-view')).toHaveAttribute('data-show-create-form', 'false')
   })
 
-  it('toggles showCreateForm when Add Item button is clicked', () => {
+  it('opens create form when FAB is tapped', () => {
     renderPage()
 
-    const button = screen.getByRole('button', { name: /add item/i })
+    const button = screen.getByRole('button', { name: 'Add Item' })
     fireEvent.click(button)
 
-    //== After clicking, form should be visible and button text should change to Cancel
+    //== After clicking, form should be visible
     expect(screen.getByTestId('pantry-items-view')).toHaveAttribute('data-show-create-form', 'true')
-    expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
+    //== FAB hides while create form is open
+    expect(screen.queryByRole('button', { name: 'Add Item' })).not.toBeInTheDocument()
   })
 
-  it('hides Add Item button when inventory is empty', () => {
+  it('shows FAB even when inventory is empty', () => {
     vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
       data: [],
       isLoading: false,
@@ -144,14 +146,15 @@ describe('PantryPage', () => {
 
     renderPage()
 
-    expect(screen.queryByRole('button', { name: /add item/i })).not.toBeInTheDocument()
+    //== FAB still appears when empty — it is the primary way to create the first item
+    expect(screen.getByRole('button', { name: 'Add Item' })).toBeInTheDocument()
   })
 
   it('closes create form when onCloseCreateForm is called', () => {
     renderPage()
 
-    //== Open the form
-    fireEvent.click(screen.getByRole('button', { name: /add item/i }))
+    //== Open the form via FAB
+    fireEvent.click(screen.getByRole('button', { name: 'Add Item' }))
     expect(screen.getByTestId('pantry-items-view')).toHaveAttribute('data-show-create-form', 'true')
 
     //== Simulate the child calling onCloseCreateForm

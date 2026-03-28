@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { ChevronDown, Plus, ShoppingCart } from 'lucide-react'
+import { ChevronDown, ShoppingCart } from 'lucide-react'
 
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
 import { useDeleteTripMutation } from '@/apis/agdevx-cart-api/trip/delete-trip.mutation'
@@ -15,6 +15,7 @@ import { useAuth } from '@/auth/use-auth'
 import { tripDetailPath } from '@/routes'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
+import { Fab } from '@/shared/fab'
 import { PageHeader } from '@/shared/page-header'
 import { SectionHeader } from '@/shared/section-header'
 import { TripCard } from '@/shared/trip-card'
@@ -103,16 +104,6 @@ export const ShoppingPage = () => {
           </p>
         </div>
       )}
-      {/* New Trip Button — hidden when empty state is showing; always visible when form is open */}
-      {(showCreateForm || (trips && trips.length > 0)) && (
-        <button
-          onClick={() => { if (!showCreateForm) setFormKey((k) => k + 1); setShowCreateForm(!showCreateForm) }}
-          className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-2"
-        >
-          <Plus className="w-5 h-5" />
-          {showCreateForm ? 'Cancel' : 'Plan a new trip'}
-        </button>
-      )}
 
       {showCreateForm && (
         <TripCreateForm
@@ -197,6 +188,16 @@ export const ShoppingPage = () => {
         />
       )}
       </div>
+
+      {/* FAB — hidden while create form is open to avoid double-entry confusion */}
+      {!showCreateForm && (
+        <Fab
+          actions={[{
+            label: 'Plan a Trip',
+            onClick: () => { setFormKey((k) => k + 1); setShowCreateForm(true) },
+          }]}
+        />
+      )}
     </div>
   )
 }

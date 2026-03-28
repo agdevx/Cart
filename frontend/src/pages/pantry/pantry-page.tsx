@@ -3,13 +3,12 @@
 
 import { useState } from 'react'
 
-import { Plus } from 'lucide-react'
-
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import type { InventoryFilter } from '@/pages/pantry/pantry-items-view'
 import { PantryItemsView } from '@/pages/pantry/pantry-items-view'
 import { PantryStoresView } from '@/pages/pantry/pantry-stores-view'
+import { Fab } from '@/shared/fab'
 import { PageHeader } from '@/shared/page-header'
 import { ScopeFilter } from '@/shared/scope-filter'
 
@@ -19,9 +18,9 @@ export const PantryPage = () => {
   const [activeTab, setActiveTab] = useState<InventoryTab>('items')
   const [filter, setFilter] = useState<InventoryFilter>('all')
   const [showItemCreateForm, setShowItemCreateForm] = useState(false)
+  const [showStoreCreateForm, setShowStoreCreateForm] = useState(false)
   const { data: households } = useHouseholdsQuery()
-  const { data: allItems } = useInventoryQuery()
-  const hasItems = (allItems?.length ?? 0) > 0
+  useInventoryQuery() // prefetch for child PantryItemsView
 
   return (
     <div className="pb-4">
@@ -66,17 +65,6 @@ export const PantryPage = () => {
         />
       </div>
 
-      {/* Add Item Button — Items tab only, hidden when empty state is showing */}
-      {hasItems && activeTab === 'items' && (
-        <button
-          onClick={() => setShowItemCreateForm(!showItemCreateForm)}
-          className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
-        >
-          <Plus className="w-5 h-5" />
-          {showItemCreateForm ? 'Cancel' : 'Add Item'}
-        </button>
-      )}
-
       {/* Items View */}
       {activeTab === 'items' && (
         <PantryItemsView
@@ -88,8 +76,33 @@ export const PantryPage = () => {
       )}
 
       {/* Stores View */}
-      {activeTab === 'stores' && <PantryStoresView filter={filter} />}
+      {activeTab === 'stores' && (
+        <PantryStoresView
+          filter={filter}
+          showCreateForm={showStoreCreateForm}
+          onOpenCreateForm={() => setShowStoreCreateForm(true)}
+          onCloseCreateForm={() => setShowStoreCreateForm(false)}
+        />
+      )}
       </div>
+
+      {/* FAB — one action per tab; hidden while the relevant create form is open */}
+      {activeTab === 'items' && !showItemCreateForm && (
+        <Fab
+          actions={[{
+            label: 'Add Item',
+            onClick: () => setShowItemCreateForm(true),
+          }]}
+        />
+      )}
+      {activeTab === 'stores' && !showStoreCreateForm && (
+        <Fab
+          actions={[{
+            label: 'Add Store',
+            onClick: () => setShowStoreCreateForm(true),
+          }]}
+        />
+      )}
     </div>
   )
 }
