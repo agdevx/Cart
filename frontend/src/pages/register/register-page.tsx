@@ -12,6 +12,7 @@ import { useAuth } from '@/auth/use-auth';
 import { ROUTES } from '@/routes';
 import { useFieldValidation } from '@/services/use-field-validation.service';
 import { FormField } from '@/shared/form-field';
+import { PasswordCriteria } from '@/shared/password-criteria';
 import { Spinner } from '@/shared/spinner';
 import { isEmail, isRequired, matchesField, maxLength, minLength, passwordStrength } from '@/utils/validation-rules';
 
@@ -35,11 +36,6 @@ export const RegisterPage = () => {
   const values = useMemo(() => ({ name, email, password, confirmPassword }), [name, email, password, confirmPassword]);
 
   const { errors, touched, handleBlur, handleChange, validateAll, setFieldError, isValid } = useFieldValidation(schema, values);
-
-  // Password requirements checklist — reads from password state directly
-  const hasMinLength = password.length >= 8;
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,20 +148,7 @@ export const RegisterPage = () => {
               autoComplete="new-password"
             />
             {/* Password Requirements */}
-            <div className="mt-2 text-xs text-text-secondary">
-              <p className="font-semibold mb-1">Requirements:</p>
-              <div className="space-y-1">
-                <p className={hasMinLength ? 'text-teal' : ''}>
-                  {hasMinLength ? '✓' : '○'} 8+ characters
-                </p>
-                <p className={hasUppercase ? 'text-teal' : ''}>
-                  {hasUppercase ? '✓' : '○'} One uppercase letter
-                </p>
-                <p className={hasNumber ? 'text-teal' : ''}>
-                  {hasNumber ? '✓' : '○'} One number
-                </p>
-              </div>
-            </div>
+            <PasswordCriteria password={password} />
           </FormField>
 
           {/* Confirm Password Field */}

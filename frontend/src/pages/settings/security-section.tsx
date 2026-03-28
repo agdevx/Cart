@@ -7,6 +7,7 @@ import { useChangePasswordMutation } from '@/apis/agdevx-cart-api/auth/change-pa
 import { useFieldValidation } from '@/services/use-field-validation.service'
 import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { FormField } from '@/shared/form-field'
+import { PasswordCriteria } from '@/shared/password-criteria'
 import { isRequired, matchesField, maxLength, minLength, passwordStrength } from '@/utils/validation-rules'
 
 interface SecuritySectionProps {
@@ -50,11 +51,6 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
   )
 
   const { errors, touched, handleBlur, handleChange, validateAll, setFieldError, isValid } = useFieldValidation(schema, values)
-
-  //== Password requirements checklist — read directly from state
-  const hasMinLength = newPassword.length >= 8
-  const hasUppercase = /[A-Z]/.test(newPassword)
-  const hasNumber = /[0-9]/.test(newPassword)
 
   const borderClass = (field: string) =>
     touched[field] && !errors[field]
@@ -135,19 +131,7 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
               autoComplete="new-password"
             />
           </FormField>
-          <div className="mt-2 text-xs text-text-secondary">
-            <div className="space-y-1">
-              <p className={hasMinLength ? 'text-teal' : ''}>
-                {hasMinLength ? '✓' : '○'} 8+ characters
-              </p>
-              <p className={hasUppercase ? 'text-teal' : ''}>
-                {hasUppercase ? '✓' : '○'} One uppercase letter
-              </p>
-              <p className={hasNumber ? 'text-teal' : ''}>
-                {hasNumber ? '✓' : '○'} One number
-              </p>
-            </div>
-          </div>
+          <PasswordCriteria password={newPassword} />
         </div>
         <FormField label="Confirm New Password" htmlFor="security-confirm-password" error={errors.confirmPassword} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
           <input
