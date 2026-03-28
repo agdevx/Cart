@@ -4,6 +4,8 @@
 import { useMemo, useState } from 'react';
 import { Link,useNavigate } from 'react-router-dom';
 
+import { ShoppingCart } from 'lucide-react';
+
 import { useRegisterMutation } from '@/apis/agdevx-cart-api/auth/register.mutation';
 import { ApiError } from '@/apis/api-error';
 import { useAuth } from '@/auth/use-auth';
@@ -83,12 +85,46 @@ export const RegisterPage = () => {
     errors[field] ? 'text-coral' : 'text-navy-soft';
 
   return (
-    <div id="main-content" className="min-h-screen bg-bg flex items-center justify-center px-4">
-      <div className="bg-surface p-8 rounded-2xl shadow-md w-full max-w-md">
-        <h1 className="font-display text-2xl font-extrabold text-navy mb-1">
-          AGDevX <span className="text-teal">Cart</span>
+    <div id="main-content" className="min-h-screen flex flex-col animate-fade-in">
+      {/* Brand Panel */}
+      <div className="relative overflow-hidden px-6 pt-12 pb-16 text-center" style={{ background: 'linear-gradient(to bottom, #1B2138, #2E344F)' }}>
+        {/* Geometric accents */}
+        <div className="absolute top-6 right-4 w-20 h-20 rounded-full border-2 opacity-10" style={{ borderColor: '#38BDF8' }} />
+        <div className="absolute top-16 right-12 w-10 h-10 rounded-full border-2 opacity-10" style={{ borderColor: '#38BDF8' }} />
+        <div className="absolute bottom-8 left-2 w-16 h-16 rounded-full border-2 opacity-8" style={{ borderColor: '#A78BFA' }} />
+        <div className="absolute bottom-16 left-10 w-8 h-8 rounded-full border-2 opacity-8" style={{ borderColor: '#F59E0B' }} />
+
+        {/* Cart icon */}
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[18px]" style={{ backgroundColor: 'rgba(26,171,138,0.15)' }}>
+          <ShoppingCart size={32} className="text-teal-light" />
+        </div>
+
+        {/* Logo */}
+        <h1 className="font-display text-[28px] font-extrabold tracking-tight text-white">
+          AGDevX <span className="text-teal-light">Cart</span>
         </h1>
-        <p className="text-text-secondary text-sm mb-6">Create your account</p>
+
+        {/* Tagline */}
+        <p className="mt-1 text-[13px] font-semibold text-white/45">Grocery runs, sorted</p>
+
+        {/* Feature pills */}
+        <div className="mt-5 flex justify-center gap-2">
+          <span className="rounded-full py-[5px] px-3 text-[11px] font-bold tracking-[0.3px]" style={{ color: '#38BDF8', backgroundColor: 'rgba(56,189,248,0.15)' }}>
+            Shared Lists
+          </span>
+          <span className="rounded-full py-[5px] px-3 text-[11px] font-bold tracking-[0.3px]" style={{ color: '#34D399', backgroundColor: 'rgba(52,211,153,0.15)' }}>
+            Pantry
+          </span>
+          <span className="rounded-full py-[5px] px-3 text-[11px] font-bold tracking-[0.3px]" style={{ color: '#A78BFA', backgroundColor: 'rgba(139,92,246,0.15)' }}>
+            Trip History
+          </span>
+        </div>
+      </div>
+
+      {/* Form Panel */}
+      <div className="relative z-10 -mt-4 flex flex-1 flex-col rounded-t-3xl bg-surface p-7">
+        <h2 className="font-display text-xl font-extrabold text-navy mb-6">Create your account</h2>
+
         <form onSubmit={handleSubmit}>
           {/* Email Field */}
           <div className="mb-4">
