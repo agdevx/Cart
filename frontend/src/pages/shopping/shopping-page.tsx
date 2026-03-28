@@ -94,7 +94,7 @@ export const ShoppingPage = () => {
       <div className="px-5">
       {user?.name && (
         <div className="bg-gradient-to-br from-navy to-navy-soft rounded-xl px-4 py-3 mb-4">
-          <p className="text-sm font-semibold text-teal-light">
+          <p className="text-sm font-semibold text-teal-light text-center">
             {greeting}, {user.name} 👋
           </p>
         </div>
