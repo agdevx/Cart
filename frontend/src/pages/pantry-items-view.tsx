@@ -20,6 +20,7 @@ import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 import { isRequired, maxLength } from '@/utils/validation-rules'
 
 import { ConfirmDialog } from './components/confirm-dialog'
+import { DropdownMenu } from './components/dropdown-menu'
 import { EmptyState } from './components/empty-state'
 import { ScopeSelect } from './components/scope-select'
 import { Spinner } from './components/spinner'
@@ -52,7 +53,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
   const deleteMutation = useDeleteInventoryItemMutation()
   const updateMutation = useUpdateInventoryItemMutation()
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
+  const kebabRef = useRef<HTMLButtonElement>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
 
@@ -167,26 +168,6 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
       }
     }
   }, [showCreateForm, filter])
-
-  useEffect(() => {
-    if (!menuOpenId) return
-    const handleMouseDown = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpenId(null)
-      }
-    }
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setMenuOpenId(null)
-      }
-    }
-    document.addEventListener('mousedown', handleMouseDown)
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.removeEventListener('mousedown', handleMouseDown)
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [menuOpenId])
 
   //== All four hooks are called unconditionally (React rules of hooks). Inactive scoped hooks
   //== receive null IDs which disables them via `enabled`. The all/personal hooks stay in cache
@@ -446,8 +427,9 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
             <p className="text-sm text-text-secondary mt-0.5">{item.notes}</p>
           )}
         </div>
-        <div className="relative" ref={menuOpenId === item.id ? menuRef : undefined}>
+        <div>
           <button
+            ref={menuOpenId === item.id ? kebabRef : undefined}
             onClick={() => setMenuOpenId(menuOpenId === item.id ? null : item.id)}
             aria-label="Item actions"
             className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
@@ -455,7 +437,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
             <MoreVertical className="w-5 h-5 text-text-tertiary" />
           </button>
           {menuOpenId === item.id && (
-            <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[140px]">
+            <DropdownMenu anchorRef={kebabRef} onClose={() => setMenuOpenId(null)}>
               <button
                 onClick={() => handleEdit(item)}
                 className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-text hover:bg-bg-warm transition-colors"
@@ -470,7 +452,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
                 <Trash2 className="w-4 h-4" />
                 Delete
               </button>
-            </div>
+            </DropdownMenu>
           )}
         </div>
       </div>

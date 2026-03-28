@@ -9,6 +9,8 @@ import { MoreVertical, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import { tripDetailPath } from '@/routes'
 
+import { DropdownMenu } from './dropdown-menu'
+
 interface TripCardProps {
   trip: Trip
   onUpdate: (tripId: string, name: string) => void
@@ -20,32 +22,8 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState(trip.name)
-  const menuRef = useRef<HTMLDivElement>(null)
+  const kebabRef = useRef<HTMLButtonElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-
-  // Close menu on outside click (mousedown) or Escape key
-  useEffect(() => {
-    if (!menuOpen) return
-
-    const handleMouseDown = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false)
-      }
-    }
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setMenuOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleMouseDown)
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.removeEventListener('mousedown', handleMouseDown)
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [menuOpen])
 
   // Auto-focus and select text when entering edit mode
   useEffect(() => {
@@ -111,8 +89,9 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
           </h3>
           <p className="text-[13px] text-text-secondary font-medium mt-1">{dateLabel}</p>
         </div>
-        <div className="relative" ref={menuRef}>
+        <div>
           <button
+            ref={kebabRef}
             onClick={handleKebabClick}
             aria-label="Trip actions"
             className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
@@ -120,7 +99,7 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
             <MoreVertical className="w-5 h-5" />
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[140px]">
+            <DropdownMenu anchorRef={kebabRef} onClose={() => setMenuOpen(false)}>
               <button
                 onClick={startEditing}
                 className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
@@ -144,7 +123,7 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
                 <Trash2 className="w-4 h-4" />
                 Delete
               </button>
-            </div>
+            </DropdownMenu>
           )}
         </div>
       </div>

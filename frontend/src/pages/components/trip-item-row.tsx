@@ -1,13 +1,14 @@
 // ABOUTME: TripItemRow component for displaying a trip item in planning or shopping mode
 // ABOUTME: Supports kebab menu with edit/remove, inline edit form, and shopping checkbox toggle
 
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { Check, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 
 import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import type { TripItem } from '@/apis/agdevx-cart-api/models/trip-item'
 
+import { DropdownMenu } from './dropdown-menu'
 import { Spinner } from './spinner'
 
 interface TripItemRowProps {
@@ -40,31 +41,7 @@ export const TripItemRow = ({
   const [editQuantity, setEditQuantity] = useState(tripItem.quantity)
   const [editNotes, setEditNotes] = useState(tripItem.notes ?? '')
   const [editStoreId, setEditStoreId] = useState(tripItem.storeId ?? '')
-  const menuRef = useRef<HTMLDivElement>(null)
-
-  // Close menu on outside click (mousedown) or Escape key
-  useEffect(() => {
-    if (!menuOpen) return
-
-    const handleMouseDown = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false)
-      }
-    }
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setMenuOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleMouseDown)
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.removeEventListener('mousedown', handleMouseDown)
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [menuOpen])
+  const kebabRef = useRef<HTMLButtonElement>(null)
 
   const handleKebabClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -140,8 +117,9 @@ export const TripItemRow = ({
             )}
           </div>
           {!readOnly && (
-            <div className="relative" ref={menuRef}>
+            <div>
               <button
+                ref={kebabRef}
                 onClick={handleKebabClick}
                 aria-label="Item actions"
                 className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
@@ -149,7 +127,7 @@ export const TripItemRow = ({
                 <MoreVertical className="w-4 h-4 text-text-secondary" />
               </button>
               {menuOpen && (
-                <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[120px]">
+                <DropdownMenu anchorRef={kebabRef} onClose={() => setMenuOpen(false)}>
                   <button
                     onClick={handleEditClick}
                     className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
@@ -164,7 +142,7 @@ export const TripItemRow = ({
                     <Trash2 className="w-4 h-4" />
                     Remove
                   </button>
-                </div>
+                </DropdownMenu>
               )}
             </div>
           )}
@@ -240,13 +218,13 @@ export const TripItemRow = ({
          from synthesizing a click on the parent row when tapping the kebab area */}
       {!readOnly && (
         <div
-          className="relative flex-shrink-0 self-start"
-          ref={menuRef}
+          className="flex-shrink-0 self-start"
           onTouchStart={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
         >
           <button
+            ref={kebabRef}
             onClick={handleKebabClick}
             aria-label="Item actions"
             className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
@@ -254,7 +232,7 @@ export const TripItemRow = ({
             <MoreVertical className="w-4 h-4 text-text-secondary" />
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[120px]">
+            <DropdownMenu anchorRef={kebabRef} onClose={() => setMenuOpen(false)}>
               <button
                 onClick={handleEditClick}
                 className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
@@ -269,7 +247,7 @@ export const TripItemRow = ({
                 <Trash2 className="w-4 h-4" />
                 Remove
               </button>
-            </div>
+            </DropdownMenu>
           )}
         </div>
       )}
