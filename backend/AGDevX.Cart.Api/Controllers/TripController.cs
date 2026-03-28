@@ -31,21 +31,6 @@ public class TripController(ITripService tripService) : ControllerBase
         }
     }
 
-    //== Get all trips for a specific household
-    [HttpGet("household/{householdId}")]
-    public async Task<IActionResult> GetHouseholdTrips(Guid householdId, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var trips = await tripService.GetHouseholdTrips(householdId, cancellationToken);
-            return Ok(trips);
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
-        }
-    }
-
     //== Get a specific trip by ID
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
@@ -74,7 +59,7 @@ public class TripController(ITripService tripService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            var trip = await tripService.CreateTrip(request.Name, userId, request.HouseholdId, cancellationToken);
+            var trip = await tripService.CreateTrip(request.Name, userId, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = trip.Id }, trip);
         }
         catch (UnauthorizedAccessException ex)
@@ -90,7 +75,7 @@ public class TripController(ITripService tripService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            await tripService.UpdateTrip(id, request.Name, request.HouseholdId, userId, cancellationToken);
+            await tripService.UpdateTrip(id, request.Name, userId, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

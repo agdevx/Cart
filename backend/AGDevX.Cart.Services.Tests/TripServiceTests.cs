@@ -1,5 +1,5 @@
 // ABOUTME: Unit tests for TripService covering trip lifecycle management (create, complete, reopen)
-// ABOUTME: and collaborator functionality with authorization checks for household membership
+// ABOUTME: and collaborator functionality with authorization checks for trip access
 using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
@@ -12,37 +12,30 @@ namespace AGDevX.Cart.Services.Tests;
 public class TripServiceTests
 {
     private readonly Mock<ITripRepository> _mockTripRepository;
-    private readonly Mock<IHouseholdRepository> _mockHouseholdRepository;
     private readonly TripService _tripService;
 
     public TripServiceTests()
     {
         _mockTripRepository = new Mock<ITripRepository>();
-        _mockHouseholdRepository = new Mock<IHouseholdRepository>();
-        _tripService = new TripService(_mockTripRepository.Object, _mockHouseholdRepository.Object);
+        _tripService = new TripService(_mockTripRepository.Object);
     }
 
     [Fact]
-    public async Task Should_CreateTrip_When_UserIsMember()
+    public async Task Should_CreateTrip_WithNameAndDefaults()
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var householdId = Guid.NewGuid();
         var tripName = "Weekly Grocery Run";
-
-        _mockHouseholdRepository.Setup(x => x.IsUserMember(householdId, userId, It.IsAny<CancellationToken>()))
-                                .ReturnsAsync(true);
 
         _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync((Trip t, CancellationToken _) => t);
 
         // Act
-        var result = await _tripService.CreateTrip(tripName, userId, householdId);
+        var result = await _tripService.CreateTrip(tripName, userId);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal(tripName, result.Name);
-        Assert.Equal(householdId, result.HouseholdId);
         Assert.False(result.IsCompleted);
         Assert.Null(result.CompletedAt);
     }
@@ -76,22 +69,6 @@ public class TripServiceTests
         Assert.NotNull(result);
         Assert.True(result.IsCompleted);
         Assert.NotNull(result.CompletedAt);
-    }
-
-    [Fact]
-    public async Task Should_ThrowException_When_CreatingTripForNonMember()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var householdId = Guid.NewGuid();
-        var tripName = "Weekly Grocery Run";
-
-        _mockHouseholdRepository.Setup(x => x.IsUserMember(householdId, userId, It.IsAny<CancellationToken>()))
-                                .ReturnsAsync(false);
-
-        // Act & Assert
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _tripService.CreateTrip(tripName, userId, householdId));
     }
 
     [Fact]
@@ -135,22 +112,6 @@ public class TripServiceTests
     }
 
     [Fact]
-    public async Task Should_ReturnTrips_When_GetHouseholdTrips()
-    {
-        // Arrange
-        var householdId = Guid.NewGuid();
-        var trips = new List<Trip> { new() { Id = Guid.NewGuid(), Name = "Household Trip", IsCompleted = false } };
-
-        _mockTripRepository.Setup(r => r.GetHouseholdTrips(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(trips);
-
-        // Act
-        var result = await _tripService.GetHouseholdTrips(householdId);
-
-        // Assert
-        result.Should().HaveCount(1);
-    }
-
-    [Fact]
     public async Task Should_ReturnTrip_When_GetById()
     {
         // Arrange
@@ -180,7 +141,7 @@ public class TripServiceTests
         _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip t, CancellationToken _) => t);
 
         // Act
-        var result = await _tripService.UpdateTrip(tripId, "New Name", null, userId);
+        var result = await _tripService.UpdateTrip(tripId, "New Name", userId);
 
         // Assert
         result.Name.Should().Be("New Name");
@@ -196,7 +157,7 @@ public class TripServiceTests
         _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
-        var act = () => _tripService.UpdateTrip(tripId, "New Name", null, userId);
+        var act = () => _tripService.UpdateTrip(tripId, "New Name", userId);
 
         // Assert
         await act.Should().ThrowAsync<UnauthorizedAccessException>();
@@ -213,7 +174,7 @@ public class TripServiceTests
         _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync((Trip?)null);
 
         // Act
-        var act = () => _tripService.UpdateTrip(tripId, "New Name", null, userId);
+        var act = () => _tripService.UpdateTrip(tripId, "New Name", userId);
 
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>();
@@ -304,18 +265,14 @@ public class TripServiceTests
     }
 
     [Fact]
-    public async Task Should_AddCollaborator_When_UserIsCollaboratorAndTargetIsHouseholdMember()
+    public async Task Should_AddCollaborator_When_UserIsCollaborator()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var collaboratorUserId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var householdId = Guid.NewGuid();
-        var trip = new Trip { Id = tripId, Name = "Trip", IsCompleted = false, HouseholdId = householdId };
 
         _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
-        _mockHouseholdRepository.Setup(r => r.IsUserMember(householdId, collaboratorUserId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripRepository.Setup(r => r.AddCollaborator(tripId, collaboratorUserId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
@@ -336,27 +293,6 @@ public class TripServiceTests
 
         // Act
         var act = () => _tripService.AddCollaborator(tripId, userId, Guid.NewGuid());
-
-        // Assert
-        await act.Should().ThrowAsync<UnauthorizedAccessException>();
-    }
-
-    [Fact]
-    public async Task Should_ThrowUnauthorizedAccessException_When_AddingNonHouseholdMemberAsCollaborator()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var collaboratorUserId = Guid.NewGuid();
-        var tripId = Guid.NewGuid();
-        var householdId = Guid.NewGuid();
-        var trip = new Trip { Id = tripId, Name = "Trip", IsCompleted = false, HouseholdId = householdId };
-
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
-        _mockHouseholdRepository.Setup(r => r.IsUserMember(householdId, collaboratorUserId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
-
-        // Act
-        var act = () => _tripService.AddCollaborator(tripId, userId, collaboratorUserId);
 
         // Assert
         await act.Should().ThrowAsync<UnauthorizedAccessException>();

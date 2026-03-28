@@ -1,16 +1,15 @@
 // ABOUTME: Service interface for Trip business logic including lifecycle management (create, complete, reopen)
-// ABOUTME: and collaborator functionality with authorization checks for household membership and trip access
+// ABOUTME: and collaborator functionality with authorization checks for trip access
 using AGDevX.Cart.Data.Models;
 
 namespace AGDevX.Cart.Services;
 
 public interface ITripService
 {
-    Task<Trip> CreateTrip(string name, Guid userId, Guid? householdId = null, CancellationToken cancellationToken = default);
+    Task<Trip> CreateTrip(string name, Guid userId, CancellationToken cancellationToken = default);
     Task<IEnumerable<Trip>> GetUserTrips(Guid userId, CancellationToken cancellationToken = default);
-    Task<IEnumerable<Trip>> GetHouseholdTrips(Guid householdId, CancellationToken cancellationToken = default);
     Task<Trip?> GetById(Guid id, CancellationToken cancellationToken = default);
-    Task<Trip> UpdateTrip(Guid tripId, string name, Guid? householdId, Guid userId, CancellationToken cancellationToken = default);
+    Task<Trip> UpdateTrip(Guid tripId, string name, Guid userId, CancellationToken cancellationToken = default);
     Task DeleteTrip(Guid tripId, Guid userId, CancellationToken cancellationToken = default);
     Task<Trip> StartTrip(Guid tripId, Guid userId, CancellationToken cancellationToken = default);
     Task<Trip> CompleteTrip(Guid tripId, Guid userId, CancellationToken cancellationToken = default);

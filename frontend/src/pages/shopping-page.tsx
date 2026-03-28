@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom'
 
 import { ChevronDown, Plus, ShoppingCart } from 'lucide-react'
 
-import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
 import { useDeleteTripMutation } from '@/apis/agdevx-cart-api/trip/delete-trip.mutation'
 import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.mutation'
@@ -21,7 +20,6 @@ import { isRequired } from '@/utils/validation-rules'
 import { ConfirmDialog } from './components/confirm-dialog'
 import { EmptyState } from './components/empty-state'
 import { PageHeader } from './components/page-header'
-import { ScopeSelect } from './components/scope-select'
 import { TripCard } from './components/trip-card'
 
 export const ShoppingPage = () => {
@@ -29,7 +27,6 @@ export const ShoppingPage = () => {
   const { user } = useAuth()
   const greeting = getGreeting(new Date().getHours())
   const { data: trips, isLoading } = useTripsQuery()
-  const { data: households } = useHouseholdsQuery()
   const createMutation = useCreateTripMutation()
   const updateMutation = useUpdateTripMutation()
   const deleteMutation = useDeleteTripMutation()
@@ -37,7 +34,6 @@ export const ShoppingPage = () => {
 
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [tripName, setTripName] = useState('')
-  const [householdId, setHouseholdId] = useState<string>('personal')
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
   const [showCompleted, setShowCompleted] = useState(false)
   // formKey forces the form element to remount when opened, resetting validation state
@@ -65,7 +61,6 @@ export const ShoppingPage = () => {
     try {
       const newTrip = await createMutation.mutateAsync({
         name: tripName.trim(),
-        householdId: householdId === 'personal' ? null : householdId,
       })
       setTripName('')
       setShowCreateForm(false)
@@ -75,8 +70,8 @@ export const ShoppingPage = () => {
     }
   }
 
-  const handleUpdate = (tripId: string, name: string, householdId: string | null) => {
-    updateMutation.mutate({ tripId, name, householdId })
+  const handleUpdate = (tripId: string, name: string) => {
+    updateMutation.mutate({ tripId, name })
   }
 
   const handleDelete = (tripId: string, tripName: string) => {
@@ -151,21 +146,6 @@ export const ShoppingPage = () => {
             {errors.name && <p className="mt-1 text-sm text-coral">{errors.name}</p>}
           </div>
 
-          <div className="mb-4">
-            <label htmlFor="household" className="block text-sm font-semibold text-navy-soft mb-1">
-              Type
-            </label>
-            <ScopeSelect
-              value={householdId}
-              onChange={setHouseholdId}
-              personalLabel="Personal Trip"
-              households={households}
-              householdDescription="Household"
-              disabled={createMutation.isPending}
-              aria-label="Type"
-            />
-          </div>
-
           <div className="flex gap-3">
             <button
               type="button"
@@ -194,7 +174,7 @@ export const ShoppingPage = () => {
           </div>
           <div className="space-y-3">
             {inProgressTrips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} households={households} onDelete={handleDelete} onReopen={handleReopen} />
+              <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} onDelete={handleDelete} onReopen={handleReopen} />
             ))}
           </div>
         </div>
@@ -209,7 +189,7 @@ export const ShoppingPage = () => {
           </div>
           <div className="space-y-3">
             {planningTrips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} households={households} onDelete={handleDelete} onReopen={handleReopen} />
+              <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} onDelete={handleDelete} onReopen={handleReopen} />
             ))}
           </div>
         </div>
@@ -232,7 +212,7 @@ export const ShoppingPage = () => {
             <div className="overflow-hidden">
               <div className="space-y-3">
                 {completedTrips.map((trip) => (
-                  <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} households={households} onDelete={handleDelete} onReopen={handleReopen} />
+                  <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} onDelete={handleDelete} onReopen={handleReopen} />
                 ))}
               </div>
             </div>

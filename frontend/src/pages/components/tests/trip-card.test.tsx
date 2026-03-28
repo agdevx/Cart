@@ -15,7 +15,6 @@ import { TripCard } from '../trip-card'
 const planningTrip: Trip = {
   id: 'trip-0',
   name: 'Planning Trip',
-  householdId: 'h1',
   createdByUserId: 'user-1',
   isStarted: false,
   startedAt: null,
@@ -30,7 +29,6 @@ const planningTrip: Trip = {
 const activeTrip: Trip = {
   id: 'trip-1',
   name: 'Weekly Groceries',
-  householdId: 'h1',
   createdByUserId: 'user-1',
   isStarted: true,
   startedAt: '2026-02-15T10:00:00Z',
@@ -45,7 +43,6 @@ const activeTrip: Trip = {
 const personalTrip: Trip = {
   id: 'trip-3',
   name: 'Personal Run',
-  householdId: null,
   createdByUserId: 'user-1',
   isStarted: true,
   startedAt: '2026-02-15T10:00:00Z',
@@ -60,7 +57,6 @@ const personalTrip: Trip = {
 const completedTrip: Trip = {
   id: 'trip-2',
   name: 'Costco Run',
-  householdId: 'h1',
   createdByUserId: 'user-1',
   isStarted: true,
   startedAt: '2026-02-18T10:00:00Z',
@@ -71,8 +67,6 @@ const completedTrip: Trip = {
   modifiedBy: null,
   modifiedDate: null,
 }
-
-const mockHouseholds = [{ id: 'h1', name: 'Test Household' }]
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>
@@ -92,7 +86,7 @@ describe('TripCard', () => {
 
   it('renders planning trip with name and created date', () => {
     render(
-      <TripCard trip={planningTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={planningTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -102,7 +96,7 @@ describe('TripCard', () => {
 
   it('renders started trip with name and started date', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -112,7 +106,7 @@ describe('TripCard', () => {
 
   it('renders completed trip with completion date', () => {
     render(
-      <TripCard trip={completedTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={completedTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -122,7 +116,7 @@ describe('TripCard', () => {
 
   it('shows kebab menu with Edit and Delete for active trip', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -136,7 +130,7 @@ describe('TripCard', () => {
 
   it('shows kebab menu with Edit, Reopen, and Delete for completed trip', () => {
     render(
-      <TripCard trip={completedTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={completedTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -149,7 +143,7 @@ describe('TripCard', () => {
 
   it('shows edit form below card content when Edit is clicked', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -162,15 +156,14 @@ describe('TripCard', () => {
     expect(screen.getByDisplayValue('Weekly Groceries')).toBeInTheDocument()
     //== Form labels should be visible
     expect(screen.getByText('Trip Name')).toBeInTheDocument()
-    expect(screen.getByText('Type')).toBeInTheDocument()
     //== Cancel and Save buttons should be visible
     expect(screen.getByText('Cancel')).toBeInTheDocument()
     expect(screen.getByText('Save')).toBeInTheDocument()
   })
 
-  it('calls onUpdate with name and householdId when Save is clicked', () => {
+  it('calls onUpdate with name when Save is clicked', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -181,13 +174,12 @@ describe('TripCard', () => {
     fireEvent.change(input, { target: { value: 'Saturday Groceries' } })
     fireEvent.click(screen.getByText('Save'))
 
-    //== Should pass the household trip's householdId
-    expect(mockOnUpdate).toHaveBeenCalledWith('trip-1', 'Saturday Groceries', 'h1')
+    expect(mockOnUpdate).toHaveBeenCalledWith('trip-1', 'Saturday Groceries')
   })
 
-  it('calls onUpdate with null householdId for personal trips', () => {
+  it('calls onUpdate with name for personal trips', () => {
     render(
-      <TripCard trip={personalTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={personalTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -196,13 +188,12 @@ describe('TripCard', () => {
 
     fireEvent.click(screen.getByText('Save'))
 
-    //== Personal trip should pass null for householdId
-    expect(mockOnUpdate).toHaveBeenCalledWith('trip-3', 'Personal Run', null)
+    expect(mockOnUpdate).toHaveBeenCalledWith('trip-3', 'Personal Run')
   })
 
   it('cancels edit on Cancel button without calling onUpdate', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -222,7 +213,7 @@ describe('TripCard', () => {
 
   it('disables Save button when name is empty', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -237,7 +228,7 @@ describe('TripCard', () => {
 
   it('calls onDelete with tripId and tripName when Delete is clicked', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -249,7 +240,7 @@ describe('TripCard', () => {
 
   it('calls onReopen with tripId when Reopen is clicked on completed trip', () => {
     render(
-      <TripCard trip={completedTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={completedTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -261,7 +252,7 @@ describe('TripCard', () => {
 
   it('closes kebab menu on outside click', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -278,7 +269,7 @@ describe('TripCard', () => {
 
   it('closes kebab menu on Escape key', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
@@ -291,7 +282,7 @@ describe('TripCard', () => {
 
   it('active trip card links to /shopping/{tripId}', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} households={mockHouseholds} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 

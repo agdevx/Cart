@@ -24,7 +24,6 @@ describe('useTripsQuery', () => {
       {
         id: '1',
         name: 'Grocery Shopping',
-        householdId: 'household1',
         createdByUserId: 'user1',
         isStarted: false,
         startedAt: null,
@@ -38,7 +37,6 @@ describe('useTripsQuery', () => {
       {
         id: '2',
         name: 'Weekly Shop',
-        householdId: 'household1',
         createdByUserId: 'user1',
         isStarted: true,
         startedAt: '2024-01-01',

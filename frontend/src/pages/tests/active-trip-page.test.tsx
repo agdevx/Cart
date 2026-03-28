@@ -46,7 +46,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 const mockTrip: Trip = {
   id: 'trip1',
   name: 'Weekly Groceries',
-  householdId: null,
   createdByUserId: 'user1',
   isStarted: true,
   startedAt: '2024-01-15',

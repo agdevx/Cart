@@ -1,28 +1,17 @@
 // ABOUTME: Service implementation for Trip business logic including lifecycle management (create, complete, reopen)
-// ABOUTME: and collaborator functionality with authorization checks for household membership and trip access
+// ABOUTME: and collaborator functionality with authorization checks for trip access
 using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 
 namespace AGDevX.Cart.Services;
 
-public class TripService(ITripRepository tripRepository, IHouseholdRepository householdRepository) : ITripService
+public class TripService(ITripRepository tripRepository) : ITripService
 {
-    public async Task<Trip> CreateTrip(string name, Guid userId, Guid? householdId = null, CancellationToken cancellationToken = default)
+    public async Task<Trip> CreateTrip(string name, Guid userId, CancellationToken cancellationToken = default)
     {
-        //== Verify household membership if household trip
-        if (householdId.HasValue)
-        {
-            var isMember = await householdRepository.IsUserMember(householdId.Value, userId, cancellationToken);
-            if (!isMember)
-            {
-                throw new UnauthorizedAccessException("User is not a member of the household");
-            }
-        }
-
         var trip = new Trip
         {
             Name = name,
-            HouseholdId = householdId,
             IsCompleted = false,
             CompletedAt = null,
             IsStarted = false,
@@ -37,17 +26,12 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
         return await tripRepository.GetUserTrips(userId, cancellationToken);
     }
 
-    public async Task<IEnumerable<Trip>> GetHouseholdTrips(Guid householdId, CancellationToken cancellationToken = default)
-    {
-        return await tripRepository.GetHouseholdTrips(householdId, cancellationToken);
-    }
-
     public async Task<Trip?> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         return await tripRepository.GetById(id, cancellationToken);
     }
 
-    public async Task<Trip> UpdateTrip(Guid tripId, string name, Guid? householdId, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Trip> UpdateTrip(Guid tripId, string name, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Verify user is collaborator before updating trip
         var isCollaborator = await tripRepository.IsUserCollaborator(tripId, userId, cancellationToken);
@@ -56,21 +40,10 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
             throw new UnauthorizedAccessException("User is not a collaborator on this trip");
         }
 
-        //== Verify household membership if changing to household scope
-        if (householdId.HasValue)
-        {
-            var isMember = await householdRepository.IsUserMember(householdId.Value, userId, cancellationToken);
-            if (!isMember)
-            {
-                throw new UnauthorizedAccessException("User is not a member of the household");
-            }
-        }
-
         var trip = await tripRepository.GetById(tripId, cancellationToken)
                         ?? throw new KeyNotFoundException("Trip not found");
 
         trip.Name = name;
-        trip.HouseholdId = householdId;
         return await tripRepository.Update(trip, cancellationToken);
     }
 
@@ -160,19 +133,6 @@ public class TripService(ITripRepository tripRepository, IHouseholdRepository ho
         if (!isCollaborator)
         {
             throw new UnauthorizedAccessException("User is not a collaborator on this trip");
-        }
-
-        var trip = await tripRepository.GetById(tripId, cancellationToken)
-                        ?? throw new KeyNotFoundException("Trip not found");
-
-        //== Verify household membership for household trips
-        if (trip.HouseholdId.HasValue)
-        {
-            var isMember = await householdRepository.IsUserMember(trip.HouseholdId.Value, collaboratorUserId, cancellationToken);
-            if (!isMember)
-            {
-                throw new UnauthorizedAccessException("Collaborator is not a member of the household");
-            }
         }
 
         await tripRepository.AddCollaborator(tripId, collaboratorUserId, cancellationToken);

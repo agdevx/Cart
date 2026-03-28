@@ -180,26 +180,6 @@ public class TripRepositoryTests
     }
 
     [Fact]
-    public async Task Should_ReturnHouseholdTrips_When_GetHouseholdTrips()
-    {
-        // Arrange
-        var dbName = Guid.NewGuid().ToString();
-        using var context = CreateContext(dbName);
-        var repo = new TripRepository(context);
-        var householdId = Guid.NewGuid();
-        context.Trips.Add(new Trip { Id = Guid.NewGuid(), Name = "Household Trip", IsCompleted = false, HouseholdId = householdId });
-        context.Trips.Add(new Trip { Id = Guid.NewGuid(), Name = "Other Trip", IsCompleted = false });
-        await context.SaveChangesAsync();
-
-        // Act
-        var result = await repo.GetHouseholdTrips(householdId);
-
-        // Assert
-        result.Should().HaveCount(1);
-        result.First().Name.Should().Be("Household Trip");
-    }
-
-    [Fact]
     public async Task Should_ReturnTrue_When_IsUserCollaboratorAsCreator()
     {
         // Arrange

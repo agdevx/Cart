@@ -41,7 +41,7 @@ describe('useUpdateTripMutation', () => {
 
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/trip/trip1', {
       method: 'PUT',
-      body: JSON.stringify({ name: 'Updated Trip Name', householdId: null }),
+      body: JSON.stringify({ name: 'Updated Trip Name' }),
     })
   })
 

@@ -8,8 +8,6 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
-import type { Household } from '@/apis/agdevx-cart-api/models/household'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import * as createTripModule from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
 import * as deleteTripModule from '@/apis/agdevx-cart-api/trip/delete-trip.mutation'
@@ -41,7 +39,6 @@ const mockTrips: Trip[] = [
   {
     id: 'trip1',
     name: 'Weekly Groceries',
-    householdId: null,
     createdByUserId: 'user1',
     isStarted: true,
     startedAt: '2024-01-15',
@@ -55,7 +52,6 @@ const mockTrips: Trip[] = [
   {
     id: 'trip2',
     name: 'Holiday Shopping',
-    householdId: null,
     createdByUserId: 'user1',
     isStarted: true,
     startedAt: '2024-01-15',
@@ -69,7 +65,6 @@ const mockTrips: Trip[] = [
   {
     id: 'trip3',
     name: 'Planned Trip',
-    householdId: null,
     createdByUserId: 'user1',
     isStarted: false,
     startedAt: null,
@@ -98,11 +93,6 @@ const setupMocks = () => {
     data: mockTrips,
     isLoading: false,
   } as unknown as ReturnType<typeof tripsQueryModule.useTripsQuery>)
-
-  vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
-    data: [] as Household[],
-    isLoading: false,
-  } as unknown as ReturnType<typeof householdsQueryModule.useHouseholdsQuery>)
 
   vi.spyOn(createTripModule, 'useCreateTripMutation').mockReturnValue({
     mutateAsync: vi.fn(),
@@ -187,7 +177,7 @@ describe('ShoppingPage', () => {
     fireEvent.change(input, { target: { value: 'Saturday Groceries' } })
     fireEvent.click(screen.getByText('Save'))
 
-    expect(updateMutateFn).toHaveBeenCalledWith({ tripId: 'trip1', name: 'Saturday Groceries', householdId: null })
+    expect(updateMutateFn).toHaveBeenCalledWith({ tripId: 'trip1', name: 'Saturday Groceries' })
   })
 
   it('shows delete confirmation dialog', () => {
@@ -287,7 +277,6 @@ describe('ShoppingPage', () => {
     const createdTrip: Trip = {
       id: 'new-trip-123',
       name: 'Weekend Run',
-      householdId: null,
       createdByUserId: 'user1',
       isStarted: false,
       startedAt: null,
@@ -324,7 +313,6 @@ describe('ShoppingPage', () => {
     await waitFor(() => {
       expect(mutateAsyncFn).toHaveBeenCalledWith({
         name: 'Weekend Run',
-        householdId: null,
       })
       expect(mockNavigate).toHaveBeenCalledWith('/shopping/new-trip-123')
     })

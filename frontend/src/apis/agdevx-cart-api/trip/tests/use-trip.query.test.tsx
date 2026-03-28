@@ -23,7 +23,6 @@ describe('useTripQuery', () => {
     const mockTrip: Trip = {
       id: '1',
       name: 'Grocery Shopping',
-      householdId: 'household1',
       createdByUserId: 'user1',
       isStarted: false,
       startedAt: null,

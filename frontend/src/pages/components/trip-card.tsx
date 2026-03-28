@@ -1,5 +1,5 @@
 // ABOUTME: TripCard component for displaying a trip with kebab menu actions
-// ABOUTME: Supports inline edit form (name + scope), delete, reopen actions with active/completed visual states
+// ABOUTME: Supports inline edit form (name), delete, reopen actions with active/completed visual states
 
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -9,21 +9,17 @@ import { MoreVertical, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import { tripDetailPath } from '@/routes'
 
-import { ScopeSelect } from './scope-select'
-
 interface TripCardProps {
   trip: Trip
-  onUpdate: (tripId: string, name: string, householdId: string | null) => void
+  onUpdate: (tripId: string, name: string) => void
   onDelete: (tripId: string, tripName: string) => void
   onReopen: (tripId: string) => void
-  households?: Array<{ id: string; name: string | null }>
 }
 
-export const TripCard = ({ trip, onUpdate, onDelete, onReopen, households }: TripCardProps) => {
+export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState(trip.name)
-  const [editHouseholdId, setEditHouseholdId] = useState<string>(trip.householdId ?? 'personal')
   const menuRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -70,7 +66,6 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen, households }: Tri
     e.stopPropagation()
     setMenuOpen(false)
     setEditName(trip.name)
-    setEditHouseholdId(trip.householdId ?? 'personal')
     setEditing(true)
   }
 
@@ -91,8 +86,7 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen, households }: Tri
   const commitEdit = () => {
     const trimmed = editName.trim()
     if (trimmed) {
-      const resolvedHouseholdId = editHouseholdId === 'personal' ? null : editHouseholdId
-      onUpdate(trip.id, trimmed, resolvedHouseholdId)
+      onUpdate(trip.id, trimmed)
     }
     setEditing(false)
   }
@@ -100,7 +94,6 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen, households }: Tri
   const cancelEdit = () => {
     setEditing(false)
     setEditName(trip.name)
-    setEditHouseholdId(trip.householdId ?? 'personal')
   }
 
   const dateLabel = trip.isCompleted
@@ -166,16 +159,6 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen, households }: Tri
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
               className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-            />
-          </div>
-          <div className="mb-3">
-            <label className="block text-sm font-semibold text-navy-soft mb-1">Type</label>
-            <ScopeSelect
-              value={editHouseholdId}
-              onChange={setEditHouseholdId}
-              personalLabel="Personal Trip"
-              households={households}
-              householdDescription="Household"
             />
           </div>
           <div className="flex gap-3">
