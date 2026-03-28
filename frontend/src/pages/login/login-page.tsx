@@ -10,6 +10,7 @@ import { useLoginMutation } from '@/apis/agdevx-cart-api/auth/login.mutation'
 import { useAuth } from '@/auth/use-auth'
 import { ROUTES } from '@/routes'
 import { useFieldValidation } from '@/services/use-field-validation.service'
+import { FormField } from '@/shared/form-field'
 import { Spinner } from '@/shared/spinner'
 import { isEmail, isRequired } from '@/utils/validation-rules'
 
@@ -35,9 +36,6 @@ export const LoginPage = () => {
       : errors[field]
         ? 'border-coral border-2'
         : 'border-navy/10'
-
-  const labelClass = (field: string) =>
-    errors[field] ? 'text-coral' : 'text-navy-soft'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -102,10 +100,7 @@ export const LoginPage = () => {
         <h2 className="font-display text-xl font-extrabold text-navy mb-6">Sign in</h2>
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="email" className={`block text-sm font-semibold ${labelClass('email')} mb-2`}>
-              Email
-            </label>
+          <FormField label="Email" htmlFor="email" error={errors.email}>
             <input
               id="email"
               type="email"
@@ -117,14 +112,8 @@ export const LoginPage = () => {
               className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('email')}`}
               autoComplete="email"
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-coral">{errors.email}</p>
-            )}
-          </div>
-          <div className="mb-6">
-            <label htmlFor="password" className={`block text-sm font-semibold ${labelClass('password')} mb-2`}>
-              Password
-            </label>
+          </FormField>
+          <FormField label="Password" htmlFor="password" error={errors.password}>
             <input
               id="password"
               type="password"
@@ -136,10 +125,7 @@ export const LoginPage = () => {
               className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('password')}`}
               autoComplete="current-password"
             />
-            {errors.password && (
-              <p className="mt-1 text-sm text-coral">{errors.password}</p>
-            )}
-          </div>
+          </FormField>
           <button
             type="submit"
             disabled={loginMutation.isPending || !isValid}

@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { useJoinHouseholdMutation } from '@/apis/agdevx-cart-api/household/join-household.mutation'
 import { ROUTES } from '@/routes'
+import { FormField } from '@/shared/form-field'
 import { getErrorMessage } from '@/utilities/error-messages'
 
 export const JoinHouseholdPage = () => {
@@ -33,10 +34,7 @@ export const JoinHouseholdPage = () => {
       <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight mb-6">Join Household</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="inviteCode" className="block text-sm font-semibold text-navy-soft mb-1">
-            Invite Code
-          </label>
+        <FormField label="Invite Code" htmlFor="inviteCode">
           <input
             id="inviteCode"
             type="text"
@@ -46,7 +44,7 @@ export const JoinHouseholdPage = () => {
             className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text font-mono tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
             disabled={joinMutation.isPending}
           />
-        </div>
+        </FormField>
 
         {joinMutation.isError && (
           <div className="p-3 bg-coral/10 text-coral rounded-xl font-semibold text-sm">

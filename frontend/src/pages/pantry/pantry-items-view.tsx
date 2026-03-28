@@ -19,6 +19,7 @@ import { useFieldValidation } from '@/services/use-field-validation.service'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { DropdownMenu } from '@/shared/dropdown-menu'
 import { EmptyState } from '@/shared/empty-state'
+import { FormField } from '@/shared/form-field'
 import { ScopeSelect } from '@/shared/scope-select'
 import { SectionHeader } from '@/shared/section-header'
 import { Spinner } from '@/shared/spinner'
@@ -209,10 +210,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
 
   const createForm = showCreateForm && (
     <form onSubmit={handleCreate} className="mb-4 p-5 bg-surface rounded-2xl shadow-sm">
-      <div className="mb-3">
-        <label htmlFor="itemName" className="block text-sm font-semibold text-navy-soft mb-1">
-          Item Name
-        </label>
+      <FormField label="Item Name" htmlFor="itemName" error={createErrors.name}>
         <input
           id="itemName"
           type="text"
@@ -224,13 +222,9 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${createErrors.name ? 'border-coral border-2' : 'border-navy/10'}`}
           disabled={createMutation.isPending}
         />
-        {createErrors.name && <p className="mt-1 text-sm text-coral">{createErrors.name}</p>}
-      </div>
+      </FormField>
 
-      <div className="mb-3">
-        <label htmlFor="itemScope" className="block text-sm font-semibold text-navy-soft mb-1">
-          Scope
-        </label>
+      <FormField label="Scope" htmlFor="itemScope">
         <ScopeSelect
           value={itemScope}
           onChange={(val) => {
@@ -243,12 +237,9 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           disabled={createMutation.isPending}
           aria-label="Scope"
         />
-      </div>
+      </FormField>
 
-      <div className="mb-3">
-        <label htmlFor="itemNotes" className="block text-sm font-semibold text-navy-soft mb-1">
-          Notes (optional)
-        </label>
+      <FormField label="Notes (optional)" htmlFor="itemNotes">
         <input
           id="itemNotes"
           type="text"
@@ -258,12 +249,9 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
           disabled={createMutation.isPending}
         />
-      </div>
+      </FormField>
 
-      <div className="mb-4">
-        <label htmlFor="itemDefaultStore" className="block text-sm font-semibold text-navy-soft mb-1">
-          Default Store (optional)
-        </label>
+      <FormField label="Default Store (optional)" htmlFor="itemDefaultStore">
         <select
           id="itemDefaultStore"
           value={itemDefaultStoreId || ''}
@@ -276,7 +264,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
             <option key={store.id} value={store.id}>{storeDisplayNames.get(store.id) ?? store.name}</option>
           ))}
         </select>
-      </div>
+      </FormField>
 
       <div className="flex gap-3">
         <button
@@ -330,10 +318,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
 
   const renderEditForm = (item: InventoryItem) => (
     <form onSubmit={handleEditSubmit} className="p-5 bg-surface rounded-2xl shadow-sm mt-2">
-      <div className="mb-3">
-        <label htmlFor={`editName-${item.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
-          Item Name
-        </label>
+      <FormField label="Item Name" htmlFor={`editName-${item.id}`}>
         <input
           id={`editName-${item.id}`}
           type="text"
@@ -344,12 +329,9 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
           disabled={updateMutation.isPending}
         />
-      </div>
+      </FormField>
 
-      <div className="mb-3">
-        <label htmlFor={`editScope-${item.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
-          Scope
-        </label>
+      <FormField label="Scope" htmlFor={`editScope-${item.id}`}>
         <ScopeSelect
           value={editScope}
           onChange={(val) => {
@@ -362,12 +344,9 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           disabled={updateMutation.isPending}
           aria-label="Scope"
         />
-      </div>
+      </FormField>
 
-      <div className="mb-3">
-        <label htmlFor={`editNotes-${item.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
-          Notes (optional)
-        </label>
+      <FormField label="Notes (optional)" htmlFor={`editNotes-${item.id}`}>
         <input
           id={`editNotes-${item.id}`}
           type="text"
@@ -377,12 +356,9 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
           disabled={updateMutation.isPending}
         />
-      </div>
+      </FormField>
 
-      <div className="mb-4">
-        <label htmlFor={`editDefaultStore-${item.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
-          Default Store (optional)
-        </label>
+      <FormField label="Default Store (optional)" htmlFor={`editDefaultStore-${item.id}`}>
         <select
           id={`editDefaultStore-${item.id}`}
           value={editDefaultStoreId || ''}
@@ -395,7 +371,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
             <option key={store.id} value={store.id}>{storeDisplayNames.get(store.id) ?? store.name}</option>
           ))}
         </select>
-      </div>
+      </FormField>
 
       <div className="flex gap-3">
         <button

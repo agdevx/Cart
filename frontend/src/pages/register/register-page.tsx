@@ -11,6 +11,7 @@ import { ApiError } from '@/apis/api-error';
 import { useAuth } from '@/auth/use-auth';
 import { ROUTES } from '@/routes';
 import { useFieldValidation } from '@/services/use-field-validation.service';
+import { FormField } from '@/shared/form-field';
 import { Spinner } from '@/shared/spinner';
 import { isEmail, isRequired, matchesField, maxLength, minLength, passwordStrength } from '@/utils/validation-rules';
 
@@ -80,9 +81,6 @@ export const RegisterPage = () => {
         ? 'border-coral border-2'
         : 'border-navy/10';
 
-  const labelClass = (field: string) =>
-    errors[field] ? 'text-coral' : 'text-navy-soft';
-
   return (
     <div id="main-content" className="min-h-screen flex flex-col animate-fade-in">
       {/* Brand Panel */}
@@ -126,10 +124,7 @@ export const RegisterPage = () => {
 
         <form onSubmit={handleSubmit}>
           {/* Email Field */}
-          <div className="mb-4">
-            <label htmlFor="email" className={`block text-sm font-semibold ${labelClass('email')} mb-2`}>
-              Email
-            </label>
+          <FormField label="Email" htmlFor="email" error={errors.email}>
             <input
               id="email"
               type="email"
@@ -141,16 +136,10 @@ export const RegisterPage = () => {
               className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('email')}`}
               autoComplete="email"
             />
-            {errors.email && (
-              <p className="mt-1 text-sm text-coral">{errors.email}</p>
-            )}
-          </div>
+          </FormField>
 
           {/* Password Field */}
-          <div className="mb-4">
-            <label htmlFor="password" className={`block text-sm font-semibold ${labelClass('password')} mb-2`}>
-              Password
-            </label>
+          <FormField label="Password" htmlFor="password" error={errors.password}>
             <input
               id="password"
               type="password"
@@ -162,7 +151,6 @@ export const RegisterPage = () => {
               className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('password')}`}
               autoComplete="new-password"
             />
-
             {/* Password Requirements */}
             <div className="mt-2 text-xs text-text-secondary">
               <p className="font-semibold mb-1">Requirements:</p>
@@ -178,17 +166,10 @@ export const RegisterPage = () => {
                 </p>
               </div>
             </div>
-
-            {errors.password && (
-              <p className="mt-1 text-sm text-coral">{errors.password}</p>
-            )}
-          </div>
+          </FormField>
 
           {/* Confirm Password Field */}
-          <div className="mb-4">
-            <label htmlFor="confirmPassword" className={`block text-sm font-semibold ${labelClass('confirmPassword')} mb-2`}>
-              Confirm Password
-            </label>
+          <FormField label="Confirm Password" htmlFor="confirmPassword" error={errors.confirmPassword}>
             <input
               id="confirmPassword"
               type="password"
@@ -200,16 +181,10 @@ export const RegisterPage = () => {
               className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('confirmPassword')}`}
               autoComplete="new-password"
             />
-            {errors.confirmPassword && (
-              <p className="mt-1 text-sm text-coral">{errors.confirmPassword}</p>
-            )}
-          </div>
+          </FormField>
 
           {/* Name Field */}
-          <div className="mb-6">
-            <label htmlFor="name" className={`block text-sm font-semibold ${labelClass('name')} mb-2`}>
-              Name
-            </label>
+          <FormField label="Name" htmlFor="name" error={errors.name}>
             <input
               id="name"
               type="text"
@@ -221,10 +196,7 @@ export const RegisterPage = () => {
               className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('name')}`}
               autoComplete="name"
             />
-            {errors.name && (
-              <p className="mt-1 text-sm text-coral">{errors.name}</p>
-            )}
-          </div>
+          </FormField>
 
           {/* Submit Button */}
           <button

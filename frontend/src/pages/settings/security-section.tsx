@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 
 import { useChangePasswordMutation } from '@/apis/agdevx-cart-api/auth/change-password.mutation'
 import { useFieldValidation } from '@/services/use-field-validation.service'
+import { FormField } from '@/shared/form-field'
 import { Spinner } from '@/shared/spinner'
 import { isRequired, matchesField, maxLength, minLength, passwordStrength } from '@/utils/validation-rules'
 
@@ -108,9 +109,8 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wider">Security</span>
       </div>
-      <div key={formKey} className="rounded-xl bg-surface p-4 space-y-3">
-        <div>
-          <label htmlFor="security-current-password" className={`block text-xs mb-1 ${errors.currentPassword ? 'text-coral' : 'text-text-tertiary'}`}>Current Password</label>
+      <div key={formKey} className="rounded-xl bg-surface p-4">
+        <FormField label="Current Password" htmlFor="security-current-password" error={errors.currentPassword} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
           <input
             id="security-current-password"
             type="password"
@@ -121,21 +121,20 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
             className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('currentPassword')}`}
             autoComplete="current-password"
           />
-          {errors.currentPassword && <p className="mt-1 text-sm text-coral">{errors.currentPassword}</p>}
-        </div>
+        </FormField>
         <div>
-          <label htmlFor="security-new-password" className={`block text-xs mb-1 ${errors.newPassword ? 'text-coral' : 'text-text-tertiary'}`}>New Password</label>
-          <input
-            id="security-new-password"
-            type="password"
-            value={newPassword}
-            onChange={(e) => { setNewPassword(e.target.value); handleChange('newPassword', e.target.value) }}
-            onBlur={() => handleBlur('newPassword')}
-            maxLength={128}
-            className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('newPassword')}`}
-            autoComplete="new-password"
-          />
-          {errors.newPassword && <p className="mt-1 text-sm text-coral">{errors.newPassword}</p>}
+          <FormField label="New Password" htmlFor="security-new-password" error={errors.newPassword} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
+            <input
+              id="security-new-password"
+              type="password"
+              value={newPassword}
+              onChange={(e) => { setNewPassword(e.target.value); handleChange('newPassword', e.target.value) }}
+              onBlur={() => handleBlur('newPassword')}
+              maxLength={128}
+              className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('newPassword')}`}
+              autoComplete="new-password"
+            />
+          </FormField>
           <div className="mt-2 text-xs text-text-secondary">
             <div className="space-y-1">
               <p className={hasMinLength ? 'text-teal' : ''}>
@@ -150,8 +149,7 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
             </div>
           </div>
         </div>
-        <div>
-          <label htmlFor="security-confirm-password" className={`block text-xs mb-1 ${errors.confirmPassword ? 'text-coral' : 'text-text-tertiary'}`}>Confirm New Password</label>
+        <FormField label="Confirm New Password" htmlFor="security-confirm-password" error={errors.confirmPassword} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
           <input
             id="security-confirm-password"
             type="password"
@@ -162,8 +160,7 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
             className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('confirmPassword')}`}
             autoComplete="new-password"
           />
-          {errors.confirmPassword && <p className="mt-1 text-sm text-coral">{errors.confirmPassword}</p>}
-        </div>
+        </FormField>
 
         <div className="flex gap-2 mt-3">
           <button

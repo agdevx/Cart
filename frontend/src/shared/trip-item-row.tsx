@@ -9,6 +9,7 @@ import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import type { TripItem } from '@/apis/agdevx-cart-api/models/trip-item'
 
 import { DropdownMenu } from './dropdown-menu'
+import { FormField } from './form-field'
 import { Spinner } from './spinner'
 
 interface TripItemRowProps {
@@ -304,9 +305,8 @@ const EditForm = ({
   onSave,
   onCancel,
 }: EditFormProps) => (
-  <div className="mt-3 space-y-3">
-    <div>
-      <label htmlFor="edit-quantity" className="block text-xs font-semibold text-text-secondary mb-1">Quantity</label>
+  <div className="mt-3">
+    <FormField label="Quantity" htmlFor="edit-quantity" labelSizeClassName="text-xs font-semibold" labelDefaultColor="text-text-secondary">
       <input
         id="edit-quantity"
         type="number"
@@ -317,9 +317,8 @@ const EditForm = ({
         disabled={isUpdating}
         className={inputClassName}
       />
-    </div>
-    <div>
-      <label htmlFor="edit-notes" className="block text-xs font-semibold text-text-secondary mb-1">Shopping Notes</label>
+    </FormField>
+    <FormField label="Shopping Notes" htmlFor="edit-notes" labelSizeClassName="text-xs font-semibold" labelDefaultColor="text-text-secondary">
       <input
         id="edit-notes"
         type="text"
@@ -329,9 +328,8 @@ const EditForm = ({
         disabled={isUpdating}
         className={inputClassName}
       />
-    </div>
-    <div>
-      <label htmlFor="edit-store" className="block text-xs font-semibold text-text-secondary mb-1">Store</label>
+    </FormField>
+    <FormField label="Store" htmlFor="edit-store" labelSizeClassName="text-xs font-semibold" labelDefaultColor="text-text-secondary">
       <select
         id="edit-store"
         value={editStoreId}
@@ -344,7 +342,7 @@ const EditForm = ({
           <option key={store.id} value={store.id}>{storeDisplayNames.get(store.id) ?? store.name}</option>
         ))}
       </select>
-    </div>
+    </FormField>
     <div className="flex gap-3 pt-1">
       <button
         onClick={onCancel}

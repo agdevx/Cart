@@ -13,6 +13,7 @@ import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useFieldValidation } from '@/services/use-field-validation.service'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
+import { FormField } from '@/shared/form-field'
 import { ScopeSelect } from '@/shared/scope-select'
 import { SectionHeader } from '@/shared/section-header'
 import { Spinner } from '@/shared/spinner'
@@ -211,10 +212,7 @@ export const PantryStoresView = () => {
       {/* Expandable edit form below the store row */}
       {editingStoreId === store.id && (
         <div className="mt-2 p-5 bg-surface rounded-2xl shadow-sm">
-          <div className="mb-3">
-            <label htmlFor={`editStoreName-${store.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
-              Store Name
-            </label>
+          <FormField label="Store Name" htmlFor={`editStoreName-${store.id}`}>
             <input
               id={`editStoreName-${store.id}`}
               type="text"
@@ -224,15 +222,12 @@ export const PantryStoresView = () => {
               className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
               autoFocus
             />
-            {editDuplicateError && (
-              <p className="text-coral text-sm mt-1">{editDuplicateError}</p>
-            )}
-          </div>
+          </FormField>
+          {editDuplicateError && (
+            <p className="text-coral text-sm -mt-2 mb-3">{editDuplicateError}</p>
+          )}
 
-          <div className="mb-4">
-            <label htmlFor={`editStoreScope-${store.id}`} className="block text-sm font-semibold text-navy-soft mb-1">
-              Scope
-            </label>
+          <FormField label="Scope" htmlFor={`editStoreScope-${store.id}`}>
             <ScopeSelect
               value={editingScope}
               onChange={setEditingScope}
@@ -242,7 +237,7 @@ export const PantryStoresView = () => {
               disabled={updateMutation.isPending}
               aria-label="Edit scope"
             />
-          </div>
+          </FormField>
 
           <div className="flex gap-3">
             <button
@@ -281,10 +276,7 @@ export const PantryStoresView = () => {
       {/* Inline create form */}
       {showCreateForm && (
         <form onSubmit={handleCreate} className="mt-3 mb-4 p-5 bg-surface rounded-2xl shadow-sm">
-          <div className="mb-3">
-            <label htmlFor="storeName" className="block text-sm font-semibold text-navy-soft mb-1">
-              Store Name
-            </label>
+          <FormField label="Store Name" htmlFor="storeName" error={createErrors.name}>
             <input
               id="storeName"
               type="text"
@@ -296,16 +288,12 @@ export const PantryStoresView = () => {
               className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${createErrors.name ? 'border-coral border-2' : 'border-navy/10'}`}
               disabled={createMutation.isPending}
             />
-            {createErrors.name && <p className="mt-1 text-sm text-coral">{createErrors.name}</p>}
-            {createDuplicateError && (
-              <p className="text-coral text-sm mt-1">{createDuplicateError}</p>
-            )}
-          </div>
+          </FormField>
+          {createDuplicateError && (
+            <p className="text-coral text-sm -mt-2 mb-3">{createDuplicateError}</p>
+          )}
 
-          <div className="mb-4">
-            <label htmlFor="storeScope" className="block text-sm font-semibold text-navy-soft mb-1">
-              Scope
-            </label>
+          <FormField label="Scope" htmlFor="storeScope">
             <ScopeSelect
               value={storeScope}
               onChange={setStoreScope}
@@ -315,7 +303,7 @@ export const PantryStoresView = () => {
               disabled={createMutation.isPending}
               aria-label="Scope"
             />
-          </div>
+          </FormField>
 
           <div className="flex gap-3">
             <button

@@ -7,6 +7,7 @@ import type { UpdateProfileResponse } from '@/apis/agdevx-cart-api/auth/update-p
 import { useUpdateProfileMutation } from '@/apis/agdevx-cart-api/auth/update-profile.mutation'
 import type { User } from '@/apis/agdevx-cart-api/models/user'
 import { useFieldValidation } from '@/services/use-field-validation.service'
+import { FormField } from '@/shared/form-field'
 import { Spinner } from '@/shared/spinner'
 import { isEmail, isRequired, maxLength } from '@/utils/validation-rules'
 
@@ -107,9 +108,8 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wider">Profile</span>
       </div>
-      <div key={formKey} className="rounded-xl bg-surface p-4 space-y-3">
-        <div>
-          <label htmlFor="profile-name" className={`block text-xs mb-1 ${errors.name ? 'text-coral' : 'text-text-tertiary'}`}>Name</label>
+      <div key={formKey} className="rounded-xl bg-surface p-4">
+        <FormField label="Name" htmlFor="profile-name" error={errors.name} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
           <input
             id="profile-name"
             type="text"
@@ -120,10 +120,8 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
             className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('name')}`}
             autoComplete="name"
           />
-          {errors.name && <p className="mt-1 text-sm text-coral">{errors.name}</p>}
-        </div>
-        <div>
-          <label htmlFor="profile-email" className={`block text-xs mb-1 ${errors.email ? 'text-coral' : 'text-text-tertiary'}`}>Email</label>
+        </FormField>
+        <FormField label="Email" htmlFor="profile-email" error={errors.email} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
           <input
             id="profile-email"
             type="email"
@@ -134,24 +132,23 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
             className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${borderClass('email')}`}
             autoComplete="email"
           />
-          {errors.email && <p className="mt-1 text-sm text-coral">{errors.email}</p>}
-        </div>
+        </FormField>
 
         {emailChanged && (
           <div className="border-2 border-dashed border-teal/30 rounded-xl p-3 bg-teal/[0.03]">
-            <label htmlFor="profile-current-password" className="block text-xs text-text-tertiary mb-1">Current Password</label>
-            <input
-              id="profile-current-password"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => { setCurrentPassword(e.target.value); handleChange('currentPassword', e.target.value) }}
-              onBlur={() => handleBlur('currentPassword')}
-              maxLength={128}
-              className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${errors.currentPassword ? 'border-coral border-2' : 'border-navy/10'}`}
-              autoComplete="current-password"
-            />
-            <p className="mt-1 text-xs text-text-tertiary">Required to change your email</p>
-            {errors.currentPassword && <p className="mt-1 text-sm text-coral">{errors.currentPassword}</p>}
+            <FormField label="Current Password" htmlFor="profile-current-password" error={errors.currentPassword} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
+              <input
+                id="profile-current-password"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => { setCurrentPassword(e.target.value); handleChange('currentPassword', e.target.value) }}
+                onBlur={() => handleBlur('currentPassword')}
+                maxLength={128}
+                className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${errors.currentPassword ? 'border-coral border-2' : 'border-navy/10'}`}
+                autoComplete="current-password"
+              />
+              <p className="mt-1 text-xs text-text-tertiary">Required to change your email</p>
+            </FormField>
           </div>
         )}
 

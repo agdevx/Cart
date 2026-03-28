@@ -16,6 +16,7 @@ import { tripDetailPath } from '@/routes'
 import { useFieldValidation } from '@/services/use-field-validation.service'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
+import { FormField } from '@/shared/form-field'
 import { PageHeader } from '@/shared/page-header'
 import { SectionHeader } from '@/shared/section-header'
 import { Spinner } from '@/shared/spinner'
@@ -131,10 +132,7 @@ export const ShoppingPage = () => {
 
       {showCreateForm && (
         <form key={formKey} onSubmit={handleCreateTrip} className="mt-3 mb-4 p-5 bg-surface rounded-2xl shadow-sm">
-          <div className="mb-3">
-            <label htmlFor="tripName" className="block text-sm font-semibold text-navy-soft mb-1">
-              Trip Name
-            </label>
+          <FormField label="Trip Name" htmlFor="tripName" error={errors.name}>
             <input
               id="tripName"
               type="text"
@@ -146,8 +144,7 @@ export const ShoppingPage = () => {
               className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${errors.name ? 'border-coral border-2' : 'border-navy/10'}`}
               disabled={createMutation.isPending}
             />
-            {errors.name && <p className="mt-1 text-sm text-coral">{errors.name}</p>}
-          </div>
+          </FormField>
 
           <div className="flex gap-3">
             <button

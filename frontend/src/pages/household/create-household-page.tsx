@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { useCreateHouseholdMutation } from '@/apis/agdevx-cart-api/household/create-household.mutation'
 import { ROUTES } from '@/routes'
 import { useFieldValidation } from '@/services/use-field-validation.service'
+import { FormField } from '@/shared/form-field'
 import { Spinner } from '@/shared/spinner'
 import { getErrorMessage } from '@/utilities/error-messages'
 import { isRequired, maxLength } from '@/utils/validation-rules'
@@ -44,10 +45,7 @@ export const CreateHouseholdPage = () => {
       <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight mb-6">Create Household</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-semibold text-navy-soft mb-1">
-            Household Name
-          </label>
+        <FormField label="Household Name" htmlFor="name" error={errors.name}>
           <input
             id="name"
             type="text"
@@ -58,8 +56,7 @@ export const CreateHouseholdPage = () => {
             className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${errors.name ? 'border-coral border-2' : 'border-navy/10'}`}
             disabled={createMutation.isPending}
           />
-          {errors.name && <p className="mt-1 text-sm text-coral">{errors.name}</p>}
-        </div>
+        </FormField>
 
         {createMutation.isError && (
           <div className="p-3 bg-coral/10 text-coral rounded-xl font-semibold text-sm">
