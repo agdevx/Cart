@@ -15,6 +15,7 @@ import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
 import { ScopeSelect } from '@/shared/scope-select'
 import { Spinner } from '@/shared/spinner'
+import { sortStores } from '@/utils/sort-stores'
 import { isRequired, maxLength } from '@/utils/validation-rules'
 
 export const PantryStoresView = () => {
@@ -98,14 +99,14 @@ export const PantryStoresView = () => {
     )
   }
 
-  const householdStoresMap = new Map<string, typeof stores>()
+  const householdStoresMap = new Map<string, ReadonlyArray<NonNullable<typeof stores>[number]>>()
   for (const household of households || []) {
     householdStoresMap.set(
       household.id,
-      [...(stores?.filter((s) => s.householdId === household.id) || [])].sort((a, b) => a.name.localeCompare(b.name))
+      sortStores(stores?.filter((s) => s.householdId === household.id) || [])
     )
   }
-  const personalStores = [...(stores?.filter((s) => s.userId !== null) || [])].sort((a, b) => a.name.localeCompare(b.name))
+  const personalStores = sortStores(stores?.filter((s) => s.userId !== null) || [])
 
   const isEmpty = !stores || stores.length === 0
 

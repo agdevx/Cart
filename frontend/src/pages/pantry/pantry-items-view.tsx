@@ -22,6 +22,7 @@ import { EmptyState } from '@/shared/empty-state'
 import { ScopeSelect } from '@/shared/scope-select'
 import { Spinner } from '@/shared/spinner'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
+import { sortItems } from '@/utils/sort-items'
 import { isRequired, maxLength } from '@/utils/validation-rules'
 
 export type InventoryFilter = 'all' | 'personal' | `household:${string}` | `merged:${string}`
@@ -192,10 +193,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
   const items = activeQuery.data
   const isLoading = activeQuery.isLoading
 
-  const sortedItems = useMemo(
-    () => [...(items || [])].sort((a, b) => a.name.localeCompare(b.name)),
-    [items]
-  )
+  const sortedItems = useMemo(() => sortItems(items || []), [items])
 
   const handleDelete = (id: string, name: string) => {
     setMenuOpenId(null)

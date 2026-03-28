@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 
 import { ChevronDown } from 'lucide-react'
 
+import { sortHouseholds } from '@/utils/sort-households'
+
 interface ScopeSelectProps {
   value: string
   onChange: (value: string) => void
@@ -89,7 +91,7 @@ export const ScopeSelect = ({ value, onChange, personalLabel, households, househ
             {personalLabel}
           </button>
 
-          {[...(households ?? [])].sort((a, b) => (a.name || '').localeCompare(b.name || '')).map((household) => (
+          {sortHouseholds(households ?? []).map((household) => (
             <button
               key={household.id}
               type="button"

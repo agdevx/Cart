@@ -12,6 +12,7 @@ import { useAuth } from '@/auth/use-auth'
 import { householdDetailPath, ROUTES } from '@/routes'
 import { EmptyState } from '@/shared/empty-state'
 import { PageHeader } from '@/shared/page-header'
+import { sortHouseholds } from '@/utils/sort-households'
 
 const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
   const { user } = useAuth()
@@ -36,10 +37,7 @@ const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
 export const HouseholdPage = () => {
   const { data: households, isLoading } = useHouseholdsQuery()
 
-  const sortedHouseholds = useMemo(
-    () => [...(households || [])].sort((a, b) => (a.name || '').localeCompare(b.name || '')),
-    [households]
-  )
+  const sortedHouseholds = useMemo(() => sortHouseholds(households || []), [households])
 
   if (isLoading) {
     return (

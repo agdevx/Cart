@@ -16,6 +16,7 @@ import { tripDetailPath } from '@/routes'
 import { EmptyState } from '@/shared/empty-state'
 import { Spinner } from '@/shared/spinner'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
+import { sortItems } from '@/utils/sort-items'
 
 type SourceFilter = 'all' | 'personal' | string
 
@@ -93,7 +94,7 @@ export const AddTripItemsPage = () => {
       items = items.filter((item) => item.name.toLowerCase().includes(search))
     }
 
-    return items.sort((a, b) => a.name.localeCompare(b.name))
+    return sortItems(items)
   }, [inventory, existingItemIds, sourceFilter, storeFilter, searchText])
 
   const selectedCount = Object.keys(selectedItems).length
