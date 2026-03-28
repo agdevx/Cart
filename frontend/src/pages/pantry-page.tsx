@@ -61,17 +61,6 @@ export const PantryPage = () => {
         </button>
       </div>
 
-      {/* Add Item Button — Items tab only, hidden when empty state is showing */}
-      {hasItems && activeTab === 'items' && (
-        <button
-          onClick={() => setShowItemCreateForm(!showItemCreateForm)}
-          className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
-        >
-          <Plus className="w-5 h-5" />
-          {showItemCreateForm ? 'Cancel' : 'Add Item'}
-        </button>
-      )}
-
       {/* Filter Tabs — Items tab only */}
       {activeTab === 'items' && (
         <div role="tablist" aria-label="Filter inventory" className="flex bg-bg-warm rounded-xl p-1 mb-4 overflow-x-auto">
@@ -115,6 +104,17 @@ export const PantryPage = () => {
             </button>
           ))}
         </div>
+      )}
+
+      {/* Add Item Button — Items tab only, hidden when empty state is showing */}
+      {hasItems && activeTab === 'items' && (
+        <button
+          onClick={() => setShowItemCreateForm(!showItemCreateForm)}
+          className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
+        >
+          <Plus className="w-5 h-5" />
+          {showItemCreateForm ? 'Cancel' : 'Add Item'}
+        </button>
       )}
 
       {/* Items View */}
