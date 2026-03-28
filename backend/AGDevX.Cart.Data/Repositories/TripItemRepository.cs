@@ -31,7 +31,7 @@ public class TripItemRepository(CartDbContext context) : ITripItemRepository
 
     public async Task<TripItem> Update(TripItem tripItem, CancellationToken cancellationToken = default)
     {
-        context.TripItems.Update(tripItem);
+        context.Entry(tripItem).State = EntityState.Modified;
         await context.SaveChangesAsync(cancellationToken);
         return tripItem;
     }

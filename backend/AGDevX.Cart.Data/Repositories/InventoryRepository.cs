@@ -49,7 +49,7 @@ public class InventoryRepository(CartDbContext context) : IInventoryRepository
 
     public async Task<InventoryItem> Update(InventoryItem inventoryItem, CancellationToken cancellationToken = default)
     {
-        context.InventoryItems.Update(inventoryItem);
+        context.Entry(inventoryItem).State = EntityState.Modified;
         await context.SaveChangesAsync(cancellationToken);
 
         //== Reload to include navigation properties
