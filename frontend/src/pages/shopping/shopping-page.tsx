@@ -90,15 +90,15 @@ export const ShoppingPage = () => {
 
   return (
     <div className="pb-4 animate-fade-in">
+      <PageHeader>Your <span className="text-teal">Shopping Trips</span></PageHeader>
+      <div className="px-5">
       {user?.name && (
-        <div className="px-5 pt-5 text-right">
-          <p className="text-sm font-semibold text-teal">
+        <div className="bg-gradient-to-br from-navy to-navy-soft rounded-xl px-4 py-3 mb-4">
+          <p className="text-sm font-semibold text-teal-light">
             {greeting}, {user.name} 👋
           </p>
         </div>
       )}
-      <PageHeader>Your <span className="text-teal">Shopping Trips</span></PageHeader>
-      <div className="px-5">
       {/* New Trip Button — hidden when empty state is showing; always visible when form is open */}
       {(showCreateForm || (trips && trips.length > 0)) && (
         <button
