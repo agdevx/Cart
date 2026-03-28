@@ -179,9 +179,17 @@ export const EditPantryItemForm = ({
   const [editScope, setEditScope] = useState<string>(initialScope)
   const [editDefaultStoreId, setEditDefaultStoreId] = useState<string | null>(initialDefaultStoreId)
 
+  const schema = useMemo(() => ({
+    name: [isRequired('Item name'), maxLength(200)],
+  }), [])
+
+  const values = useMemo(() => ({ name: editName }), [editName])
+
+  const { errors, handleBlur, handleChange, validateAll, isValid } = useFieldValidation(schema, values)
+
   //== Filter stores by the selected scope so only relevant options are shown
   const filteredStores = useMemo(() => {
-    if (editScope === 'personal') {
+    if (editScope === '' || editScope === 'personal') {
       return allStores.filter((s) => s.userId !== null)
     }
     return allStores.filter((s) => s.householdId === editScope)
@@ -190,7 +198,7 @@ export const EditPantryItemForm = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!editName.trim()) {
+    if (!validateAll()) {
       return
     }
 
@@ -205,15 +213,16 @@ export const EditPantryItemForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="p-5 bg-surface rounded-2xl shadow-sm mt-2">
-      <FormField label="Item Name" htmlFor={`editName-${itemId}`}>
+      <FormField label="Item Name" htmlFor={`editName-${itemId}`} error={errors.name}>
         <input
           id={`editName-${itemId}`}
           type="text"
           autoFocus
           value={editName}
-          onChange={(e) => setEditName(e.target.value)}
+          onChange={(e) => { setEditName(e.target.value); handleChange('name', e.target.value) }}
+          onBlur={() => handleBlur('name')}
           placeholder="e.g., Milk"
-          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+          className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${errors.name ? 'border-coral border-2' : 'border-navy/10'}`}
           disabled={isPending}
         />
       </FormField>
@@ -264,7 +273,7 @@ export const EditPantryItemForm = ({
         onCancel={onCancel}
         submitLabel="Save"
         isPending={isPending}
-        disabled={!editName.trim()}
+        disabled={!isValid}
       />
     </form>
   )
