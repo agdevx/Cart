@@ -13,9 +13,9 @@ export interface TripCreateFormData {
 }
 
 interface TripCreateFormProps {
-  isPending: boolean
-  onSubmit: (data: TripCreateFormData) => void
-  onCancel: () => void
+  readonly isPending: boolean
+  readonly onSubmit: (data: TripCreateFormData) => void
+  readonly onCancel: () => void
 }
 
 export const TripCreateForm = ({ isPending, onSubmit, onCancel }: TripCreateFormProps) => {
