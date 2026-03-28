@@ -4,7 +4,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { apiFetch } from '../agdevx-cart-api-config'
-import type { InventoryItem } from '../models/inventory-item'
 
 interface UpdateInventoryItemRequest {
   id: string
@@ -20,13 +19,12 @@ export const useUpdateInventoryItemMutation = () => {
 
   return useMutation({
     mutationKey: ['inventory', 'update'],
-    mutationFn: async (request: UpdateInventoryItemRequest): Promise<InventoryItem> => {
+    mutationFn: async (request: UpdateInventoryItemRequest): Promise<void> => {
       const { id, ...updateData } = request
-      const response = await apiFetch(`/api/v1/inventory/${id}`, {
+      await apiFetch(`/api/v1/inventory/${id}`, {
         method: 'PUT',
         body: JSON.stringify(updateData),
       })
-      return response.json() as Promise<InventoryItem>
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] })
