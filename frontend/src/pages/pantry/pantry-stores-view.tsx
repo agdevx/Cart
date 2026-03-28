@@ -10,15 +10,13 @@ import { useCreateStoreMutation } from '@/apis/agdevx-cart-api/store/create-stor
 import { useDeleteStoreMutation } from '@/apis/agdevx-cart-api/store/delete-store.mutation'
 import { useUpdateStoreMutation } from '@/apis/agdevx-cart-api/store/update-store.mutation'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
-import { useFieldValidation } from '@/services/use-field-validation.service'
-import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
-import { FormField } from '@/shared/form-field'
-import { ScopeSelect } from '@/shared/scope-select'
 import { SectionHeader } from '@/shared/section-header'
 import { sortStores } from '@/utils/sort-stores'
-import { isRequired, maxLength } from '@/utils/validation-rules'
+
+import type { PantryStoreFormData } from './pantry-store-form'
+import { CreatePantryStoreForm, EditPantryStoreForm } from './pantry-store-form'
 
 export const PantryStoresView = () => {
   const { data: households, isLoading: householdsLoading } = useHouseholdsQuery()
@@ -29,44 +27,10 @@ export const PantryStoresView = () => {
   const deleteMutation = useDeleteStoreMutation()
 
   const [showCreateForm, setShowCreateForm] = useState(false)
-  const [storeName, setStoreName] = useState('')
-  const [storeScope, setStoreScope] = useState<string>('personal')
   const [editingStoreId, setEditingStoreId] = useState<string | null>(null)
-  const [editingName, setEditingName] = useState('')
-  const [editingScope, setEditingScope] = useState<string>('personal')
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
-
-  const createSchema = useMemo(() => ({
-    name: [isRequired('Store name'), maxLength(100)],
-  }), [])
-
-  const createValues = useMemo(() => ({ name: storeName }), [storeName])
-
-  const { errors: createErrors, handleBlur: handleCreateBlur, handleChange: handleCreateChange, validateAll: validateCreateAll, isValid: isCreateValid } = useFieldValidation(createSchema, createValues)
-
-  const createDuplicateError = useMemo(() => {
-    if (!storeName.trim() || !stores) return null
-    const scopeStores = storeScope === 'personal'
-      ? stores.filter((s) => s.userId !== null)
-      : stores.filter((s) => s.householdId === storeScope)
-    const isDuplicate = scopeStores.some(
-      (s) => s.name.toLowerCase() === storeName.trim().toLowerCase()
-    )
-    return isDuplicate ? 'A store with this name already exists in this scope' : null
-  }, [storeName, storeScope, stores])
-
-  const editDuplicateError = useMemo(() => {
-    if (!editingName.trim() || !stores || !editingStoreId) return null
-    const scopeStores = editingScope === 'personal'
-      ? stores.filter((s) => s.userId !== null)
-      : stores.filter((s) => s.householdId === editingScope)
-    const isDuplicate = scopeStores.some(
-      (s) => s.id !== editingStoreId && s.name.toLowerCase() === editingName.trim().toLowerCase()
-    )
-    return isDuplicate ? 'A store with this name already exists in this scope' : null
-  }, [editingName, editingScope, editingStoreId, stores])
 
   useEffect(() => {
     if (!menuOpenId) return
@@ -112,20 +76,12 @@ export const PantryStoresView = () => {
 
   const isEmpty = !stores || stores.length === 0
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateCreateAll()) {
-      return
-    }
-
+  const handleCreate = async (data: PantryStoreFormData) => {
     try {
       await createMutation.mutateAsync({
-        name: storeName.trim(),
-        householdId: storeScope === 'personal' ? null : storeScope,
+        name: data.name,
+        householdId: data.householdId,
       })
-      setStoreName('')
-      setStoreScope('personal')
       setShowCreateForm(false)
     } catch {
       // Error handled by mutation state
@@ -134,24 +90,20 @@ export const PantryStoresView = () => {
 
   const handleStartEdit = (store: NonNullable<typeof stores>[number]) => {
     setEditingStoreId(store.id)
-    setEditingName(store.name)
-    setEditingScope(store.householdId ?? 'personal')
   }
 
-  const handleSaveEdit = async () => {
-    if (!editingStoreId || !editingName.trim()) {
+  const handleSaveEdit = async (data: PantryStoreFormData) => {
+    if (!editingStoreId) {
       return
     }
 
     try {
       await updateMutation.mutateAsync({
         id: editingStoreId,
-        name: editingName.trim(),
-        householdId: editingScope === 'personal' ? null : editingScope,
+        name: data.name,
+        householdId: data.householdId,
       })
       setEditingStoreId(null)
-      setEditingName('')
-      setEditingScope('personal')
     } catch {
       // Error handled by mutation state
     }
@@ -159,8 +111,6 @@ export const PantryStoresView = () => {
 
   const handleCancelEdit = () => {
     setEditingStoreId(null)
-    setEditingName('')
-    setEditingScope('personal')
   }
 
   const handleConfirmDelete = async () => {
@@ -211,43 +161,16 @@ export const PantryStoresView = () => {
 
       {/* Expandable edit form below the store row */}
       {editingStoreId === store.id && (
-        <div className="mt-2 p-5 bg-surface rounded-2xl shadow-sm">
-          <FormField label="Store Name" htmlFor={`editStoreName-${store.id}`}>
-            <input
-              id={`editStoreName-${store.id}`}
-              type="text"
-              value={editingName}
-              onChange={(e) => setEditingName(e.target.value)}
-              aria-label="Edit store name"
-              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-              autoFocus
-            />
-          </FormField>
-          {editDuplicateError && (
-            <p className="text-coral text-sm -mt-2 mb-3">{editDuplicateError}</p>
-          )}
-
-          <FormField label="Scope" htmlFor={`editStoreScope-${store.id}`}>
-            <ScopeSelect
-              value={editingScope}
-              onChange={setEditingScope}
-              personalLabel="Personal"
-              households={households}
-              householdDescription="Household"
-              disabled={updateMutation.isPending}
-              aria-label="Edit scope"
-            />
-          </FormField>
-
-          <ActionCancelFormButtons
-            onCancel={handleCancelEdit}
-            submitLabel="Save"
-            isPending={updateMutation.isPending}
-            disabled={!editingName.trim() || !!editDuplicateError}
-            type="button"
-            onSubmit={handleSaveEdit}
-          />
-        </div>
+        <EditPantryStoreForm
+          storeId={store.id}
+          initialName={store.name}
+          initialScope={store.householdId ?? 'personal'}
+          stores={stores ?? []}
+          households={households}
+          isPending={updateMutation.isPending}
+          onSubmit={handleSaveEdit}
+          onCancel={handleCancelEdit}
+        />
       )}
     </div>
   )
@@ -267,43 +190,13 @@ export const PantryStoresView = () => {
 
       {/* Inline create form */}
       {showCreateForm && (
-        <form onSubmit={handleCreate} className="mt-3 mb-4 p-5 bg-surface rounded-2xl shadow-sm">
-          <FormField label="Store Name" htmlFor="storeName" error={createErrors.name}>
-            <input
-              id="storeName"
-              type="text"
-              autoFocus
-              value={storeName}
-              onChange={(e) => { setStoreName(e.target.value); handleCreateChange('name', e.target.value) }}
-              onBlur={() => handleCreateBlur('name')}
-              placeholder="e.g., Costco"
-              className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${createErrors.name ? 'border-coral border-2' : 'border-navy/10'}`}
-              disabled={createMutation.isPending}
-            />
-          </FormField>
-          {createDuplicateError && (
-            <p className="text-coral text-sm -mt-2 mb-3">{createDuplicateError}</p>
-          )}
-
-          <FormField label="Scope" htmlFor="storeScope">
-            <ScopeSelect
-              value={storeScope}
-              onChange={setStoreScope}
-              personalLabel="Personal"
-              households={households}
-              householdDescription="Household"
-              disabled={createMutation.isPending}
-              aria-label="Scope"
-            />
-          </FormField>
-
-          <ActionCancelFormButtons
-            onCancel={() => setShowCreateForm(false)}
-            submitLabel="Create"
-            isPending={createMutation.isPending}
-            disabled={!isCreateValid || !!createDuplicateError}
-          />
-        </form>
+        <CreatePantryStoreForm
+          stores={stores ?? []}
+          households={households}
+          isPending={createMutation.isPending}
+          onSubmit={handleCreate}
+          onCancel={() => setShowCreateForm(false)}
+        />
       )}
 
       {/* Empty state */}
