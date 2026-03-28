@@ -319,7 +319,7 @@ export const HouseholdDetailPage = () => {
                 </p>
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="w-full py-3 bg-coral text-white rounded-xl font-display font-bold hover:bg-coral/90 transition-colors"
+                  className="w-full py-3 bg-coral text-white rounded-xl font-display font-bold hover:bg-coral/90 active:bg-coral/80 active:scale-[0.98] transition-all"
                 >
                   Delete Household
                 </button>
