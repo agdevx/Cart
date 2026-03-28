@@ -129,7 +129,7 @@ export const LoginPage = () => {
           <button
             type="submit"
             disabled={loginMutation.isPending || !isValid}
-            className="w-full bg-teal text-white py-3 px-4 rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
+            className="flex w-full items-center justify-center bg-teal text-white py-3 px-4 rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
           >
             {loginMutation.isPending ? <Spinner /> : 'Login'}
           </button>

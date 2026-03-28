@@ -32,7 +32,7 @@ export const ActionCancelFormButtons = ({
       type={type}
       onClick={onSubmit}
       disabled={isPending || disabled}
-      className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
+      className="flex flex-1 items-center justify-center py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
     >
       {isPending ? <Spinner /> : submitLabel}
     </button>

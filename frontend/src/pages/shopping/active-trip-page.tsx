@@ -214,7 +214,7 @@ export const ActiveTripPage = () => {
       <button
         onClick={handleCompleteTrip}
         disabled={completeMutation.isPending}
-        className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors shadow-[0_3px_0_#148F72] active:translate-y-[3px] active:shadow-none"
+        className="flex w-full items-center justify-center py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors shadow-[0_3px_0_#148F72] active:translate-y-[3px] active:shadow-none"
       >
         {completeMutation.isPending ? <Spinner /> : 'Complete Trip'}
       </button>

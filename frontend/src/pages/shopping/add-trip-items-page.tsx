@@ -300,7 +300,7 @@ export const AddTripItemsPage = () => {
           <button
             onClick={handleAddItems}
             disabled={isAdding}
-            className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors shadow-lg"
+            className="flex w-full items-center justify-center py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors shadow-lg"
           >
             {isAdding ? <Spinner /> : `Add Items (${selectedCount} ${selectedCount === 1 ? 'item' : 'items'})`}
           </button>

@@ -354,7 +354,7 @@ const EditForm = ({
       <button
         onClick={onSave}
         disabled={isUpdating}
-        className="flex-1 py-2.5 text-sm font-bold text-white rounded-xl bg-teal hover:bg-teal-light disabled:opacity-50 transition-colors"
+        className="flex flex-1 items-center justify-center py-2.5 text-sm font-bold text-white rounded-xl bg-teal hover:bg-teal-light disabled:opacity-50 transition-colors"
       >
         {isUpdating ? <Spinner className="w-4 h-4" /> : 'Save'}
       </button>
