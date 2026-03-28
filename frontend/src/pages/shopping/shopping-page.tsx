@@ -1,7 +1,7 @@
 // ABOUTME: Shopping page displaying active trip and trip history
 // ABOUTME: Shows current trip in progress and completed trips list
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { ChevronDown, Plus, ShoppingCart } from 'lucide-react'
@@ -13,16 +13,14 @@ import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.m
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
 import { useAuth } from '@/auth/use-auth'
 import { tripDetailPath } from '@/routes'
-import { useFieldValidation } from '@/services/use-field-validation.service'
-import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
-import { FormField } from '@/shared/form-field'
 import { PageHeader } from '@/shared/page-header'
 import { SectionHeader } from '@/shared/section-header'
 import { TripCard } from '@/shared/trip-card'
 import { getGreeting } from '@/utils/greeting'
-import { isRequired } from '@/utils/validation-rules'
+
+import { TripCreateForm } from './trip-create-form'
 
 export const ShoppingPage = () => {
   const navigate = useNavigate()
@@ -35,36 +33,18 @@ export const ShoppingPage = () => {
   const reopenMutation = useReopenTripMutation()
 
   const [showCreateForm, setShowCreateForm] = useState(false)
-  const [tripName, setTripName] = useState('')
+  // formKey forces the form to remount when opened, resetting its internal state
+  const [formKey, setFormKey] = useState(0)
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
   const [showCompleted, setShowCompleted] = useState(false)
-  // formKey forces the form element to remount when opened, resetting validation state
-  const [formKey, setFormKey] = useState(0)
-
-  const schema = useMemo(() => ({
-    name: [isRequired('Trip name')],
-  }), [])
-
-  const values = useMemo(() => ({ name: tripName }), [tripName])
-
-  const { errors, handleBlur, handleChange, validateAll, isValid } = useFieldValidation(schema, values)
 
   const inProgressTrips = trips?.filter((trip) => trip.isStarted && !trip.isCompleted) || []
   const planningTrips = trips?.filter((trip) => !trip.isStarted && !trip.isCompleted) || []
   const completedTrips = trips?.filter((trip) => trip.isCompleted) || []
 
-  const handleCreateTrip = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateAll()) {
-      return
-    }
-
+  const handleCreateTrip = async ({ name }: { name: string }) => {
     try {
-      const newTrip = await createMutation.mutateAsync({
-        name: tripName.trim(),
-      })
-      setTripName('')
+      const newTrip = await createMutation.mutateAsync({ name })
       setShowCreateForm(false)
       navigate(tripDetailPath(newTrip.id))
     } catch {
@@ -131,28 +111,12 @@ export const ShoppingPage = () => {
       )}
 
       {showCreateForm && (
-        <form key={formKey} onSubmit={handleCreateTrip} className="mt-3 mb-4 p-5 bg-surface rounded-2xl shadow-sm">
-          <FormField label="Trip Name" htmlFor="tripName" error={errors.name}>
-            <input
-              id="tripName"
-              type="text"
-              autoFocus
-              value={tripName}
-              onChange={(e) => { setTripName(e.target.value); handleChange('name', e.target.value) }}
-              onBlur={() => handleBlur('name')}
-              placeholder="e.g., Weekly Groceries"
-              className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${errors.name ? 'border-coral border-2' : 'border-navy/10'}`}
-              disabled={createMutation.isPending}
-            />
-          </FormField>
-
-          <ActionCancelFormButtons
-            onCancel={() => setShowCreateForm(false)}
-            submitLabel="Create"
-            isPending={createMutation.isPending}
-            disabled={!isValid}
-          />
-        </form>
+        <TripCreateForm
+          key={formKey}
+          onSubmit={handleCreateTrip}
+          onCancel={() => setShowCreateForm(false)}
+          isPending={createMutation.isPending}
+        />
       )}
 
       {/* In Progress section */}
