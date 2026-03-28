@@ -266,14 +266,16 @@ export const PantryStoresView = () => {
 
   return (
     <div className="animate-fade-in">
-      {/* Add Store toggle button */}
-      <button
-        onClick={() => setShowCreateForm(!showCreateForm)}
-        className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-2"
-      >
-        <Plus className="w-5 h-5" />
-        {showCreateForm ? 'Cancel' : 'Add Store'}
-      </button>
+      {/* Add Store toggle button — hidden when empty state is showing */}
+      {(showCreateForm || (stores && stores.length > 0)) && (
+        <button
+          onClick={() => setShowCreateForm(!showCreateForm)}
+          className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-2"
+        >
+          <Plus className="w-5 h-5" />
+          {showCreateForm ? 'Cancel' : 'Add Store'}
+        </button>
+      )}
 
       {/* Inline create form */}
       {showCreateForm && (

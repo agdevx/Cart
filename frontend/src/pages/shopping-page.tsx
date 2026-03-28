@@ -118,14 +118,16 @@ export const ShoppingPage = () => {
       )}
       <PageHeader>Your <span className="text-teal">Shopping Trips</span></PageHeader>
       <div className="px-5">
-      {/* New Trip Button */}
-      <button
-        onClick={() => { if (!showCreateForm) setFormKey((k) => k + 1); setShowCreateForm(!showCreateForm) }}
-        className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-2"
-      >
-        <Plus className="w-5 h-5" />
-        {showCreateForm ? 'Cancel' : 'Plan a new trip'}
-      </button>
+      {/* New Trip Button — hidden when empty state is showing; always visible when form is open */}
+      {(showCreateForm || (trips && trips.length > 0)) && (
+        <button
+          onClick={() => { if (!showCreateForm) setFormKey((k) => k + 1); setShowCreateForm(!showCreateForm) }}
+          className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-2"
+        >
+          <Plus className="w-5 h-5" />
+          {showCreateForm ? 'Cancel' : 'Plan a new trip'}
+        </button>
+      )}
 
       {showCreateForm && (
         <form key={formKey} onSubmit={handleCreateTrip} className="mt-3 mb-4 p-5 bg-surface rounded-2xl shadow-sm">

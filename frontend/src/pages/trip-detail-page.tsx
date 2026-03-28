@@ -134,7 +134,7 @@ export const TripDetailPage = () => {
           <span className="flex-1 h-px bg-navy/8" />
         </div>
 
-        {!readOnly && (
+        {!readOnly && tripItems && tripItems.length > 0 && (
           <button
             onClick={() => navigate(tripAddItemsPath(tripId!))}
             className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"

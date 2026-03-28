@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
+import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import type { InventoryFilter } from '@/pages/pantry-items-view'
 import { PantryItemsView } from '@/pages/pantry-items-view'
 import { PantryStoresView } from '@/pages/pantry-stores-view'
@@ -19,6 +20,8 @@ export const PantryPage = () => {
   const [filter, setFilter] = useState<InventoryFilter>('all')
   const [showItemCreateForm, setShowItemCreateForm] = useState(false)
   const { data: households } = useHouseholdsQuery()
+  const { data: allItems } = useInventoryQuery()
+  const hasItems = (allItems?.length ?? 0) > 0
 
   const sortedHouseholds = useMemo(
     () => [...(households || [])].sort((a, b) => (a.name || '').localeCompare(b.name || '')),
@@ -58,8 +61,8 @@ export const PantryPage = () => {
         </button>
       </div>
 
-      {/* Add Item Button — Items tab only */}
-      {activeTab === 'items' && (
+      {/* Add Item Button — Items tab only, hidden when empty state is showing */}
+      {hasItems && activeTab === 'items' && (
         <button
           onClick={() => setShowItemCreateForm(!showItemCreateForm)}
           className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"

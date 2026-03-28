@@ -6,7 +6,9 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
+import * as inventoryQueryModule from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import type { Household } from '@/apis/agdevx-cart-api/models/household'
+import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 
 import { PantryPage } from '../pantry-page'
@@ -32,6 +34,10 @@ const mockHouseholds: Household[] = [
   { id: 'h2', name: 'Book Club', createdBy: null, createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
 ]
 
+const mockInventoryItems: InventoryItem[] = [
+  { id: 'item1', name: 'Milk', defaultStoreId: null, notes: null, ownerUserId: 'user1', householdId: null, createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
+]
+
 const renderPage = () => {
   return render(
     <QueryClientProvider client={queryClient}>
@@ -51,6 +57,11 @@ describe('PantryPage', () => {
       data: mockHouseholds,
       isLoading: false,
     } as UseQueryResult<Household[]>)
+
+    vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
+      data: mockInventoryItems,
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
   })
 
   it('renders segmented control with Items and Stores tabs', () => {
@@ -123,6 +134,17 @@ describe('PantryPage', () => {
     //== After clicking, form should be visible and button text should change to Cancel
     expect(screen.getByTestId('pantry-items-view')).toHaveAttribute('data-show-create-form', 'true')
     expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
+  })
+
+  it('hides Add Item button when inventory is empty', () => {
+    vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
+      data: [],
+      isLoading: false,
+    } as UseQueryResult<InventoryItem[]>)
+
+    renderPage()
+
+    expect(screen.queryByRole('button', { name: /add item/i })).not.toBeInTheDocument()
   })
 
   it('closes create form when onCloseCreateForm is called', () => {
