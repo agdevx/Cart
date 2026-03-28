@@ -1,5 +1,6 @@
 // ABOUTME: Store management view with list, create, edit, and delete functionality
 // ABOUTME: Groups stores by household with a personal stores section, inline editing and delete confirmation
+// ABOUTME: Accepts a filter prop to show all, personal-only, or a single household's stores
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -16,10 +17,15 @@ import { SectionHeader } from '@/shared/section-header'
 import { sortHouseholds } from '@/utils/sort-households'
 import { sortStores } from '@/utils/sort-stores'
 
+import type { InventoryFilter } from './pantry-items-view'
 import type { PantryStoreFormData } from './pantry-store-form'
 import { CreatePantryStoreForm, EditPantryStoreForm } from './pantry-store-form'
 
-export const PantryStoresView = () => {
+interface PantryStoresViewProps {
+  filter: InventoryFilter
+}
+
+export const PantryStoresView = ({ filter }: PantryStoresViewProps) => {
   const { data: households, isLoading: householdsLoading } = useHouseholdsQuery()
   const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
   const { data: stores, isLoading: storesLoading } = useStoresQuery(householdIds)
@@ -74,6 +80,15 @@ export const PantryStoresView = () => {
     )
   }
   const personalStores = sortStores(stores?.filter((s) => s.userId !== null) || [])
+
+  /* Derive the filtered set based on the active scope filter */
+  const householdId = filter.startsWith('household:') ? filter.split(':')[1] : null
+  const filteredStores =
+    filter === 'personal'
+      ? personalStores
+      : householdId
+        ? (householdStoresMap.get(householdId) ?? [])
+        : null // null means "all" — use grouped view
 
   const isEmpty = !stores || stores.length === 0
 
@@ -211,35 +226,47 @@ export const PantryStoresView = () => {
         />
       )}
 
-      {/* Personal stores section — always first */}
-      {personalStores.length > 0 && (
-        <div className="mb-6">
-          <div className="mt-4">
-            <SectionHeader title="Personal Stores" />
-          </div>
-          <div className="space-y-2">
-            {personalStores.map(renderStoreRow)}
-          </div>
+      {/* Filtered view — flat list with no section headers when a specific scope is selected */}
+      {filteredStores !== null && filteredStores.length > 0 && (
+        <div className="space-y-2">
+          {filteredStores.map(renderStoreRow)}
         </div>
       )}
 
-      {/* Household store sections — sorted alphabetically by household name */}
-      {sortHouseholds(households || []).map((household) => {
-        const householdStores = householdStoresMap.get(household.id) || []
-        if (householdStores.length === 0) {
-          return null
-        }
-        return (
-          <div key={household.id} className="mb-6">
-            <div className="mt-4">
-              <SectionHeader title={household.name ?? ''} />
+      {/* Grouped view — Personal first, then households alphabetically */}
+      {filteredStores === null && (
+        <>
+          {/* Personal stores section — always first */}
+          {personalStores.length > 0 && (
+            <div className="mb-6">
+              <div className="mt-4">
+                <SectionHeader title="Personal Stores" />
+              </div>
+              <div className="space-y-2">
+                {personalStores.map(renderStoreRow)}
+              </div>
             </div>
-            <div className="space-y-2">
-              {householdStores.map(renderStoreRow)}
-            </div>
-          </div>
-        )
-      })}
+          )}
+
+          {/* Household store sections — sorted alphabetically by household name */}
+          {sortHouseholds(households || []).map((household) => {
+            const householdStores = householdStoresMap.get(household.id) || []
+            if (householdStores.length === 0) {
+              return null
+            }
+            return (
+              <div key={household.id} className="mb-6">
+                <div className="mt-4">
+                  <SectionHeader title={household.name ?? ''} />
+                </div>
+                <div className="space-y-2">
+                  {householdStores.map(renderStoreRow)}
+                </div>
+              </div>
+            )
+          })}
+        </>
+      )}
 
       {/* Delete confirmation modal */}
       {deleteConfirm && (

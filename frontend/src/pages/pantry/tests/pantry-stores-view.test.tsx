@@ -27,11 +27,11 @@ const mockStores: Store[] = [
   { id: 'ps1', name: 'Corner Market', householdId: null, userId: 'user1', createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
 ]
 
-const renderView = () => {
+const renderView = (filter: 'all' | 'personal' | `household:${string}` = 'all') => {
   return render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <PantryStoresView />
+        <PantryStoresView filter={filter} />
       </BrowserRouter>
     </QueryClientProvider>
   )

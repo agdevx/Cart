@@ -1,5 +1,5 @@
 // ABOUTME: Pantry management page with Items/Stores segmented control and horizontal filter tabs
-// ABOUTME: Items tab supports filtering by all, personal, or per-household views
+// ABOUTME: Both Items and Stores tabs support filtering by all, personal, or per-household views
 
 import { useState } from 'react'
 
@@ -56,17 +56,15 @@ export const PantryPage = () => {
         </button>
       </div>
 
-      {/* Filter Tabs — Items tab only */}
-      {activeTab === 'items' && (
-        <div className="mb-4">
-          <ScopeFilter
-            aria-label="Filter inventory"
-            value={filter === 'all' ? 'all' : filter === 'personal' ? 'personal' : filter.split(':')[1]}
-            onChange={(v) => setFilter(v === 'all' ? 'all' : v === 'personal' ? 'personal' : `household:${v}`)}
-            households={households}
-          />
-        </div>
-      )}
+      {/* Filter Tabs — both Items and Stores tabs */}
+      <div className="mb-4">
+        <ScopeFilter
+          aria-label="Filter inventory"
+          value={filter === 'all' ? 'all' : filter === 'personal' ? 'personal' : filter.split(':')[1]}
+          onChange={(v) => setFilter(v === 'all' ? 'all' : v === 'personal' ? 'personal' : `household:${v}`)}
+          households={households}
+        />
+      </div>
 
       {/* Add Item Button — Items tab only, hidden when empty state is showing */}
       {hasItems && activeTab === 'items' && (
@@ -90,7 +88,7 @@ export const PantryPage = () => {
       )}
 
       {/* Stores View */}
-      {activeTab === 'stores' && <PantryStoresView />}
+      {activeTab === 'stores' && <PantryStoresView filter={filter} />}
       </div>
     </div>
   )

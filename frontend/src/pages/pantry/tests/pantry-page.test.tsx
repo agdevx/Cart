@@ -159,12 +159,13 @@ describe('PantryPage', () => {
     expect(screen.getByTestId('pantry-items-view')).toHaveAttribute('data-show-create-form', 'false')
   })
 
-  it('hides filter tabs when Stores tab is active', () => {
+  it('shows filter tabs when Stores tab is active', () => {
     renderPage()
 
     fireEvent.click(screen.getByRole('tab', { name: 'Stores' }))
 
-    expect(screen.queryByRole('tablist', { name: 'Filter inventory' })).not.toBeInTheDocument()
+    //== Filter tabs remain visible on the Stores tab (shared filter state)
+    expect(screen.getByRole('tablist', { name: 'Filter inventory' })).toBeInTheDocument()
     expect(screen.getByTestId('pantry-stores-view')).toBeInTheDocument()
   })
 
