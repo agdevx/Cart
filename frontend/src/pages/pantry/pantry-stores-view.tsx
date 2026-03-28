@@ -219,7 +219,7 @@ export const PantryStoresView = () => {
         return (
           <div key={household.id} className="mb-6">
             <div className="mt-4">
-              <SectionHeader title={household.name} />
+              <SectionHeader title={household.name ?? ''} />
             </div>
             <div className="space-y-2">
               {householdStores.map(renderStoreRow)}

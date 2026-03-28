@@ -140,7 +140,7 @@ describe('PantryPage', () => {
     vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
       data: [],
       isLoading: false,
-    } as UseQueryResult<InventoryItem[]>)
+    } as unknown as UseQueryResult<InventoryItem[]>)
 
     renderPage()
 
