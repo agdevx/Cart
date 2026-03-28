@@ -197,9 +197,9 @@ export const AddTripItemsPage = () => {
       </div>
 
       {/* Source and store filter toggles */}
-      <div className="flex gap-2 mb-4">
+      <div className="space-y-3 mb-4">
         {/* Source filter */}
-        <div className="flex-1 overflow-x-auto">
+        <div className="overflow-x-auto">
           <div role="tablist" className="flex bg-bg-warm rounded-xl p-1">
             <button
               role="tab"
@@ -244,7 +244,7 @@ export const AddTripItemsPage = () => {
         </div>
 
         {/* Store filter */}
-        <div className="flex-1 overflow-x-auto">
+        <div className="overflow-x-auto">
           <div role="tablist" className="flex bg-bg-warm rounded-xl p-1">
             <button
               role="tab"
