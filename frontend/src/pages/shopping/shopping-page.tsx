@@ -14,12 +14,12 @@ import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
 import { useAuth } from '@/auth/use-auth'
 import { tripDetailPath } from '@/routes'
 import { useFieldValidation } from '@/services/use-field-validation.service'
+import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
 import { FormField } from '@/shared/form-field'
 import { PageHeader } from '@/shared/page-header'
 import { SectionHeader } from '@/shared/section-header'
-import { Spinner } from '@/shared/spinner'
 import { TripCard } from '@/shared/trip-card'
 import { getGreeting } from '@/utils/greeting'
 import { isRequired } from '@/utils/validation-rules'
@@ -146,22 +146,12 @@ export const ShoppingPage = () => {
             />
           </FormField>
 
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setShowCreateForm(false)}
-              className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={createMutation.isPending || !isValid}
-              className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
-            >
-              {createMutation.isPending ? <Spinner /> : 'Create'}
-            </button>
-          </div>
+          <ActionCancelFormButtons
+            onCancel={() => setShowCreateForm(false)}
+            submitLabel="Create"
+            isPending={createMutation.isPending}
+            disabled={!isValid}
+          />
         </form>
       )}
 

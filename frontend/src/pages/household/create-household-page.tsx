@@ -7,8 +7,8 @@ import { useNavigate } from 'react-router-dom'
 import { useCreateHouseholdMutation } from '@/apis/agdevx-cart-api/household/create-household.mutation'
 import { ROUTES } from '@/routes'
 import { useFieldValidation } from '@/services/use-field-validation.service'
+import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { FormField } from '@/shared/form-field'
-import { Spinner } from '@/shared/spinner'
 import { getErrorMessage } from '@/utilities/error-messages'
 import { isRequired, maxLength } from '@/utils/validation-rules'
 
@@ -64,21 +64,13 @@ export const CreateHouseholdPage = () => {
           </div>
         )}
 
-        <div className="flex gap-3 pt-2">
-          <button
-            type="button"
-            onClick={() => navigate(ROUTES.HOUSEHOLD)}
-            className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={createMutation.isPending || !isValid}
-            className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
-          >
-            {createMutation.isPending ? <Spinner /> : 'Create'}
-          </button>
+        <div className="pt-2">
+          <ActionCancelFormButtons
+            onCancel={() => navigate(ROUTES.HOUSEHOLD)}
+            submitLabel="Create"
+            isPending={createMutation.isPending}
+            disabled={!isValid}
+          />
         </div>
       </form>
     </div>

@@ -16,13 +16,13 @@ import { usePersonalInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useFieldValidation } from '@/services/use-field-validation.service'
+import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { DropdownMenu } from '@/shared/dropdown-menu'
 import { EmptyState } from '@/shared/empty-state'
 import { FormField } from '@/shared/form-field'
 import { ScopeSelect } from '@/shared/scope-select'
 import { SectionHeader } from '@/shared/section-header'
-import { Spinner } from '@/shared/spinner'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 import { sortItems } from '@/utils/sort-items'
 import { isRequired, maxLength } from '@/utils/validation-rules'
@@ -266,22 +266,12 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
         </select>
       </FormField>
 
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={onCloseCreateForm}
-          className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={createMutation.isPending || !isCreateValid || itemScope === ''}
-          className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
-        >
-          {createMutation.isPending ? <Spinner /> : 'Create'}
-        </button>
-      </div>
+      <ActionCancelFormButtons
+        onCancel={onCloseCreateForm}
+        submitLabel="Create"
+        isPending={createMutation.isPending}
+        disabled={!isCreateValid || itemScope === ''}
+      />
     </form>
   )
 
@@ -373,22 +363,12 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
         </select>
       </FormField>
 
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={() => setEditingItemId(null)}
-          className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={updateMutation.isPending || !editName.trim()}
-          className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
-        >
-          {updateMutation.isPending ? <Spinner /> : 'Save'}
-        </button>
-      </div>
+      <ActionCancelFormButtons
+        onCancel={() => setEditingItemId(null)}
+        submitLabel="Save"
+        isPending={updateMutation.isPending}
+        disabled={!editName.trim()}
+      />
     </form>
   )
 

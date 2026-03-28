@@ -5,8 +5,8 @@ import { useMemo, useState } from 'react'
 
 import { useChangePasswordMutation } from '@/apis/agdevx-cart-api/auth/change-password.mutation'
 import { useFieldValidation } from '@/services/use-field-validation.service'
+import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { FormField } from '@/shared/form-field'
-import { Spinner } from '@/shared/spinner'
 import { isRequired, matchesField, maxLength, minLength, passwordStrength } from '@/utils/validation-rules'
 
 interface SecuritySectionProps {
@@ -162,20 +162,15 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
           />
         </FormField>
 
-        <div className="flex gap-2 mt-3">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-2.5 border-2 border-bg-warm rounded-xl font-display font-bold text-navy-muted"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!isValid || changePasswordMutation.isPending}
-            className="flex-1 py-2.5 bg-teal text-white rounded-xl font-display font-bold disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed"
-          >
-            {changePasswordMutation.isPending ? <Spinner /> : 'Save'}
-          </button>
+        <div className="mt-3">
+          <ActionCancelFormButtons
+            onCancel={onCancel}
+            submitLabel="Save"
+            isPending={changePasswordMutation.isPending}
+            disabled={!isValid}
+            type="button"
+            onSubmit={handleSave}
+          />
         </div>
       </div>
     </div>

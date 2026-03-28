@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { useJoinHouseholdMutation } from '@/apis/agdevx-cart-api/household/join-household.mutation'
 import { ROUTES } from '@/routes'
+import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { FormField } from '@/shared/form-field'
 import { getErrorMessage } from '@/utilities/error-messages'
 
@@ -52,21 +53,13 @@ export const JoinHouseholdPage = () => {
           </div>
         )}
 
-        <div className="flex gap-3 pt-2">
-          <button
-            type="button"
-            onClick={() => navigate(ROUTES.HOUSEHOLD)}
-            className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={joinMutation.isPending || !inviteCode.trim()}
-            className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
-          >
-            {joinMutation.isPending ? 'Joining...' : 'Join Household'}
-          </button>
+        <div className="pt-2">
+          <ActionCancelFormButtons
+            onCancel={() => navigate(ROUTES.HOUSEHOLD)}
+            submitLabel="Join Household"
+            isPending={joinMutation.isPending}
+            disabled={!inviteCode.trim()}
+          />
         </div>
       </form>
     </div>

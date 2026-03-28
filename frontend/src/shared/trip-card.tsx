@@ -9,6 +9,7 @@ import { MoreVertical, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import { tripDetailPath } from '@/routes'
 
+import { ActionCancelFormButtons } from './action-cancel-form-buttons'
 import { DropdownMenu } from './dropdown-menu'
 
 interface TripCardProps {
@@ -140,14 +141,14 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
               className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
             />
           </div>
-          <div className="flex gap-3">
-            <button onClick={cancelEdit} className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-semibold hover:bg-navy/10 transition-colors">
-              Cancel
-            </button>
-            <button onClick={commitEdit} disabled={!editName.trim()} className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors">
-              Save
-            </button>
-          </div>
+          <ActionCancelFormButtons
+            onCancel={cancelEdit}
+            submitLabel="Save"
+            isPending={false}
+            disabled={!editName.trim()}
+            type="button"
+            onSubmit={commitEdit}
+          />
         </div>
       )}
     </>

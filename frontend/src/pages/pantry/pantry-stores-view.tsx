@@ -11,12 +11,12 @@ import { useDeleteStoreMutation } from '@/apis/agdevx-cart-api/store/delete-stor
 import { useUpdateStoreMutation } from '@/apis/agdevx-cart-api/store/update-store.mutation'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useFieldValidation } from '@/services/use-field-validation.service'
+import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
 import { FormField } from '@/shared/form-field'
 import { ScopeSelect } from '@/shared/scope-select'
 import { SectionHeader } from '@/shared/section-header'
-import { Spinner } from '@/shared/spinner'
 import { sortStores } from '@/utils/sort-stores'
 import { isRequired, maxLength } from '@/utils/validation-rules'
 
@@ -239,22 +239,14 @@ export const PantryStoresView = () => {
             />
           </FormField>
 
-          <div className="flex gap-3">
-            <button
-              onClick={handleCancelEdit}
-              disabled={updateMutation.isPending}
-              className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-display font-bold hover:bg-navy/10 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSaveEdit}
-              disabled={updateMutation.isPending || !editingName.trim() || !!editDuplicateError}
-              className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
-            >
-              {updateMutation.isPending ? <Spinner /> : 'Save'}
-            </button>
-          </div>
+          <ActionCancelFormButtons
+            onCancel={handleCancelEdit}
+            submitLabel="Save"
+            isPending={updateMutation.isPending}
+            disabled={!editingName.trim() || !!editDuplicateError}
+            type="button"
+            onSubmit={handleSaveEdit}
+          />
         </div>
       )}
     </div>
@@ -305,22 +297,12 @@ export const PantryStoresView = () => {
             />
           </FormField>
 
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setShowCreateForm(false)}
-              className="flex-1 py-3 bg-bg-warm text-navy-soft rounded-xl font-display font-bold hover:bg-navy/10 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={createMutation.isPending || !isCreateValid || !!createDuplicateError}
-              className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
-            >
-              {createMutation.isPending ? <Spinner /> : 'Create'}
-            </button>
-          </div>
+          <ActionCancelFormButtons
+            onCancel={() => setShowCreateForm(false)}
+            submitLabel="Create"
+            isPending={createMutation.isPending}
+            disabled={!isCreateValid || !!createDuplicateError}
+          />
         </form>
       )}
 
