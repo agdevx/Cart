@@ -25,17 +25,9 @@ body {
 }
 
 /* Tailwind's preflight can leave caret-color unset or inheriting from a context
-   that makes it invisible. This ensures a consistent visible caret in all inputs.
-   The cursor rule works around a Firefox responsive design mode quirk where the
-   mouse cursor disappears when clicking into focused inputs. */
+   that makes it invisible. This ensures a consistent visible caret in all inputs. */
 input, textarea, select {
   caret-color: var(--color-navy);
-  cursor: text;
-}
-
-input:focus, textarea:focus {
-  caret-color: var(--color-navy);
-  cursor: text;
 }
 
 @keyframes fadeIn {

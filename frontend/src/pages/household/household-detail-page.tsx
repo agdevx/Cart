@@ -160,7 +160,7 @@ export const HouseholdDetailPage = () => {
               onBlur={handleRenameBlur}
               autoFocus
               disabled={updateHouseholdMutation.isPending}
-              className="font-display text-[28px] font-extrabold text-navy tracking-tight bg-transparent border-b-2 border-teal focus:outline-none focus:ring-2 focus:ring-teal w-full"
+              className="font-display text-[28px] font-extrabold text-navy tracking-tight bg-transparent border-b-2 border-teal focus:outline-none w-full"
             />
           ) : (
             <>
