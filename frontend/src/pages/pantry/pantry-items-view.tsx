@@ -1,7 +1,7 @@
 // ABOUTME: Pantry items view with filter support for all, personal, household, and merged views
 // ABOUTME: Groups items by household in "all" view, flat list for scoped filters, inline create and edit forms
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 import { MoreVertical, Package, Pencil, Trash2 } from 'lucide-react'
 
@@ -15,17 +15,15 @@ import { useMergedInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-me
 import { usePersonalInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-personal-inventory.query'
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
-import { useFieldValidation } from '@/services/use-field-validation.service'
-import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { DropdownMenu } from '@/shared/dropdown-menu'
 import { EmptyState } from '@/shared/empty-state'
-import { FormField } from '@/shared/form-field'
-import { ScopeSelect } from '@/shared/scope-select'
 import { SectionHeader } from '@/shared/section-header'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 import { sortItems } from '@/utils/sort-items'
-import { isRequired, maxLength } from '@/utils/validation-rules'
+
+import type { PantryItemFormData } from './pantry-item-form'
+import { CreatePantryItemForm, EditPantryItemForm } from './pantry-item-form'
 
 export type InventoryFilter = 'all' | 'personal' | `household:${string}` | `merged:${string}`
 
@@ -46,6 +44,18 @@ const parseFilter = (filter: InventoryFilter): { type: FilterType; id: string | 
   return { type: type as FilterType, id }
 }
 
+//== Derive the default scope for the create form based on the active filter.
+//== Empty string means "All" filter — the user must choose a scope before submitting.
+const getCreateInitialScope = (filter: InventoryFilter): string => {
+  if (filter === 'personal') {
+    return 'personal'
+  }
+  if (filter.startsWith('household:')) {
+    return filter.split(':')[1]
+  }
+  return ''
+}
+
 export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCloseCreateForm }: PantryItemsViewProps) => {
   const { type: filterType, id: filterId } = parseFilter(filter)
   const { data: households } = useHouseholdsQuery()
@@ -59,44 +69,9 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
 
-  //== Inline edit form state
-  const [editName, setEditName] = useState('')
-  const [editNotes, setEditNotes] = useState('')
-  const [editScope, setEditScope] = useState<string>('personal')
-  const [editDefaultStoreId, setEditDefaultStoreId] = useState<string | null>(null)
-
-  //== Inline create form state
-  const [itemName, setItemName] = useState('')
-  const [itemNotes, setItemNotes] = useState('')
-  const [itemScope, setItemScope] = useState<string>('personal')
-  const [itemDefaultStoreId, setItemDefaultStoreId] = useState<string | null>(null)
-
-  const createSchema = useMemo(() => ({
-    name: [isRequired('Item name'), maxLength(200)],
-  }), [])
-
-  const createValues = useMemo(() => ({ name: itemName }), [itemName])
-
-  const { errors: createErrors, handleBlur: handleCreateBlur, handleChange: handleCreateChange, validateAll: validateCreateAll, isValid: isCreateValid } = useFieldValidation(createSchema, createValues)
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateCreateAll()) {
-      return
-    }
-
+  const handleCreate = async (data: PantryItemFormData) => {
     try {
-      await createMutation.mutateAsync({
-        name: itemName.trim(),
-        notes: itemNotes.trim() || null,
-        householdId: itemScope === 'personal' ? null : itemScope,
-        defaultStoreId: itemDefaultStoreId,
-      })
-      setItemName('')
-      setItemNotes('')
-      setItemScope('personal')
-      setItemDefaultStoreId(null)
+      await createMutation.mutateAsync(data)
       onCloseCreateForm()
     } catch {
       // Error handled by mutation state
@@ -106,27 +81,17 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
   const handleEdit = (item: InventoryItem) => {
     setMenuOpenId(null)
     setEditingItemId(item.id)
-    setEditName(item.name)
-    setEditNotes(item.notes || '')
-    setEditScope(item.householdId || 'personal')
-    setEditDefaultStoreId(item.defaultStoreId)
   }
 
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!editingItemId || !editName.trim()) {
+  const handleEditSubmit = async (data: PantryItemFormData & { ownerUserId: string | null }) => {
+    if (!editingItemId) {
       return
     }
 
     try {
       await updateMutation.mutateAsync({
         id: editingItemId,
-        name: editName.trim(),
-        notes: editNotes.trim() || null,
-        householdId: editScope === 'personal' ? null : editScope,
-        ownerUserId: editScope === 'personal' ? items?.find((i) => i.id === editingItemId)?.ownerUserId ?? null : null,
-        defaultStoreId: editDefaultStoreId,
+        ...data,
       })
       setEditingItemId(null)
     } catch {
@@ -138,38 +103,6 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
     () => getStoreDisplayNames(stores ?? [], households ?? []),
     [stores, households]
   )
-
-  //== Filter stores by the selected scope (for create form)
-  const filteredStores = useMemo(() => {
-    if (!stores) return []
-    if (itemScope === 'personal') {
-      return stores.filter((s) => s.userId !== null)
-    }
-    return stores.filter((s) => s.householdId === itemScope)
-  }, [stores, itemScope])
-
-  //== Filter stores by the selected scope (for edit form)
-  const editFilteredStores = useMemo(() => {
-    if (!stores) return []
-    if (editScope === 'personal') {
-      return stores.filter((s) => s.userId !== null)
-    }
-    return stores.filter((s) => s.householdId === editScope)
-  }, [stores, editScope])
-
-  //== When the create form opens, default itemScope based on the active filter so the user
-  //== doesn't have to manually set it. Empty string means "All" filter — scope must be chosen.
-  useEffect(() => {
-    if (showCreateForm) {
-      if (filter === 'personal') {
-        setItemScope('personal')
-      } else if (filter.startsWith('household:')) {
-        setItemScope(filter.split(':')[1])
-      } else {
-        setItemScope('')
-      }
-    }
-  }, [showCreateForm, filter])
 
   //== All four hooks are called unconditionally (React rules of hooks). Inactive scoped hooks
   //== receive null IDs which disables them via `enabled`. The all/personal hooks stay in cache
@@ -209,70 +142,15 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
   }
 
   const createForm = showCreateForm && (
-    <form onSubmit={handleCreate} className="mb-4 p-5 bg-surface rounded-2xl shadow-sm">
-      <FormField label="Item Name" htmlFor="itemName" error={createErrors.name}>
-        <input
-          id="itemName"
-          type="text"
-          autoFocus
-          value={itemName}
-          onChange={(e) => { setItemName(e.target.value); handleCreateChange('name', e.target.value) }}
-          onBlur={() => handleCreateBlur('name')}
-          placeholder="e.g., Milk"
-          className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${createErrors.name ? 'border-coral border-2' : 'border-navy/10'}`}
-          disabled={createMutation.isPending}
-        />
-      </FormField>
-
-      <FormField label="Scope" htmlFor="itemScope">
-        <ScopeSelect
-          value={itemScope}
-          onChange={(val) => {
-            setItemScope(val)
-            setItemDefaultStoreId(null)
-          }}
-          personalLabel="Personal"
-          households={households}
-          householdDescription="Household"
-          disabled={createMutation.isPending}
-          aria-label="Scope"
-        />
-      </FormField>
-
-      <FormField label="Notes (optional)" htmlFor="itemNotes">
-        <input
-          id="itemNotes"
-          type="text"
-          value={itemNotes}
-          onChange={(e) => setItemNotes(e.target.value)}
-          placeholder="Additional details"
-          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-          disabled={createMutation.isPending}
-        />
-      </FormField>
-
-      <FormField label="Default Store (optional)" htmlFor="itemDefaultStore">
-        <select
-          id="itemDefaultStore"
-          value={itemDefaultStoreId || ''}
-          onChange={(e) => setItemDefaultStoreId(e.target.value || null)}
-          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-          disabled={createMutation.isPending}
-        >
-          <option value="">None</option>
-          {filteredStores.map((store) => (
-            <option key={store.id} value={store.id}>{storeDisplayNames.get(store.id) ?? store.name}</option>
-          ))}
-        </select>
-      </FormField>
-
-      <ActionCancelFormButtons
-        onCancel={onCloseCreateForm}
-        submitLabel="Create"
-        isPending={createMutation.isPending}
-        disabled={!isCreateValid || itemScope === ''}
-      />
-    </form>
+    <CreatePantryItemForm
+      initialScope={getCreateInitialScope(filter)}
+      households={households}
+      allStores={stores ?? []}
+      storeDisplayNames={storeDisplayNames}
+      isPending={createMutation.isPending}
+      onSubmit={handleCreate}
+      onCancel={onCloseCreateForm}
+    />
   )
 
   if (isLoading) {
@@ -307,69 +185,20 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
   }
 
   const renderEditForm = (item: InventoryItem) => (
-    <form onSubmit={handleEditSubmit} className="p-5 bg-surface rounded-2xl shadow-sm mt-2">
-      <FormField label="Item Name" htmlFor={`editName-${item.id}`}>
-        <input
-          id={`editName-${item.id}`}
-          type="text"
-          autoFocus
-          value={editName}
-          onChange={(e) => setEditName(e.target.value)}
-          placeholder="e.g., Milk"
-          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-          disabled={updateMutation.isPending}
-        />
-      </FormField>
-
-      <FormField label="Scope" htmlFor={`editScope-${item.id}`}>
-        <ScopeSelect
-          value={editScope}
-          onChange={(val) => {
-            setEditScope(val)
-            setEditDefaultStoreId(null)
-          }}
-          personalLabel="Personal"
-          households={households}
-          householdDescription="Household"
-          disabled={updateMutation.isPending}
-          aria-label="Scope"
-        />
-      </FormField>
-
-      <FormField label="Notes (optional)" htmlFor={`editNotes-${item.id}`}>
-        <input
-          id={`editNotes-${item.id}`}
-          type="text"
-          value={editNotes}
-          onChange={(e) => setEditNotes(e.target.value)}
-          placeholder="Additional details"
-          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-          disabled={updateMutation.isPending}
-        />
-      </FormField>
-
-      <FormField label="Default Store (optional)" htmlFor={`editDefaultStore-${item.id}`}>
-        <select
-          id={`editDefaultStore-${item.id}`}
-          value={editDefaultStoreId || ''}
-          onChange={(e) => setEditDefaultStoreId(e.target.value || null)}
-          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-          disabled={updateMutation.isPending}
-        >
-          <option value="">None</option>
-          {editFilteredStores.map((store) => (
-            <option key={store.id} value={store.id}>{storeDisplayNames.get(store.id) ?? store.name}</option>
-          ))}
-        </select>
-      </FormField>
-
-      <ActionCancelFormButtons
-        onCancel={() => setEditingItemId(null)}
-        submitLabel="Save"
-        isPending={updateMutation.isPending}
-        disabled={!editName.trim()}
-      />
-    </form>
+    <EditPantryItemForm
+      itemId={item.id}
+      initialName={item.name}
+      initialNotes={item.notes || ''}
+      initialScope={item.householdId || 'personal'}
+      initialDefaultStoreId={item.defaultStoreId}
+      ownerUserId={item.ownerUserId}
+      households={households}
+      allStores={stores ?? []}
+      storeDisplayNames={storeDisplayNames}
+      isPending={updateMutation.isPending}
+      onSubmit={handleEditSubmit}
+      onCancel={() => setEditingItemId(null)}
+    />
   )
 
   const renderItem = (item: InventoryItem) => (
@@ -433,7 +262,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           if (householdItems.length === 0) return null
           return (
             <div key={household.id} className="mb-6">
-              <SectionHeader title={household.name} />
+              <SectionHeader title={household.name ?? ''} />
               <div className="space-y-2">
                 {householdItems.map(renderItem)}
               </div>

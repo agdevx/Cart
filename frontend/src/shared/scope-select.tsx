@@ -11,7 +11,7 @@ interface ScopeSelectProps {
   value: string
   onChange: (value: string) => void
   personalLabel: string
-  households: Array<{ id: string; name: string | null }> | undefined
+  households: ReadonlyArray<{ id: string; name: string | null }> | undefined
   householdDescription: string
   disabled?: boolean
   'aria-label'?: string
