@@ -13,8 +13,8 @@ export const BottomNav = () => {
   const isActive = (path: string) => location.pathname.startsWith(path)
 
   const tabs = [
+    { path: ROUTES.SHOPPING, label: 'Shopping', icon: ShoppingCart },
     { path: ROUTES.PANTRY, label: 'Pantry', icon: Package },
-    { path: ROUTES.SHOPPING, label: 'Trips', icon: ShoppingCart },
     { path: ROUTES.HOUSEHOLD, label: 'Household', icon: Users },
     { path: ROUTES.SETTINGS, label: 'Settings', icon: Settings },
   ]

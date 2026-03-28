@@ -17,15 +17,15 @@ const renderWithRouter = (initialRoute = '/shopping') => {
 describe('BottomNav', () => {
   it('renders all three navigation tabs', () => {
     renderWithRouter()
+    expect(screen.getByText('Shopping')).toBeInTheDocument()
     expect(screen.getByText('Pantry')).toBeInTheDocument()
-    expect(screen.getByText('Trips')).toBeInTheDocument()
     expect(screen.getByText('Household')).toBeInTheDocument()
   })
 
   it('highlights the active tab based on current route', () => {
     renderWithRouter('/shopping')
-    const tripsLink = screen.getByText('Trips').closest('a')
-    expect(tripsLink?.className).toContain('text-teal')
+    const shoppingLink = screen.getByText('Shopping').closest('a')
+    expect(shoppingLink?.className).toContain('text-teal')
   })
 
   it('sets inactive tabs to muted color', () => {

@@ -34,7 +34,7 @@ export const SettingsPage = () => {
 
   return (
     <div className="pb-4 animate-fade-in">
-      <PageHeader>Settings</PageHeader>
+      <PageHeader>Your <span className="text-teal">Settings</span></PageHeader>
       <div className="px-5 space-y-4">
         <ProfileSection
           user={user}

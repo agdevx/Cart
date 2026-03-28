@@ -109,13 +109,13 @@ export const ShoppingPage = () => {
   return (
     <div className="pb-4 animate-fade-in">
       {user?.name && (
-        <div className="px-5 pt-5">
+        <div className="px-5 pt-5 text-right">
           <p className="text-sm font-semibold text-teal">
             {greeting}, {user.name} 👋
           </p>
         </div>
       )}
-      <PageHeader>Your <span className="text-teal">Trips</span></PageHeader>
+      <PageHeader>Your <span className="text-teal">Shopping Trips</span></PageHeader>
       <div className="px-5">
       {/* New Trip Button */}
       <button
