@@ -18,6 +18,7 @@ import { activeTripPath, ROUTES, tripAddItemsPath } from '@/routes'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 
 import { EmptyState } from './components/empty-state'
+import { Spinner } from './components/spinner'
 import { StoreAccordion } from './components/store-accordion'
 import { TripItemRow } from './components/trip-item-row'
 
@@ -122,7 +123,7 @@ export const TripDetailPage = () => {
             className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors flex items-center justify-center gap-2"
           >
             <ShoppingCart className="w-5 h-5" />
-            {startMutation.isPending ? 'Starting...' : trip.isStarted ? 'Continue Shopping' : 'Start Shopping'}
+            {startMutation.isPending ? <Spinner /> : trip.isStarted ? 'Continue Shopping' : 'Start Shopping'}
           </button>
         </div>
       )}

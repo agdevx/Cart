@@ -16,6 +16,7 @@ import { isRequired, maxLength } from '@/utils/validation-rules'
 import { ConfirmDialog } from './components/confirm-dialog'
 import { EmptyState } from './components/empty-state'
 import { ScopeSelect } from './components/scope-select'
+import { Spinner } from './components/spinner'
 
 export const PantryStoresView = () => {
   const { data: households, isLoading: householdsLoading } = useHouseholdsQuery()
@@ -255,7 +256,7 @@ export const PantryStoresView = () => {
               disabled={updateMutation.isPending || !editingName.trim() || !!editDuplicateError}
               className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
             >
-              {updateMutation.isPending ? 'Saving...' : 'Save'}
+              {updateMutation.isPending ? <Spinner /> : 'Save'}
             </button>
           </div>
         </div>
@@ -326,7 +327,7 @@ export const PantryStoresView = () => {
               disabled={createMutation.isPending || !isCreateValid || !!createDuplicateError}
               className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
             >
-              {createMutation.isPending ? 'Creating...' : 'Create'}
+              {createMutation.isPending ? <Spinner /> : 'Create'}
             </button>
           </div>
         </form>

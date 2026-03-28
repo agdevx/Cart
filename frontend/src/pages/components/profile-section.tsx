@@ -9,6 +9,8 @@ import type { User } from '@/apis/agdevx-cart-api/models/user'
 import { useFieldValidation } from '@/hooks/use-field-validation'
 import { isEmail, isRequired, maxLength } from '@/utils/validation-rules'
 
+import { Spinner } from './spinner'
+
 interface ProfileSectionProps {
   user: User
   isEditing: boolean
@@ -166,7 +168,7 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
             disabled={!isValid || updateProfileMutation.isPending}
             className="flex-1 py-2.5 bg-teal text-white rounded-xl font-display font-bold disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed"
           >
-            {updateProfileMutation.isPending ? 'Saving...' : 'Save'}
+            {updateProfileMutation.isPending ? <Spinner /> : 'Save'}
           </button>
         </div>
       </div>

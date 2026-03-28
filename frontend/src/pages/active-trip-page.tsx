@@ -23,6 +23,7 @@ import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 
 import { ConfirmDialog } from './components/confirm-dialog'
 import { EmptyState } from './components/empty-state'
+import { Spinner } from './components/spinner'
 import { StoreAccordion } from './components/store-accordion'
 import { TripItemRow } from './components/trip-item-row'
 
@@ -216,7 +217,7 @@ export const ActiveTripPage = () => {
         disabled={completeMutation.isPending}
         className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors shadow-[0_3px_0_#148F72] active:translate-y-[3px] active:shadow-none"
       >
-        {completeMutation.isPending ? 'Completing...' : 'Complete Trip'}
+        {completeMutation.isPending ? <Spinner /> : 'Complete Trip'}
       </button>
 
       {showCompleteConfirm && (

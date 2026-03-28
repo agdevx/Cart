@@ -7,6 +7,8 @@ import { useChangePasswordMutation } from '@/apis/agdevx-cart-api/auth/change-pa
 import { useFieldValidation } from '@/hooks/use-field-validation'
 import { isRequired, matchesField, maxLength, minLength, passwordStrength } from '@/utils/validation-rules'
 
+import { Spinner } from './spinner'
+
 interface SecuritySectionProps {
   isEditing: boolean
   onStartEdit: () => void
@@ -176,7 +178,7 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
             disabled={!isValid || changePasswordMutation.isPending}
             className="flex-1 py-2.5 bg-teal text-white rounded-xl font-display font-bold disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed"
           >
-            {changePasswordMutation.isPending ? 'Saving...' : 'Save'}
+            {changePasswordMutation.isPending ? <Spinner /> : 'Save'}
           </button>
         </div>
       </div>

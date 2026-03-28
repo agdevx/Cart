@@ -10,6 +10,8 @@ import { ROUTES } from '@/routes'
 import { getErrorMessage } from '@/utilities/error-messages'
 import { isRequired, maxLength } from '@/utils/validation-rules'
 
+import { Spinner } from './components/spinner'
+
 export const CreateHouseholdPage = () => {
   const [name, setName] = useState('')
   const navigate = useNavigate()
@@ -79,7 +81,7 @@ export const CreateHouseholdPage = () => {
             disabled={createMutation.isPending || !isValid}
             className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
           >
-            {createMutation.isPending ? 'Creating...' : 'Create'}
+            {createMutation.isPending ? <Spinner /> : 'Create'}
           </button>
         </div>
       </form>

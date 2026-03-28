@@ -10,6 +10,8 @@ import { useFieldValidation } from '@/hooks/use-field-validation'
 import { ROUTES } from '@/routes'
 import { isEmail, isRequired } from '@/utils/validation-rules'
 
+import { Spinner } from './components/spinner'
+
 export const LoginPage = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -108,7 +110,7 @@ export const LoginPage = () => {
             disabled={loginMutation.isPending || !isValid}
             className="w-full bg-teal text-white py-3 px-4 rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
           >
-            {loginMutation.isPending ? 'Logging in...' : 'Login'}
+            {loginMutation.isPending ? <Spinner /> : 'Login'}
           </button>
         </form>
         {/* Link to Register */}

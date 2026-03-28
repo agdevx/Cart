@@ -16,6 +16,7 @@ import { tripDetailPath } from '@/routes'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 
 import { EmptyState } from './components/empty-state'
+import { Spinner } from './components/spinner'
 
 type SourceFilter = 'all' | 'personal' | string
 
@@ -362,7 +363,7 @@ export const AddTripItemsPage = () => {
             disabled={isAdding}
             className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors shadow-lg"
           >
-            {isAdding ? 'Adding Items...' : `Add Items (${selectedCount} ${selectedCount === 1 ? 'item' : 'items'})`}
+            {isAdding ? <Spinner /> : `Add Items (${selectedCount} ${selectedCount === 1 ? 'item' : 'items'})`}
           </button>
         </div>
       )}

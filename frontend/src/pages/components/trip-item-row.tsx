@@ -8,6 +8,8 @@ import { Check, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import type { TripItem } from '@/apis/agdevx-cart-api/models/trip-item'
 
+import { Spinner } from './spinner'
+
 interface TripItemRowProps {
   tripItem: TripItem
   itemName: string
@@ -378,7 +380,7 @@ const EditForm = ({
         disabled={isUpdating}
         className="flex-1 py-2.5 text-sm font-bold text-white rounded-xl bg-teal hover:bg-teal-light disabled:opacity-50 transition-colors"
       >
-        {isUpdating ? 'Saving...' : 'Save'}
+        {isUpdating ? <Spinner className="w-4 h-4" /> : 'Save'}
       </button>
     </div>
   </div>

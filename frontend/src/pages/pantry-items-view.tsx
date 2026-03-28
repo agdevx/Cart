@@ -22,6 +22,7 @@ import { isRequired, maxLength } from '@/utils/validation-rules'
 import { ConfirmDialog } from './components/confirm-dialog'
 import { EmptyState } from './components/empty-state'
 import { ScopeSelect } from './components/scope-select'
+import { Spinner } from './components/spinner'
 
 export type InventoryFilter = 'all' | 'personal' | `household:${string}` | `merged:${string}`
 
@@ -297,7 +298,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           disabled={createMutation.isPending || !isCreateValid}
           className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
         >
-          {createMutation.isPending ? 'Creating...' : 'Create'}
+          {createMutation.isPending ? <Spinner /> : 'Create'}
         </button>
       </div>
     </form>
@@ -416,7 +417,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           disabled={updateMutation.isPending || !editName.trim()}
           className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
         >
-          {updateMutation.isPending ? 'Saving...' : 'Save'}
+          {updateMutation.isPending ? <Spinner /> : 'Save'}
         </button>
       </div>
     </form>

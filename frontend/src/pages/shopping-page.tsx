@@ -20,6 +20,7 @@ import { isRequired } from '@/utils/validation-rules'
 import { ConfirmDialog } from './components/confirm-dialog'
 import { EmptyState } from './components/empty-state'
 import { PageHeader } from './components/page-header'
+import { Spinner } from './components/spinner'
 import { TripCard } from './components/trip-card'
 
 export const ShoppingPage = () => {
@@ -159,7 +160,7 @@ export const ShoppingPage = () => {
               disabled={createMutation.isPending || !isValid}
               className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
             >
-              {createMutation.isPending ? 'Creating...' : 'Create'}
+              {createMutation.isPending ? <Spinner /> : 'Create'}
             </button>
           </div>
         </form>
