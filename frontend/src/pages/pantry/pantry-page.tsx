@@ -1,7 +1,7 @@
 // ABOUTME: Pantry management page with Items/Stores segmented control and horizontal filter tabs
 // ABOUTME: Items tab supports filtering by all, personal, or per-household views
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
 import { Plus } from 'lucide-react'
 
@@ -12,7 +12,6 @@ import { PantryItemsView } from '@/pages/pantry/pantry-items-view'
 import { PantryStoresView } from '@/pages/pantry/pantry-stores-view'
 import { PageHeader } from '@/shared/page-header'
 import { ScopeFilter } from '@/shared/scope-filter'
-import { sortHouseholds } from '@/utils/sort-households'
 
 type InventoryTab = 'items' | 'stores'
 
@@ -23,11 +22,6 @@ export const PantryPage = () => {
   const { data: households } = useHouseholdsQuery()
   const { data: allItems } = useInventoryQuery()
   const hasItems = (allItems?.length ?? 0) > 0
-
-  const sortedHouseholds = useMemo(
-    () => sortHouseholds(households || []),
-    [households]
-  )
 
   return (
     <div className="pb-4">
@@ -69,7 +63,7 @@ export const PantryPage = () => {
             aria-label="Filter inventory"
             value={filter === 'all' ? 'all' : filter === 'personal' ? 'personal' : filter.split(':')[1]}
             onChange={(v) => setFilter(v === 'all' ? 'all' : v === 'personal' ? 'personal' : `household:${v}`)}
-            households={sortedHouseholds}
+            households={households}
           />
         </div>
       )}
