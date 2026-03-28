@@ -159,7 +159,7 @@ export const ShoppingPage = () => {
               disabled={createMutation.isPending || !isValid}
               className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors"
             >
-              {createMutation.isPending ? 'Creating...' : 'Create Trip'}
+              {createMutation.isPending ? 'Creating...' : 'Create'}
             </button>
           </div>
         </form>

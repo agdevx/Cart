@@ -308,7 +308,7 @@ describe('ShoppingPage', () => {
     fireEvent.change(input, { target: { value: 'Weekend Run' } })
 
     //== Submit the form
-    fireEvent.click(screen.getByText('Create Trip'))
+    fireEvent.click(screen.getByText('Create'))
 
     await waitFor(() => {
       expect(mutateAsyncFn).toHaveBeenCalledWith({
