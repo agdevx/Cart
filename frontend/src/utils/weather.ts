@@ -41,8 +41,8 @@ export function getWeatherLabel(code: number): string {
 
 const WEATHER_TINT_COLORS: Record<WeatherCondition, [number, number, number]> = {
   sunny: [254, 220, 100],
-  cloudy: [180, 200, 220],
-  rain: [150, 190, 250],
+  cloudy: [190, 190, 200],
+  rain: [100, 160, 255],
 }
 
 const MIN_TEMP = 30
@@ -54,17 +54,13 @@ const MAX_ALPHA = 0.55
  * Returns a CSS rgba background color for a calendar cell.
  * The alpha scales with temperature (warmer = stronger tint).
  */
-export function getWeatherTintColor(code: number, temperatureF: number, isPast: boolean): string {
+export function getWeatherTintColor(code: number, temperatureF: number): string {
   const condition = getWeatherCondition(code)
   const [r, g, b] = WEATHER_TINT_COLORS[condition]
 
   const clamped = Math.max(MIN_TEMP, Math.min(MAX_TEMP, temperatureF))
   const ratio = (clamped - MIN_TEMP) / (MAX_TEMP - MIN_TEMP)
-  let alpha = MIN_ALPHA + ratio * (MAX_ALPHA - MIN_ALPHA)
-
-  if (isPast) {
-    alpha *= 0.5
-  }
+  const alpha = MIN_ALPHA + ratio * (MAX_ALPHA - MIN_ALPHA)
 
   return `rgba(${r},${g},${b},${alpha.toFixed(2)})`
 }

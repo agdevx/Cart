@@ -63,28 +63,20 @@ describe('getWeatherLabel', () => {
 
 describe('getWeatherTintColor', () => {
   it('returns rgba string with yellow hue for sunny', () => {
-    const result = getWeatherTintColor(0, 75, false)
+    const result = getWeatherTintColor(0, 75)
     expect(result).toMatch(/^rgba\(254,220,100,/)
   })
 
   it('returns rgba string with blue hue for rain', () => {
-    const result = getWeatherTintColor(61, 60, false)
-    expect(result).toMatch(/^rgba\(150,190,250,/)
+    const result = getWeatherTintColor(61, 60)
+    expect(result).toMatch(/^rgba\(100,160,255,/)
   })
 
   it('returns higher alpha for hotter temperatures', () => {
-    const cool = getWeatherTintColor(0, 40, false)
-    const hot = getWeatherTintColor(0, 95, false)
+    const cool = getWeatherTintColor(0, 40)
+    const hot = getWeatherTintColor(0, 95)
     const coolAlpha = parseFloat(cool.split(',')[3])
     const hotAlpha = parseFloat(hot.split(',')[3])
     expect(hotAlpha).toBeGreaterThan(coolAlpha)
-  })
-
-  it('returns lower alpha for past dates', () => {
-    const current = getWeatherTintColor(0, 75, false)
-    const past = getWeatherTintColor(0, 75, true)
-    const currentAlpha = parseFloat(current.split(',')[3])
-    const pastAlpha = parseFloat(past.split(',')[3])
-    expect(pastAlpha).toBeLessThan(currentAlpha)
   })
 })

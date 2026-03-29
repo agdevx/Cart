@@ -102,16 +102,18 @@ describe('TripCalendar', () => {
   it('calls onDayClick when a day is clicked', async () => {
     const user = userEvent.setup()
 
+    // Use today's date — it is always clickable (not a past date with no content)
     const today = new Date()
     const year = today.getFullYear()
     const month = today.getMonth() + 1
-    const dayStr = `${year}-${String(month).padStart(2, '0')}-15`
+    const day = today.getDate()
+    const dayStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 
     render(
       <TripCalendar trips={[]} weatherByDate={emptyWeather} onDayClick={mockOnDayClick} />
     )
 
-    const dayButton = screen.getByLabelText(new RegExp(`^15 ${dayStr}`))
+    const dayButton = screen.getByLabelText(new RegExp(`^${day} ${dayStr}.*today`))
     await user.click(dayButton)
 
     expect(mockOnDayClick).toHaveBeenCalledWith(dayStr)

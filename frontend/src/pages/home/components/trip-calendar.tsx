@@ -27,11 +27,44 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
     return new Date(now.getFullYear(), now.getMonth(), 1)
   })
 
-  const today = new Date()
+  // Memoized so useMemo hooks that depend on today have a stable reference
+  const today = useMemo(() => new Date(), [])
   const todayStr = formatDate(today.getFullYear(), today.getMonth(), today.getDate())
 
   const year = currentMonth.getFullYear()
   const month = currentMonth.getMonth()
+
+  // The earliest tripDate across all trips, used to limit backward navigation
+  const earliestTripDate = useMemo(() => {
+    const dates = trips.filter(t => t.tripDate).map(t => t.tripDate!)
+
+    if (dates.length === 0) { return null }
+
+    return dates.sort()[0]
+  }, [trips])
+
+  /*
+   * The minimum month the user may navigate back to.  We always allow going one
+   * month behind today so historical weather is browsable even with no trips.
+   * If there are trips, the floor is whichever is further in the past: one month
+   * ago or the month containing the earliest trip.
+   */
+  const minNavigableDate = useMemo(() => {
+    const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+
+    if (!earliestTripDate) { return oneMonthAgo }
+
+    const [etYear, etMonth] = earliestTripDate.split('-').map(Number)
+    const earliestTripMonth = new Date(etYear, etMonth - 1, 1)
+
+    // Use whichever floor is further in the past
+    return earliestTripMonth < oneMonthAgo ? earliestTripMonth : oneMonthAgo
+  }, [earliestTripDate, today])
+
+  const isPrevMonthDisabled =
+    currentMonth.getFullYear() < minNavigableDate.getFullYear() ||
+    (currentMonth.getFullYear() === minNavigableDate.getFullYear() &&
+      currentMonth.getMonth() <= minNavigableDate.getMonth())
 
   // Group trips by date for efficient lookup
   const tripsByDate = useMemo(() => {
@@ -100,11 +133,17 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
 
   return (
     <div className="bg-surface rounded-xl shadow-sm px-4 py-4">
+      {/* Section label */}
+      <div className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">
+        Trip Calendar
+      </div>
+
       {/* Month navigation header */}
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={goToPrevMonth}
-          className="p-1 text-text-secondary hover:text-teal transition-colors"
+          disabled={isPrevMonthDisabled}
+          className="p-1 text-text-secondary hover:text-teal transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-text-secondary"
           aria-label="Previous month"
         >
           <ChevronLeft size={20} />
@@ -139,10 +178,19 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
           const weather = weatherByDate[dateStr]
           const dayTrips = cell.isCurrentMonth ? tripsByDate.get(dateStr) : undefined
 
+          /*
+           * Past days with neither trips nor weather have nothing to show in the
+           * popover, so we skip the click handler and remove the hover ring to
+           * avoid implying interactivity.
+           */
+          const tripsForDate = dayTrips ?? []
+          const hasContent = tripsForDate.length > 0 || !!weather
+          const isClickable = !isPast || hasContent
+
           // Weather tint only for current month days with weather data
           const bgStyle: React.CSSProperties = {}
           if (cell.isCurrentMonth && weather) {
-            bgStyle.backgroundColor = getWeatherTintColor(weather.weatherCode, weather.temperatureMax, isPast)
+            bgStyle.backgroundColor = getWeatherTintColor(weather.weatherCode, weather.temperatureMax)
           }
 
           // Text styling based on date type
@@ -154,17 +202,17 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
           }
 
           // Trip dots (max 3)
-          const dots = dayTrips?.slice(0, 3) ?? []
+          const dots = tripsForDate.slice(0, 3)
 
           return (
             <button
               key={i}
-              onClick={() => onDayClick(dateStr)}
+              onClick={isClickable ? () => onDayClick(dateStr) : undefined}
               className={`
                 relative flex flex-col items-center justify-start
                 rounded-md py-1 min-h-[2.75rem]
                 text-xs font-body transition-colors
-                hover:ring-1 hover:ring-teal/30
+                ${isClickable ? 'hover:ring-1 hover:ring-teal/30' : 'cursor-default'}
                 ${textClass}
                 ${isToday ? 'font-bold ring-2 ring-inset ring-teal' : ''}
               `}
@@ -193,7 +241,7 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
         <div className="flex items-center gap-1.5">
           <span
             className="w-3 h-3 rounded-sm"
-            style={{ backgroundColor: getWeatherTintColor(0, 75, false) }}
+            style={{ backgroundColor: getWeatherTintColor(0, 75) }}
           />
           <span className="text-[10px] text-text-secondary">Sunny</span>
         </div>
@@ -201,7 +249,7 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
         <div className="flex items-center gap-1.5">
           <span
             className="w-3 h-3 rounded-sm"
-            style={{ backgroundColor: getWeatherTintColor(3, 75, false) }}
+            style={{ backgroundColor: getWeatherTintColor(3, 75) }}
           />
           <span className="text-[10px] text-text-secondary">Cloudy</span>
         </div>
@@ -209,7 +257,7 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
         <div className="flex items-center gap-1.5">
           <span
             className="w-3 h-3 rounded-sm"
-            style={{ backgroundColor: getWeatherTintColor(61, 75, false) }}
+            style={{ backgroundColor: getWeatherTintColor(61, 75) }}
           />
           <span className="text-[10px] text-text-secondary">Rain</span>
         </div>

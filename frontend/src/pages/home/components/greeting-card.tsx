@@ -23,9 +23,14 @@ export const GreetingCard = ({
   if (!user?.name) { return null }
 
   return (
-    <div className="bg-gradient-to-br from-navy to-navy-soft rounded-xl px-4 py-5">
-      <p className="text-xl font-display font-extrabold text-teal-light">
-        {greeting}, {user.name} 👋
+    <div
+      className="rounded-xl px-4 py-5"
+      style={{ backgroundColor: 'rgba(20,50,140,0.09)', border: '1px solid rgba(20,50,140,0.16)' }}
+    >
+      <p className="text-xl font-display font-extrabold">
+        <span className="text-text">{greeting}, </span>
+        <span className="text-teal">{user.name}</span>
+        <span> 👋</span>
       </p>
 
       {(locationName || currentTemperature !== null) && (
