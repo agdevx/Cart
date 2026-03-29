@@ -82,7 +82,7 @@ export const LoginPage = () => {
 
         {/* Logo */}
         <h1 className="font-display text-[28px] font-extrabold tracking-tight text-white">
-          AGDevX <span className="text-teal-light">Cart</span>
+          <span className="text-teal-light">Cart</span>
         </h1>
 
         {/* Tagline */}

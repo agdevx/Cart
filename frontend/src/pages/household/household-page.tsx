@@ -83,6 +83,8 @@ export const HouseholdPage = () => {
           icon={Users}
           title="No households yet"
           subtitle="Create or join a household to share shopping trips"
+          actionLabel="Create Household"
+          onAction={() => navigate(ROUTES.HOUSEHOLD_CREATE)}
         />
       )}
 

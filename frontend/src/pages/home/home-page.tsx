@@ -56,7 +56,7 @@ export const HomePage = () => {
 
   return (
     <div className="pb-4 animate-fade-in">
-      <PageHeader>Home</PageHeader>
+      <PageHeader><span className="text-teal">Home</span></PageHeader>
 
       <div className="px-5 space-y-3">
         <GreetingCard
