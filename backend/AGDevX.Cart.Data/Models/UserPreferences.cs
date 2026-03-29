@@ -17,5 +17,7 @@ public class UserPreferences : BaseEntity
 
     public bool ShowWeatherIcons { get; set; } = true;
 
+    public bool ShowWeatherTemps { get; set; } = true;
+
     public User User { get; set; } = null!;
 }

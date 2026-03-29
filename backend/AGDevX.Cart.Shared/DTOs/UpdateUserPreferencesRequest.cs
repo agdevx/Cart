@@ -13,4 +13,6 @@ public class UpdateUserPreferencesRequest
     public string? LocationDisplayName { get; set; }
 
     public bool? ShowWeatherIcons { get; set; }
+
+    public bool? ShowWeatherTemps { get; set; }
 }
