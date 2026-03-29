@@ -40,6 +40,7 @@ This is the single source of truth for where the project stands. Read it at the 
 |-------------|-------------|
 | Docker Deployment | [docs/archive/2026-01-25-phase9-docker-deployment.md](../docs/archive/2026-01-25-phase9-docker-deployment.md) |
 | Trip Collaborator UI | No planning doc yet (backend endpoints exist: `POST/DELETE /api/v1/trip/{id}/collaborators`) |
+| Home Page | No planning doc yet (greeting panel, activity feed, shopping list preview, trip templates, calendar view, default page setting) |
 | Camera / Barcode Scanning | No planning doc yet |
 | Inventory Categories | No planning doc yet |
 
