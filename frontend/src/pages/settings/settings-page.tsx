@@ -1,5 +1,5 @@
 // ABOUTME: Settings page with user profile management and account actions
-// ABOUTME: iOS-style grouped list with Profile, Security sections, and logout
+// ABOUTME: iOS-style grouped list with Preferences, Profile, Security sections, and logout
 
 import { useState } from 'react'
 
@@ -9,6 +9,7 @@ import type { UpdateProfileResponse } from '@/apis/agdevx-cart-api/auth/update-p
 import { useAuth } from '@/auth/use-auth'
 import { PageHeader } from '@/shared/page-header'
 
+import { PreferencesSection } from './preferences-section'
 import { ProfileSection } from './profile-section'
 import { SecuritySection } from './security-section'
 
@@ -36,6 +37,7 @@ export const SettingsPage = () => {
     <div className="pb-4 animate-fade-in">
       <PageHeader>Your <span className="text-teal">Settings</span></PageHeader>
       <div className="px-5 space-y-4">
+        <PreferencesSection />
         <ProfileSection
           user={user}
           isEditing={editingSection === 'profile'}
