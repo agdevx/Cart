@@ -1,5 +1,5 @@
 // ABOUTME: Mutation hook for creating trips
-// ABOUTME: Creates household or personal trip and invalidates query cache
+// ABOUTME: Creates a trip and invalidates query cache
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -8,7 +8,6 @@ import type { Trip } from '../models/trip'
 
 interface CreateTripRequest {
   name: string
-  householdId?: string | null
 }
 
 export const useCreateTripMutation = () => {

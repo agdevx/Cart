@@ -4,7 +4,6 @@
 export interface Trip {
   id: string;
   name: string;
-  householdId: string | null;
   createdByUserId: string;
   isStarted: boolean;
   startedAt: string | null;

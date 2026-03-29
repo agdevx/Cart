@@ -185,9 +185,6 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("HouseholdId")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
 
@@ -208,8 +205,6 @@ namespace AGDevX.Cart.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("HouseholdId");
 
                     b.ToTable("Trips");
                 });
@@ -395,15 +390,6 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Navigation("Household");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("AGDevX.Cart.Data.Models.Trip", b =>
-                {
-                    b.HasOne("AGDevX.Cart.Data.Models.Household", "Household")
-                        .WithMany()
-                        .HasForeignKey("HouseholdId");
-
-                    b.Navigation("Household");
                 });
 
             modelBuilder.Entity("AGDevX.Cart.Data.Models.TripCollaborator", b =>

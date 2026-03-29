@@ -8,7 +8,6 @@ public interface ITripRepository
 {
     Task<Trip?> GetById(Guid id, CancellationToken cancellationToken = default);
     Task<IEnumerable<Trip>> GetUserTrips(Guid userId, CancellationToken cancellationToken = default);
-    Task<IEnumerable<Trip>> GetHouseholdTrips(Guid householdId, CancellationToken cancellationToken = default);
     Task<Trip> Create(Trip trip, CancellationToken cancellationToken = default);
     Task<Trip> Update(Trip trip, CancellationToken cancellationToken = default);
     Task Delete(Guid id, CancellationToken cancellationToken = default);

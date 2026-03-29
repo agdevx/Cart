@@ -49,40 +49,6 @@ public class TripControllerTests
     }
 
     [Fact]
-    public async Task Should_ReturnOk_When_GetHouseholdTrips()
-    {
-        // Arrange
-        var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
-        var userId = Guid.NewGuid();
-        var householdId = Guid.NewGuid();
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        var trips = new List<Trip>
-        {
-            new Trip { Id = Guid.NewGuid(), Name = "Household Trip", HouseholdId = householdId }
-        };
-
-        mockService.Setup(s => s.GetHouseholdTrips(householdId))
-                   .ReturnsAsync(trips);
-
-        // Act
-        var result = await controller.GetHouseholdTrips(householdId);
-
-        // Assert
-        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-        okResult.Value.Should().BeEquivalentTo(trips);
-    }
-
-    [Fact]
     public async Task Should_ReturnOk_When_GetByIdSuccessful()
     {
         // Arrange
@@ -158,10 +124,10 @@ public class TripControllerTests
             HttpContext = new DefaultHttpContext { User = user }
         };
 
-        var createRequest = new CreateTripRequest { Name = "New Trip", HouseholdId = null };
+        var createRequest = new CreateTripRequest { Name = "New Trip" };
         var trip = new Trip { Id = Guid.NewGuid(), Name = "New Trip" };
 
-        mockService.Setup(s => s.CreateTrip(createRequest.Name, userId, createRequest.HouseholdId))
+        mockService.Setup(s => s.CreateTrip(createRequest.Name, userId, It.IsAny<CancellationToken>()))
                    .ReturnsAsync(trip);
 
         // Act
@@ -214,7 +180,7 @@ public class TripControllerTests
         var request = new UpdateTripRequest { Name = "Updated Trip" };
         var trip = new Trip { Id = tripId, Name = "Updated Trip" };
 
-        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, request.HouseholdId, userId))
+        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, userId, It.IsAny<CancellationToken>()))
                    .ReturnsAsync(trip);
 
         // Act
@@ -244,7 +210,7 @@ public class TripControllerTests
 
         var request = new UpdateTripRequest { Name = "Updated Trip" };
 
-        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, request.HouseholdId, userId))
+        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, userId, It.IsAny<CancellationToken>()))
                    .ThrowsAsync(new ArgumentException("Trip not found"));
 
         // Act
@@ -274,7 +240,7 @@ public class TripControllerTests
 
         var request = new UpdateTripRequest { Name = "Updated Trip" };
 
-        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, request.HouseholdId, userId))
+        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, userId, It.IsAny<CancellationToken>()))
                    .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this trip"));
 
         // Act

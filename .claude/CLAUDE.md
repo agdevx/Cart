@@ -49,21 +49,34 @@ backend/
 frontend/src/
 ├── apis/                         # apiFetch wrapper + TanStack Query hooks (one file per endpoint)
 ├── auth/                         # AuthProvider, useAuth hook, session management
-├── hooks/                        # Custom hooks (useFocusTrap, useStoreAccordionState, etc.)
-├── pages/                        # Page components (one per route)
-│   ├── components/               # Shared UI (EmptyState, ConfirmDialog, PageHeader, etc.)
-│   │   └── tests/                # Component tests
-│   └── tests/                    # Page-level tests
+├── pages/                        # Each page gets its own folder
+│   ├── shopping/                 # Page component + page-specific components + tests
+│   ├── pantry/
+│   ├── household/
+│   ├── settings/
+│   ├── login/
+│   └── register/
+├── shared/                       # Components used by multiple pages
+├── services/                     # Hooks for data fetching and business logic (*Service suffix)
 ├── state/                        # Jotai atoms (auth, household scope)
 ├── styles/                       # globals.css (Tailwind theme, animations)
-└── utils/                        # Utility functions (confetti, greeting, etc.)
+└── utils/                        # Pure utility functions (confetti, greeting, sorting, etc.)
 ```
+
+## Frontend Architecture Rules
+
+- **Organize by domain, not by technical concept.** Folders represent features/functionality, not software patterns.
+- **Each page gets its own folder** under `pages/`. Page-specific components, forms, and tests live in the same folder.
+- **Shared components** used by multiple pages go in `shared/`. This includes layout primitives (PageHeader, SectionHeader), form primitives (FormField, ActionCancelFormButtons), filters (ScopeFilter, StoreFilter), dialogs, and navigation.
+- **Forms live in their own file.** Create and Edit variants colocate in the same file.
+- **Components never fetch data themselves.** Data fetching lives in service hooks that components consume via props or hooks.
+- **Modals/dialogs live in their own file.**
+- **Services** contain custom hooks for data fetching and business logic. Hook names end with `Service` (e.g., `useFocusTrapService`).
 
 ## Architecture Patterns
 
 - **Auth:** Cookie-based sessions. Cookie `.Cart.Auth`, 30-min sliding expiration, `credentials: 'include'` on all fetches. `useAuth()` hook from `@/auth/use-auth`.
 - **API layer:** `apiFetch()` wrapper handles credentials and error extraction. Each endpoint gets a TanStack Query hook file in `apis/agdevx-cart-api/`.
-- **Component locations:** Shared components in `pages/components/`. Page-specific UI stays in the page file.
 - **State:** Jotai atoms for auth state and household scope. TanStack Query for server state.
 - **Styling:** Tailwind CSS 4 with custom theme in `globals.css`. Design system colors: `navy`, `teal`, `coral`, `amber`. Font: `font-display` (Bricolage Grotesque), `font-body` (Nunito).
 

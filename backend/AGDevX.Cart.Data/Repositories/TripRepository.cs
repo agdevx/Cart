@@ -26,14 +26,6 @@ public class TripRepository(CartDbContext context) : ITripRepository
                                   .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Trip>> GetHouseholdTrips(Guid householdId, CancellationToken cancellationToken = default)
-    {
-        return await context.Trips.Include(t => t.Items)
-                                  .Include(t => t.Collaborators)
-                                  .Where(t => t.HouseholdId == householdId)
-                                  .ToListAsync(cancellationToken);
-    }
-
     public async Task<Trip> Create(Trip trip, CancellationToken cancellationToken = default)
     {
         context.Trips.Add(trip);

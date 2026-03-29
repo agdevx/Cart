@@ -128,16 +128,22 @@ public class InventoryService(IInventoryRepository inventoryRepository, IHouseho
             }
 
             //== Clear personal owner when moving to household
-            inventoryItem.OwnerUserId = null;
+            existing.OwnerUserId = null;
+            existing.HouseholdId = inventoryItem.HouseholdId;
         }
         else
         {
             //== Moving to personal: set owner, clear household
-            inventoryItem.OwnerUserId = userId;
-            inventoryItem.HouseholdId = null;
+            existing.OwnerUserId = userId;
+            existing.HouseholdId = null;
         }
 
-        var result = await inventoryRepository.Update(inventoryItem, cancellationToken);
+        //== Update properties on the tracked entity
+        existing.Name = inventoryItem.Name;
+        existing.Notes = inventoryItem.Notes;
+        existing.DefaultStoreId = inventoryItem.DefaultStoreId;
+
+        var result = await inventoryRepository.Update(existing, cancellationToken);
 
         //== Live mirror: update denormalized ItemName on all TripItems
         await tripItemRepository.UpdateItemNameByInventoryItemId(inventoryItem.Id, inventoryItem.Name, cancellationToken);

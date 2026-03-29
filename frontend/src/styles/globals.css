@@ -24,13 +24,19 @@ body {
   color: var(--color-text);
 }
 
+/* Tailwind's preflight can leave caret-color unset or inheriting from a context
+   that makes it invisible. This ensures a consistent visible caret in all inputs. */
+input, textarea, select {
+  caret-color: var(--color-navy);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 .animate-fade-in {
-  animation: fadeIn 350ms ease-out;
+  animation: fadeIn 200ms ease-out;
 }
 
 @keyframes checkBounce {
@@ -43,9 +49,18 @@ body {
   animation: checkBounce 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 600ms linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in,
-  .animate-check-bounce {
+  .animate-check-bounce,
+  .animate-spin {
     animation: none;
   }
 

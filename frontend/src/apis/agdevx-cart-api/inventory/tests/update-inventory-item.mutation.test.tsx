@@ -43,7 +43,6 @@ describe('useUpdateInventoryItemMutation', () => {
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
       ok: true,
-      json: async () => mockInventoryItem,
     } as unknown as Response)
 
     const { result } = renderHook(() => useUpdateInventoryItemMutation(), {
@@ -59,7 +58,6 @@ describe('useUpdateInventoryItemMutation', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(result.current.data).toEqual(mockInventoryItem)
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/inventory/1', {
       method: 'PUT',
       body: JSON.stringify({
@@ -93,7 +91,6 @@ describe('useUpdateInventoryItemMutation', () => {
 
     vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
       ok: true,
-      json: async () => mockInventoryItem,
     } as unknown as Response)
 
     const invalidateQueriesSpy = vi.spyOn(queryClient, 'invalidateQueries')

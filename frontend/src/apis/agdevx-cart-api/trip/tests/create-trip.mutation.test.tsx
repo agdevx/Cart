@@ -24,7 +24,6 @@ describe('useCreateTripMutation', () => {
     const mockTrip: Trip = {
       id: '1',
       name: 'Grocery Shopping',
-      householdId: 'household1',
       createdByUserId: 'user1',
       isStarted: false,
       startedAt: null,
@@ -54,7 +53,6 @@ describe('useCreateTripMutation', () => {
 
     result.current.mutate({
       name: 'Grocery Shopping',
-      householdId: 'household1',
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -64,7 +62,6 @@ describe('useCreateTripMutation', () => {
       method: 'POST',
       body: JSON.stringify({
         name: 'Grocery Shopping',
-        householdId: 'household1',
       }),
     })
   })
@@ -73,7 +70,6 @@ describe('useCreateTripMutation', () => {
     const mockTrip: Trip = {
       id: '1',
       name: 'Personal Trip',
-      householdId: null,
       createdByUserId: 'user1',
       isStarted: false,
       startedAt: null,

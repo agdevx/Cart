@@ -31,7 +31,7 @@ public class TripItemRepository(CartDbContext context) : ITripItemRepository
 
     public async Task<TripItem> Update(TripItem tripItem, CancellationToken cancellationToken = default)
     {
-        context.TripItems.Update(tripItem);
+        context.Entry(tripItem).State = EntityState.Modified;
         await context.SaveChangesAsync(cancellationToken);
         return tripItem;
     }
@@ -51,6 +51,7 @@ public class TripItemRepository(CartDbContext context) : ITripItemRepository
     {
         await context.TripItems
             .Where(ti => ti.InventoryItemId == inventoryItemId)
+            .Where(ti => !ti.Trip.IsCompleted)
             .ExecuteUpdateAsync(s => s.SetProperty(ti => ti.ItemName, itemName), cancellationToken);
     }
 
@@ -59,6 +60,7 @@ public class TripItemRepository(CartDbContext context) : ITripItemRepository
     {
         await context.TripItems
             .Where(ti => ti.StoreId == storeId)
+            .Where(ti => !ti.Trip.IsCompleted)
             .ExecuteUpdateAsync(s => s.SetProperty(ti => ti.StoreName, storeName), cancellationToken);
     }
 }

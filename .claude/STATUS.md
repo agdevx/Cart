@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated:** 2026-03-25
+**Last Updated:** 2026-03-27
 
 ## How to Use This File
 
@@ -25,7 +25,7 @@ This is the single source of truth for where the project stands. Read it at the 
 | Backend — Services | 115 | AGDevX.Cart.Services.Tests |
 | Backend — API | 111 | AGDevX.Cart.Api.Tests |
 | Backend — Auth | 22 | AGDevX.Cart.Auth.Tests |
-| Frontend — Vitest | 493 | 76 test files |
+| Frontend — Vitest | 525 | 83 test files |
 
 ## Known Issues / Tech Debt
 

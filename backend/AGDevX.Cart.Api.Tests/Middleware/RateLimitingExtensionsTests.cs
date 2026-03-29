@@ -75,14 +75,14 @@ public class RateLimitingExtensionsTests
         using var host = await CreateTestHost();
         var client = host.GetTestClient();
 
-        // Global limiter allows 30 requests per minute per IP
-        for (var i = 0; i < 30; i++)
+        // Global limiter allows 60 requests per minute per IP
+        for (var i = 0; i < 60; i++)
         {
             var response = await client.GetAsync("/general-test");
             Assert.Equal(200, (int)response.StatusCode);
         }
 
-        // 31st request should be rate limited
+        // 61st request should be rate limited
         var limitedResponse = await client.GetAsync("/general-test");
         Assert.Equal(429, (int)limitedResponse.StatusCode);
     }
