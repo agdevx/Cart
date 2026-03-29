@@ -178,6 +178,42 @@ describe('apiFetch', () => {
     })
   })
 
+  it('should prepend VITE_API_BASE_URL to endpoint', async () => {
+    const originalEnv = import.meta.env.VITE_API_BASE_URL;
+    import.meta.env.VITE_API_BASE_URL = '/cart/api';
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: 'test' }),
+    });
+    globalThis.fetch = mockFetch;
+
+    await apiFetch('/api/v1/items', { method: 'GET' });
+
+    const calledUrl = mockFetch.mock.calls[0][0];
+    expect(calledUrl).toBe('/cart/api/api/v1/items');
+
+    import.meta.env.VITE_API_BASE_URL = originalEnv;
+  });
+
+  it('should work with empty VITE_API_BASE_URL', async () => {
+    const originalEnv = import.meta.env.VITE_API_BASE_URL;
+    import.meta.env.VITE_API_BASE_URL = '';
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: 'test' }),
+    });
+    globalThis.fetch = mockFetch;
+
+    await apiFetch('/api/v1/items', { method: 'GET' });
+
+    const calledUrl = mockFetch.mock.calls[0][0];
+    expect(calledUrl).toBe('/api/v1/items');
+
+    import.meta.env.VITE_API_BASE_URL = originalEnv;
+  });
+
   it('should return Response normally when response is ok', async () => {
     const mockResponse = {
       ok: true,
