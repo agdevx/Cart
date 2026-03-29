@@ -25,23 +25,22 @@
     "noUncheckedSideEffectImports": true,
 
     /* Path Aliases */
-    "baseUrl": ".",
     "paths": {
-      "@/routes": ["src/routes.ts"],
-      "@/apis/*": ["src/apis/*"],
-      "@/auth/*": ["src/auth/*"],
-      "@/config/*": ["src/config/*"],
-      "@/features/*": ["src/features/*"],
-      "@/hooks/*": ["src/hooks/*"],
-      "@/libs/*": ["src/libs/*"],
-      "@/models/*": ["src/models/*"],
-      "@/pages/*": ["src/pages/*"],
-      "@/services/*": ["src/services/*"],
-      "@/shared/*": ["src/shared/*"],
-      "@/state/*": ["src/state/*"],
-      "@/styles/*": ["src/styles/*"],
-      "@/utilities/*": ["src/utilities/*"],
-      "@/utils/*": ["src/utils/*"]
+      "@/routes": ["./src/routes.ts"],
+      "@/apis/*": ["./src/apis/*"],
+      "@/auth/*": ["./src/auth/*"],
+      "@/config/*": ["./src/config/*"],
+      "@/features/*": ["./src/features/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/libs/*": ["./src/libs/*"],
+      "@/models/*": ["./src/models/*"],
+      "@/pages/*": ["./src/pages/*"],
+      "@/services/*": ["./src/services/*"],
+      "@/shared/*": ["./src/shared/*"],
+      "@/state/*": ["./src/state/*"],
+      "@/styles/*": ["./src/styles/*"],
+      "@/utilities/*": ["./src/utilities/*"],
+      "@/utils/*": ["./src/utils/*"]
     }
   },
   "include": ["src", "integration-tests"]

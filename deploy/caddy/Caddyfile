@@ -9,7 +9,7 @@
 		reverse_proxy backend:2946
 	}
 
-	handle /cart/* {
+	handle /cart* {
 		uri strip_prefix /cart
 		reverse_proxy frontend:3750
 	}

@@ -212,4 +212,4 @@ This is a personal project but follows standard practices:
 
 ## License
 
-Private project - not licensed for public use.
+This project is licensed under the [GNU General Public License v3.0](LICENSE).
