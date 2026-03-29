@@ -45,6 +45,10 @@ This is the single source of truth for where the project stands. Read it at the 
 | Camera / Barcode Scanning | No planning doc yet                                                                                                             |
 | Inventory Categories      | No planning doc yet                                                                                                             |
 | Seed pantry items         | No planning doc yet                                                                                                             |
+| CSV Import (Stores & Items) | No planning doc yet (import from CSV + downloadable CSV templates)                                                             |
+| Database Index Review     | No planning doc yet (audit and add proper indexes to DB tables)                                                                 |
+| Container Image Versioning | No planning doc yet (review tagging strategy for Docker Hub images)                                                             |
+| NuGet Package Updates     | No planning doc yet                                                                                                             |
 
 ## In Progress Enhancements
 
