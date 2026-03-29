@@ -11,7 +11,6 @@ import { useDeleteTripMutation } from '@/apis/agdevx-cart-api/trip/delete-trip.m
 import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.mutation'
 import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
-import { useAuth } from '@/auth/use-auth'
 import { tripDetailPath } from '@/routes'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
@@ -19,14 +18,11 @@ import { Fab } from '@/shared/fab'
 import { PageHeader } from '@/shared/page-header'
 import { SectionHeader } from '@/shared/section-header'
 import { TripCard } from '@/shared/trip-card'
-import { getGreeting } from '@/utils/greeting'
 
 import { TripCreateForm } from './trip-create-form'
 
 export const ShoppingPage = () => {
   const navigate = useNavigate()
-  const { user } = useAuth()
-  const greeting = getGreeting(new Date().getHours())
   const { data: trips, isLoading } = useTripsQuery()
   const createMutation = useCreateTripMutation()
   const updateMutation = useUpdateTripMutation()
@@ -97,14 +93,6 @@ export const ShoppingPage = () => {
     <div className="pb-4 animate-fade-in">
       <PageHeader>Your <span className="text-teal">Shopping Trips</span></PageHeader>
       <div className="px-5">
-      {user?.name && (
-        <div className="bg-gradient-to-br from-navy to-navy-soft rounded-xl px-4 py-3 mb-4">
-          <p className="text-sm font-semibold text-teal-light text-center">
-            {greeting}, {user.name} 👋
-          </p>
-        </div>
-      )}
-
       {showCreateForm && (
         <TripCreateForm
           key={formKey}
