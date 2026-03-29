@@ -197,6 +197,7 @@ All endpoints use the `/api/v1/` prefix.
 ## Documentation
 
 - **[Development Guide](docs/DEVELOPMENT.md)** - Setup, running, testing, troubleshooting
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Docker architecture, CI/CD, server setup, updating
 - **[Integration Tests](frontend/tests/e2e-integration-tests/README.md)** - Full-stack integration testing
 - **[Enhancement Tracking](.claude/STATUS.md)** - Planned, in progress, and completed enhancements
 - **[Archive](docs/archive/)** - Design specs and implementation plans for all completed work

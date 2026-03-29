@@ -239,5 +239,6 @@ cd frontend && npm update
 ## Next Steps
 
 - See `README.md` for project overview
+- See `docs/DEPLOYMENT.md` for Docker deployment, CI/CD, and server setup
 - See `.claude/STATUS.md` for enhancement tracking (planned / in progress / completed)
 - See `docs/archive/` for design specs and implementation plans
