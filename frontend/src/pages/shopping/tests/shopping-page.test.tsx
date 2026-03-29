@@ -4,9 +4,9 @@
 import { BrowserRouter } from 'react-router-dom'
 
 import { QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import * as createTripModule from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
@@ -124,6 +124,10 @@ describe('ShoppingPage', () => {
     vi.clearAllMocks()
   })
 
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('renders trip cards in three sections', () => {
     setupMocks()
     render(<ShoppingPage />, { wrapper })
@@ -183,7 +187,8 @@ describe('ShoppingPage', () => {
     expect(updateMutateFn).toHaveBeenCalledWith({ tripId: 'trip1', name: 'Saturday Groceries', tripDate: null })
   })
 
-  it('shows delete confirmation dialog', () => {
+  it('deletes a trip after the 3-second long press completes', () => {
+    vi.useFakeTimers()
     setupMocks()
     render(<ShoppingPage />, { wrapper })
 
@@ -191,48 +196,35 @@ describe('ShoppingPage', () => {
     const kebabButtons = screen.getAllByLabelText('Trip actions')
     fireEvent.click(kebabButtons[0])
 
-    //== Click Delete in the kebab menu
-    fireEvent.click(screen.getByText('Delete'))
+    //== Hold the delete button for the full duration
+    const deleteBtn = screen.getByLabelText('Hold to delete trip')
+    fireEvent.mouseDown(deleteBtn)
 
-    //== Confirm dialog should appear with trip name in the message
-    expect(screen.getByText('Delete Trip')).toBeInTheDocument()
-    expect(screen.getByText(/Delete "Weekly Groceries"\? This can't be undone\./)).toBeInTheDocument()
-  })
+    //== Not fired yet
+    expect(deleteMutateFn).not.toHaveBeenCalled()
 
-  it('deletes a trip when confirmed', () => {
-    setupMocks()
-    render(<ShoppingPage />, { wrapper })
-
-    //== Open kebab menu and click Delete
-    const kebabButtons = screen.getAllByLabelText('Trip actions')
-    fireEvent.click(kebabButtons[0])
-    fireEvent.click(screen.getByText('Delete'))
-
-    //== Click the Delete button in the confirmation dialog
-    const dialogDeleteButton = screen.getByRole('button', { name: /^Delete$/i })
-    fireEvent.click(dialogDeleteButton)
+    act(() => { vi.advanceTimersByTime(3000) })
 
     expect(deleteMutateFn).toHaveBeenCalledWith('trip1')
   })
 
-  it('cancels delete when Cancel is clicked', () => {
+  it('does not delete a trip if the hold is released early', () => {
+    vi.useFakeTimers()
     setupMocks()
     render(<ShoppingPage />, { wrapper })
 
-    //== Open kebab menu and click Delete
+    //== Open kebab menu on the first trip
     const kebabButtons = screen.getAllByLabelText('Trip actions')
     fireEvent.click(kebabButtons[0])
-    fireEvent.click(screen.getByText('Delete'))
 
-    //== Verify dialog is showing
-    expect(screen.getByText('Delete Trip')).toBeInTheDocument()
+    //== Start and immediately cancel the hold
+    const deleteBtn = screen.getByLabelText('Hold to delete trip')
+    fireEvent.mouseDown(deleteBtn)
+    fireEvent.mouseUp(deleteBtn)
 
-    //== Click Cancel
-    fireEvent.click(screen.getByText('Cancel'))
+    act(() => { vi.advanceTimersByTime(3000) })
 
-    //== Dialog should disappear
-    expect(screen.queryByText('Delete Trip')).not.toBeInTheDocument()
-    //== Delete mutation should NOT be called
+    //== Timer was cancelled — mutation should not fire
     expect(deleteMutateFn).not.toHaveBeenCalled()
   })
 

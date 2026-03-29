@@ -12,7 +12,6 @@ import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.m
 import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
 import { tripDetailPath } from '@/routes'
-import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
 import { Fab } from '@/shared/fab'
 import { PageHeader } from '@/shared/page-header'
@@ -32,7 +31,6 @@ export const ShoppingPage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false)
   // formKey forces the form to remount when opened, resetting its internal state
   const [formKey, setFormKey] = useState(0)
-  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
   const [showCompleted, setShowCompleted] = useState(false)
 
   const inProgressTrips = trips?.filter((trip) => trip.isStarted && !trip.isCompleted) || []
@@ -57,15 +55,9 @@ export const ShoppingPage = () => {
     updateMutation.mutate({ tripId, name, tripDate })
   }
 
-  const handleDelete = (tripId: string, tripName: string) => {
-    setDeleteConfirm({ id: tripId, name: tripName })
-  }
-
-  const handleConfirmDelete = () => {
-    if (deleteConfirm) {
-      deleteMutation.mutate(deleteConfirm.id)
-      setDeleteConfirm(null)
-    }
+  /* Long-press in TripCard is the confirmation — fire the mutation directly */
+  const handleDelete = (tripId: string, _tripName: string) => {
+    deleteMutation.mutate(tripId)
   }
 
   const handleReopen = (tripId: string) => {
@@ -164,17 +156,6 @@ export const ShoppingPage = () => {
         />
       )}
 
-      {/* Delete confirmation dialog */}
-      {deleteConfirm && (
-        <ConfirmDialog
-          title="Delete Trip"
-          message={`Delete "${deleteConfirm.name}"? This can't be undone.`}
-          confirmLabel="Delete"
-          onConfirm={handleConfirmDelete}
-          onCancel={() => setDeleteConfirm(null)}
-          isPending={deleteMutation.isPending}
-        />
-      )}
       </div>
 
       {/* FAB — hidden while create form is open to avoid double-entry confusion */}
