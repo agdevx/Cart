@@ -11,6 +11,7 @@ interface UpdateUserPreferencesRequest {
   locationLatitude?: number | null
   locationLongitude?: number | null
   locationDisplayName?: string | null
+  showWeatherIcons?: boolean
 }
 
 export const useUpdateUserPreferencesMutation = () => {

@@ -39,6 +39,7 @@ export const PreferencesSection = () => {
   const [locationLat, setLocationLat] = useState<number | null>(preferences?.locationLatitude ?? null)
   const [locationLon, setLocationLon] = useState<number | null>(preferences?.locationLongitude ?? null)
   const [locationName, setLocationName] = useState<string | null>(preferences?.locationDisplayName ?? null)
+  const [showWeatherIcons, setShowWeatherIcons] = useState(preferences?.showWeatherIcons ?? true)
   const [isDirty, setIsDirty] = useState(false)
 
   const [citySearch, setCitySearch] = useState('')
@@ -56,6 +57,7 @@ export const PreferencesSection = () => {
     setLocationLat(preferences?.locationLatitude ?? null)
     setLocationLon(preferences?.locationLongitude ?? null)
     setLocationName(preferences?.locationDisplayName ?? null)
+    setShowWeatherIcons(preferences?.showWeatherIcons ?? true)
     setIsDirty(false)
   }, [preferences])
 
@@ -139,6 +141,11 @@ export const PreferencesSection = () => {
     }
   }
 
+  const handleShowWeatherIconsChange = () => {
+    setShowWeatherIcons(prev => !prev)
+    setIsDirty(true)
+  }
+
   /** Sends all current local state in a single mutation to avoid partial-update overwrites */
   const handleSave = () => {
     updateMutation.mutate({
@@ -146,6 +153,7 @@ export const PreferencesSection = () => {
       locationLatitude: locationLat,
       locationLongitude: locationLon,
       locationDisplayName: locationName,
+      showWeatherIcons,
     })
   }
 
@@ -176,6 +184,27 @@ export const PreferencesSection = () => {
                 </button>
               )
             })}
+          </div>
+        </div>
+
+        {/* Show Weather Icons */}
+        <div className="border-t border-bg px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-text-tertiary">Show weather icons in calendar</div>
+            <button
+              onClick={handleShowWeatherIconsChange}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                showWeatherIcons ? 'bg-teal' : 'bg-bg-warm'
+              }`}
+              role="switch"
+              aria-checked={showWeatherIcons}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                  showWeatherIcons ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
           </div>
         </div>
 

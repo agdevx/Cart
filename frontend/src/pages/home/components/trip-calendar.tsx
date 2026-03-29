@@ -7,12 +7,13 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import type { WeatherByDate } from '@/apis/open-meteo/weather-types'
-import { getWeatherTintColor } from '@/utils/weather'
+import { getWeatherEmoji, getWeatherTintColor } from '@/utils/weather'
 
 interface TripCalendarProps {
   readonly trips: Trip[]
   readonly weatherByDate: WeatherByDate
   readonly onDayClick: (date: string) => void
+  readonly showWeatherIcons: boolean
 }
 
 const DAY_HEADERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -21,7 +22,7 @@ function formatDate(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
-export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarProps) => {
+export const TripCalendar = ({ trips, weatherByDate, onDayClick, showWeatherIcons }: TripCalendarProps) => {
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date()
     return new Date(now.getFullYear(), now.getMonth(), 1)
@@ -210,7 +211,7 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
               onClick={isClickable ? () => onDayClick(dateStr) : undefined}
               className={`
                 relative flex flex-col items-center justify-start
-                rounded-md py-1 min-h-[2.75rem]
+                rounded-md py-0.5 min-h-[2.75rem]
                 text-xs font-body transition-colors
                 ${isClickable ? 'hover:ring-1 hover:ring-teal/30' : 'cursor-default'}
                 ${textClass}
@@ -221,12 +222,22 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
             >
               <span>{cell.day}</span>
 
+              {weather && showWeatherIcons && (
+                <div className="text-[8px] leading-none mt-0.5">{getWeatherEmoji(weather.weatherCode)}</div>
+              )}
+
+              {weather && (
+                <div className={`text-text-tertiary leading-none mt-0.5 ${showWeatherIcons ? 'text-[7px]' : 'text-[9px]'}`}>
+                  {Math.round(weather.temperatureMax)}°
+                </div>
+              )}
+
               {dots.length > 0 && (
                 <div className={`flex gap-0.5 mt-0.5 ${isPast ? 'opacity-60' : ''}`}>
                   {dots.map((trip, j) => (
                     <span
                       key={j}
-                      className={`w-1.5 h-1.5 rounded-full ${trip.isCompleted ? 'bg-teal' : 'bg-amber'}`}
+                      className={`w-2 h-2 rounded-full ${trip.isCompleted ? 'bg-teal' : 'bg-amber'}`}
                     />
                   ))}
                 </div>
@@ -263,12 +274,12 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
         </div>
 
         <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-teal" />
+          <span className="w-2 h-2 rounded-full bg-teal" />
           <span className="text-[10px] text-text-secondary">Completed</span>
         </div>
 
         <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber" />
+          <span className="w-2 h-2 rounded-full bg-amber" />
           <span className="text-[10px] text-text-secondary">Planned</span>
         </div>
 

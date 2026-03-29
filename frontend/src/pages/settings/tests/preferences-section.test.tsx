@@ -64,7 +64,7 @@ describe('PreferencesSection', () => {
 
   it('shows location display name when location is set', () => {
     vi.mocked(useUserPreferencesQuery).mockReturnValue({
-      data: { defaultPage: '/shopping', locationLatitude: 40.71, locationLongitude: -74.0, locationDisplayName: 'New York, NY' },
+      data: { defaultPage: '/shopping', locationLatitude: 40.71, locationLongitude: -74.0, locationDisplayName: 'New York, NY', showWeatherIcons: true },
     } as unknown as ReturnType<typeof useUserPreferencesQuery>)
 
     render(createElement(PreferencesSection), { wrapper })
@@ -105,7 +105,7 @@ describe('PreferencesSection', () => {
 
   it('shows Clear button when location is set', () => {
     vi.mocked(useUserPreferencesQuery).mockReturnValue({
-      data: { defaultPage: '/shopping', locationLatitude: 40.71, locationLongitude: -74.0, locationDisplayName: 'New York, NY' },
+      data: { defaultPage: '/shopping', locationLatitude: 40.71, locationLongitude: -74.0, locationDisplayName: 'New York, NY', showWeatherIcons: true },
     } as unknown as ReturnType<typeof useUserPreferencesQuery>)
 
     render(createElement(PreferencesSection), { wrapper })
@@ -160,7 +160,7 @@ describe('PreferencesSection', () => {
 
   it('sends all preference values in a single mutation when Save is clicked', async () => {
     vi.mocked(useUserPreferencesQuery).mockReturnValue({
-      data: { defaultPage: '/shopping', locationLatitude: 40.71, locationLongitude: -74.0, locationDisplayName: 'New York, NY' },
+      data: { defaultPage: '/shopping', locationLatitude: 40.71, locationLongitude: -74.0, locationDisplayName: 'New York, NY', showWeatherIcons: true },
     } as unknown as ReturnType<typeof useUserPreferencesQuery>)
 
     render(createElement(PreferencesSection), { wrapper })
@@ -174,12 +174,13 @@ describe('PreferencesSection', () => {
       locationLatitude: 40.71,
       locationLongitude: -74.0,
       locationDisplayName: 'New York, NY',
+      showWeatherIcons: true,
     })
   })
 
   it('shows Save button after clearing location', async () => {
     vi.mocked(useUserPreferencesQuery).mockReturnValue({
-      data: { defaultPage: '/shopping', locationLatitude: 40.71, locationLongitude: -74.0, locationDisplayName: 'New York, NY' },
+      data: { defaultPage: '/shopping', locationLatitude: 40.71, locationLongitude: -74.0, locationDisplayName: 'New York, NY', showWeatherIcons: true },
     } as unknown as ReturnType<typeof useUserPreferencesQuery>)
 
     render(createElement(PreferencesSection), { wrapper })
