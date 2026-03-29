@@ -339,44 +339,24 @@ export const HouseholdDetailPage = () => {
 
       {/* Confirmation Dialog */}
       {confirmAction && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-surface rounded-2xl p-6 mx-4 max-w-sm w-full shadow-lg">
-            <h3 className="font-display text-lg font-bold text-navy mb-2">
-              {confirmAction.type === 'remove' && 'Remove Member'}
-              {confirmAction.type === 'transfer' && 'Transfer Ownership'}
-              {confirmAction.type === 'leave' && 'Leave Household'}
-            </h3>
-            <p className="text-text-secondary mb-5">
-              {confirmAction.type === 'remove' &&
-                `Are you sure you want to remove ${confirmAction.memberName} from this household?`}
-              {confirmAction.type === 'transfer' &&
-                `Are you sure you want to transfer ownership to ${confirmAction.memberName}? You will become a regular member.`}
-              {confirmAction.type === 'leave' &&
-                'Are you sure you want to leave this household?'}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setConfirmAction(null)}
-                className="flex-1 py-2.5 text-sm font-semibold bg-bg-warm text-navy-soft rounded-xl hover:bg-navy/10 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmAction}
-                disabled={removeMemberMutation.isPending || transferOwnershipMutation.isPending}
-                className={`flex-1 py-2.5 text-sm font-bold text-white rounded-xl disabled:opacity-50 transition-colors ${
-                  confirmAction.type === 'transfer'
-                    ? 'bg-teal hover:bg-teal-light'
-                    : 'bg-coral hover:bg-coral/90'
-                }`}
-              >
-                {(removeMemberMutation.isPending || transferOwnershipMutation.isPending)
-                  ? 'Processing...'
-                  : 'Confirm'}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          title={
+            confirmAction.type === 'remove' ? 'Remove Member'
+            : confirmAction.type === 'transfer' ? 'Transfer Ownership'
+            : 'Leave Household'
+          }
+          message={
+            confirmAction.type === 'remove'
+              ? `Are you sure you want to remove ${confirmAction.memberName} from this household?`
+              : confirmAction.type === 'transfer'
+                ? `Are you sure you want to transfer ownership to ${confirmAction.memberName}? You will become a regular member.`
+                : 'Are you sure you want to leave this household?'
+          }
+          confirmLabel="Confirm"
+          onConfirm={handleConfirmAction}
+          onCancel={() => setConfirmAction(null)}
+          isPending={removeMemberMutation.isPending || transferOwnershipMutation.isPending}
+        />
       )}
     </div>
   )

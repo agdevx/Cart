@@ -82,7 +82,7 @@ export const ShoppingPage = () => {
         <div className="h-9 w-48 bg-navy/8 animate-pulse rounded-lg mb-6" />
         <div className="space-y-4">
           {[0, 1].map((i) => (
-            <div key={i} className="p-4 bg-surface rounded-2xl shadow-sm space-y-3">
+            <div key={i} className="p-4 bg-surface rounded-xl shadow-sm space-y-3">
               <div className="h-3 w-3/5 bg-navy/8 animate-pulse rounded-lg" />
               <div className="h-2.5 w-2/5 bg-navy/8 animate-pulse rounded-lg" />
               <div className="h-2 w-full bg-navy/8 animate-pulse rounded-full" />

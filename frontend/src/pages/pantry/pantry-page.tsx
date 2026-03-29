@@ -23,7 +23,7 @@ export const PantryPage = () => {
   useInventoryQuery() // prefetch for child PantryItemsView
 
   return (
-    <div className="pb-4">
+    <div className="pb-4 animate-fade-in">
       <PageHeader>Your <span className="text-teal">Pantry</span></PageHeader>
 
       <div className="px-5">

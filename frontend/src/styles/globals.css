@@ -36,7 +36,7 @@ input, textarea, select {
 }
 
 .animate-fade-in {
-  animation: fadeIn 350ms ease-out;
+  animation: fadeIn 200ms ease-out;
 }
 
 @keyframes checkBounce {
