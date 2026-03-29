@@ -112,12 +112,6 @@ app.UseGlobalExceptionHandler();
 //== Security headers on all responses
 app.UseSecurityHeaders();
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHsts();
-    app.UseHttpsRedirection();
-}
-
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
