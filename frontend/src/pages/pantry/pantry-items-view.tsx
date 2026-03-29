@@ -29,10 +29,10 @@ import { CreatePantryItemForm, EditPantryItemForm } from './pantry-item-form'
 export type InventoryFilter = 'all' | 'personal' | `household:${string}` | `merged:${string}`
 
 interface PantryItemsViewProps {
-  filter: InventoryFilter
-  showCreateForm: boolean
-  onOpenCreateForm: () => void
-  onCloseCreateForm: () => void
+  readonly filter: InventoryFilter
+  readonly showCreateForm: boolean
+  readonly onOpenCreateForm: () => void
+  readonly onCloseCreateForm: () => void
 }
 
 type FilterType = 'all' | 'personal' | 'household' | 'merged'

@@ -28,8 +28,18 @@ export const Fab = ({ actions }: FabProps) => {
       }
     }
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMenuOpen(false)
+      }
+    }
+
     document.addEventListener('mousedown', handleMouseDown)
-    return () => { document.removeEventListener('mousedown', handleMouseDown) }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [menuOpen])
 
   const handleFabClick = () => {
