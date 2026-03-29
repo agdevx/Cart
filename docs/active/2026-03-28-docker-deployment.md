@@ -27,7 +27,7 @@ Three containers across two Docker Compose stacks:
 │  ┌──────┴──────┐  ┌─────┴──────────┐  cart stack    │
 │  │  Nginx      │  │  .NET 10 API   │                │
 │  │  (SPA host) │  │  (REST API)    │                │
-│  │  Port 8080  │  │  Port 5000     │                │
+│  │  Port 3750  │  │  Port 2946     │                │
 │  │  internal   │  │  internal      │                │
 │  └─────────────┘  └──────┬─────────┘                │
 │                          │                           │
@@ -65,7 +65,7 @@ Two images pushed to Docker Hub:
 - Multi-stage Dockerfile in `backend/`
 - Stage 1 (build): .NET 10 SDK — restore, build, publish
 - Stage 2 (runtime): .NET 10 ASP.NET runtime (smaller image)
-- Exposes port 5000
+- Exposes port 2946
 - Database path configured via environment variable
 
 **`agdevx/cart-frontend`**
@@ -74,7 +74,7 @@ Two images pushed to Docker Hub:
 - Stage 1 (build): Node — `npm ci`, `npm run build` (produces `dist/`)
 - Stage 2 (runtime): Nginx Alpine — copies `dist/` into Nginx's serve directory
 - Nginx config handles SPA fallback (serves `index.html` for routes that aren't static files)
-- Exposes port 8080 internally
+- Exposes port 3750 internally
 
 **Image tagging:**
 
@@ -117,12 +117,12 @@ networks:
 :80 {
     handle /cart/api/* {
         uri strip_prefix /cart
-        reverse_proxy backend:5000
+        reverse_proxy backend:2946
     }
 
     handle /cart/* {
         uri strip_prefix /cart
-        reverse_proxy frontend:8080
+        reverse_proxy frontend:3750
     }
 }
 ```
