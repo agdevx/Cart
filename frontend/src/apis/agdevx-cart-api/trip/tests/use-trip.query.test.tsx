@@ -28,6 +28,7 @@ describe('useTripQuery', () => {
       startedAt: null,
       isCompleted: false,
       completedAt: null,
+      tripDate: null,
       createdBy: 'user1',
       createdDate: '2024-01-01',
       modifiedBy: null,
