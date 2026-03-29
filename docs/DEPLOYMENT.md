@@ -180,14 +180,14 @@ C:\docker\caddy\Caddyfile
 
 Copy the contents from `deploy/caddy/` in the repo. These are templates — use them as-is or adjust paths to your preference.
 
-Start Caddy:
+Start Caddy. In Docker Desktop, open a terminal in the `C:\docker\caddy` folder and run `docker compose up -d`. Or drag the folder into Docker Desktop if it supports compose file detection. This creates the shared `proxy` network and starts the Caddy container.
+
+Alternatively, from a terminal:
 
 ```bash
 cd C:\docker\caddy
 docker compose up -d
 ```
-
-This creates the shared `proxy` network and starts the Caddy container.
 
 ### 3. Create the Cart Stack
 
@@ -210,12 +210,7 @@ ASPNETCORE_ENVIRONMENT=Production
 
 `CART_DB_PATH` is the Windows folder you created in step 1. This gets bind-mounted into the backend container at `/app/data/`.
 
-Start the Cart stack:
-
-```bash
-cd C:\docker\cart
-docker compose up -d
-```
+Start the Cart stack the same way — open a terminal in `C:\docker\cart` and run `docker compose up -d`.
 
 ### 4. Verify
 
@@ -234,10 +229,16 @@ When you merge changes to main, the CI/CD pipeline builds new images and pushes 
 ### Via Docker Desktop
 
 1. Open Docker Desktop on the server
-2. Go to the Cart stack containers
-3. Pull new images and recreate the containers
+2. Navigate to the **Containers** view
+3. Find the Cart stack (`cart`)
+4. Stop the stack
+5. Navigate to **Images**, find `agdevx/cart-backend` and `agdevx/cart-frontend`
+6. Pull the latest versions
+7. Go back to **Containers** and start the Cart stack
 
 ### Via Command Line
+
+Alternatively, two commands from a terminal:
 
 ```bash
 cd C:\docker\cart
@@ -245,7 +246,7 @@ docker compose pull
 docker compose up -d
 ```
 
-This pulls the latest images and recreates only the containers that changed. The database is unaffected — it lives on the host filesystem via the bind mount.
+Either approach pulls the latest images and recreates only the containers that changed. The database is unaffected — it lives on the host filesystem via the bind mount.
 
 ## Rolling Back
 
