@@ -158,15 +158,19 @@ export const ActiveTripPage = () => {
           Update Shopping List
         </button>
         <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">{trip.name}</h1>
+      </div>
 
+      <div className="mb-6">
         <button
           onClick={handleCompleteTrip}
           disabled={completeMutation.isPending}
-          className="flex w-full items-center justify-center py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors mt-4 mb-4"
+          className="w-full py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors flex items-center justify-center"
         >
           {completeMutation.isPending ? <Spinner /> : 'Complete Trip'}
         </button>
+      </div>
 
+      <div className="mb-6">
         {/* Progress bar */}
         <div>
           <div className="flex justify-between text-sm mb-2">
