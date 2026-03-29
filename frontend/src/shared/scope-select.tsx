@@ -79,7 +79,7 @@ export const ScopeSelect = ({ value, onChange, personalLabel, households, househ
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         aria-label={ariaLabel}
-        className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal text-left flex items-center justify-between"
+        className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal text-left flex items-center justify-between hover:bg-bg-warm transition-colors"
       >
         <span>{getSelectedLabel()}</span>
         <ChevronDown

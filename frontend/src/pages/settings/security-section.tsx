@@ -88,7 +88,7 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
               <div className="text-xs text-text-tertiary">Password</div>
               <div className="text-sm text-navy-soft">••••••••</div>
             </div>
-            <button onClick={onStartEdit} className="text-xs font-semibold text-teal">Change</button>
+            <button onClick={onStartEdit} className="text-xs font-semibold text-teal hover:text-teal-light transition-colors">Change</button>
           </div>
           {successMessage && (
             <div className="px-4 pb-3">

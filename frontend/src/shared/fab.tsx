@@ -68,7 +68,7 @@ export const Fab = ({ actions }: FabProps) => {
               key={action.label}
               role="menuitem"
               onClick={() => handleActionClick(action)}
-              className="bg-surface rounded-xl shadow-md px-4 py-3 text-sm font-display font-bold text-navy whitespace-nowrap active:scale-95 transition-transform"
+              className="bg-surface rounded-xl shadow-md px-4 py-3 text-sm font-display font-bold text-navy whitespace-nowrap hover:bg-navy/5 transition-colors"
             >
               {action.label}
             </button>
@@ -82,7 +82,7 @@ export const Fab = ({ actions }: FabProps) => {
         aria-expanded={actions.length > 1 ? menuOpen : undefined}
         aria-haspopup={actions.length > 1 ? 'menu' : undefined}
         onClick={handleFabClick}
-        className="w-14 h-14 rounded-full bg-teal text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+        className="w-14 h-14 rounded-full bg-teal text-white shadow-lg flex items-center justify-center hover:bg-teal-light transition-colors"
       >
         {actions.length > 1 && menuOpen
           ? <X className="w-6 h-6" />

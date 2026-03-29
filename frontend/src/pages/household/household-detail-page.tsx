@@ -301,7 +301,7 @@ export const HouseholdDetailPage = () => {
         <div className="mt-6 bg-coral/5 rounded-2xl border border-coral/20 overflow-hidden">
           <button
             onClick={() => setDangerZoneOpen(!dangerZoneOpen)}
-            className="w-full p-5 flex items-center justify-between"
+            className="w-full p-5 flex items-center justify-between hover:bg-coral/5 transition-colors"
           >
             <h2 className="font-display text-sm font-semibold uppercase tracking-[1.5px] text-coral">Danger Zone</h2>
             <ChevronDown className={`w-4 h-4 text-coral transition-transform ${dangerZoneOpen ? 'rotate-180' : ''}`} />
@@ -314,7 +314,7 @@ export const HouseholdDetailPage = () => {
                 </p>
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="w-full py-3 bg-coral text-white rounded-xl font-display font-bold hover:bg-coral/90 active:bg-coral/70 active:scale-[0.96] transition-all duration-100"
+                  className="w-full py-3 bg-coral text-white rounded-xl font-display font-bold hover:bg-coral/90 transition-colors"
                 >
                   Delete Household
                 </button>

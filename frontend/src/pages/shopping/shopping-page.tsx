@@ -147,7 +147,7 @@ export const ShoppingPage = () => {
         <div className="mt-6">
           <button
             onClick={() => setShowCompleted(!showCompleted)}
-            className="w-full"
+            className="w-full hover:opacity-80 transition-opacity"
           >
             <SectionHeader
               title="Completed"

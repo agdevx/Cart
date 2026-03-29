@@ -87,7 +87,7 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wider">Profile</span>
-          <button onClick={onStartEdit} className="text-xs font-semibold text-teal">Edit</button>
+          <button onClick={onStartEdit} className="text-xs font-semibold text-teal hover:text-teal-light transition-colors">Edit</button>
         </div>
         <div className="rounded-xl bg-surface">
           <div className="px-4 py-3">
@@ -155,14 +155,14 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
         <div className="flex gap-2 mt-3">
           <button
             onClick={onCancel}
-            className="flex-1 py-2.5 border-2 border-bg-warm rounded-xl font-display font-bold text-navy-muted"
+            className="flex-1 py-2.5 border-2 border-bg-warm rounded-xl font-display font-bold text-navy-muted hover:bg-navy/10 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={!isValid || updateProfileMutation.isPending}
-            className="flex flex-1 items-center justify-center py-2.5 bg-teal text-white rounded-xl font-display font-bold disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed"
+            className="flex flex-1 items-center justify-center py-2.5 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
           >
             {updateProfileMutation.isPending ? <Spinner /> : 'Save'}
           </button>
