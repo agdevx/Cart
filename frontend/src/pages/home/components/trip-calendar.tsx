@@ -99,22 +99,22 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
   const monthLabel = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 
   return (
-    <div className="bg-gradient-to-br from-navy to-navy-soft rounded-xl px-4 py-4">
+    <div className="bg-surface rounded-xl shadow-sm px-4 py-4">
       {/* Month navigation header */}
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={goToPrevMonth}
-          className="p-1 text-navy-muted hover:text-teal-light transition-colors"
+          className="p-1 text-text-secondary hover:text-teal transition-colors"
           aria-label="Previous month"
         >
           <ChevronLeft size={20} />
         </button>
 
-        <h2 className="text-sm font-display font-bold text-teal-light">{monthLabel}</h2>
+        <h2 className="text-sm font-display font-bold text-text">{monthLabel}</h2>
 
         <button
           onClick={goToNextMonth}
-          className="p-1 text-navy-muted hover:text-teal-light transition-colors"
+          className="p-1 text-text-secondary hover:text-teal transition-colors"
           aria-label="Next month"
         >
           <ChevronRight size={20} />
@@ -124,7 +124,7 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
       {/* Day-of-week headers */}
       <div className="grid grid-cols-7 mb-1">
         {DAY_HEADERS.map((label, i) => (
-          <div key={i} className="text-center text-xs font-body text-navy-muted py-1">
+          <div key={i} className="text-center text-xs font-body text-text-tertiary py-1">
             {label}
           </div>
         ))}
@@ -146,7 +146,7 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
           }
 
           // Text styling based on date type
-          let textClass = 'text-text-primary'
+          let textClass = 'text-text'
           if (!cell.isCurrentMonth) {
             textClass = 'text-text-tertiary'
           } else if (isPast) {
@@ -195,7 +195,7 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
             className="w-3 h-3 rounded-sm"
             style={{ backgroundColor: getWeatherTintColor(0, 75, false) }}
           />
-          <span className="text-[10px] text-navy-muted">Sunny</span>
+          <span className="text-[10px] text-text-secondary">Sunny</span>
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -203,7 +203,7 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
             className="w-3 h-3 rounded-sm"
             style={{ backgroundColor: getWeatherTintColor(3, 75, false) }}
           />
-          <span className="text-[10px] text-navy-muted">Cloudy</span>
+          <span className="text-[10px] text-text-secondary">Cloudy</span>
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -211,17 +211,17 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick }: TripCalendarP
             className="w-3 h-3 rounded-sm"
             style={{ backgroundColor: getWeatherTintColor(61, 75, false) }}
           />
-          <span className="text-[10px] text-navy-muted">Rain</span>
+          <span className="text-[10px] text-text-secondary">Rain</span>
         </div>
 
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-teal" />
-          <span className="text-[10px] text-navy-muted">Completed</span>
+          <span className="text-[10px] text-text-secondary">Completed</span>
         </div>
 
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-amber" />
-          <span className="text-[10px] text-navy-muted">Planned</span>
+          <span className="text-[10px] text-text-secondary">Planned</span>
         </div>
 
         <span className="text-[10px] text-text-tertiary italic">Stronger color = warmer</span>
