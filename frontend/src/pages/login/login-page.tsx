@@ -6,6 +6,7 @@ import { Link,useNavigate } from 'react-router-dom'
 
 import { ShoppingCart } from 'lucide-react'
 
+import { apiFetch } from '@/apis/agdevx-cart-api/agdevx-cart-api-config'
 import { useLoginMutation } from '@/apis/agdevx-cart-api/auth/login.mutation'
 import { useAuth } from '@/auth/use-auth'
 import { ROUTES } from '@/routes'
@@ -52,7 +53,13 @@ export const LoginPage = () => {
           modifiedBy: null,
           modifiedDate: null,
         })
-      navigate(ROUTES.SHOPPING)
+      try {
+        const prefsResponse = await apiFetch('/api/v1/user/preferences')
+        const prefs = await prefsResponse.json()
+        navigate(prefs.defaultPage || ROUTES.HOME)
+      } catch {
+        navigate(ROUTES.HOME)
+      }
     } catch {
       setFieldError('email', 'Invalid email or password')
     }
