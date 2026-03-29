@@ -48,7 +48,7 @@ All containers communicate over a shared Docker network named `proxy`. Only Cadd
 
 ### Routing
 
-Caddy uses `handle_path` to strip the `/cart` prefix before forwarding:
+Caddy uses `handle` with `uri strip_prefix /cart` to strip the `/cart` prefix before forwarding:
 
 - Browser requests `/cart/shopping` → Caddy strips `/cart` → Nginx receives `/shopping` → serves `index.html` (SPA routing)
 - Browser requests `/cart/api/v1/items` → Caddy strips `/cart` → API receives `/api/v1/items`
@@ -93,7 +93,7 @@ services:
   caddy:
     image: caddy:2-alpine
     ports:
-      - "80:80"
+      - '80:80'
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     networks:
@@ -239,4 +239,4 @@ No business logic changes. No new features.
 
 ## Implementation Plan
 
-*To be written after design approval.*
+_To be written after design approval._
