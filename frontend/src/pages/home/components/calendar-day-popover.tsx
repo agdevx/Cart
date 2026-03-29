@@ -57,6 +57,11 @@ export const CalendarDayPopover = ({
     ? `— ${getWeatherEmoji(weather.weatherCode)} ${Math.round(weather.temperatureMax)}°F ${getWeatherLabel(weather.weatherCode)}`
     : null
 
+  // Compare date strings directly — "YYYY-MM-DD" lexicographic order is chronological
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+  const isPast = date < todayStr
+
   const planLabel = trips.length > 0 ? 'Plan another trip' : 'Plan a trip'
 
   return (
@@ -120,23 +125,25 @@ export const CalendarDayPopover = ({
             ))}
           </div>
 
-          {/* Plan trip action */}
-          <div className="px-5 pt-2 pb-5">
-            <div
-              className="bg-bg rounded-lg p-3 cursor-pointer flex items-center gap-2 hover:opacity-80 transition-opacity"
-              onClick={() => onPlanTrip(date)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  onPlanTrip(date)
-                }
-              }}
-            >
-              <Plus size={16} className="text-teal" />
-              <span className="text-sm font-semibold text-teal">{planLabel}</span>
+          {/* Plan trip action — only shown for today and future dates */}
+          {!isPast && (
+            <div className="px-5 pt-2 pb-5">
+              <div
+                className="bg-bg rounded-lg p-3 cursor-pointer flex items-center gap-2 hover:opacity-80 transition-opacity"
+                onClick={() => onPlanTrip(date)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    onPlanTrip(date)
+                  }
+                }}
+              >
+                <Plus size={16} className="text-teal" />
+                <span className="text-sm font-semibold text-teal">{planLabel}</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </>
