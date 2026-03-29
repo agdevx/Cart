@@ -306,10 +306,13 @@ describe('ShoppingPage', () => {
     //== Submit the form
     fireEvent.click(screen.getByText('Create'))
 
+    const today = new Date()
+    const expectedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
     await waitFor(() => {
       expect(mutateAsyncFn).toHaveBeenCalledWith({
         name: 'Weekend Run',
-        tripDate: null,
+        tripDate: expectedDate,
       })
       expect(mockNavigate).toHaveBeenCalledWith('/shopping/new-trip-123')
     })
