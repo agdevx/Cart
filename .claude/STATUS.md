@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated:** 2026-03-27
+**Last Updated:** 2026-03-28
 
 ## How to Use This File
 
@@ -21,16 +21,16 @@ This is the single source of truth for where the project stands. Read it at the 
 
 | Suite              | Tests | Files                      |
 | ------------------ | ----- | -------------------------- |
-| Backend — Data     | 74    | AGDevX.Cart.Data.Tests     |
-| Backend — Services | 115   | AGDevX.Cart.Services.Tests |
-| Backend — API      | 111   | AGDevX.Cart.Api.Tests      |
+| Backend — Data     | 73    | AGDevX.Cart.Data.Tests     |
+| Backend — Services | 112   | AGDevX.Cart.Services.Tests |
+| Backend — API      | 110   | AGDevX.Cart.Api.Tests      |
 | Backend — Auth     | 22    | AGDevX.Cart.Auth.Tests     |
-| Frontend — Vitest  | 525   | 83 test files              |
+| Frontend — Vitest  | 527   | 83 test files              |
 
 ## Known Issues / Tech Debt
 
 - Trip collaborator management has backend endpoints but no frontend UI
-- No CI/CD pipeline (`.github/workflows/` exists but is empty)
+- No CI/CD pipeline (`.github/workflows/` has CI + deploy workflows, pending first merge to main)
 
 ---
 
@@ -38,7 +38,6 @@ This is the single source of truth for where the project stands. Read it at the 
 
 | Enhancement               | Planning Doc                                                                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Docker Deployment         | [docs/archive/2026-01-25-phase9-docker-deployment.md](../docs/archive/2026-01-25-phase9-docker-deployment.md)                   |
 | Trip Collaborator UI      | No planning doc yet (backend endpoints exist: `POST/DELETE /api/v1/trip/{id}/collaborators`)                                    |
 | Home Page                 | No planning doc yet (greeting panel, activity feed, shopping list preview, trip templates, calendar view, default page setting) |
 | Camera / Barcode Scanning | No planning doc yet                                                                                                             |
@@ -47,7 +46,9 @@ This is the single source of truth for where the project stands. Read it at the 
 
 ## In Progress Enhancements
 
-_None_
+| Enhancement       | Planning Doc                                                                                  |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| Docker Deployment | [docs/active/2026-03-28-docker-deployment.md](../docs/active/2026-03-28-docker-deployment.md) |
 
 ## Completed Enhancements
 
