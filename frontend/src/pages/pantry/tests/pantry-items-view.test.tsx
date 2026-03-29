@@ -110,10 +110,10 @@ describe('PantryItemsView', () => {
 
     renderView('all')
 
-    //== Per-household section headers
-    expect(screen.getByText('Smith Family')).toBeInTheDocument()
-    expect(screen.getByText('Book Club')).toBeInTheDocument()
-    expect(screen.getByText('Personal Items')).toBeInTheDocument()
+    //== Per-household section headers with item counts
+    expect(screen.getByText('Smith Family (1)')).toBeInTheDocument()
+    expect(screen.getByText('Book Club (1)')).toBeInTheDocument()
+    expect(screen.getByText('Personal Items (1)')).toBeInTheDocument()
 
     //== Items
     expect(screen.getByText('Milk')).toBeInTheDocument()

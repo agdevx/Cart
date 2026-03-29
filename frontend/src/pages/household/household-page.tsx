@@ -22,16 +22,18 @@ const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
   if (!members || members.length === 0) return null
 
   const otherMembers = members.filter((m) => m.userId !== user?.id)
-  if (otherMembers.length === 0) return null
-
+  const memberCount = members.length
   const names = otherMembers
     .map((m) => m.user?.name || 'Unknown')
     .join(', ')
 
   return (
-    <p className="text-[13px] text-text-secondary font-medium mt-1 truncate">
-      {names}
-    </p>
+    <div className="flex items-center gap-2 mt-1">
+      <span className="text-[13px] text-text-tertiary font-medium">{memberCount} {memberCount === 1 ? 'member' : 'members'}</span>
+      {otherMembers.length > 0 && (
+        <p className="text-[13px] text-text-secondary font-medium truncate">· {names}</p>
+      )}
+    </div>
   )
 }
 

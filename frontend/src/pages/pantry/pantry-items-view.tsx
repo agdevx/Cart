@@ -261,7 +261,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
 
         {personalItems.length > 0 && (
           <div className="mb-6">
-            <SectionHeader title="Personal Items" />
+            <SectionHeader title={`Personal Items (${personalItems.length})`} />
             <div className="space-y-2">
               {personalItems.map(renderItem)}
             </div>
@@ -273,7 +273,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           if (householdItems.length === 0) return null
           return (
             <div key={household.id} className="mb-6">
-              <SectionHeader title={household.name ?? ''} />
+              <SectionHeader title={`${household.name ?? ''} (${householdItems.length})`} />
               <div className="space-y-2">
                 {householdItems.map(renderItem)}
               </div>

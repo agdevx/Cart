@@ -92,7 +92,8 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
         ? (householdStoresMap.get(householdId) ?? [])
         : null // null means "all" — use grouped view
 
-  const isEmpty = !stores || stores.length === 0
+  /* True when the currently visible scope has no stores (not just the global list) */
+  const isFilteredEmpty = filteredStores !== null ? filteredStores.length === 0 : !stores || stores.length === 0
 
   const handleCreate = async (data: PantryStoreFormData) => {
     try {
@@ -206,8 +207,8 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
         />
       )}
 
-      {/* Empty state */}
-      {isEmpty && (
+      {/* Empty state — shown when the active scope has no stores */}
+      {isFilteredEmpty && (
         <EmptyState
           icon={Package}
           title="No stores yet"
@@ -231,7 +232,7 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
           {personalStores.length > 0 && (
             <div className="mb-6">
               <div className="mt-4">
-                <SectionHeader title="Personal Stores" />
+                <SectionHeader title={`Personal Stores (${personalStores.length})`} />
               </div>
               <div className="space-y-2">
                 {personalStores.map(renderStoreRow)}
@@ -248,7 +249,7 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
             return (
               <div key={household.id} className="mb-6">
                 <div className="mt-4">
-                  <SectionHeader title={household.name ?? ''} />
+                  <SectionHeader title={`${household.name ?? ''} (${householdStores.length})`} />
                 </div>
                 <div className="space-y-2">
                   {householdStores.map(renderStoreRow)}

@@ -74,6 +74,8 @@ export const TripItemRow = ({
       editNotes || null,
       editStoreId || null,
     )
+    // Close optimistically — the parent mutation is fire-and-forget
+    setEditing(false)
   }
 
   const handleCancel = () => {

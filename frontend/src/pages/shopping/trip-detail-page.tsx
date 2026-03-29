@@ -130,7 +130,7 @@ export const TripDetailPage = () => {
       )}
 
       <div className="mb-4">
-        <SectionHeader title="Shopping List" />
+        <SectionHeader title={`Shopping List (${tripItems?.length ?? 0})`} />
 
         {groupedItems.length > 0 ? (
           <div>

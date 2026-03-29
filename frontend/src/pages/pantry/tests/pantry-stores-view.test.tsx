@@ -111,13 +111,13 @@ describe('PantryStoresView', () => {
 
     renderView()
 
-    //== Household section header should use household name
-    expect(screen.getByText('Smith Family')).toBeInTheDocument()
+    //== Household section header should use household name with store count
+    expect(screen.getByText('Smith Family (2)')).toBeInTheDocument()
     //== Store names under household section
     expect(screen.getByText('Costco')).toBeInTheDocument()
     expect(screen.getByText('Trader Joes')).toBeInTheDocument()
-    //== Personal stores section header
-    expect(screen.getByText('Personal Stores')).toBeInTheDocument()
+    //== Personal stores section header with store count
+    expect(screen.getByText('Personal Stores (1)')).toBeInTheDocument()
     //== Personal store name
     expect(screen.getByText('Corner Market')).toBeInTheDocument()
   })

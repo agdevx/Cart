@@ -142,8 +142,9 @@ describe('HouseholdPage', () => {
 
     renderPage()
 
-    //== Should show other members but not the current user
-    expect(screen.getByText('Alice, Bob')).toBeInTheDocument()
+    //== Should show member count and other members but not the current user
+    expect(screen.getByText('3 members')).toBeInTheDocument()
+    expect(screen.getByText('· Alice, Bob')).toBeInTheDocument()
     //== The current user's member name ('Me') should not appear in the member list
     expect(screen.queryByText('Me')).not.toBeInTheDocument()
   })
