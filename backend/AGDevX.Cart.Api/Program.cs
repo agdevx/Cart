@@ -76,7 +76,7 @@ builder.Services.AddHttpContextAccessor();
 
 //== Database Configuration
 builder.Services.AddDbContext<CartDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("CartDb")));
 
 //== Repository registrations
 builder.Services.AddScoped<IHouseholdRepository, HouseholdRepository>();
