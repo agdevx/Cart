@@ -2,6 +2,7 @@
 // ABOUTME: All route strings should be imported from here, never hardcoded
 
 export const ROUTES = {
+  HOME: '/home',
   LOGIN: '/login',
   REGISTER: '/register',
   PANTRY: '/pantry',

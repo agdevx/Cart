@@ -59,7 +59,7 @@ public class TripController(ITripService tripService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            var trip = await tripService.CreateTrip(request.Name, userId, cancellationToken);
+            var trip = await tripService.CreateTrip(request.Name, request.TripDate, userId, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = trip.Id }, trip);
         }
         catch (UnauthorizedAccessException ex)
@@ -75,7 +75,7 @@ public class TripController(ITripService tripService) : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            await tripService.UpdateTrip(id, request.Name, userId, cancellationToken);
+            await tripService.UpdateTrip(id, request.Name, request.TripDate, userId, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)

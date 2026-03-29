@@ -19,6 +19,9 @@ public class Trip : BaseEntity
     //== When the trip was started
     public DateTime? StartedAt { get; set; }
 
+    //== User-facing date for the trip (e.g., "when is this trip")
+    public DateOnly? TripDate { get; set; }
+
     //== Users who can collaborate on this trip
     public ICollection<TripCollaborator> Collaborators { get; set; } = [];
 

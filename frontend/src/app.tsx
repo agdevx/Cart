@@ -10,6 +10,7 @@ import { Toaster } from 'sonner'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 import { AuthProvider } from '@/auth/auth-provider'
 import { useAuth } from '@/auth/use-auth'
+import { HomePage } from '@/pages/home/home-page'
 import { CreateHouseholdPage } from '@/pages/household/create-household-page'
 import { HouseholdDetailPage } from '@/pages/household/household-detail-page'
 import { HouseholdPage } from '@/pages/household/household-page'
@@ -58,6 +59,7 @@ export const AppRoutes = () => (
     <Routes>
       <Route path={ROUTES.LOGIN} element={<LoginPage />} />
       <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
+      <Route path={ROUTES.HOME} element={<ProtectedRoute><AuthenticatedLayout><HomePage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path={ROUTES.PANTRY} element={<ProtectedRoute><AuthenticatedLayout><PantryPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path={ROUTES.SHOPPING} element={<ProtectedRoute><AuthenticatedLayout><ShoppingPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path={ROUTES.TRIP_DETAIL} element={<ProtectedRoute><AuthenticatedLayout><TripDetailPage /></AuthenticatedLayout></ProtectedRoute>} />
@@ -68,7 +70,7 @@ export const AppRoutes = () => (
       <Route path={ROUTES.HOUSEHOLD_JOIN} element={<ProtectedRoute><AuthenticatedLayout><JoinHouseholdPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path={ROUTES.HOUSEHOLD_DETAIL} element={<ProtectedRoute><AuthenticatedLayout><HouseholdDetailPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path={ROUTES.SETTINGS} element={<ProtectedRoute><AuthenticatedLayout><SettingsPage /></AuthenticatedLayout></ProtectedRoute>} />
-      <Route path="/" element={<Navigate to={ROUTES.SHOPPING} replace />} />
+      <Route path="/" element={<Navigate to={ROUTES.HOME} replace />} />
     </Routes>
   </>
 )

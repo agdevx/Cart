@@ -9,6 +9,7 @@ export interface Trip {
   startedAt: string | null;
   isCompleted: boolean;
   completedAt: string | null;
+  tripDate: string | null;
   createdBy: string | null;
   createdDate: string;
   modifiedBy: string | null;

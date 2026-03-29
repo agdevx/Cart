@@ -48,6 +48,7 @@ const mockTrip: Trip = {
   startedAt: null,
   isCompleted: false,
   completedAt: null,
+  tripDate: null,
   createdBy: 'user1',
   createdDate: '2024-01-15',
   modifiedBy: null,

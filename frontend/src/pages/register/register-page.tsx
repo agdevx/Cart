@@ -6,6 +6,7 @@ import { Link,useNavigate } from 'react-router-dom';
 
 import { ShoppingCart } from 'lucide-react';
 
+import { apiFetch } from '@/apis/agdevx-cart-api/agdevx-cart-api-config';
 import { useRegisterMutation } from '@/apis/agdevx-cart-api/auth/register.mutation';
 import { ApiError } from '@/apis/api-error';
 import { useAuth } from '@/auth/use-auth';
@@ -58,7 +59,13 @@ export const RegisterPage = () => {
           modifiedDate: null,
         });
 
-      navigate(ROUTES.SHOPPING);
+      try {
+        const prefsResponse = await apiFetch('/api/v1/user/preferences');
+        const prefs = await prefsResponse.json();
+        navigate(prefs.defaultPage || ROUTES.HOME);
+      } catch {
+        navigate(ROUTES.HOME);
+      }
     } catch (error) {
       if (error instanceof ApiError) {
         const body = error.body as Record<string, unknown> | null
@@ -94,7 +101,7 @@ export const RegisterPage = () => {
 
         {/* Logo */}
         <h1 className="font-display text-[28px] font-extrabold tracking-tight text-white">
-          AGDevX <span className="text-teal-light">Cart</span>
+          <span className="text-teal-light">Cart</span>
         </h1>
 
         {/* Tagline */}

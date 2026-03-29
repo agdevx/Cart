@@ -50,9 +50,9 @@ export const PwaInstallPrompt = () => {
     <div className="fixed bottom-24 left-4 right-4 bg-surface p-5 rounded-2xl shadow-lg border border-navy/8 z-50">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="font-display font-bold text-navy">Install AGDevX Cart</h3>
+          <h3 className="font-display font-bold text-navy">Install Cart</h3>
           <p className="text-sm text-text-secondary mt-1">
-            Add to home screen for quick access and offline support
+            Add to home screen for quick access
           </p>
         </div>
         <button
@@ -65,16 +65,16 @@ export const PwaInstallPrompt = () => {
       </div>
       <div className="flex gap-2 mt-4">
         <button
-          onClick={handleInstall}
-          className="flex-1 bg-teal text-white py-2.5 px-4 rounded-xl font-display font-bold hover:bg-teal-light transition-colors"
-        >
-          Install
-        </button>
-        <button
           onClick={handleDismiss}
           className="flex-1 bg-bg-warm text-navy-soft py-2.5 px-4 rounded-xl font-semibold hover:bg-navy/10 transition-colors"
         >
           Not Now
+        </button>
+        <button
+          onClick={handleInstall}
+          className="flex-1 bg-teal text-white py-2.5 px-4 rounded-xl font-display font-bold hover:bg-teal-light transition-colors"
+        >
+          Install
         </button>
       </div>
     </div>

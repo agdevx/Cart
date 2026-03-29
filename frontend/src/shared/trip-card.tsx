@@ -1,5 +1,6 @@
 // ABOUTME: TripCard component for displaying a trip with kebab menu actions
 // ABOUTME: Supports inline edit form (name), delete, reopen actions with active/completed visual states
+// ABOUTME: Delete requires a 3-second long press to prevent accidental deletion — no confirmation dialog needed
 
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -14,17 +15,26 @@ import { DropdownMenu } from './dropdown-menu'
 
 interface TripCardProps {
   trip: Trip
-  onUpdate: (tripId: string, name: string) => void
+  onUpdate: (tripId: string, name: string, tripDate: string | null) => void
   onDelete: (tripId: string, tripName: string) => void
   onReopen: (tripId: string) => void
 }
+
+/** Duration in milliseconds the user must hold the delete button before it fires */
+const DELETE_HOLD_DURATION_MS = 3000
 
 export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState(trip.name)
+  const [editDate, setEditDate] = useState(trip.tripDate ?? '')
+
+  /* Long-press delete state: whether the button is currently being held */
+  const [deletePressing, setDeletePressing] = useState(false)
+
   const kebabRef = useRef<HTMLButtonElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Auto-focus and select text when entering edit mode
   useEffect(() => {
@@ -45,14 +55,33 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
     e.stopPropagation()
     setMenuOpen(false)
     setEditName(trip.name)
+    setEditDate(trip.tripDate ?? '')
     setEditing(true)
   }
 
-  const handleDeleteClick = (e: React.MouseEvent) => {
+  const cancelDeleteHold = () => {
+    if (deleteTimerRef.current) {
+      clearTimeout(deleteTimerRef.current)
+      deleteTimerRef.current = null
+    }
+    setDeletePressing(false)
+  }
+
+  const handleDeletePointerDown = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setMenuOpen(false)
-    onDelete(trip.id, trip.name)
+    setDeletePressing(true)
+    deleteTimerRef.current = setTimeout(() => {
+      setDeletePressing(false)
+      setMenuOpen(false)
+      onDelete(trip.id, trip.name)
+    }, DELETE_HOLD_DURATION_MS)
+  }
+
+  const handleDeletePointerUp = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    cancelDeleteHold()
   }
 
   const handleReopenClick = (e: React.MouseEvent) => {
@@ -65,7 +94,7 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
   const commitEdit = () => {
     const trimmed = editName.trim()
     if (trimmed) {
-      onUpdate(trip.id, trimmed)
+      onUpdate(trip.id, trimmed, editDate || null)
     }
     setEditing(false)
   }
@@ -75,11 +104,17 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
     setEditName(trip.name)
   }
 
+  /* For planned trips, prefer the explicit trip date; fall back to created date for older trips */
+  const plannedDateSource = trip.tripDate ?? trip.createdDate
+  const plannedDateLabel = new Date(plannedDateSource).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+  })
+
   const dateLabel = trip.isCompleted
     ? `Completed: ${trip.completedAt ? new Date(trip.completedAt).toLocaleDateString() : 'N/A'}`
     : trip.isStarted
     ? `Started: ${trip.startedAt ? new Date(trip.startedAt).toLocaleDateString() : 'N/A'}`
-    : `Created: ${new Date(trip.createdDate).toLocaleDateString()}`
+    : `Trip Date: ${plannedDateLabel}`
 
   const cardContent = (
     <>
@@ -117,12 +152,28 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
                   Reopen
                 </button>
               )}
+              {/* Delete uses long-press: no click handler, hold for 3 seconds to confirm */}
               <button
-                onClick={handleDeleteClick}
-                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
+                onMouseDown={handleDeletePointerDown}
+                onMouseUp={handleDeletePointerUp}
+                onMouseLeave={cancelDeleteHold}
+                onTouchStart={handleDeletePointerDown}
+                onTouchEnd={handleDeletePointerUp}
+                aria-label="Hold to delete trip"
+                className="relative w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral overflow-hidden select-none"
               >
-                <Trash2 className="w-4 h-4" />
-                Delete
+                {/* Fill bar animates from left to right over DELETE_HOLD_DURATION_MS when pressing */}
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 bg-coral/15 origin-left"
+                  style={{
+                    transform: deletePressing ? 'scaleX(1)' : 'scaleX(0)',
+                    transition: deletePressing ? `transform ${DELETE_HOLD_DURATION_MS}ms linear` : 'none',
+                    transformOrigin: 'left center',
+                  }}
+                />
+                <Trash2 className="relative w-4 h-4" />
+                <span className="relative">{deletePressing ? 'Hold to Delete…' : 'Hold to Delete'}</span>
               </button>
             </DropdownMenu>
           )}
@@ -141,6 +192,16 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
               className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
             />
           </div>
+          <div className="mb-3">
+            <label className="block text-sm font-semibold text-navy-soft mb-1">Trip Date</label>
+            <input
+              type="date"
+              value={editDate}
+              onChange={(e) => setEditDate(e.target.value)}
+              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+            />
+          </div>
+
           <ActionCancelFormButtons
             onCancel={cancelEdit}
             submitLabel="Save"

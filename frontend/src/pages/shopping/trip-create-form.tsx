@@ -10,6 +10,7 @@ import { isRequired } from '@/utils/validation-rules'
 
 export interface TripCreateFormData {
   name: string
+  tripDate: string | null
 }
 
 interface TripCreateFormProps {
@@ -20,6 +21,10 @@ interface TripCreateFormProps {
 
 export const TripCreateForm = ({ isPending, onSubmit, onCancel }: TripCreateFormProps) => {
   const [tripName, setTripName] = useState('')
+  const [tripDate, setTripDate] = useState(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  })
 
   const schema = useMemo(() => ({
     name: [isRequired('Trip name')],
@@ -36,7 +41,7 @@ export const TripCreateForm = ({ isPending, onSubmit, onCancel }: TripCreateForm
       return
     }
 
-    onSubmit({ name: tripName.trim() })
+    onSubmit({ name: tripName.trim(), tripDate: tripDate || null })
   }
 
   return (
@@ -51,6 +56,17 @@ export const TripCreateForm = ({ isPending, onSubmit, onCancel }: TripCreateForm
           onBlur={() => handleBlur('name')}
           placeholder="e.g., Weekly Groceries"
           className={`w-full px-4 py-3 border rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent ${errors.name ? 'border-coral border-2' : 'border-navy/10'}`}
+          disabled={isPending}
+        />
+      </FormField>
+
+      <FormField label="Trip Date" htmlFor="tripDate">
+        <input
+          id="tripDate"
+          type="date"
+          value={tripDate}
+          onChange={(e) => setTripDate(e.target.value)}
+          className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
           disabled={isPending}
         />
       </FormField>

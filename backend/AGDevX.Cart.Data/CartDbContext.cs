@@ -19,6 +19,7 @@ public class CartDbContext(DbContextOptions<CartDbContext> options, IHttpContext
     public DbSet<Trip> Trips { get; set; }
     public DbSet<TripCollaborator> TripCollaborators { get; set; }
     public DbSet<TripItem> TripItems { get; set; }
+    public DbSet<UserPreferences> UserPreferences { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -105,6 +106,17 @@ public class CartDbContext(DbContextOptions<CartDbContext> options, IHttpContext
             entity.HasOne(s => s.Household)
                   .WithMany()
                   .HasForeignKey(s => s.HouseholdId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        //== UserPreferences: one-to-one with User, cascade delete
+        modelBuilder.Entity<UserPreferences>(entity =>
+        {
+            entity.HasIndex(e => e.UserId).IsUnique();
+
+            entity.HasOne(e => e.User)
+                  .WithOne()
+                  .HasForeignKey<UserPreferences>(e => e.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
     }

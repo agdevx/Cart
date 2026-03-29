@@ -51,6 +51,7 @@ const mockTrip: Trip = {
   startedAt: '2024-01-15',
   isCompleted: false,
   completedAt: null,
+  tripDate: null,
   createdBy: 'user1',
   createdDate: '2024-01-15',
   modifiedBy: null,

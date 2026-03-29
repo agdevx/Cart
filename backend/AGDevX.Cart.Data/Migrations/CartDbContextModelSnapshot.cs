@@ -204,6 +204,9 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Property<DateTime?>("StartedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateOnly?>("TripDate")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.ToTable("Trips");
@@ -334,6 +337,53 @@ namespace AGDevX.Cart.Data.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.UserPreferences", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DefaultPage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LocationDisplayName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("LocationLatitude")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("LocationLongitude")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("ShowWeatherIcons")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ShowWeatherTemps")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserPreferences");
+                });
+
             modelBuilder.Entity("AGDevX.Cart.Data.Models.HouseholdMember", b =>
                 {
                     b.HasOne("AGDevX.Cart.Data.Models.Household", "Household")
@@ -434,6 +484,17 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Navigation("Store");
 
                     b.Navigation("Trip");
+                });
+
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.UserPreferences", b =>
+                {
+                    b.HasOne("AGDevX.Cart.Data.Models.User", "User")
+                        .WithOne()
+                        .HasForeignKey("AGDevX.Cart.Data.Models.UserPreferences", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AGDevX.Cart.Data.Models.Household", b =>

@@ -1,9 +1,9 @@
 // ABOUTME: Bottom tab navigation component
-// ABOUTME: Mobile-first navigation with 4 tabs
+// ABOUTME: Mobile-first navigation with 5 tabs
 
 import { Link, useLocation } from 'react-router-dom'
 
-import { Package, Settings, ShoppingCart, Users } from 'lucide-react'
+import { House, Package, Settings, ShoppingCart, Users } from 'lucide-react'
 
 import { ROUTES } from '@/routes'
 
@@ -13,6 +13,7 @@ export const BottomNav = () => {
   const isActive = (path: string) => location.pathname.startsWith(path)
 
   const tabs = [
+    { path: ROUTES.HOME, label: 'Home', icon: House },
     { path: ROUTES.SHOPPING, label: 'Shopping', icon: ShoppingCart },
     { path: ROUTES.PANTRY, label: 'Pantry', icon: Package },
     { path: ROUTES.HOUSEHOLD, label: 'Household', icon: Users },

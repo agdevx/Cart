@@ -11,22 +11,17 @@ import { useDeleteTripMutation } from '@/apis/agdevx-cart-api/trip/delete-trip.m
 import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.mutation'
 import { useUpdateTripMutation } from '@/apis/agdevx-cart-api/trip/update-trip.mutation'
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
-import { useAuth } from '@/auth/use-auth'
 import { tripDetailPath } from '@/routes'
-import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
 import { Fab } from '@/shared/fab'
 import { PageHeader } from '@/shared/page-header'
 import { SectionHeader } from '@/shared/section-header'
 import { TripCard } from '@/shared/trip-card'
-import { getGreeting } from '@/utils/greeting'
 
 import { TripCreateForm } from './trip-create-form'
 
 export const ShoppingPage = () => {
   const navigate = useNavigate()
-  const { user } = useAuth()
-  const greeting = getGreeting(new Date().getHours())
   const { data: trips, isLoading } = useTripsQuery()
   const createMutation = useCreateTripMutation()
   const updateMutation = useUpdateTripMutation()
@@ -36,7 +31,6 @@ export const ShoppingPage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false)
   // formKey forces the form to remount when opened, resetting its internal state
   const [formKey, setFormKey] = useState(0)
-  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
   const [showCompleted, setShowCompleted] = useState(false)
 
   const inProgressTrips = trips?.filter((trip) => trip.isStarted && !trip.isCompleted) || []
@@ -47,9 +41,9 @@ export const ShoppingPage = () => {
       return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
     }) || []
 
-  const handleCreateTrip = async ({ name }: { name: string }) => {
+  const handleCreateTrip = async ({ name, tripDate }: { name: string; tripDate: string | null }) => {
     try {
-      const newTrip = await createMutation.mutateAsync({ name })
+      const newTrip = await createMutation.mutateAsync({ name, tripDate })
       setShowCreateForm(false)
       navigate(tripDetailPath(newTrip.id))
     } catch {
@@ -57,19 +51,13 @@ export const ShoppingPage = () => {
     }
   }
 
-  const handleUpdate = (tripId: string, name: string) => {
-    updateMutation.mutate({ tripId, name })
+  const handleUpdate = (tripId: string, name: string, tripDate: string | null) => {
+    updateMutation.mutate({ tripId, name, tripDate })
   }
 
-  const handleDelete = (tripId: string, tripName: string) => {
-    setDeleteConfirm({ id: tripId, name: tripName })
-  }
-
-  const handleConfirmDelete = () => {
-    if (deleteConfirm) {
-      deleteMutation.mutate(deleteConfirm.id)
-      setDeleteConfirm(null)
-    }
+  /* Long-press in TripCard is the confirmation — fire the mutation directly */
+  const handleDelete = (tripId: string, _tripName: string) => {
+    deleteMutation.mutate(tripId)
   }
 
   const handleReopen = (tripId: string) => {
@@ -97,14 +85,6 @@ export const ShoppingPage = () => {
     <div className="pb-4 animate-fade-in">
       <PageHeader>Your <span className="text-teal">Shopping Trips</span></PageHeader>
       <div className="px-5">
-      {user?.name && (
-        <div className="bg-gradient-to-br from-navy to-navy-soft rounded-xl px-4 py-3 mb-4">
-          <p className="text-sm font-semibold text-teal-light text-center">
-            {greeting}, {user.name} 👋
-          </p>
-        </div>
-      )}
-
       {showCreateForm && (
         <TripCreateForm
           key={formKey}
@@ -176,17 +156,6 @@ export const ShoppingPage = () => {
         />
       )}
 
-      {/* Delete confirmation dialog */}
-      {deleteConfirm && (
-        <ConfirmDialog
-          title="Delete Trip"
-          message={`Delete "${deleteConfirm.name}"? This can't be undone.`}
-          confirmLabel="Delete"
-          onConfirm={handleConfirmDelete}
-          onCancel={() => setDeleteConfirm(null)}
-          isPending={deleteMutation.isPending}
-        />
-      )}
       </div>
 
       {/* FAB — hidden while create form is open to avoid double-entry confusion */}
