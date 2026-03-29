@@ -127,7 +127,7 @@ public class TripControllerTests
         var createRequest = new CreateTripRequest { Name = "New Trip" };
         var trip = new Trip { Id = Guid.NewGuid(), Name = "New Trip" };
 
-        mockService.Setup(s => s.CreateTrip(createRequest.Name, userId, It.IsAny<CancellationToken>()))
+        mockService.Setup(s => s.CreateTrip(createRequest.Name, createRequest.TripDate, userId, It.IsAny<CancellationToken>()))
                    .ReturnsAsync(trip);
 
         // Act
@@ -180,7 +180,7 @@ public class TripControllerTests
         var request = new UpdateTripRequest { Name = "Updated Trip" };
         var trip = new Trip { Id = tripId, Name = "Updated Trip" };
 
-        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, userId, It.IsAny<CancellationToken>()))
+        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, request.TripDate, userId, It.IsAny<CancellationToken>()))
                    .ReturnsAsync(trip);
 
         // Act
@@ -210,7 +210,7 @@ public class TripControllerTests
 
         var request = new UpdateTripRequest { Name = "Updated Trip" };
 
-        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, userId, It.IsAny<CancellationToken>()))
+        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, request.TripDate, userId, It.IsAny<CancellationToken>()))
                    .ThrowsAsync(new ArgumentException("Trip not found"));
 
         // Act
@@ -240,7 +240,7 @@ public class TripControllerTests
 
         var request = new UpdateTripRequest { Name = "Updated Trip" };
 
-        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, userId, It.IsAny<CancellationToken>()))
+        mockService.Setup(s => s.UpdateTrip(tripId, request.Name, request.TripDate, userId, It.IsAny<CancellationToken>()))
                    .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this trip"));
 
         // Act

@@ -7,11 +7,12 @@ namespace AGDevX.Cart.Services;
 
 public class TripService(ITripRepository tripRepository) : ITripService
 {
-    public async Task<Trip> CreateTrip(string name, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Trip> CreateTrip(string name, DateOnly? tripDate, Guid userId, CancellationToken cancellationToken = default)
     {
         var trip = new Trip
         {
             Name = name,
+            TripDate = tripDate,
             IsCompleted = false,
             CompletedAt = null,
             IsStarted = false,
@@ -31,7 +32,7 @@ public class TripService(ITripRepository tripRepository) : ITripService
         return await tripRepository.GetById(id, cancellationToken);
     }
 
-    public async Task<Trip> UpdateTrip(Guid tripId, string name, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Trip> UpdateTrip(Guid tripId, string name, DateOnly? tripDate, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Verify user is collaborator before updating trip
         var isCollaborator = await tripRepository.IsUserCollaborator(tripId, userId, cancellationToken);
@@ -44,6 +45,7 @@ public class TripService(ITripRepository tripRepository) : ITripService
                         ?? throw new KeyNotFoundException("Trip not found");
 
         trip.Name = name;
+        trip.TripDate = tripDate;
         return await tripRepository.Update(trip, cancellationToken);
     }
 
