@@ -1,12 +1,16 @@
 // ABOUTME: Home page — placeholder for the home dashboard
 // ABOUTME: Will display greeting, trip calendar, and weather summary
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useTripsQuery } from '@/apis/agdevx-cart-api/trip/use-trips.query'
+import { useUserPreferencesQuery } from '@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query'
+import { useForecastWeatherQuery } from '@/apis/open-meteo/use-forecast-weather.query'
+import { useHistoricalWeatherQuery } from '@/apis/open-meteo/use-historical-weather.query'
 import { tripDetailPath } from '@/routes'
 import { PageHeader } from '@/shared/page-header'
+import { getWeatherEmoji, getWeatherLabel } from '@/utils/weather'
 
 import { CalendarDayPopover } from './components/calendar-day-popover'
 import { GreetingCard } from './components/greeting-card'
@@ -17,21 +21,54 @@ export const HomePage = () => {
   const navigate = useNavigate()
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
+  /* Date range: one month ago → yesterday for historical, today onward for forecast */
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
+  const oneMonthAgo = new Date(today)
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
+  const startDate = `${oneMonthAgo.getFullYear()}-${String(oneMonthAgo.getMonth() + 1).padStart(2, '0')}-${String(oneMonthAgo.getDate()).padStart(2, '0')}`
+
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+  const endDate = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`
+
+  /* User preferences provide the lat/long for weather queries */
+  const { data: preferences } = useUserPreferencesQuery()
+  const latitude = preferences?.locationLatitude ?? null
+  const longitude = preferences?.locationLongitude ?? null
+
+  const { data: historicalWeather } = useHistoricalWeatherQuery({
+    latitude, longitude, startDate, endDate,
+  })
+
+  const { data: forecastWeather } = useForecastWeatherQuery({
+    latitude, longitude,
+  })
+
+  /* Merge historical and forecast into a single date-keyed map */
+  const weatherByDate = useMemo(() => ({
+    ...historicalWeather,
+    ...forecastWeather,
+  }), [historicalWeather, forecastWeather])
+
+  const todayWeather = weatherByDate[todayStr] ?? null
+
   return (
     <div className="pb-4 animate-fade-in">
       <PageHeader>Home</PageHeader>
 
       <div className="px-5 space-y-3">
         <GreetingCard
-          locationName={null}
-          currentWeatherEmoji={null}
-          currentTemperature={null}
-          currentCondition={null}
+          locationName={preferences?.locationDisplayName ?? null}
+          currentWeatherEmoji={todayWeather ? getWeatherEmoji(todayWeather.weatherCode) : null}
+          currentTemperature={todayWeather?.temperatureMax ?? null}
+          currentCondition={todayWeather ? getWeatherLabel(todayWeather.weatherCode) : null}
         />
 
         <TripCalendar
           trips={trips}
-          weatherByDate={{}}
+          weatherByDate={weatherByDate}
           onDayClick={setSelectedDate}
         />
       </div>
@@ -40,7 +77,7 @@ export const HomePage = () => {
         <CalendarDayPopover
           date={selectedDate}
           trips={trips.filter(t => t.tripDate === selectedDate)}
-          weather={null}
+          weather={selectedDate ? (weatherByDate[selectedDate] ?? null) : null}
           onClose={() => setSelectedDate(null)}
           onViewTrip={(tripId) => {
             setSelectedDate(null)
