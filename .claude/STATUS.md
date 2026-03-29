@@ -25,7 +25,7 @@ This is the single source of truth for where the project stands. Read it at the 
 | Backend — Services | 120   | AGDevX.Cart.Services.Tests |
 | Backend — API      | 116   | AGDevX.Cart.Api.Tests      |
 | Backend — Auth     | 22    | AGDevX.Cart.Auth.Tests     |
-| Frontend — Vitest  | 582   | 91 test files              |
+| Frontend — Vitest  | 588   | 91 test files              |
 
 ## Known Issues / Tech Debt
 
@@ -39,7 +39,9 @@ This is the single source of truth for where the project stands. Read it at the 
 | Enhancement               | Planning Doc                                                                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | Trip Collaborator UI      | No planning doc yet (backend endpoints exist: `POST/DELETE /api/v1/trip/{id}/collaborators`)                                    |
-| Home Page (remaining)     | No planning doc yet (activity feed, shopping list preview, trip templates)                                                       |
+| Home Page — Activity Feed | No planning doc yet (14 event types, dedicated ActivityEvent table, separate household vs personal sections)                     |
+| Home Page — Shopping List Preview | No planning doc yet                                                                                                       |
+| Home Page — Trip Templates | No planning doc yet                                                                                                              |
 | Camera / Barcode Scanning | No planning doc yet                                                                                                             |
 | Inventory Categories      | No planning doc yet                                                                                                             |
 | Seed pantry items         | No planning doc yet                                                                                                             |
