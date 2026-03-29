@@ -180,14 +180,14 @@ C:\docker\caddy\Caddyfile
 
 Copy the contents from `deploy/caddy/` in the repo. These are templates — use them as-is or adjust paths to your preference.
 
-Start Caddy. In Docker Desktop, open a terminal in the `C:\docker\caddy` folder and run `docker compose up -d`. Or drag the folder into Docker Desktop if it supports compose file detection. This creates the shared `proxy` network and starts the Caddy container.
-
-Alternatively, from a terminal:
+Start Caddy from a terminal:
 
 ```bash
 cd C:\docker\caddy
 docker compose up -d
 ```
+
+This creates the shared `proxy` network and starts the Caddy container. Once running, the stack will appear in Docker Desktop's Containers view for future management.
 
 ### 3. Create the Cart Stack
 
@@ -210,7 +210,14 @@ ASPNETCORE_ENVIRONMENT=Production
 
 `CART_DB_PATH` is the Windows folder you created in step 1. This gets bind-mounted into the backend container at `/app/data/`.
 
-Start the Cart stack the same way — open a terminal in `C:\docker\cart` and run `docker compose up -d`.
+Start the Cart stack the same way:
+
+```bash
+cd C:\docker\cart
+docker compose up -d
+```
+
+Once both stacks are running, they appear in Docker Desktop and can be managed (stopped, started, updated) through the GUI from that point on.
 
 ### 4. Verify
 
