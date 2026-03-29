@@ -4,6 +4,9 @@
 import { ApiError } from '../api-error'
 
 const REQUEST_TIMEOUT_MS = 15_000;
+function getApiBaseUrl(): string {
+  return import.meta.env.VITE_API_BASE_URL ?? '';
+}
 
 /**
  * Base fetch wrapper that includes credentials for cookie-based auth
@@ -44,7 +47,7 @@ export async function apiFetch(
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const response = await fetch(endpoint, {
+    const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
       ...options,
       headers,
       credentials: 'include',

@@ -1,0 +1,19 @@
+services:
+  frontend:
+    image: agdevx/cart-frontend:latest
+    networks:
+      - proxy
+    restart: unless-stopped
+
+  backend:
+    image: agdevx/cart-backend:latest
+    env_file: .env
+    volumes:
+      - ${CART_DB_PATH:?Set CART_DB_PATH in .env}:/app/data
+    networks:
+      - proxy
+    restart: unless-stopped
+
+networks:
+  proxy:
+    external: true

@@ -79,7 +79,7 @@ const App = () => {
       <Toaster position="bottom-right" />
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <BrowserRouter>
+          <BrowserRouter basename={import.meta.env.VITE_BASE_PATH || '/'}>
             <a
               href="#main-content"
               className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-teal focus:text-white focus:px-4 focus:py-2 focus:rounded-xl focus:font-display focus:font-bold"

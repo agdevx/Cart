@@ -20,7 +20,7 @@ Self-hosted grocery shopping list application with real-time collaboration.
 - Progressive Web App (installable, offline support)
 - Mobile-first design with bottom navigation
 - Request timeouts (30s default, SSE excluded) with CancellationToken propagation
-- Rate limiting (5/min auth, 30/min general)
+- Rate limiting (5/min auth, 60/min general)
 - Security headers (CSP, X-Frame-Options, etc.)
 - Security audit logging
 
@@ -75,6 +75,9 @@ AGDevX.Cart/                          # Monorepo root
 │   │   ├── browser-tests/           # Playwright browser tests (mocked API)
 │   │   └── e2e-integration-tests/   # Playwright E2E tests (real backend)
 │   └── public/                      # Static assets + PWA manifest
+├── deploy/                           # Server deployment templates
+│   ├── caddy/                       # Shared Caddy reverse proxy
+│   └── cart/                        # Cart app stack (compose + env)
 ├── docs/
 │   ├── DEVELOPMENT.md               # Setup, running, testing guide
 │   ├── active/                      # Specs and plans for in-progress or planned work
@@ -194,6 +197,7 @@ All endpoints use the `/api/v1/` prefix.
 ## Documentation
 
 - **[Development Guide](docs/DEVELOPMENT.md)** - Setup, running, testing, troubleshooting
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Docker architecture, CI/CD, server setup, updating
 - **[Integration Tests](frontend/tests/e2e-integration-tests/README.md)** - Full-stack integration testing
 - **[Enhancement Tracking](.claude/STATUS.md)** - Planned, in progress, and completed enhancements
 - **[Archive](docs/archive/)** - Design specs and implementation plans for all completed work

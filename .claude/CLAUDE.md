@@ -61,6 +61,10 @@ frontend/src/
 ├── state/                        # Jotai atoms (auth, household scope)
 ├── styles/                       # globals.css (Tailwind theme, animations)
 └── utils/                        # Pure utility functions (confetti, greeting, sorting, etc.)
+
+deploy/                           # Server deployment templates (not used in dev)
+├── caddy/                        # Shared Caddy reverse proxy (docker-compose.yml, Caddyfile)
+└── cart/                         # Cart app stack (docker-compose.yml, .env.example)
 ```
 
 ## Frontend Architecture Rules
@@ -76,7 +80,7 @@ frontend/src/
 ## Architecture Patterns
 
 - **Auth:** Cookie-based sessions. Cookie `.Cart.Auth`, 30-min sliding expiration, `credentials: 'include'` on all fetches. `useAuth()` hook from `@/auth/use-auth`.
-- **API layer:** `apiFetch()` wrapper handles credentials and error extraction. Each endpoint gets a TanStack Query hook file in `apis/agdevx-cart-api/`.
+- **API layer:** `apiFetch()` wrapper handles credentials, error extraction, and `VITE_API_BASE_URL` prepending. Each endpoint gets a TanStack Query hook file in `apis/agdevx-cart-api/`.
 - **State:** Jotai atoms for auth state and household scope. TanStack Query for server state.
 - **Styling:** Tailwind CSS 4 with custom theme in `globals.css`. Design system colors: `navy`, `teal`, `coral`, `amber`. Font: `font-display` (Bricolage Grotesque), `font-body` (Nunito).
 

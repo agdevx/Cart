@@ -5,7 +5,7 @@ Guide for running the full AGDevX.Cart application in development mode.
 ## Prerequisites
 
 - .NET 10 SDK
-- Node.js 18+ and npm
+- Node.js 22+ and npm
 - Git
 
 ## Project Structure
@@ -55,7 +55,7 @@ cd frontend
 npm install
 ```
 
-No environment file is needed — the Vite dev server proxies `/api` requests to the backend automatically.
+The `.env.development` file is checked into the repo and configures the dev-mode base paths. The Vite dev server proxies `/api` requests to the backend automatically.
 
 ## Running the Application
 
@@ -153,7 +153,7 @@ The backend uses SQLite with Entity Framework Core:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Data Source=cart.db"
+    "CartDb": "Data Source=cart.db"
   },
   "CookieSettings": {
     "SessionTimeoutMinutes": 30
@@ -163,7 +163,7 @@ The backend uses SQLite with Entity Framework Core:
 
 ### Frontend
 
-No environment files needed. The Vite proxy in `vite.config.ts` handles routing `/api` requests to the backend:
+Environment files configure base paths for deployment. In development, `.env.development` sets empty base paths so the Vite proxy handles routing `/api` requests to the backend:
 
 ```typescript
 server: {
@@ -191,7 +191,7 @@ server: {
 ### Frontend won't start
 - Check if port 5173 is already in use
 - Clear node_modules: `rm -rf node_modules && npm install`
-- Check Node version: `node --version` (should be 18+)
+- Check Node version: `node --version` (should be 22+)
 
 ### CORS errors
 - Ensure backend is running and accessible at `http://localhost:5000`
@@ -239,5 +239,6 @@ cd frontend && npm update
 ## Next Steps
 
 - See `README.md` for project overview
+- See `docs/DEPLOYMENT.md` for Docker deployment, CI/CD, and server setup
 - See `.claude/STATUS.md` for enhancement tracking (planned / in progress / completed)
 - See `docs/archive/` for design specs and implementation plans
