@@ -13,6 +13,7 @@
 ### Task 1: Rename Connection String
 
 **Files:**
+
 - Modify: `backend/AGDevX.Cart.Api/appSettings.json`
 - Modify: `backend/AGDevX.Cart.Api/Program.cs:79`
 
@@ -38,6 +39,7 @@ builder.Services.AddDbContext<CartDbContext>(options =>
 - [ ] **Step 3: Run backend tests to verify nothing broke**
 
 Run from `backend/`:
+
 ```bash
 dotnet test
 ```
@@ -56,6 +58,7 @@ git commit -m "refactor: rename DefaultConnection to CartDb"
 ### Task 2: Remove HTTPS Middleware
 
 **Files:**
+
 - Modify: `backend/AGDevX.Cart.Api/Program.cs:115-119`
 
 - [ ] **Step 1: Remove the HSTS/HTTPS redirect block**
@@ -75,6 +78,7 @@ This is safe because Tailscale encrypts all traffic at the network layer.
 - [ ] **Step 2: Run backend tests**
 
 Run from `backend/`:
+
 ```bash
 dotnet test
 ```
@@ -93,6 +97,7 @@ git commit -m "fix: remove HTTPS middleware for Tailscale-only deployment"
 ### Task 3: Add VITE_API_BASE_URL Support to apiFetch
 
 **Files:**
+
 - Modify: `frontend/src/apis/agdevx-cart-api/agdevx-cart-api-config.ts`
 - Modify: `frontend/src/apis/agdevx-cart-api/agdevx-cart-api-config.test.ts`
 
@@ -102,45 +107,46 @@ Add this test to the existing describe block in `frontend/src/apis/agdevx-cart-a
 
 ```typescript
 it('should prepend VITE_API_BASE_URL to endpoint', async () => {
-  const originalEnv = import.meta.env.VITE_API_BASE_URL;
-  import.meta.env.VITE_API_BASE_URL = '/cart/api';
+	const originalEnv = import.meta.env.VITE_API_BASE_URL
+	import.meta.env.VITE_API_BASE_URL = '/cart/api'
 
-  const mockFetch = vi.fn().mockResolvedValue({
-    ok: true,
-    json: async () => ({ data: 'test' }),
-  });
-  globalThis.fetch = mockFetch;
+	const mockFetch = vi.fn().mockResolvedValue({
+		ok: true,
+		json: async () => ({ data: 'test' })
+	})
+	globalThis.fetch = mockFetch
 
-  await apiFetch('/api/v1/items', { method: 'GET' });
+	await apiFetch('/api/v1/items', { method: 'GET' })
 
-  const calledUrl = mockFetch.mock.calls[0][0];
-  expect(calledUrl).toBe('/cart/api/api/v1/items');
+	const calledUrl = mockFetch.mock.calls[0][0]
+	expect(calledUrl).toBe('/cart/api/api/v1/items')
 
-  import.meta.env.VITE_API_BASE_URL = originalEnv;
-});
+	import.meta.env.VITE_API_BASE_URL = originalEnv
+})
 
 it('should work with empty VITE_API_BASE_URL', async () => {
-  const originalEnv = import.meta.env.VITE_API_BASE_URL;
-  import.meta.env.VITE_API_BASE_URL = '';
+	const originalEnv = import.meta.env.VITE_API_BASE_URL
+	import.meta.env.VITE_API_BASE_URL = ''
 
-  const mockFetch = vi.fn().mockResolvedValue({
-    ok: true,
-    json: async () => ({ data: 'test' }),
-  });
-  globalThis.fetch = mockFetch;
+	const mockFetch = vi.fn().mockResolvedValue({
+		ok: true,
+		json: async () => ({ data: 'test' })
+	})
+	globalThis.fetch = mockFetch
 
-  await apiFetch('/api/v1/items', { method: 'GET' });
+	await apiFetch('/api/v1/items', { method: 'GET' })
 
-  const calledUrl = mockFetch.mock.calls[0][0];
-  expect(calledUrl).toBe('/api/v1/items');
+	const calledUrl = mockFetch.mock.calls[0][0]
+	expect(calledUrl).toBe('/api/v1/items')
 
-  import.meta.env.VITE_API_BASE_URL = originalEnv;
-});
+	import.meta.env.VITE_API_BASE_URL = originalEnv
+})
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run from `frontend/`:
+
 ```bash
 npx vitest run src/apis/agdevx-cart-api/agdevx-cart-api-config.test.ts
 ```
@@ -152,7 +158,7 @@ Expected: The two new tests fail (apiFetch doesn't prepend the base URL yet).
 In `frontend/src/apis/agdevx-cart-api/agdevx-cart-api-config.ts`, add a constant after `REQUEST_TIMEOUT_MS`:
 
 ```typescript
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 ```
 
 Then change the fetch call from:
@@ -170,6 +176,7 @@ const response = await fetch(`${API_BASE_URL}${endpoint}`, {
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run from `frontend/`:
+
 ```bash
 npx vitest run src/apis/agdevx-cart-api/agdevx-cart-api-config.test.ts
 ```
@@ -179,6 +186,7 @@ Expected: All tests pass.
 - [ ] **Step 5: Run full frontend test suite**
 
 Run from `frontend/`:
+
 ```bash
 npx vitest run
 ```
@@ -197,6 +205,7 @@ git commit -m "feat: add VITE_API_BASE_URL support to apiFetch"
 ### Task 4: Configure Vite Base Path and React Router Basename
 
 **Files:**
+
 - Modify: `frontend/vite.config.ts`
 - Modify: `frontend/src/app.tsx`
 - Create: `frontend/.env.development`
@@ -205,12 +214,14 @@ git commit -m "feat: add VITE_API_BASE_URL support to apiFetch"
 - [ ] **Step 1: Create frontend environment files**
 
 Create `frontend/.env.development`:
+
 ```
 VITE_API_BASE_URL=
 VITE_BASE_PATH=/
 ```
 
 Create `frontend/.env.production`:
+
 ```
 VITE_API_BASE_URL=/cart/api
 VITE_BASE_PATH=/cart
@@ -221,11 +232,13 @@ VITE_BASE_PATH=/cart
 In `frontend/vite.config.ts`, change the `defineConfig` call to accept the env:
 
 Replace:
+
 ```typescript
 export default defineConfig({
 ```
 
 With:
+
 ```typescript
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
@@ -233,16 +246,19 @@ export default defineConfig(({ mode }) => {
 ```
 
 Add `loadEnv` to the import:
+
 ```typescript
 import { defineConfig, loadEnv } from 'vitest/config'
 ```
 
 Add `base` as the first property inside the returned config object:
+
 ```typescript
     base: env.VITE_BASE_PATH || '/',
 ```
 
 And close the function with `}` after the existing closing `}`:
+
 ```typescript
   }
 })
@@ -265,6 +281,7 @@ to:
 - [ ] **Step 4: Run TypeScript check**
 
 Run from `frontend/`:
+
 ```bash
 npx tsc -b --noEmit
 ```
@@ -274,6 +291,7 @@ Expected: No errors.
 - [ ] **Step 5: Run full frontend test suite**
 
 Run from `frontend/`:
+
 ```bash
 npx vitest run
 ```
@@ -292,6 +310,7 @@ git commit -m "feat: configure base path for sub-path deployment"
 ### Task 5: Backend Dockerfile
 
 **Files:**
+
 - Create: `backend/Dockerfile`
 - Create: `backend/.dockerignore`
 
@@ -358,6 +377,7 @@ git commit -m "feat: add multi-stage Dockerfile for backend API"
 ### Task 6: Frontend Dockerfile
 
 **Files:**
+
 - Create: `frontend/Dockerfile`
 - Create: `frontend/.dockerignore`
 - Create: `frontend/nginx.conf`
@@ -422,6 +442,7 @@ git commit -m "feat: add multi-stage Dockerfile for frontend SPA"
 ### Task 7: CI Workflow
 
 **Files:**
+
 - Create: `.github/workflows/ci.yml`
 
 - [ ] **Step 1: Create .github/workflows/ci.yml**
@@ -503,6 +524,7 @@ git commit -m "feat: add CI workflow for tests, lint, and type checking"
 ### Task 8: Deploy Workflow
 
 **Files:**
+
 - Create: `.github/workflows/deploy.yml`
 
 - [ ] **Step 1: Create .github/workflows/deploy.yml**
@@ -574,6 +596,7 @@ git commit -m "feat: add deploy workflow to build and push Docker images"
 These files live on the server, not in the repo. We'll create example/template versions in the repo under `deploy/` so they're documented and version-controlled.
 
 **Files:**
+
 - Create: `deploy/caddy/docker-compose.yml`
 - Create: `deploy/caddy/Caddyfile`
 - Create: `deploy/cart/docker-compose.yml`
@@ -586,7 +609,7 @@ services:
   caddy:
     image: caddy:2-alpine
     ports:
-      - "80:80"
+      - '80:80'
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     networks:
@@ -673,6 +696,7 @@ git commit -m "feat: add server deployment templates for Caddy and Cart stacks"
 - [ ] **Step 1: Run full backend test suite**
 
 Run from `backend/`:
+
 ```bash
 dotnet test
 ```
@@ -682,6 +706,7 @@ Expected: All 322 tests pass.
 - [ ] **Step 2: Run full frontend test suite**
 
 Run from `frontend/`:
+
 ```bash
 npx vitest run
 ```
@@ -691,6 +716,7 @@ Expected: All 525 tests pass.
 - [ ] **Step 3: Run TypeScript check**
 
 Run from `frontend/`:
+
 ```bash
 npx tsc -b --noEmit
 ```
@@ -700,6 +726,7 @@ Expected: No errors.
 - [ ] **Step 4: Run lint**
 
 Run from `frontend/`:
+
 ```bash
 npx eslint src/
 ```

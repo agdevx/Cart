@@ -19,13 +19,13 @@ This is the single source of truth for where the project stands. Read it at the 
 
 ## Test Health
 
-| Suite | Tests | Files |
-|-------|-------|-------|
-| Backend — Data | 74 | AGDevX.Cart.Data.Tests |
-| Backend — Services | 115 | AGDevX.Cart.Services.Tests |
-| Backend — API | 111 | AGDevX.Cart.Api.Tests |
-| Backend — Auth | 22 | AGDevX.Cart.Auth.Tests |
-| Frontend — Vitest | 525 | 83 test files |
+| Suite              | Tests | Files                      |
+| ------------------ | ----- | -------------------------- |
+| Backend — Data     | 74    | AGDevX.Cart.Data.Tests     |
+| Backend — Services | 115   | AGDevX.Cart.Services.Tests |
+| Backend — API      | 111   | AGDevX.Cart.Api.Tests      |
+| Backend — Auth     | 22    | AGDevX.Cart.Auth.Tests     |
+| Frontend — Vitest  | 525   | 83 test files              |
 
 ## Known Issues / Tech Debt
 
@@ -36,39 +36,40 @@ This is the single source of truth for where the project stands. Read it at the 
 
 ## Planned Enhancements
 
-| Enhancement | Planning Doc |
-|-------------|-------------|
-| Docker Deployment | [docs/archive/2026-01-25-phase9-docker-deployment.md](../docs/archive/2026-01-25-phase9-docker-deployment.md) |
-| Trip Collaborator UI | No planning doc yet (backend endpoints exist: `POST/DELETE /api/v1/trip/{id}/collaborators`) |
-| Home Page | No planning doc yet (greeting panel, activity feed, shopping list preview, trip templates, calendar view, default page setting) |
-| Camera / Barcode Scanning | No planning doc yet |
-| Inventory Categories | No planning doc yet |
+| Enhancement               | Planning Doc                                                                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Docker Deployment         | [docs/archive/2026-01-25-phase9-docker-deployment.md](../docs/archive/2026-01-25-phase9-docker-deployment.md)                   |
+| Trip Collaborator UI      | No planning doc yet (backend endpoints exist: `POST/DELETE /api/v1/trip/{id}/collaborators`)                                    |
+| Home Page                 | No planning doc yet (greeting panel, activity feed, shopping list preview, trip templates, calendar view, default page setting) |
+| Camera / Barcode Scanning | No planning doc yet                                                                                                             |
+| Inventory Categories      | No planning doc yet                                                                                                             |
+| Seed pantry items         | No planning doc yet                                                                                                             |
 
 ## In Progress Enhancements
 
-*None*
+_None_
 
 ## Completed Enhancements
 
-| Enhancement | Completed | Planning Doc |
-|-------------|-----------|-------------|
-| Backend MVP (Phases 1–6) | 2026-01-25 | [docs/archive/2026-01-25-cart-mvp-implementation.md](../docs/archive/2026-01-25-cart-mvp-implementation.md) |
-| Frontend PWA (Phases 7–8) | 2026-01-31 | [docs/archive/2026-01-31-frontend-pwa.md](../docs/archive/2026-01-31-frontend-pwa.md) |
-| Registration Page | 2026-02-15 | [docs/archive/2026-02-15-registration-page.md](../docs/archive/2026-02-15-registration-page.md) |
-| Cookie Auth Migration | 2026-02-22 | [docs/archive/2026-02-22-cookie-auth-migration.md](../docs/archive/2026-02-22-cookie-auth-migration.md) |
-| Household Management | 2026-02-22 | [docs/archive/2026-02-22-household-management.md](../docs/archive/2026-02-22-household-management.md) |
-| Store Management UI | 2026-02-23 | [docs/archive/2026-02-23-store-management-ui.md](../docs/archive/2026-02-23-store-management-ui.md) |
-| Filtered Inventory Views | 2026-03-01 | [docs/archive/2026-03-01-filtered-inventory-views.md](../docs/archive/2026-03-01-filtered-inventory-views.md) |
-| Household Edit & Delete | 2026-03-01 | [docs/archive/2026-03-01-household-edit-delete.md](../docs/archive/2026-03-01-household-edit-delete.md) |
-| Trip Edit, Delete & Reopen | 2026-03-01 | [docs/archive/2026-03-01-trip-edit-delete-reopen.md](../docs/archive/2026-03-01-trip-edit-delete-reopen.md) |
-| Trip Item Edit & Remove | 2026-03-01 | [docs/archive/2026-03-01-trip-item-edit-remove.md](../docs/archive/2026-03-01-trip-item-edit-remove.md) |
-| App Improvements Round 1 | 2026-03-08 | [docs/archive/2026-03-08-app-improvements-round1.md](../docs/archive/2026-03-08-app-improvements-round1.md) |
-| App Improvements Round 2 | 2026-03-09 | [docs/archive/2026-03-09-app-improvements-round2.md](../docs/archive/2026-03-09-app-improvements-round2.md) |
-| App Improvements Round 3 | 2026-03-10 | [docs/archive/2026-03-09-app-improvements-round3.md](../docs/archive/2026-03-09-app-improvements-round3.md) |
-| Security Hardening | 2026-03-11 | [docs/archive/2026-03-10-security-hardening.md](../docs/archive/2026-03-10-security-hardening.md) |
-| Store Uniqueness & Scope Indicators | 2026-03-10 | [docs/archive/2026-03-10-store-uniqueness-and-scope-indicators.md](../docs/archive/2026-03-10-store-uniqueness-and-scope-indicators.md) |
-| TanStack Query Resilience | 2026-03-11 | [docs/archive/2026-03-10-tanstack-query-resilience.md](../docs/archive/2026-03-10-tanstack-query-resilience.md) |
-| User Profile Management | 2026-03-10 | [docs/archive/2026-03-10-user-profile-management.md](../docs/archive/2026-03-10-user-profile-management.md) |
-| UX Polish & Delight | 2026-03-11 | [docs/archive/2026-03-10-ux-polish.md](../docs/archive/2026-03-10-ux-polish.md) |
-| Frontend Quality (Validation, Error Boundary, A11y) | 2026-03-11 | [docs/archive/2026-03-11-frontend-quality.md](../docs/archive/2026-03-11-frontend-quality.md) |
-| Backend Resilience (Timeouts, CancellationToken, /api/v1/) | 2026-03-11 | [docs/archive/2026-03-11-backend-resilience.md](../docs/archive/2026-03-11-backend-resilience.md) |
+| Enhancement                                                | Completed  | Planning Doc                                                                                                                            |
+| ---------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend MVP (Phases 1–6)                                   | 2026-01-25 | [docs/archive/2026-01-25-cart-mvp-implementation.md](../docs/archive/2026-01-25-cart-mvp-implementation.md)                             |
+| Frontend PWA (Phases 7–8)                                  | 2026-01-31 | [docs/archive/2026-01-31-frontend-pwa.md](../docs/archive/2026-01-31-frontend-pwa.md)                                                   |
+| Registration Page                                          | 2026-02-15 | [docs/archive/2026-02-15-registration-page.md](../docs/archive/2026-02-15-registration-page.md)                                         |
+| Cookie Auth Migration                                      | 2026-02-22 | [docs/archive/2026-02-22-cookie-auth-migration.md](../docs/archive/2026-02-22-cookie-auth-migration.md)                                 |
+| Household Management                                       | 2026-02-22 | [docs/archive/2026-02-22-household-management.md](../docs/archive/2026-02-22-household-management.md)                                   |
+| Store Management UI                                        | 2026-02-23 | [docs/archive/2026-02-23-store-management-ui.md](../docs/archive/2026-02-23-store-management-ui.md)                                     |
+| Filtered Inventory Views                                   | 2026-03-01 | [docs/archive/2026-03-01-filtered-inventory-views.md](../docs/archive/2026-03-01-filtered-inventory-views.md)                           |
+| Household Edit & Delete                                    | 2026-03-01 | [docs/archive/2026-03-01-household-edit-delete.md](../docs/archive/2026-03-01-household-edit-delete.md)                                 |
+| Trip Edit, Delete & Reopen                                 | 2026-03-01 | [docs/archive/2026-03-01-trip-edit-delete-reopen.md](../docs/archive/2026-03-01-trip-edit-delete-reopen.md)                             |
+| Trip Item Edit & Remove                                    | 2026-03-01 | [docs/archive/2026-03-01-trip-item-edit-remove.md](../docs/archive/2026-03-01-trip-item-edit-remove.md)                                 |
+| App Improvements Round 1                                   | 2026-03-08 | [docs/archive/2026-03-08-app-improvements-round1.md](../docs/archive/2026-03-08-app-improvements-round1.md)                             |
+| App Improvements Round 2                                   | 2026-03-09 | [docs/archive/2026-03-09-app-improvements-round2.md](../docs/archive/2026-03-09-app-improvements-round2.md)                             |
+| App Improvements Round 3                                   | 2026-03-10 | [docs/archive/2026-03-09-app-improvements-round3.md](../docs/archive/2026-03-09-app-improvements-round3.md)                             |
+| Security Hardening                                         | 2026-03-11 | [docs/archive/2026-03-10-security-hardening.md](../docs/archive/2026-03-10-security-hardening.md)                                       |
+| Store Uniqueness & Scope Indicators                        | 2026-03-10 | [docs/archive/2026-03-10-store-uniqueness-and-scope-indicators.md](../docs/archive/2026-03-10-store-uniqueness-and-scope-indicators.md) |
+| TanStack Query Resilience                                  | 2026-03-11 | [docs/archive/2026-03-10-tanstack-query-resilience.md](../docs/archive/2026-03-10-tanstack-query-resilience.md)                         |
+| User Profile Management                                    | 2026-03-10 | [docs/archive/2026-03-10-user-profile-management.md](../docs/archive/2026-03-10-user-profile-management.md)                             |
+| UX Polish & Delight                                        | 2026-03-11 | [docs/archive/2026-03-10-ux-polish.md](../docs/archive/2026-03-10-ux-polish.md)                                                         |
+| Frontend Quality (Validation, Error Boundary, A11y)        | 2026-03-11 | [docs/archive/2026-03-11-frontend-quality.md](../docs/archive/2026-03-11-frontend-quality.md)                                           |
+| Backend Resilience (Timeouts, CancellationToken, /api/v1/) | 2026-03-11 | [docs/archive/2026-03-11-backend-resilience.md](../docs/archive/2026-03-11-backend-resilience.md)                                       |
