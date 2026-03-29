@@ -160,7 +160,7 @@ describe('PreferencesSection', () => {
 
   it('sends all preference values in a single mutation when Save is clicked', async () => {
     vi.mocked(useUserPreferencesQuery).mockReturnValue({
-      data: { defaultPage: '/shopping', locationLatitude: 40.71, locationLongitude: -74.0, locationDisplayName: 'New York, NY', showWeatherIcons: true },
+      data: { defaultPage: '/shopping', locationLatitude: 40.71, locationLongitude: -74.0, locationDisplayName: 'New York, NY', showWeatherIcons: true, showWeatherTemps: true },
     } as unknown as ReturnType<typeof useUserPreferencesQuery>)
 
     render(createElement(PreferencesSection), { wrapper })
@@ -175,6 +175,7 @@ describe('PreferencesSection', () => {
       locationLongitude: -74.0,
       locationDisplayName: 'New York, NY',
       showWeatherIcons: true,
+      showWeatherTemps: true,
     })
   })
 

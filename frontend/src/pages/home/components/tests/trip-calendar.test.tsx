@@ -37,7 +37,7 @@ describe('TripCalendar', () => {
 
   it('renders current month and year in the header', () => {
     render(
-      <TripCalendar trips={[]} weatherByDate={emptyWeather} onDayClick={mockOnDayClick} showWeatherIcons={true} />
+      <TripCalendar trips={[]} weatherByDate={emptyWeather} onDayClick={mockOnDayClick} showWeatherIcons={true} showWeatherTemps={true} />
     )
 
     const now = new Date()
@@ -50,7 +50,7 @@ describe('TripCalendar', () => {
     const user = userEvent.setup()
 
     render(
-      <TripCalendar trips={[]} weatherByDate={emptyWeather} onDayClick={mockOnDayClick} showWeatherIcons={true} />
+      <TripCalendar trips={[]} weatherByDate={emptyWeather} onDayClick={mockOnDayClick} showWeatherIcons={true} showWeatherTemps={true} />
     )
 
     await user.click(screen.getByLabelText('Next month'))
@@ -66,7 +66,7 @@ describe('TripCalendar', () => {
     const user = userEvent.setup()
 
     render(
-      <TripCalendar trips={[]} weatherByDate={emptyWeather} onDayClick={mockOnDayClick} showWeatherIcons={true} />
+      <TripCalendar trips={[]} weatherByDate={emptyWeather} onDayClick={mockOnDayClick} showWeatherIcons={true} showWeatherTemps={true} />
     )
 
     await user.click(screen.getByLabelText('Previous month'))
@@ -88,7 +88,7 @@ describe('TripCalendar', () => {
     ]
 
     render(
-      <TripCalendar trips={trips} weatherByDate={emptyWeather} onDayClick={mockOnDayClick} showWeatherIcons={true} />
+      <TripCalendar trips={trips} weatherByDate={emptyWeather} onDayClick={mockOnDayClick} showWeatherIcons={true} showWeatherTemps={true} />
     )
 
     //== Two dots should appear for day 15 (one amber/planned, one teal/completed)
@@ -110,7 +110,7 @@ describe('TripCalendar', () => {
     const dayStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 
     render(
-      <TripCalendar trips={[]} weatherByDate={emptyWeather} onDayClick={mockOnDayClick} showWeatherIcons={true} />
+      <TripCalendar trips={[]} weatherByDate={emptyWeather} onDayClick={mockOnDayClick} showWeatherIcons={true} showWeatherTemps={true} />
     )
 
     const dayButton = screen.getByLabelText(new RegExp(`^${day} ${dayStr}.*today`))
@@ -121,7 +121,7 @@ describe('TripCalendar', () => {
 
   it('renders legend with Completed and Planned labels', () => {
     render(
-      <TripCalendar trips={[]} weatherByDate={emptyWeather} onDayClick={mockOnDayClick} showWeatherIcons={true} />
+      <TripCalendar trips={[]} weatherByDate={emptyWeather} onDayClick={mockOnDayClick} showWeatherIcons={true} showWeatherTemps={true} />
     )
 
     expect(screen.getByText('Completed')).toBeInTheDocument()

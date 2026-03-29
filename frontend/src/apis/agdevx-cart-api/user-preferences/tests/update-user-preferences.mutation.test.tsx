@@ -27,6 +27,7 @@ describe('useUpdateUserPreferencesMutation', () => {
       locationLongitude: -118.2437,
       locationDisplayName: 'Los Angeles, CA',
       showWeatherIcons: true,
+      showWeatherTemps: true,
     }
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
@@ -73,6 +74,7 @@ describe('useUpdateUserPreferencesMutation', () => {
       locationLongitude: null,
       locationDisplayName: null,
       showWeatherIcons: true,
+      showWeatherTemps: true,
     }
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({

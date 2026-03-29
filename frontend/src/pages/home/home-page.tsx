@@ -72,6 +72,7 @@ export const HomePage = () => {
           weatherByDate={weatherByDate}
           onDayClick={setSelectedDate}
           showWeatherIcons={preferences?.showWeatherIcons ?? true}
+          showWeatherTemps={preferences?.showWeatherTemps ?? true}
         />
       </div>
 

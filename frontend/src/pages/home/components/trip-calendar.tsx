@@ -14,6 +14,7 @@ interface TripCalendarProps {
   readonly weatherByDate: WeatherByDate
   readonly onDayClick: (date: string) => void
   readonly showWeatherIcons: boolean
+  readonly showWeatherTemps: boolean
 }
 
 const DAY_HEADERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
@@ -22,7 +23,7 @@ function formatDate(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
-export const TripCalendar = ({ trips, weatherByDate, onDayClick, showWeatherIcons }: TripCalendarProps) => {
+export const TripCalendar = ({ trips, weatherByDate, onDayClick, showWeatherIcons, showWeatherTemps }: TripCalendarProps) => {
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date()
     return new Date(now.getFullYear(), now.getMonth(), 1)
@@ -222,14 +223,18 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick, showWeatherIcon
             >
               <span>{cell.day}</span>
 
-              {weather ? (
+              {weather && (showWeatherIcons || showWeatherTemps) ? (
                 <div className="flex-1 flex items-center justify-center gap-0.5">
                   {showWeatherIcons && (
-                    <span className="text-[11px] leading-none">{getWeatherEmoji(weather.weatherCode)}</span>
+                    <span className={`leading-none ${showWeatherTemps ? 'text-[11px]' : 'text-[13px]'}`}>
+                      {getWeatherEmoji(weather.weatherCode)}
+                    </span>
                   )}
-                  <span className={`text-text-tertiary leading-none ${showWeatherIcons ? 'text-[11px]' : 'text-[12px]'}`}>
-                    {Math.round(weather.temperatureMax)}°
-                  </span>
+                  {showWeatherTemps && (
+                    <span className={`text-text-tertiary leading-none ${showWeatherIcons ? 'text-[11px]' : 'text-[13px]'}`}>
+                      {Math.round(weather.temperatureMax)}°
+                    </span>
+                  )}
                 </div>
               ) : (
                 <div className="flex-1" />

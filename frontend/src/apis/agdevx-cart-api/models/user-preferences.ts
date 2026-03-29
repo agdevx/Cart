@@ -7,4 +7,5 @@ export interface UserPreferences {
   locationLongitude: number | null;
   locationDisplayName: string | null;
   showWeatherIcons: boolean;
+  showWeatherTemps: boolean;
 }
