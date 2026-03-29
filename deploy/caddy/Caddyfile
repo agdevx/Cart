@@ -1,0 +1,16 @@
+{
+	auto_https off
+	admin off
+}
+
+:80 {
+	handle /cart/api/* {
+		uri strip_prefix /cart
+		reverse_proxy backend:2946
+	}
+
+	handle /cart/* {
+		uri strip_prefix /cart
+		reverse_proxy frontend:3750
+	}
+}
