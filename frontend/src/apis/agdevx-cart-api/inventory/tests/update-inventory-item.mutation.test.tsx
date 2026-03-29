@@ -7,7 +7,6 @@ import { queryClient } from '@/apis/tanstack-query/query-client'
 import * as useAuthModule from '@/auth/use-auth'
 
 import * as apiFetchModule from '../../agdevx-cart-api-config'
-import type { InventoryItem } from '../../models/inventory-item'
 import { useUpdateInventoryItemMutation } from '../update-inventory-item.mutation'
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -21,19 +20,6 @@ describe('useUpdateInventoryItemMutation', () => {
   })
 
   it('updates inventory item successfully', async () => {
-    const mockInventoryItem: InventoryItem = {
-      id: '1',
-      name: 'Whole Milk',
-      defaultStoreId: 'store2',
-      notes: 'Updated notes',
-      ownerUserId: null,
-      householdId: 'household1',
-      createdBy: 'user1',
-      createdDate: '2024-01-01',
-      modifiedBy: 'user1',
-      modifiedDate: '2024-01-02',
-    }
-
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
       user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
@@ -69,19 +55,6 @@ describe('useUpdateInventoryItemMutation', () => {
   })
 
   it('invalidates inventory query on success', async () => {
-    const mockInventoryItem: InventoryItem = {
-      id: '1',
-      name: 'Milk',
-      defaultStoreId: null,
-      notes: null,
-      ownerUserId: 'user1',
-      householdId: null,
-      createdBy: 'user1',
-      createdDate: '2024-01-01',
-      modifiedBy: 'user1',
-      modifiedDate: '2024-01-02',
-    }
-
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
       user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
