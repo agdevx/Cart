@@ -171,9 +171,11 @@ export const ActiveTripPage = () => {
         </button>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-4">
+        <SectionHeader title={`Shopping List (${totalCount})`} />
+
         {/* Progress bar */}
-        <div>
+        <div className="mt-3">
           <div className="flex justify-between text-sm mb-2">
             <span className="text-text-tertiary font-semibold">{checkedCount} of {totalCount} items</span>
             <span className="text-teal font-extrabold">{progressPercent}%</span>
@@ -185,10 +187,6 @@ export const ActiveTripPage = () => {
             />
           </div>
         </div>
-      </div>
-
-      <div className="mb-4">
-        <SectionHeader title={`Shopping List (${totalCount})`} />
       </div>
 
       {groupedItems.length > 0 ? (
