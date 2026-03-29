@@ -3,6 +3,7 @@ import { MemoryRouter } from 'react-router-dom'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as membersQueryModule from '@/apis/agdevx-cart-api/household/use-household-members.query'
@@ -172,10 +173,13 @@ describe('HouseholdPage', () => {
     expect(screen.queryByText('Me')).not.toBeInTheDocument()
   })
 
-  it('renders create and join buttons', () => {
+  it('renders create and join actions in FAB menu', async () => {
     setupMocks()
 
     renderPage()
+
+    //== FAB starts closed; open it to reveal the action menu
+    await userEvent.click(screen.getByLabelText('Open actions menu'))
 
     expect(screen.getByText('Create Household')).toBeInTheDocument()
     expect(screen.getByText('Join with Code')).toBeInTheDocument()

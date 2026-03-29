@@ -2,15 +2,16 @@
 // ABOUTME: Displays user's households with options to create or join new ones
 
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
-import { Plus, UserPlus, Users } from 'lucide-react'
+import { Users } from 'lucide-react'
 
 import { useHouseholdMembersQuery } from '@/apis/agdevx-cart-api/household/use-household-members.query'
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useAuth } from '@/auth/use-auth'
 import { householdDetailPath, ROUTES } from '@/routes'
 import { EmptyState } from '@/shared/empty-state'
+import { Fab } from '@/shared/fab'
 import { PageHeader } from '@/shared/page-header'
 import { sortHouseholds } from '@/utils/sort-households'
 
@@ -35,6 +36,7 @@ const HouseholdMembersList = ({ householdId }: { householdId: string }) => {
 }
 
 export const HouseholdPage = () => {
+  const navigate = useNavigate()
   const { data: households, isLoading } = useHouseholdsQuery()
 
   const sortedHouseholds = useMemo(() => sortHouseholds(households || []), [households])
@@ -82,23 +84,14 @@ export const HouseholdPage = () => {
         />
       )}
 
-      <div className="space-y-3">
-        <Link
-          to={ROUTES.HOUSEHOLD_CREATE}
-          className="flex items-center justify-center gap-2 w-full py-3.5 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Create Household
-        </Link>
-        <Link
-          to={ROUTES.HOUSEHOLD_JOIN}
-          className="flex items-center justify-center gap-2 w-full py-3.5 border-2 border-teal/30 text-teal rounded-xl font-display font-bold hover:bg-teal/8 transition-colors"
-        >
-          <UserPlus className="w-5 h-5" />
-          Join with Code
-        </Link>
       </div>
-      </div>
+
+      <Fab
+        actions={[
+          { label: 'Create Household', onClick: () => navigate(ROUTES.HOUSEHOLD_CREATE) },
+          { label: 'Join with Code', onClick: () => navigate(ROUTES.HOUSEHOLD_JOIN) },
+        ]}
+      />
     </div>
   )
 }

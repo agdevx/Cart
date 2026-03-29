@@ -4,7 +4,7 @@
 import { useMemo } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
-import { ArrowLeft, Plus, ShoppingCart } from 'lucide-react'
+import { ArrowLeft, ShoppingCart } from 'lucide-react'
 
 import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
@@ -16,6 +16,7 @@ import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.qu
 import { activeTripPath, ROUTES, tripAddItemsPath } from '@/routes'
 import { useStoreAccordionState } from '@/services/use-store-accordion-state.service'
 import { EmptyState } from '@/shared/empty-state'
+import { Fab } from '@/shared/fab'
 import { SectionHeader } from '@/shared/section-header'
 import { Spinner } from '@/shared/spinner'
 import { StoreAccordion } from '@/shared/store-accordion'
@@ -131,16 +132,6 @@ export const TripDetailPage = () => {
       <div className="mb-4">
         <SectionHeader title="Shopping List" />
 
-        {!readOnly && tripItems && tripItems.length > 0 && (
-          <button
-            onClick={() => navigate(tripAddItemsPath(tripId!))}
-            className="w-full py-4 border-2 border-dashed border-navy/14 rounded-2xl bg-transparent text-text-secondary font-display text-[15px] font-semibold hover:border-teal hover:text-teal hover:bg-teal/8 transition-all flex items-center justify-center gap-2.5 mb-4"
-          >
-            <Plus className="w-5 h-5" />
-            Add Items
-          </button>
-        )}
-
         {groupedItems.length > 0 ? (
           <div>
             {groupedItems.map(([storeName, storeItems]) => (
@@ -179,6 +170,14 @@ export const TripDetailPage = () => {
           />
         )}
       </div>
+
+      {!readOnly && (
+        <Fab
+          actions={[
+            { label: 'Add Items', onClick: () => navigate(tripAddItemsPath(tripId!)) },
+          ]}
+        />
+      )}
     </div>
   )
 }
