@@ -21,7 +21,10 @@ interface TripCreateFormProps {
 
 export const TripCreateForm = ({ isPending, onSubmit, onCancel }: TripCreateFormProps) => {
   const [tripName, setTripName] = useState('')
-  const [tripDate, setTripDate] = useState('')
+  const [tripDate, setTripDate] = useState(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  })
 
   const schema = useMemo(() => ({
     name: [isRequired('Trip name')],
