@@ -1,5 +1,5 @@
 // ABOUTME: Configures rate limiting with auth and general policies
-// ABOUTME: Auth: 5 req/min per IP for login/register. General: 30 req/min per IP for all endpoints.
+// ABOUTME: Auth: 5 req/min per IP for login/register. General: 60 req/min per IP for all endpoints.
 
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
@@ -34,7 +34,7 @@ public static class RateLimitingExtensions
                 });
             });
 
-            //== General: 30 requests per minute per IP (default policy)
+            //== General: 60 requests per minute per IP (default policy)
             options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
             {
                 //== Exclude CORS preflight requests from rate limiting
@@ -46,7 +46,7 @@ public static class RateLimitingExtensions
                 var remoteIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
                 return RateLimitPartition.GetFixedWindowLimiter(remoteIp, _ => new FixedWindowRateLimiterOptions
                 {
-                    PermitLimit = 30,
+                    PermitLimit = 60,
                     Window = TimeSpan.FromMinutes(1),
                     QueueLimit = 0,
                 });
