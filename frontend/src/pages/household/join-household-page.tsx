@@ -9,7 +9,7 @@ import { ROUTES } from '@/routes'
 import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { FormField } from '@/shared/form-field'
 import { PageHeader } from '@/shared/page-header'
-import { getErrorMessage } from '@/utilities/error-messages'
+import { getErrorMessage } from '@/utils/error-messages'
 
 export const JoinHouseholdPage = () => {
   const [inviteCode, setInviteCode] = useState('')

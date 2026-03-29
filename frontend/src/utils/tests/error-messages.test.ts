@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 
 import { ApiError } from '@/apis/api-error'
 
-import { getErrorMessage } from './error-messages'
+import { getErrorMessage } from '../error-messages'
 
 describe('getErrorMessage', () => {
   it('should extract message from ApiError body', () => {

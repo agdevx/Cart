@@ -9,7 +9,7 @@ import { ROUTES } from '@/routes'
 import { useFieldValidation } from '@/services/use-field-validation.service'
 import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { FormField } from '@/shared/form-field'
-import { getErrorMessage } from '@/utilities/error-messages'
+import { getErrorMessage } from '@/utils/error-messages'
 import { isRequired, maxLength } from '@/utils/validation-rules'
 
 export const CreateHouseholdPage = () => {
