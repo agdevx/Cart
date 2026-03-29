@@ -21,6 +21,7 @@ import { useStoreAccordionState } from '@/services/use-store-accordion-state.ser
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
 import { Spinner } from '@/shared/spinner'
+import { SectionHeader } from '@/shared/section-header'
 import { StoreAccordion } from '@/shared/store-accordion'
 import { TripItemRow } from '@/shared/trip-item-row'
 import { fireCompletionConfetti } from '@/utils/confetti'
@@ -184,6 +185,10 @@ export const ActiveTripPage = () => {
             />
           </div>
         </div>
+      </div>
+
+      <div className="mb-4">
+        <SectionHeader title={`Shopping List (${totalCount})`} />
       </div>
 
       {groupedItems.length > 0 ? (
