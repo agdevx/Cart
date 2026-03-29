@@ -45,7 +45,12 @@ public class TripService(ITripRepository tripRepository) : ITripService
                         ?? throw new KeyNotFoundException("Trip not found");
 
         trip.Name = name;
-        trip.TripDate = tripDate;
+
+        if (tripDate.HasValue)
+        {
+            trip.TripDate = tripDate;
+        }
+
         return await tripRepository.Update(trip, cancellationToken);
     }
 

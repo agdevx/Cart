@@ -34,9 +34,10 @@ export const HomePage = () => {
   const endDate = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`
 
   /* User preferences provide the lat/long for weather queries */
+  /* Falls back to Cleveland, Ohio when no location is set */
   const { data: preferences } = useUserPreferencesQuery()
-  const latitude = preferences?.locationLatitude ?? null
-  const longitude = preferences?.locationLongitude ?? null
+  const latitude = preferences?.locationLatitude ?? 41.4993
+  const longitude = preferences?.locationLongitude ?? -81.6944
 
   const { data: historicalWeather } = useHistoricalWeatherQuery({
     latitude, longitude, startDate, endDate,
@@ -60,7 +61,7 @@ export const HomePage = () => {
 
       <div className="px-5 space-y-3">
         <GreetingCard
-          locationName={preferences?.locationDisplayName ?? null}
+          locationName={preferences?.locationDisplayName ?? 'Cleveland, Ohio'}
           currentWeatherEmoji={todayWeather ? getWeatherEmoji(todayWeather.weatherCode) : null}
           currentTemperature={todayWeather?.temperatureMax ?? null}
           currentCondition={todayWeather ? getWeatherLabel(todayWeather.weatherCode) : null}

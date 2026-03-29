@@ -77,11 +77,17 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
     setEditName(trip.name)
   }
 
+  /* For planned trips, prefer the explicit trip date; fall back to created date for older trips */
+  const plannedDateSource = trip.tripDate ?? trip.createdDate
+  const plannedDateLabel = new Date(plannedDateSource).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+  })
+
   const dateLabel = trip.isCompleted
     ? `Completed: ${trip.completedAt ? new Date(trip.completedAt).toLocaleDateString() : 'N/A'}`
     : trip.isStarted
     ? `Started: ${trip.startedAt ? new Date(trip.startedAt).toLocaleDateString() : 'N/A'}`
-    : `Created: ${new Date(trip.createdDate).toLocaleDateString()}`
+    : `Trip Date: ${plannedDateLabel}`
 
   const cardContent = (
     <>
