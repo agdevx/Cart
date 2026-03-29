@@ -69,7 +69,7 @@ export const HouseholdPage = () => {
             <Link
               key={household.id}
               to={householdDetailPath(household.id)}
-              className="block p-5 bg-surface rounded-xl shadow-sm border-2 border-transparent hover:border-teal/30 hover:shadow-md transition-all"
+              className="block p-5 bg-surface rounded-xl shadow-sm border-2 border-transparent"
             >
               <h2 className="font-display text-lg font-bold text-navy">
                 {household.name || 'Unnamed Household'}

@@ -159,7 +159,7 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
     return (
       <Link
         to={tripDetailPath(trip.id)}
-        className="block p-5 bg-surface rounded-2xl shadow-sm opacity-60 hover:shadow-md transition-all"
+        className="block p-5 bg-surface rounded-2xl shadow-sm opacity-60"
       >
         {cardContent}
       </Link>
@@ -169,7 +169,7 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
   // When editing, render as div instead of link to prevent navigation
   if (editing) {
     return (
-      <div className="block p-5 bg-surface rounded-2xl shadow-sm border-2 border-transparent hover:shadow-md hover:-translate-y-0.5 transition-all">
+      <div className="block p-5 bg-surface rounded-2xl shadow-sm border-2 border-transparent">
         {cardContent}
       </div>
     )
@@ -183,7 +183,7 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
   return (
     <Link
       to={destination}
-      className="block p-5 bg-surface rounded-2xl shadow-sm border-2 border-transparent hover:shadow-md hover:-translate-y-0.5 transition-all"
+      className="block p-5 bg-surface rounded-2xl shadow-sm border-2 border-transparent"
     >
       {cardContent}
     </Link>

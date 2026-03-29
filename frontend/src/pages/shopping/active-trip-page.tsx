@@ -159,8 +159,16 @@ export const ActiveTripPage = () => {
         </button>
         <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">{trip.name}</h1>
 
+        <button
+          onClick={handleCompleteTrip}
+          disabled={completeMutation.isPending}
+          className="flex w-full items-center justify-center py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors mt-4 mb-4"
+        >
+          {completeMutation.isPending ? <Spinner /> : 'Complete Trip'}
+        </button>
+
         {/* Progress bar */}
-        <div className="mt-4">
+        <div>
           <div className="flex justify-between text-sm mb-2">
             <span className="text-text-tertiary font-semibold">{checkedCount} of {totalCount} items</span>
             <span className="text-teal font-extrabold">{progressPercent}%</span>
@@ -173,14 +181,6 @@ export const ActiveTripPage = () => {
           </div>
         </div>
       </div>
-
-      <button
-        onClick={handleCompleteTrip}
-        disabled={completeMutation.isPending}
-        className="flex w-full items-center justify-center py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors shadow-[0_3px_0_#148F72] mb-6"
-      >
-        {completeMutation.isPending ? <Spinner /> : 'Complete Trip'}
-      </button>
 
       {groupedItems.length > 0 ? (
         <div className="mb-6">

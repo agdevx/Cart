@@ -175,7 +175,7 @@ export const TripItemRow = ({
   return (
     <div
       onClick={handleRowClick}
-      className={`flex items-center gap-4 p-4 rounded-xl shadow-sm cursor-pointer transition-all min-h-[60px] select-none active:scale-[0.98] ${checkedBg}`}
+      className={`flex items-center gap-4 p-4 rounded-xl shadow-sm cursor-pointer transition-all min-h-[60px] select-none ${checkedBg}`}
     >
       {/* Custom checkbox */}
       <div data-testid="item-checkbox" className="flex-shrink-0">
