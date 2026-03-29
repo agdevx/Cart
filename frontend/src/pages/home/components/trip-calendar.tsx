@@ -225,9 +225,9 @@ export const TripCalendar = ({ trips, weatherByDate, onDayClick, showWeatherIcon
               {weather ? (
                 <div className="flex-1 flex items-center justify-center gap-0.5">
                   {showWeatherIcons && (
-                    <span className="text-[10px] leading-none">{getWeatherEmoji(weather.weatherCode)}</span>
+                    <span className="text-[11px] leading-none">{getWeatherEmoji(weather.weatherCode)}</span>
                   )}
-                  <span className={`text-text-tertiary leading-none ${showWeatherIcons ? 'text-[10px]' : 'text-[11px]'}`}>
+                  <span className={`text-text-tertiary leading-none ${showWeatherIcons ? 'text-[11px]' : 'text-[12px]'}`}>
                     {Math.round(weather.temperatureMax)}°
                   </span>
                 </div>
