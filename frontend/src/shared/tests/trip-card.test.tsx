@@ -93,14 +93,14 @@ describe('TripCard', () => {
     vi.useRealTimers()
   })
 
-  it('renders planning trip with name and created date', () => {
+  it('renders planning trip with name and trip date', () => {
     render(
       <TripCard trip={planningTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
     expect(screen.getByText('Planning Trip')).toBeInTheDocument()
-    expect(screen.getByText(/Created:/)).toBeInTheDocument()
+    expect(screen.getByText(/Trip Date:/)).toBeInTheDocument()
   })
 
   it('renders started trip with name and started date', () => {
