@@ -178,7 +178,7 @@ describe('TripCard', () => {
     fireEvent.change(input, { target: { value: 'Saturday Groceries' } })
     fireEvent.click(screen.getByText('Save'))
 
-    expect(mockOnUpdate).toHaveBeenCalledWith('trip-1', 'Saturday Groceries')
+    expect(mockOnUpdate).toHaveBeenCalledWith('trip-1', 'Saturday Groceries', null)
   })
 
   it('calls onUpdate with name for personal trips', () => {
@@ -192,7 +192,7 @@ describe('TripCard', () => {
 
     fireEvent.click(screen.getByText('Save'))
 
-    expect(mockOnUpdate).toHaveBeenCalledWith('trip-3', 'Personal Run')
+    expect(mockOnUpdate).toHaveBeenCalledWith('trip-3', 'Personal Run', null)
   })
 
   it('cancels edit on Cancel button without calling onUpdate', () => {

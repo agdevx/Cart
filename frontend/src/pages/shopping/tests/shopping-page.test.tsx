@@ -180,7 +180,7 @@ describe('ShoppingPage', () => {
     fireEvent.change(input, { target: { value: 'Saturday Groceries' } })
     fireEvent.click(screen.getByText('Save'))
 
-    expect(updateMutateFn).toHaveBeenCalledWith({ tripId: 'trip1', name: 'Saturday Groceries' })
+    expect(updateMutateFn).toHaveBeenCalledWith({ tripId: 'trip1', name: 'Saturday Groceries', tripDate: null })
   })
 
   it('shows delete confirmation dialog', () => {
@@ -317,6 +317,7 @@ describe('ShoppingPage', () => {
     await waitFor(() => {
       expect(mutateAsyncFn).toHaveBeenCalledWith({
         name: 'Weekend Run',
+        tripDate: null,
       })
       expect(mockNavigate).toHaveBeenCalledWith('/shopping/new-trip-123')
     })

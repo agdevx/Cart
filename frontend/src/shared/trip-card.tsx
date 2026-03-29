@@ -14,7 +14,7 @@ import { DropdownMenu } from './dropdown-menu'
 
 interface TripCardProps {
   trip: Trip
-  onUpdate: (tripId: string, name: string) => void
+  onUpdate: (tripId: string, name: string, tripDate: string | null) => void
   onDelete: (tripId: string, tripName: string) => void
   onReopen: (tripId: string) => void
 }
@@ -23,6 +23,7 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState(trip.name)
+  const [editDate, setEditDate] = useState(trip.tripDate ?? '')
   const kebabRef = useRef<HTMLButtonElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -45,6 +46,7 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
     e.stopPropagation()
     setMenuOpen(false)
     setEditName(trip.name)
+    setEditDate(trip.tripDate ?? '')
     setEditing(true)
   }
 
@@ -65,7 +67,7 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
   const commitEdit = () => {
     const trimmed = editName.trim()
     if (trimmed) {
-      onUpdate(trip.id, trimmed)
+      onUpdate(trip.id, trimmed, editDate || null)
     }
     setEditing(false)
   }
@@ -141,6 +143,16 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
               className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
             />
           </div>
+          <div className="mb-3">
+            <label className="block text-sm font-semibold text-navy-soft mb-1">Trip Date</label>
+            <input
+              type="date"
+              value={editDate}
+              onChange={(e) => setEditDate(e.target.value)}
+              className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+            />
+          </div>
+
           <ActionCancelFormButtons
             onCancel={cancelEdit}
             submitLabel="Save"

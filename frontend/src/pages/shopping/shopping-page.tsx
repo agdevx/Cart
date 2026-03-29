@@ -43,9 +43,9 @@ export const ShoppingPage = () => {
       return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
     }) || []
 
-  const handleCreateTrip = async ({ name }: { name: string }) => {
+  const handleCreateTrip = async ({ name, tripDate }: { name: string; tripDate: string | null }) => {
     try {
-      const newTrip = await createMutation.mutateAsync({ name })
+      const newTrip = await createMutation.mutateAsync({ name, tripDate })
       setShowCreateForm(false)
       navigate(tripDetailPath(newTrip.id))
     } catch {
@@ -53,8 +53,8 @@ export const ShoppingPage = () => {
     }
   }
 
-  const handleUpdate = (tripId: string, name: string) => {
-    updateMutation.mutate({ tripId, name })
+  const handleUpdate = (tripId: string, name: string, tripDate: string | null) => {
+    updateMutation.mutate({ tripId, name, tripDate })
   }
 
   const handleDelete = (tripId: string, tripName: string) => {

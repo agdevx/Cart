@@ -8,6 +8,7 @@ import type { Trip } from '../models/trip'
 
 interface CreateTripRequest {
   name: string
+  tripDate?: string | null
 }
 
 export const useCreateTripMutation = () => {
