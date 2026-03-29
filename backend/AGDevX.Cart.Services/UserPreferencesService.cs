@@ -1,0 +1,46 @@
+// ABOUTME: Service implementation for user preferences — maps between DTOs and data models.
+// ABOUTME: Returns an empty-but-valid response when no preferences record exists yet (first-time users).
+
+using AGDevX.Cart.Data.Models;
+using AGDevX.Cart.Data.Repositories;
+using AGDevX.Cart.Shared.DTOs;
+
+namespace AGDevX.Cart.Services;
+
+public class UserPreferencesService(IUserPreferencesRepository repository) : IUserPreferencesService
+{
+    public async Task<UserPreferencesResponse> GetPreferences(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var prefs = await repository.GetByUserId(userId, cancellationToken);
+
+        return new UserPreferencesResponse
+        {
+            DefaultPage = prefs?.DefaultPage,
+            LocationLatitude = prefs?.LocationLatitude,
+            LocationLongitude = prefs?.LocationLongitude,
+            LocationDisplayName = prefs?.LocationDisplayName,
+        };
+    }
+
+    public async Task<UserPreferencesResponse> UpdatePreferences(Guid userId, UpdateUserPreferencesRequest request, CancellationToken cancellationToken = default)
+    {
+        var prefs = new UserPreferences
+        {
+            UserId = userId,
+            DefaultPage = request.DefaultPage,
+            LocationLatitude = request.LocationLatitude,
+            LocationLongitude = request.LocationLongitude,
+            LocationDisplayName = request.LocationDisplayName,
+        };
+
+        var saved = await repository.CreateOrUpdate(prefs, cancellationToken);
+
+        return new UserPreferencesResponse
+        {
+            DefaultPage = saved.DefaultPage,
+            LocationLatitude = saved.LocationLatitude,
+            LocationLongitude = saved.LocationLongitude,
+            LocationDisplayName = saved.LocationDisplayName,
+        };
+    }
+}

@@ -84,6 +84,7 @@ builder.Services.AddScoped<IStoreRepository, StoreRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<ITripRepository, TripRepository>();
 builder.Services.AddScoped<ITripItemRepository, TripItemRepository>();
+builder.Services.AddScoped<IUserPreferencesRepository, UserPreferencesRepository>();
 
 //== Service registrations
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -94,6 +95,7 @@ builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<ITripService, TripService>();
 builder.Services.AddScoped<ITripItemService, TripItemService>();
 builder.Services.AddSingleton<ITripEventService, TripEventService>(); //== Event broadcasting service (singleton for in-memory state)
+builder.Services.AddScoped<IUserPreferencesService, UserPreferencesService>();
 
 var app = builder.Build();
 
