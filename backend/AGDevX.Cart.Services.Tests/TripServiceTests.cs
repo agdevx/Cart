@@ -433,4 +433,80 @@ public class TripServiceTests
         result.IsStarted.Should().BeFalse();
         result.StartedAt.Should().BeNull();
     }
+
+    [Fact]
+    public async Task Should_SetTripDate_When_CreatingTripWithNonNullDate()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripDate = new DateOnly(2025, 6, 15);
+
+        _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>(), It.IsAny<CancellationToken>()))
+                           .ReturnsAsync((Trip t, CancellationToken _) => t);
+
+        // Act
+        var result = await _tripService.CreateTrip("Trip With Date", tripDate, userId);
+
+        // Assert
+        result.TripDate.Should().Be(tripDate);
+    }
+
+    [Fact]
+    public async Task Should_LeaveTripDateNull_When_CreatingTripWithNullDate()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+
+        _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>(), It.IsAny<CancellationToken>()))
+                           .ReturnsAsync((Trip t, CancellationToken _) => t);
+
+        // Act
+        var result = await _tripService.CreateTrip("Trip Without Date", null, userId);
+
+        // Assert
+        result.TripDate.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Should_UpdateTripDate_When_UpdatingTripWithNonNullDate()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var tripDate = new DateOnly(2025, 8, 20);
+        var trip = new Trip { Id = tripId, Name = "Trip", IsCompleted = false };
+
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip t, CancellationToken _) => t);
+
+        // Act
+        var result = await _tripService.UpdateTrip(tripId, "Trip", tripDate, userId);
+
+        // Assert
+        result.TripDate.Should().Be(tripDate);
+    }
+
+    [Fact]
+    public async Task Should_PreserveExistingTripDate_When_UpdatingTripWithNullDate()
+    {
+        /*
+         * Null means "don't change" — the service's null-check guard ensures
+         * passing null does not clear a previously-set TripDate.
+         */
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var existingDate = new DateOnly(2025, 5, 1);
+        var trip = new Trip { Id = tripId, Name = "Trip", IsCompleted = false, TripDate = existingDate };
+
+        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip t, CancellationToken _) => t);
+
+        // Act
+        var result = await _tripService.UpdateTrip(tripId, "Trip", null, userId);
+
+        // Assert
+        result.TripDate.Should().Be(existingDate, "null tripDate should not overwrite an existing value");
+    }
 }
