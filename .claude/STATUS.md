@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated:** 2026-03-28
+**Last Updated:** 2026-03-29
 
 ## How to Use This File
 
@@ -22,10 +22,10 @@ This is the single source of truth for where the project stands. Read it at the 
 | Suite              | Tests | Files                      |
 | ------------------ | ----- | -------------------------- |
 | Backend — Data     | 73    | AGDevX.Cart.Data.Tests     |
-| Backend — Services | 112   | AGDevX.Cart.Services.Tests |
-| Backend — API      | 110   | AGDevX.Cart.Api.Tests      |
+| Backend — Services | 120   | AGDevX.Cart.Services.Tests |
+| Backend — API      | 116   | AGDevX.Cart.Api.Tests      |
 | Backend — Auth     | 22    | AGDevX.Cart.Auth.Tests     |
-| Frontend — Vitest  | 527   | 83 test files              |
+| Frontend — Vitest  | 582   | 91 test files              |
 
 ## Known Issues / Tech Debt
 
@@ -39,7 +39,7 @@ This is the single source of truth for where the project stands. Read it at the 
 | Enhancement               | Planning Doc                                                                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | Trip Collaborator UI      | No planning doc yet (backend endpoints exist: `POST/DELETE /api/v1/trip/{id}/collaborators`)                                    |
-| Home Page                 | No planning doc yet (greeting panel, activity feed, shopping list preview, trip templates, calendar view, default page setting) |
+| Home Page (remaining)     | No planning doc yet (activity feed, shopping list preview, trip templates)                                                       |
 | Camera / Barcode Scanning | No planning doc yet                                                                                                             |
 | Inventory Categories      | No planning doc yet                                                                                                             |
 | Seed pantry items         | No planning doc yet                                                                                                             |
@@ -49,6 +49,7 @@ This is the single source of truth for where the project stands. Read it at the 
 | Enhancement       | Planning Doc                                                                                  |
 | ----------------- | --------------------------------------------------------------------------------------------- |
 | Docker Deployment | [docs/active/2026-03-28-docker-deployment.md](../docs/active/2026-03-28-docker-deployment.md) |
+| Home Page         | [docs/active/2026-03-29-home-page.md](../docs/active/2026-03-29-home-page.md)                 |
 
 ## Completed Enhancements
 

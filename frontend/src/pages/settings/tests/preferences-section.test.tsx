@@ -8,9 +8,9 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { queryClient } from '@/apis/tanstack-query/query-client'
 import { useUpdateUserPreferencesMutation } from '@/apis/agdevx-cart-api/user-preferences/update-user-preferences.mutation'
 import { useUserPreferencesQuery } from '@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query'
+import { queryClient } from '@/apis/tanstack-query/query-client'
 
 import { PreferencesSection } from '../preferences-section'
 
