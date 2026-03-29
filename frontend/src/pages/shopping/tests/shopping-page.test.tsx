@@ -132,7 +132,7 @@ describe('ShoppingPage', () => {
     //== Section headers should appear
     expect(screen.getByText('In Progress')).toBeInTheDocument()
     expect(screen.getByText('Planning')).toBeInTheDocument()
-    expect(screen.getByText('Completed (1)')).toBeInTheDocument()
+    expect(screen.getByText('Completed')).toBeInTheDocument()
 
     //== Completed trips are in the DOM but inside a collapsed grid container
     const holidayElement = screen.getByText('Holiday Shopping')
@@ -151,7 +151,7 @@ describe('ShoppingPage', () => {
     render(<ShoppingPage />, { wrapper })
 
     //== Click the Completed accordion button
-    fireEvent.click(screen.getByText('Completed (1)'))
+    fireEvent.click(screen.getByText('Completed'))
 
     //== Completed trip should now be visible
     expect(screen.getByText('Holiday Shopping')).toBeInTheDocument()
@@ -238,7 +238,7 @@ describe('ShoppingPage', () => {
     render(<ShoppingPage />, { wrapper })
 
     //== Expand the completed accordion first
-    fireEvent.click(screen.getByText('Completed (1)'))
+    fireEvent.click(screen.getByText('Completed'))
 
     //== Open kebab menu on the completed trip (Holiday Shopping)
     //== After expansion, there are 3 kebab buttons: trip1, trip3, trip2

@@ -174,6 +174,14 @@ export const ActiveTripPage = () => {
         </div>
       </div>
 
+      <button
+        onClick={handleCompleteTrip}
+        disabled={completeMutation.isPending}
+        className="flex w-full items-center justify-center py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors shadow-[0_3px_0_#148F72] active:translate-y-[3px] active:shadow-none mb-6"
+      >
+        {completeMutation.isPending ? <Spinner /> : 'Complete Trip'}
+      </button>
+
       {groupedItems.length > 0 ? (
         <div className="mb-6">
           {groupedItems.map(([storeName, storeItems]) => {
@@ -210,14 +218,6 @@ export const ActiveTripPage = () => {
       ) : (
         <EmptyState icon={ShoppingCart} title="No items in this trip" />
       )}
-
-      <button
-        onClick={handleCompleteTrip}
-        disabled={completeMutation.isPending}
-        className="flex w-full items-center justify-center py-4 bg-teal text-white rounded-2xl font-display font-bold text-base hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary transition-colors shadow-[0_3px_0_#148F72] active:translate-y-[3px] active:shadow-none"
-      >
-        {completeMutation.isPending ? <Spinner /> : 'Complete Trip'}
-      </button>
 
       {showCompleteConfirm && (
         <ConfirmDialog

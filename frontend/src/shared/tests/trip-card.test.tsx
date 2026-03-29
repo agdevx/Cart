@@ -280,13 +280,13 @@ describe('TripCard', () => {
     expect(screen.queryByText('Edit')).not.toBeInTheDocument()
   })
 
-  it('active trip card links to /shopping/{tripId}', () => {
+  it('active trip card links to /shopping/{tripId}/active', () => {
     render(
       <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
     const link = screen.getByRole('link')
-    expect(link).toHaveAttribute('href', '/shopping/trip-1')
+    expect(link).toHaveAttribute('href', '/shopping/trip-1/active')
   })
 })

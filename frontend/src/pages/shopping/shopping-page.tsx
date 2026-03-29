@@ -150,7 +150,7 @@ export const ShoppingPage = () => {
             className="w-full"
           >
             <SectionHeader
-              title={`Completed (${completedTrips.length})`}
+              title="Completed"
               action={<ChevronDown className={`w-4 h-4 text-text-tertiary transition-transform ${showCompleted ? 'rotate-180' : ''}`} />}
             />
           </button>

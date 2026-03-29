@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 import { MoreVertical, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
-import { tripDetailPath } from '@/routes'
+import { activeTripPath, tripDetailPath } from '@/routes'
 
 import { ActionCancelFormButtons } from './action-cancel-form-buttons'
 import { DropdownMenu } from './dropdown-menu'
@@ -175,9 +175,14 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
     )
   }
 
+  // In-progress trips link to active trip page; planning trips link to detail page
+  const destination = (trip.isStarted && !trip.isCompleted)
+    ? activeTripPath(trip.id)
+    : tripDetailPath(trip.id)
+
   return (
     <Link
-      to={tripDetailPath(trip.id)}
+      to={destination}
       className="block p-5 bg-surface rounded-2xl shadow-sm border-2 border-transparent hover:shadow-md hover:-translate-y-0.5 transition-all"
     >
       {cardContent}
