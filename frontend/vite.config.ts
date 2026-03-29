@@ -57,6 +57,15 @@ export default defineConfig(({ mode }) => {
         }
       })
     ],
+    build: {
+      rollupOptions: {
+        output: {
+          assetFileNames: '[ext]/[name]-[hash][extname]',
+          chunkFileNames: 'js/[name]-[hash].js',
+          entryFileNames: 'js/[name]-[hash].js',
+        },
+      },
+    },
     resolve: {
       alias: {
         '@/routes': path.resolve(__dirname, './src/routes.ts'),
