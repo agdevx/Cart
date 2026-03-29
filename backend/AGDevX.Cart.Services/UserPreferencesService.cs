@@ -19,6 +19,7 @@ public class UserPreferencesService(IUserPreferencesRepository repository) : IUs
             LocationLatitude = prefs?.LocationLatitude,
             LocationLongitude = prefs?.LocationLongitude,
             LocationDisplayName = prefs?.LocationDisplayName,
+            ShowWeatherIcons = prefs?.ShowWeatherIcons ?? true,
         };
     }
 
@@ -31,6 +32,7 @@ public class UserPreferencesService(IUserPreferencesRepository repository) : IUs
             LocationLatitude = request.LocationLatitude,
             LocationLongitude = request.LocationLongitude,
             LocationDisplayName = request.LocationDisplayName,
+            ShowWeatherIcons = request.ShowWeatherIcons ?? true,
         };
 
         var saved = await repository.CreateOrUpdate(prefs, cancellationToken);
@@ -41,6 +43,7 @@ public class UserPreferencesService(IUserPreferencesRepository repository) : IUs
             LocationLatitude = saved.LocationLatitude,
             LocationLongitude = saved.LocationLongitude,
             LocationDisplayName = saved.LocationDisplayName,
+            ShowWeatherIcons = saved.ShowWeatherIcons,
         };
     }
 }

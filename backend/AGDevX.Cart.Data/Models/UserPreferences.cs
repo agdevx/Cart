@@ -15,5 +15,7 @@ public class UserPreferences : BaseEntity
 
     public string? LocationDisplayName { get; set; }
 
+    public bool ShowWeatherIcons { get; set; } = true;
+
     public User User { get; set; } = null!;
 }

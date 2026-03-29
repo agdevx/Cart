@@ -28,6 +28,7 @@ public class UserPreferencesRepository(CartDbContext context) : IUserPreferences
             existing.LocationLatitude = preferences.LocationLatitude;
             existing.LocationLongitude = preferences.LocationLongitude;
             existing.LocationDisplayName = preferences.LocationDisplayName;
+            existing.ShowWeatherIcons = preferences.ShowWeatherIcons;
             context.UserPreferences.Update(existing);
         }
 
