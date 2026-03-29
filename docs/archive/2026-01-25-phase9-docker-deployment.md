@@ -1,6 +1,6 @@
 # Phase 9: Docker & Deployment Implementation Plan
 
-> **Status:** NOT STARTED. This plan needs review before execution — auth has changed from JWT to cookie-based since this was written.
+> **Status:** SUPERSEDED by [docs/active/2026-03-28-docker-deployment.md](../active/2026-03-28-docker-deployment.md). This plan used JWT auth and a different architecture. Do not use.
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
