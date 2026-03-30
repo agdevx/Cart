@@ -313,9 +313,10 @@ const EditForm = ({
         id="edit-quantity"
         type="number"
         autoFocus
-        min="1"
-        value={editQuantity}
-        onChange={(e) => onQuantityChange(Number(e.target.value))}
+        min="0"
+        value={editQuantity ?? ''}
+        onChange={(e) => onQuantityChange(parseInt(e.target.value, 10) || 0)}
+        onBlur={() => onQuantityChange(editQuantity ?? 0)}
         disabled={isUpdating}
         className={inputClassName}
       />

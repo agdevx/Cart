@@ -115,7 +115,7 @@ export const AddTripItemsPage = () => {
   const updateQuantity = (itemId: string, quantity: number) => {
     setSelectedItems((prev) => ({
       ...prev,
-      [itemId]: { ...prev[itemId], quantity: Math.max(1, quantity) },
+      [itemId]: { ...prev[itemId], quantity },
     }))
   }
 
@@ -274,9 +274,10 @@ export const AddTripItemsPage = () => {
                     id={`qty-${item.id}`}
                     aria-label="Quantity"
                     type="number"
-                    min={1}
-                    value={selectedItems[item.id].quantity}
-                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10) || 1)}
+                    min={0}
+                    value={selectedItems[item.id].quantity ?? ''}
+                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10) || 0)}
+                    onBlur={() => updateQuantity(item.id, selectedItems[item.id].quantity ?? 0)}
                     className="w-14 px-2 py-2 text-center border border-navy/10 rounded-xl bg-surface text-text text-sm focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
                   />
                 </div>

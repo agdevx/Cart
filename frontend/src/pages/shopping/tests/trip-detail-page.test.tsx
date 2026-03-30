@@ -228,9 +228,10 @@ describe('TripDetailPage', () => {
     render(<TripDetailPage />, { wrapper })
 
     //== Planning context defaults to expanded, so items are already visible
-    //== Open kebab menu on first item (Milk)
+    //== Items are sorted alphabetically within each store group: Bread, Milk
+    //== Open kebab menu on Milk (second item in Costco group)
     const kebabButtons = screen.getAllByLabelText('Item actions')
-    fireEvent.click(kebabButtons[0])
+    fireEvent.click(kebabButtons[1])
 
     //== Click Edit
     fireEvent.click(screen.getByText('Edit'))
@@ -256,9 +257,10 @@ describe('TripDetailPage', () => {
     render(<TripDetailPage />, { wrapper })
 
     //== Planning context defaults to expanded, items already visible
-    //== Open kebab menu on first item (Milk)
+    //== Items are sorted alphabetically within each store group: Bread, Milk
+    //== Open kebab menu on Milk (second item in Costco group)
     const kebabButtons = screen.getAllByLabelText('Item actions')
-    fireEvent.click(kebabButtons[0])
+    fireEvent.click(kebabButtons[1])
 
     //== Click Remove
     fireEvent.click(screen.getByText('Remove'))

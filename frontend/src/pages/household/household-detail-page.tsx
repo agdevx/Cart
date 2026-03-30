@@ -182,7 +182,7 @@ export const HouseholdDetailPage = () => {
       {/* Invite Code Card */}
       <div className="mb-6 p-5 bg-surface rounded-2xl shadow-sm">
         <h2 className="font-display text-sm font-semibold uppercase tracking-[1.5px] text-text-tertiary mb-3">Invite Code</h2>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <span className="text-2xl font-mono font-bold tracking-widest text-navy">
             {inviteCode || '------'}
           </span>

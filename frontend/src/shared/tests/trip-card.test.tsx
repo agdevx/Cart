@@ -103,14 +103,14 @@ describe('TripCard', () => {
     expect(screen.getByText(/Trip Date:/)).toBeInTheDocument()
   })
 
-  it('renders started trip with name and started date', () => {
+  it('renders started trip with name and trip date', () => {
     render(
       <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
     expect(screen.getByText('Weekly Groceries')).toBeInTheDocument()
-    expect(screen.getByText(/Started:/)).toBeInTheDocument()
+    expect(screen.getByText(/Trip Date:/)).toBeInTheDocument()
   })
 
   it('renders completed trip with completion date', () => {

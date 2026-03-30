@@ -384,9 +384,9 @@ describe('ActiveTripPage', () => {
     //== Expand Costco accordion to reveal items
     fireEvent.click(screen.getByText('Costco'))
 
-    //== Open kebab menu and click Edit on Milk item
+    //== Items are sorted alphabetically: Bread, Milk — open kebab on Milk (index 1)
     const kebabButtons = screen.getAllByLabelText('Item actions')
-    fireEvent.click(kebabButtons[0])
+    fireEvent.click(kebabButtons[1])
     fireEvent.click(screen.getByText('Edit'))
 
     //== Clear any calls from setup

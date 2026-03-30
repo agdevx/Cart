@@ -279,12 +279,12 @@ export const PreferencesSection = () => {
               onChange={(e) => setCitySearch(e.target.value)}
               onKeyDown={handleCitySearchKeyDown}
               placeholder="Search city..."
-              className="flex-1 px-3 py-2 border border-navy/10 rounded-xl bg-surface text-sm text-text placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+              className="flex-1 min-w-0 px-3 py-2 border border-navy/10 rounded-xl bg-surface text-sm text-text placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
             />
             <button
               onClick={() => void handleCitySearch()}
               disabled={isSearching || !citySearch.trim()}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 bg-teal text-white rounded-xl text-sm font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
+              className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-teal text-white rounded-xl text-sm font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
             >
               {isSearching ? <Spinner /> : <Search className="w-3.5 h-3.5" />}
               Search

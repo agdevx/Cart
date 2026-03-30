@@ -112,8 +112,6 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
 
   const dateLabel = trip.isCompleted
     ? `Completed: ${trip.completedAt ? new Date(trip.completedAt).toLocaleDateString() : 'N/A'}`
-    : trip.isStarted
-    ? `Started: ${trip.startedAt ? new Date(trip.startedAt).toLocaleDateString() : 'N/A'}`
     : `Trip Date: ${plannedDateLabel}`
 
   const cardContent = (

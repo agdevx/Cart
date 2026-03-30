@@ -22,6 +22,7 @@ import { Spinner } from '@/shared/spinner'
 import { StoreAccordion } from '@/shared/store-accordion'
 import { TripItemRow } from '@/shared/trip-item-row'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
+import { sortItems } from '@/utils/sort-items'
 
 export const TripDetailPage = () => {
   const { tripId } = useParams<{ tripId: string }>()
@@ -48,11 +49,13 @@ export const TripDetailPage = () => {
       const key = item.storeName ?? 'Any Store'
       ;(groups[key] ??= []).push(item)
     })
-    return Object.entries(groups).sort(([a], [b]) => {
-      if (a === 'Any Store') return 1
-      if (b === 'Any Store') return -1
-      return a.localeCompare(b)
-    })
+    return Object.entries(groups)
+      .map(([storeName, storeItems]) => [storeName, sortItems(storeItems, 'itemName')] as const)
+      .sort(([a], [b]) => {
+        if (a === 'Any Store') return 1
+        if (b === 'Any Store') return -1
+        return a.localeCompare(b)
+      })
   }, [tripItems])
 
   const handleStartShopping = async () => {
