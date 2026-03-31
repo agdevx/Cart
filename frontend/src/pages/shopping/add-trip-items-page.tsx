@@ -6,7 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { ArrowLeft, Search } from 'lucide-react'
 
-import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
+import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
@@ -32,10 +32,9 @@ export const AddTripItemsPage = () => {
   const navigate = useNavigate()
   const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
   const { data: inventory } = useInventoryQuery()
-  const { data: households } = useHouseholdsQuery()
+  const { data: household } = useHouseholdQuery()
   const { data: tripItems } = useTripItemsQuery(tripId!)
-  const householdIds = useMemo(() => households?.map((h) => h.id) ?? [], [households])
-  const { data: stores } = useStoresQuery(householdIds)
+  const { data: stores } = useStoresQuery(household?.id ?? null)
   const addTripItemMutation = useAddTripItemMutation()
 
   const [searchText, setSearchText] = useState('')
@@ -67,8 +66,8 @@ export const AddTripItemsPage = () => {
   }, [stores, sourceFilter])
 
   const storeDisplayNames = useMemo(
-    () => getStoreDisplayNames(stores ?? [], households ?? []),
-    [stores, households]
+    () => getStoreDisplayNames(stores ?? [], household ?? null),
+    [stores, household]
   )
 
   // Filter inventory items based on source filter, store filter, search text, and existing trip items
@@ -150,7 +149,6 @@ export const AddTripItemsPage = () => {
 
   const getSourceLabel = (householdId: string | null): string => {
     if (!householdId) return 'Personal'
-    const household = households?.find((h) => h.id === householdId)
     return household?.name || 'Household'
   }
 
@@ -205,7 +203,7 @@ export const AddTripItemsPage = () => {
         <ScopeFilter
           value={sourceFilter}
           onChange={setSourceFilter}
-          households={households}
+          household={household}
         />
 
         {/* Store filter */}

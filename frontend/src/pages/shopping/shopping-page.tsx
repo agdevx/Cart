@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { ChevronDown, ShoppingCart } from 'lucide-react'
 
+import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
 import { useDeleteTripMutation } from '@/apis/agdevx-cart-api/trip/delete-trip.mutation'
 import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.mutation'
@@ -22,6 +23,7 @@ import { TripCreateForm } from './trip-create-form'
 
 export const ShoppingPage = () => {
   const navigate = useNavigate()
+  const { data: household } = useHouseholdQuery()
   const { data: trips, isLoading } = useTripsQuery()
   const createMutation = useCreateTripMutation()
   const updateMutation = useUpdateTripMutation()
@@ -41,9 +43,9 @@ export const ShoppingPage = () => {
       return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
     }) || []
 
-  const handleCreateTrip = async ({ name, tripDate }: { name: string; tripDate: string | null }) => {
+  const handleCreateTrip = async ({ name, tripDate, householdId }: { name: string; tripDate: string | null; householdId: string | null }) => {
     try {
-      const newTrip = await createMutation.mutateAsync({ name, tripDate })
+      const newTrip = await createMutation.mutateAsync({ name, tripDate, householdId })
       setShowCreateForm(false)
       navigate(tripDetailPath(newTrip.id))
     } catch {
@@ -88,6 +90,7 @@ export const ShoppingPage = () => {
       {showCreateForm && (
         <TripCreateForm
           key={formKey}
+          household={household}
           onSubmit={handleCreateTrip}
           onCancel={() => setShowCreateForm(false)}
           isPending={createMutation.isPending}

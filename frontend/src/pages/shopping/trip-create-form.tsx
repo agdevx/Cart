@@ -6,25 +6,29 @@ import { useMemo, useState } from 'react'
 import { useFieldValidation } from '@/services/use-field-validation.service'
 import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { FormField } from '@/shared/form-field'
+import { ScopeRadio } from '@/shared/scope-radio'
 import { isRequired } from '@/utils/validation-rules'
 
 export interface TripCreateFormData {
   name: string
   tripDate: string | null
+  householdId: string | null
 }
 
 interface TripCreateFormProps {
+  readonly household: { id: string; name: string | null } | null | undefined
   readonly isPending: boolean
   readonly onSubmit: (data: TripCreateFormData) => void
   readonly onCancel: () => void
 }
 
-export const TripCreateForm = ({ isPending, onSubmit, onCancel }: TripCreateFormProps) => {
+export const TripCreateForm = ({ household, isPending, onSubmit, onCancel }: TripCreateFormProps) => {
   const [tripName, setTripName] = useState('')
   const [tripDate, setTripDate] = useState(() => {
     const now = new Date()
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
   })
+  const [tripScope, setTripScope] = useState<string>('personal')
 
   const schema = useMemo(() => ({
     name: [isRequired('Trip name')],
@@ -41,7 +45,11 @@ export const TripCreateForm = ({ isPending, onSubmit, onCancel }: TripCreateForm
       return
     }
 
-    onSubmit({ name: tripName.trim(), tripDate: tripDate || null })
+    onSubmit({
+      name: tripName.trim(),
+      tripDate: tripDate || null,
+      householdId: tripScope === 'personal' ? null : tripScope,
+    })
   }
 
   return (
@@ -67,6 +75,15 @@ export const TripCreateForm = ({ isPending, onSubmit, onCancel }: TripCreateForm
           value={tripDate}
           onChange={(e) => setTripDate(e.target.value)}
           className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+          disabled={isPending}
+        />
+      </FormField>
+
+      <FormField label="Scope" htmlFor="tripScope">
+        <ScopeRadio
+          value={tripScope}
+          onChange={setTripScope}
+          household={household}
           disabled={isPending}
         />
       </FormField>

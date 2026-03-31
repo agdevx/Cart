@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ShoppingCart } from 'lucide-react';
 
-import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query';
+import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query';
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query';
 import { useCheckTripItemMutation } from '@/apis/agdevx-cart-api/trip/check-trip-item.mutation';
 import { useCompleteTripMutation } from '@/apis/agdevx-cart-api/trip/complete-trip.mutation';
@@ -34,16 +34,15 @@ export const ActiveTripPage = () => {
 	const queryClient = useQueryClient();
 	const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!);
 	const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!);
-	const { data: households } = useHouseholdsQuery();
-	const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households]);
-	const { data: stores } = useStoresQuery(householdIds);
+	const { data: household } = useHouseholdQuery();
+	const { data: stores } = useStoresQuery(household?.id ?? null);
 	const { isExpanded, toggleStore, autoCollapseIfAllChecked, cleanup } = useStoreAccordionState(tripId!, 'shopping', trip?.isCompleted ?? false);
 	const checkMutation = useCheckTripItemMutation();
 	const completeMutation = useCompleteTripMutation();
 	const updateMutation = useUpdateTripItemMutation();
 	const deleteMutation = useDeleteTripItemMutation();
 
-	const storeDisplayNames = useMemo(() => getStoreDisplayNames(stores ?? [], households ?? []), [stores, households]);
+	const storeDisplayNames = useMemo(() => getStoreDisplayNames(stores ?? [], household ?? null), [stores, household]);
 
 	const groupedItems = useMemo(() => {
 		if (!tripItems) return [];

@@ -6,7 +6,7 @@ import { useNavigate,useParams } from 'react-router-dom'
 
 import { ArrowLeft, ShoppingCart } from 'lucide-react'
 
-import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
+import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useDeleteTripItemMutation } from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
 import { useStartTripMutation } from '@/apis/agdevx-cart-api/trip/start-trip.mutation'
@@ -29,17 +29,16 @@ export const TripDetailPage = () => {
   const navigate = useNavigate()
   const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
   const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!)
-  const { data: households } = useHouseholdsQuery()
-  const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
-  const { data: stores } = useStoresQuery(householdIds)
+  const { data: household } = useHouseholdQuery()
+  const { data: stores } = useStoresQuery(household?.id ?? null)
   const { isExpanded, toggleStore } = useStoreAccordionState(tripId!, 'planning', trip?.isCompleted ?? false)
   const startMutation = useStartTripMutation()
   const updateMutation = useUpdateTripItemMutation()
   const deleteMutation = useDeleteTripItemMutation()
 
   const storeDisplayNames = useMemo(
-    () => getStoreDisplayNames(stores ?? [], households ?? []),
-    [stores, households]
+    () => getStoreDisplayNames(stores ?? [], household ?? null),
+    [stores, household]
   )
 
   const groupedItems = useMemo(() => {
