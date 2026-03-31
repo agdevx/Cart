@@ -63,8 +63,7 @@ describe('useUpdateHouseholdMutation', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['households'] })
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['household', 'h1'] })
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['household'] })
   })
 
   it('handles update error', async () => {

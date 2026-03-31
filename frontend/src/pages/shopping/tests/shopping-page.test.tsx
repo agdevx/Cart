@@ -39,7 +39,6 @@ const mockTrips: Trip[] = [
   {
     id: 'trip1',
     name: 'Weekly Groceries',
-    createdByUserId: 'user1',
     householdId: null,
     isStarted: true,
     startedAt: '2024-01-15',
@@ -48,13 +47,12 @@ const mockTrips: Trip[] = [
     tripDate: null,
     createdBy: 'user1',
     createdDate: '2024-01-15',
-    modifiedBy: null,
+    modifiedBy: 'user1',
     modifiedDate: null,
   },
   {
     id: 'trip2',
     name: 'Holiday Shopping',
-    createdByUserId: 'user1',
     householdId: null,
     isStarted: true,
     startedAt: '2024-01-15',
@@ -69,7 +67,6 @@ const mockTrips: Trip[] = [
   {
     id: 'trip3',
     name: 'Planned Trip',
-    createdByUserId: 'user1',
     householdId: null,
     isStarted: false,
     startedAt: null,
@@ -78,7 +75,7 @@ const mockTrips: Trip[] = [
     tripDate: null,
     createdBy: 'user1',
     createdDate: '2024-01-22',
-    modifiedBy: null,
+    modifiedBy: 'user1',
     modifiedDate: null,
   },
 ]
@@ -275,7 +272,6 @@ describe('ShoppingPage', () => {
     const createdTrip: Trip = {
       id: 'new-trip-123',
       name: 'Weekend Run',
-      createdByUserId: 'user1',
       householdId: null,
       isStarted: false,
       startedAt: null,
@@ -284,7 +280,7 @@ describe('ShoppingPage', () => {
       tripDate: null,
       createdBy: 'user1',
       createdDate: '2024-02-01',
-      modifiedBy: null,
+      modifiedBy: 'user1',
       modifiedDate: null,
     }
 

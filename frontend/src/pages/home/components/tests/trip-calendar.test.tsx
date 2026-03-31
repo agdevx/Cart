@@ -15,7 +15,6 @@ const emptyWeather: WeatherByDate = {}
 const makeTrip = (overrides: Partial<Trip>): Trip => ({
   id: 'trip-1',
   name: 'Test Trip',
-  createdByUserId: 'user-1',
   householdId: null,
   isStarted: false,
   startedAt: null,
@@ -24,7 +23,7 @@ const makeTrip = (overrides: Partial<Trip>): Trip => ({
   tripDate: null,
   createdBy: 'user-1',
   createdDate: '2026-01-01',
-  modifiedBy: null,
+  modifiedBy: 'user-1',
   modifiedDate: null,
   ...overrides,
 })

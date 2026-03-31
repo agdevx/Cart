@@ -62,7 +62,7 @@ describe('useDeleteHouseholdMutation', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['households'] })
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['household'] })
   })
 
   it('handles delete error', async () => {

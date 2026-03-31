@@ -13,7 +13,6 @@ import { CalendarDayPopover } from '../calendar-day-popover'
 const makeTrip = (overrides: Partial<Trip>): Trip => ({
   id: 'trip-1',
   name: 'Weekly Groceries',
-  createdByUserId: 'user-1',
   householdId: null,
   isStarted: false,
   startedAt: null,
@@ -22,7 +21,7 @@ const makeTrip = (overrides: Partial<Trip>): Trip => ({
   tripDate: '2026-03-31',
   createdBy: 'user-1',
   createdDate: '2026-01-01',
-  modifiedBy: null,
+  modifiedBy: 'user-1',
   modifiedDate: null,
   ...overrides,
 })

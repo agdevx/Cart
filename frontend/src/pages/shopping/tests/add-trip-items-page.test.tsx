@@ -41,7 +41,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 const mockTrip: Trip = {
   id: 'trip1',
   name: 'Weekly Groceries',
-  createdByUserId: 'user1',
   householdId: null,
   isStarted: false,
   startedAt: null,
@@ -50,7 +49,7 @@ const mockTrip: Trip = {
   tripDate: null,
   createdBy: 'user1',
   createdDate: '2024-01-15',
-  modifiedBy: null,
+  modifiedBy: 'user1',
   modifiedDate: null,
 }
 
@@ -70,7 +69,7 @@ const mockTripItems: TripItem[] = [
     isHouseholdItem: false,
     createdBy: 'user1',
     createdDate: '2024-01-15',
-    modifiedBy: null,
+    modifiedBy: 'user1',
     modifiedDate: null,
   },
 ]

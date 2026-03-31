@@ -21,9 +21,8 @@ export const useUpdateHouseholdMutation = () => {
         body: JSON.stringify({ name: request.name }),
       })
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['households'] })
-      queryClient.invalidateQueries({ queryKey: ['household', variables.householdId] })
+    onSuccess: (_, _variables) => {
+      queryClient.invalidateQueries({ queryKey: ['household'] })
     },
   })
 }

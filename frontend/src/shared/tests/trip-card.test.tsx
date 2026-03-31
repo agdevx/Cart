@@ -16,7 +16,6 @@ import { TripCard } from '../trip-card'
 const planningTrip: Trip = {
   id: 'trip-0',
   name: 'Planning Trip',
-  createdByUserId: 'user-1',
   isStarted: false,
   startedAt: null,
   isCompleted: false,
@@ -24,7 +23,7 @@ const planningTrip: Trip = {
   tripDate: null,
   createdBy: 'user-1',
   createdDate: '2026-02-14T10:00:00Z',
-  modifiedBy: null,
+  modifiedBy: 'user-1',
   householdId: null,
   modifiedDate: null,
 }
@@ -32,7 +31,6 @@ const planningTrip: Trip = {
 const activeTrip: Trip = {
   id: 'trip-1',
   name: 'Weekly Groceries',
-  createdByUserId: 'user-1',
   isStarted: true,
   startedAt: '2026-02-15T10:00:00Z',
   isCompleted: false,
@@ -40,7 +38,7 @@ const activeTrip: Trip = {
   tripDate: null,
   createdBy: 'user-1',
   createdDate: '2026-02-15T10:00:00Z',
-  modifiedBy: null,
+  modifiedBy: 'user-1',
   householdId: null,
   modifiedDate: null,
 }
@@ -48,7 +46,6 @@ const activeTrip: Trip = {
 const personalTrip: Trip = {
   id: 'trip-3',
   name: 'Personal Run',
-  createdByUserId: 'user-1',
   isStarted: true,
   startedAt: '2026-02-15T10:00:00Z',
   isCompleted: false,
@@ -56,7 +53,7 @@ const personalTrip: Trip = {
   tripDate: null,
   createdBy: 'user-1',
   createdDate: '2026-02-15T10:00:00Z',
-  modifiedBy: null,
+  modifiedBy: 'user-1',
   householdId: null,
   modifiedDate: null,
 }
@@ -64,7 +61,6 @@ const personalTrip: Trip = {
 const completedTrip: Trip = {
   id: 'trip-2',
   name: 'Costco Run',
-  createdByUserId: 'user-1',
   isStarted: true,
   startedAt: '2026-02-18T10:00:00Z',
   isCompleted: true,
@@ -72,7 +68,7 @@ const completedTrip: Trip = {
   tripDate: null,
   createdBy: 'user-1',
   createdDate: '2026-02-18T10:00:00Z',
-  modifiedBy: null,
+  modifiedBy: 'user-1',
   householdId: null,
   modifiedDate: null,
 }

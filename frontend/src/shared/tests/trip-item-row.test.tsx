@@ -23,7 +23,7 @@ const mockTripItem: TripItem = {
   isHouseholdItem: false,
   createdBy: 'user1',
   createdDate: '2024-01-01',
-  modifiedBy: null,
+  modifiedBy: 'user1',
   modifiedDate: null,
 }
 
