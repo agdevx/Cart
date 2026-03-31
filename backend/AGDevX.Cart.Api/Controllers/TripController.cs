@@ -1,10 +1,9 @@
-// ABOUTME: API controller for trip management operations including lifecycle and collaboration
-// ABOUTME: Provides endpoints for CRUD operations, completing/reopening trips, and managing collaborators
+// ABOUTME: API controller for trip management operations including lifecycle
+// ABOUTME: Provides endpoints for CRUD operations, completing/reopening trips
 
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Shared.DTOs;
 using AGDevX.Cart.Auth.Extensions;
-using AGDevX.Cart.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,7 +36,8 @@ public class TripController(ITripService tripService) : ControllerBase
     {
         try
         {
-            var trip = await tripService.GetById(id, cancellationToken);
+            var userId = User.GetUserId();
+            var trip = await tripService.GetById(id, userId, cancellationToken);
 
             if (trip == null)
             {
@@ -52,14 +52,14 @@ public class TripController(ITripService tripService) : ControllerBase
         }
     }
 
-    //== Create a new trip
+    //== Create a new trip (personal or household-scoped)
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateTripRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var trip = await tripService.CreateTrip(request.Name, request.TripDate, userId, cancellationToken);
+            var trip = await tripService.CreateTrip(request.Name, request.TripDate, request.HouseholdId, userId, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = trip.Id }, trip);
         }
         catch (UnauthorizedAccessException ex)
@@ -157,46 +157,6 @@ public class TripController(ITripService tripService) : ControllerBase
             var userId = User.GetUserId();
             var trip = await tripService.ReopenTrip(id, userId, cancellationToken);
             return Ok(trip);
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return NotFound(new { errorCode = "NOT_FOUND", message = ex.Message });
-        }
-    }
-
-    //== Add a collaborator to a trip
-    [HttpPost("{id}/collaborators")]
-    public async Task<IActionResult> AddCollaborator(Guid id, [FromBody] AddCollaboratorRequest request, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var userId = User.GetUserId();
-            await tripService.AddCollaborator(id, userId, request.UserId!.Value, cancellationToken);
-            return NoContent();
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return NotFound(new { errorCode = "NOT_FOUND", message = ex.Message });
-        }
-    }
-
-    //== Remove a collaborator from a trip
-    [HttpDelete("{id}/collaborators/{collaboratorUserId}")]
-    public async Task<IActionResult> RemoveCollaborator(Guid id, Guid collaboratorUserId, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var userId = User.GetUserId();
-            await tripService.RemoveCollaborator(id, userId, collaboratorUserId, cancellationToken);
-            return NoContent();
         }
         catch (UnauthorizedAccessException ex)
         {
