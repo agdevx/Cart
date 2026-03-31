@@ -24,7 +24,7 @@ import { Spinner } from '@/shared/spinner'
 import { StoreAccordion } from '@/shared/store-accordion'
 import { TripItemRow } from '@/shared/trip-item-row'
 import { fireCompletionConfetti } from '@/utils/confetti'
-import { sortItems } from '@/utils/sort-items'
+import { groupTripItemsByStore } from '@/utils/group-trip-items-by-store'
 
 export const ActiveTripPage = () => {
   const { tripId } = useParams<{ tripId: string }>()
@@ -41,18 +41,7 @@ export const ActiveTripPage = () => {
 
   const groupedItems = useMemo(() => {
     if (!tripItems) return []
-    const groups: Record<string, typeof tripItems> = {}
-    tripItems.forEach((item) => {
-      const key = item.storeName ?? 'Any Store'
-      ;(groups[key] ??= []).push(item)
-    })
-    return Object.entries(groups)
-      .map(([storeName, storeItems]) => [storeName, sortItems(storeItems, 'itemName')] as const)
-      .sort(([a], [b]) => {
-        if (a === 'Any Store') return 1
-        if (b === 'Any Store') return -1
-        return a.localeCompare(b)
-      })
+    return groupTripItemsByStore(tripItems)
   }, [tripItems])
 
   // Auto-collapse store groups where all items are checked
