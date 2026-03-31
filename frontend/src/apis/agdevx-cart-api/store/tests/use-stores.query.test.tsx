@@ -60,7 +60,7 @@ describe('useStoresQuery', () => {
         json: async () => [mockHouseholdStore],
       } as unknown as Response)
 
-    const { result } = renderHook(() => useStoresQuery(['h1']), { wrapper })
+    const { result } = renderHook(() => useStoresQuery('h1'), { wrapper })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
@@ -69,7 +69,7 @@ describe('useStoresQuery', () => {
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/store/household/h1')
   })
 
-  it('fetches only personal stores when no household IDs provided', async () => {
+  it('fetches only personal stores when no household ID provided', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
       user: { id: 'user1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
@@ -82,7 +82,7 @@ describe('useStoresQuery', () => {
       json: async () => [mockPersonalStore],
     } as unknown as Response)
 
-    const { result } = renderHook(() => useStoresQuery([]), { wrapper })
+    const { result } = renderHook(() => useStoresQuery(null), { wrapper })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
@@ -101,7 +101,7 @@ describe('useStoresQuery', () => {
 
     const apiFetchSpy = vi.spyOn(apiFetchModule, 'apiFetch')
 
-    const { result } = renderHook(() => useStoresQuery([]), { wrapper })
+    const { result } = renderHook(() => useStoresQuery(null), { wrapper })
 
     expect(result.current.isPending).toBe(true)
     expect(apiFetchSpy).not.toHaveBeenCalled()
@@ -119,7 +119,7 @@ describe('useStoresQuery', () => {
       new ApiError(500, 'Internal Server Error', null)
     )
 
-    const { result } = renderHook(() => useStoresQuery([]), { wrapper })
+    const { result } = renderHook(() => useStoresQuery(null), { wrapper })
 
     await waitFor(
       () => expect(result.current.isError).toBe(true),

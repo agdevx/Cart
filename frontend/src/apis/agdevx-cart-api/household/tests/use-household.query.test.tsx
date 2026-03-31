@@ -23,6 +23,8 @@ describe('useHouseholdQuery', () => {
     const mockHousehold: Household = {
       id: 'h1',
       name: 'Test Household',
+      owner1UserId: 'user1',
+      owner2UserId: null,
       createdBy: 'user1',
       createdDate: '2024-01-01',
       modifiedBy: null,
@@ -41,12 +43,12 @@ describe('useHouseholdQuery', () => {
       json: async () => mockHousehold,
     } as unknown as Response)
 
-    const { result } = renderHook(() => useHouseholdQuery('h1'), { wrapper })
+    const { result } = renderHook(() => useHouseholdQuery(), { wrapper })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockHousehold)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/household/h1')
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/household')
   })
 
   it('handles fetch error', async () => {
@@ -61,7 +63,7 @@ describe('useHouseholdQuery', () => {
       new Error('Network error')
     )
 
-    const { result } = renderHook(() => useHouseholdQuery('h1'), { wrapper })
+    const { result } = renderHook(() => useHouseholdQuery(), { wrapper })
 
     await waitFor(
       () => expect(result.current.isError).toBe(true),

@@ -1,9 +1,13 @@
 import { BrowserRouter } from 'react-router-dom'
 
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { BottomNav } from './bottom-nav'
+
+vi.mock('@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query', () => ({
+  useUserPreferencesQuery: () => ({ data: { showHouseholdPage: true } }),
+}))
 
 const renderWithRouter = (initialRoute = '/shopping') => {
   window.history.pushState({}, '', initialRoute)

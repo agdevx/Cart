@@ -313,6 +313,7 @@ describe('ShoppingPage', () => {
       expect(mutateAsyncFn).toHaveBeenCalledWith({
         name: 'Weekend Run',
         tripDate: expectedDate,
+        householdId: null,
       })
       expect(mockNavigate).toHaveBeenCalledWith('/shopping/new-trip-123')
     })

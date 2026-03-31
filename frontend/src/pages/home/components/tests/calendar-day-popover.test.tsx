@@ -18,7 +18,7 @@ const makeTrip = (overrides: Partial<Trip>): Trip => ({
   startedAt: null,
   isCompleted: false,
   completedAt: null,
-  tripDate: '2026-03-29',
+  tripDate: '2026-03-31',
   createdBy: 'user-1',
   createdDate: '2026-01-01',
   modifiedBy: null,
@@ -27,7 +27,7 @@ const makeTrip = (overrides: Partial<Trip>): Trip => ({
 })
 
 const mockWeather: DailyWeather = {
-  date: '2026-03-29',
+  date: '2026-03-31',
   weatherCode: 0,
   temperatureMax: 68,
 }
@@ -44,7 +44,7 @@ describe('CalendarDayPopover', () => {
   it('shows formatted date in the header', () => {
     render(
       <CalendarDayPopover
-        date="2026-03-29"
+        date="2026-03-31"
         trips={[]}
         weather={null}
         onClose={mockOnClose}
@@ -53,14 +53,14 @@ describe('CalendarDayPopover', () => {
       />
     )
 
-    //== "Sun, March 29" — weekday depends on the actual date
-    expect(screen.getByText(/March 29/)).toBeInTheDocument()
+    //== "Tue, March 31" — weekday depends on the actual date
+    expect(screen.getByText(/March 31/)).toBeInTheDocument()
   })
 
   it('shows weather info when weather is provided', () => {
     render(
       <CalendarDayPopover
-        date="2026-03-29"
+        date="2026-03-31"
         trips={[]}
         weather={mockWeather}
         onClose={mockOnClose}
@@ -81,7 +81,7 @@ describe('CalendarDayPopover', () => {
 
     render(
       <CalendarDayPopover
-        date="2026-03-29"
+        date="2026-03-31"
         trips={trips}
         weather={null}
         onClose={mockOnClose}
@@ -97,7 +97,7 @@ describe('CalendarDayPopover', () => {
   it('shows "Plan a trip" when no trips exist', () => {
     render(
       <CalendarDayPopover
-        date="2026-03-29"
+        date="2026-03-31"
         trips={[]}
         weather={null}
         onClose={mockOnClose}
@@ -114,7 +114,7 @@ describe('CalendarDayPopover', () => {
 
     render(
       <CalendarDayPopover
-        date="2026-03-29"
+        date="2026-03-31"
         trips={trips}
         weather={null}
         onClose={mockOnClose}
@@ -132,7 +132,7 @@ describe('CalendarDayPopover', () => {
 
     render(
       <CalendarDayPopover
-        date="2026-03-29"
+        date="2026-03-31"
         trips={trips}
         weather={null}
         onClose={mockOnClose}
@@ -151,7 +151,7 @@ describe('CalendarDayPopover', () => {
 
     render(
       <CalendarDayPopover
-        date="2026-03-29"
+        date="2026-03-31"
         trips={[]}
         weather={null}
         onClose={mockOnClose}
@@ -162,7 +162,7 @@ describe('CalendarDayPopover', () => {
 
     await user.click(screen.getByText('Plan a trip'))
 
-    expect(mockOnPlanTrip).toHaveBeenCalledWith('2026-03-29')
+    expect(mockOnPlanTrip).toHaveBeenCalledWith('2026-03-31')
   })
 
   it('calls onClose when the backdrop is clicked', async () => {
@@ -170,7 +170,7 @@ describe('CalendarDayPopover', () => {
 
     render(
       <CalendarDayPopover
-        date="2026-03-29"
+        date="2026-03-31"
         trips={[]}
         weather={null}
         onClose={mockOnClose}

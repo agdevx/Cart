@@ -8,7 +8,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
+import * as householdQueryModule from '@/apis/agdevx-cart-api/household/use-household.query'
 import type { Household } from '@/apis/agdevx-cart-api/models/household'
 import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
@@ -106,16 +106,16 @@ const mockStores: Store[] = [
   },
 ]
 
-const mockHouseholds: Household[] = [
-  {
-    id: 'hh1',
-    name: 'Test Household',
-    createdBy: 'user1',
-    createdDate: '2024-01-01',
-    modifiedBy: null,
-    modifiedDate: null,
-  },
-]
+const mockHousehold: Household = {
+  id: 'hh1',
+  name: 'Test Household',
+  owner1UserId: 'user1',
+  owner2UserId: null,
+  createdBy: 'user1',
+  createdDate: '2024-01-01',
+  modifiedBy: null,
+  modifiedDate: null,
+}
 
 const checkMutateFn = vi.fn()
 const completeMutateAsyncFn = vi.fn()
@@ -159,10 +159,10 @@ const setupMocks = () => {
     isLoading: false,
   } as unknown as UseQueryResult<Store[]>)
 
-  vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
-    data: mockHouseholds,
+  vi.spyOn(householdQueryModule, 'useHouseholdQuery').mockReturnValue({
+    data: mockHousehold,
     isLoading: false,
-  } as unknown as UseQueryResult<Household[]>)
+  } as unknown as UseQueryResult<Household | null>)
 }
 
 describe('ActiveTripPage', () => {

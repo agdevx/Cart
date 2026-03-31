@@ -6,7 +6,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
+import * as householdQueryModule from '@/apis/agdevx-cart-api/household/use-household.query'
 import type { Household } from '@/apis/agdevx-cart-api/models/household'
 import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import * as createStoreModule from '@/apis/agdevx-cart-api/store/create-store.mutation'
@@ -17,9 +17,16 @@ import { queryClient } from '@/apis/tanstack-query/query-client'
 
 import { PantryStoresView } from '../pantry-stores-view'
 
-const mockHouseholds: Household[] = [
-  { id: 'h1', name: 'Smith Family', createdBy: null, createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
-]
+const mockHousehold: Household = {
+  id: 'h1',
+  name: 'Smith Family',
+  owner1UserId: 'u1',
+  owner2UserId: null,
+  createdBy: null,
+  createdDate: '2024-01-01',
+  modifiedBy: null,
+  modifiedDate: null,
+}
 
 const mockStores: Store[] = [
   { id: 'hs1', name: 'Costco', householdId: 'h1', userId: null, createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
@@ -53,21 +60,21 @@ const renderView = (
 
 const setupMocks = (options?: {
   stores?: Store[]
-  households?: Household[]
+  household?: Household | null
   storesLoading?: boolean
-  householdsLoading?: boolean
+  householdLoading?: boolean
 }) => {
   const {
     stores = mockStores,
-    households = mockHouseholds,
+    household = mockHousehold,
     storesLoading = false,
-    householdsLoading = false,
+    householdLoading = false,
   } = options || {}
 
-  vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
-    data: householdsLoading ? undefined : households,
-    isLoading: householdsLoading,
-  } as UseQueryResult<Household[]>)
+  vi.spyOn(householdQueryModule, 'useHouseholdQuery').mockReturnValue({
+    data: householdLoading ? undefined : household,
+    isLoading: householdLoading,
+  } as UseQueryResult<Household | null>)
 
   vi.spyOn(storesQueryModule, 'useStoresQuery').mockReturnValue({
     data: storesLoading ? undefined : stores,
@@ -97,7 +104,7 @@ describe('PantryStoresView', () => {
   })
 
   it('renders loading state', () => {
-    setupMocks({ storesLoading: true, householdsLoading: true })
+    setupMocks({ storesLoading: true, householdLoading: true })
 
     const { container } = renderView()
 
@@ -136,7 +143,7 @@ describe('PantryStoresView', () => {
     renderView('all', true)
 
     expect(screen.getByLabelText('Store Name')).toBeInTheDocument()
-    expect(screen.getByLabelText('Scope')).toBeInTheDocument()
+    expect(screen.getByText('Scope')).toBeInTheDocument()
   })
 
   it('creates a store via the inline form', async () => {
@@ -292,8 +299,8 @@ describe('PantryStoresView', () => {
     const nameInput = screen.getByLabelText('Edit store name')
     expect(nameInput).toHaveValue('Costco')
 
-    //== Scope dropdown pre-populated (household store -> should show household id)
-    expect(screen.getByLabelText('Edit scope')).toBeInTheDocument()
+    //== Scope radio group should be visible
+    expect(screen.getByText('Scope')).toBeInTheDocument()
 
     //== Save/Cancel buttons visible
     expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument()
@@ -352,11 +359,8 @@ describe('PantryStoresView', () => {
     fireEvent.click(kebabButtons[0])
     fireEvent.click(screen.getByText('Edit'))
 
-    //== Change scope from personal to household
-    const scopeButton = screen.getByLabelText('Edit scope')
-    fireEvent.click(scopeButton)
-    //== Click the household option in the ScopeSelect dropdown (contains "Household" description)
-    fireEvent.click(screen.getByText(/Household/))
+    //== Change scope from personal to household via radio button
+    fireEvent.click(screen.getByRole('radio', { name: 'Smith Family Household' }))
 
     //== Click Save
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
