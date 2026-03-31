@@ -1,5 +1,5 @@
-// ABOUTME: Repository implementation for Trip entities with EF Core including navigation property loading
-// ABOUTME: and collaborator management with authorization checks for creator and collaborator access
+// ABOUTME: Repository implementation for Trip entities with scope-based authorization
+// ABOUTME: Personal trips check CreatedBy, household trips check HouseholdId membership
 using AGDevX.Cart.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,16 +13,15 @@ public class TripRepository(CartDbContext context) : ITripRepository
                                   .ThenInclude(ti => ti.InventoryItem)
                                   .Include(t => t.Items)
                                   .ThenInclude(ti => ti.Store)
-                                  .Include(t => t.Collaborators)
                                   .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
     }
 
-    public async Task<IEnumerable<Trip>> GetUserTrips(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Trip>> GetUserTrips(Guid userId, Guid? userHouseholdId, CancellationToken cancellationToken = default)
     {
-        var userIdString = userId.ToString();
         return await context.Trips.Include(t => t.Items)
-                                  .Include(t => t.Collaborators)
-                                  .Where(t => t.CreatedBy == userIdString || t.Collaborators.Any(c => c.UserId == userId))
+                                  .Where(t =>
+                                      (t.CreatedBy == userId && t.HouseholdId == null) ||
+                                      (userHouseholdId != null && t.HouseholdId == userHouseholdId))
                                   .ToListAsync(cancellationToken);
     }
 
@@ -43,6 +42,7 @@ public class TripRepository(CartDbContext context) : ITripRepository
     public async Task Delete(Guid id, CancellationToken cancellationToken = default)
     {
         var trip = await context.Trips.FindAsync(new object[] { id }, cancellationToken);
+
         if (trip != null)
         {
             context.Trips.Remove(trip);
@@ -50,44 +50,39 @@ public class TripRepository(CartDbContext context) : ITripRepository
         }
     }
 
-    public async Task<bool> IsUserCollaborator(Guid tripId, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<bool> HasTripAccess(Guid tripId, Guid userId, Guid? userHouseholdId, CancellationToken cancellationToken = default)
     {
-        //== Check if user is creator OR in collaborators collection
-        var trip = await context.Trips.Include(t => t.Collaborators)
-                                      .FirstOrDefaultAsync(t => t.Id == tripId, cancellationToken);
+        var trip = await context.Trips.FindAsync(new object[] { tripId }, cancellationToken);
 
         if (trip == null)
         {
             return false;
         }
 
-        var userIdString = userId.ToString();
-        return trip.CreatedBy == userIdString ||
-               trip.Collaborators.Any(c => c.UserId == userId);
-    }
-
-    public async Task AddCollaborator(Guid tripId, Guid userId, CancellationToken cancellationToken = default)
-    {
-        var collaborator = new TripCollaborator
+        //== Personal trip: only the creator has access
+        if (trip.HouseholdId == null)
         {
-            TripId = tripId,
-            UserId = userId,
-            Trip = null!,
-            User = null!
-        };
-
-        context.TripCollaborators.Add(collaborator);
-        await context.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task RemoveCollaborator(Guid tripId, Guid userId, CancellationToken cancellationToken = default)
-    {
-        var collaborator = await context.TripCollaborators.FirstOrDefaultAsync(c => c.TripId == tripId && c.UserId == userId, cancellationToken);
-
-        if (collaborator != null)
-        {
-            context.TripCollaborators.Remove(collaborator);
-            await context.SaveChangesAsync(cancellationToken);
+            return trip.CreatedBy == userId;
         }
+
+        //== Household trip: any member of the household has access
+        return userHouseholdId != null && trip.HouseholdId == userHouseholdId;
+    }
+
+    //== Delete personal TripItems for a user leaving a household.
+    //== Prevents ghost data that no one can see after the user leaves.
+    public async Task DeletePersonalTripItemsForUser(Guid householdId, Guid userId, CancellationToken cancellationToken = default)
+    {
+        var personalItems = await context.TripItems
+            .Include(ti => ti.Trip)
+            .Where(ti =>
+                ti.Trip != null &&
+                ti.Trip.HouseholdId == householdId &&
+                !ti.IsHouseholdItem &&
+                ti.CreatedBy == userId)
+            .ToListAsync(cancellationToken);
+
+        context.TripItems.RemoveRange(personalItems);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }
