@@ -7,8 +7,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ShoppingCart } from 'lucide-react';
 
-import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query';
-import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query';
 import { useCheckTripItemMutation } from '@/apis/agdevx-cart-api/trip/check-trip-item.mutation';
 import { useCompleteTripMutation } from '@/apis/agdevx-cart-api/trip/complete-trip.mutation';
 import { useDeleteTripItemMutation } from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation';
@@ -18,6 +16,7 @@ import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.qu
 import { ROUTES, tripDetailPath } from '@/routes';
 import { useSSE } from '@/services/use-sse.service';
 import { useStoreAccordionState } from '@/services/use-store-accordion-state.service';
+import { useStoresWithDisplayNamesService } from '@/services/use-stores-with-display-names.service';
 import { ConfirmDialog } from '@/shared/confirm-dialog';
 import { EmptyState } from '@/shared/empty-state';
 import { SectionHeader } from '@/shared/section-header';
@@ -25,7 +24,6 @@ import { Spinner } from '@/shared/spinner';
 import { StoreAccordion } from '@/shared/store-accordion';
 import { TripItemRow } from '@/shared/trip-item-row';
 import { fireCompletionConfetti } from '@/utils/confetti';
-import { getStoreDisplayNames } from '@/utils/get-store-display-names';
 import { sortItems } from '@/utils/sort-items';
 
 export const ActiveTripPage = () => {
@@ -34,15 +32,12 @@ export const ActiveTripPage = () => {
 	const queryClient = useQueryClient();
 	const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!);
 	const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!);
-	const { data: household } = useHouseholdQuery();
-	const { data: stores } = useStoresQuery(household?.id ?? null);
+	const { stores, storeDisplayNames } = useStoresWithDisplayNamesService();
 	const { isExpanded, toggleStore, autoCollapseIfAllChecked, cleanup } = useStoreAccordionState(tripId!, 'shopping', trip?.isCompleted ?? false);
 	const checkMutation = useCheckTripItemMutation();
 	const completeMutation = useCompleteTripMutation();
 	const updateMutation = useUpdateTripItemMutation();
 	const deleteMutation = useDeleteTripItemMutation();
-
-	const storeDisplayNames = useMemo(() => getStoreDisplayNames(stores ?? [], household ?? null), [stores, household]);
 
 	const groupedItems = useMemo(() => {
 		if (!tripItems) return [];

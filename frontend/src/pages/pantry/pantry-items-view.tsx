@@ -5,7 +5,6 @@ import { useMemo, useRef, useState } from 'react'
 
 import { MoreVertical, Package, Pencil, Trash2 } from 'lucide-react'
 
-import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useCreateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/create-inventory-item.mutation'
 import { useDeleteInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/delete-inventory-item.mutation'
 import { useUpdateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/update-inventory-item.mutation'
@@ -14,12 +13,11 @@ import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventor
 import { useMergedInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-merged-inventory.query'
 import { usePersonalInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-personal-inventory.query'
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
-import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
+import { useStoresWithDisplayNamesService } from '@/services/use-stores-with-display-names.service'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { DropdownMenu } from '@/shared/dropdown-menu'
 import { EmptyState } from '@/shared/empty-state'
 import { SectionHeader } from '@/shared/section-header'
-import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 import { sortItems } from '@/utils/sort-items'
 
 import type { PantryItemFormData } from './pantry-item-form'
@@ -58,8 +56,7 @@ const getCreateInitialScope = (filter: InventoryFilter): string => {
 
 export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCloseCreateForm }: PantryItemsViewProps) => {
   const { type: filterType, id: filterId } = parseFilter(filter)
-  const { data: household } = useHouseholdQuery()
-  const { data: stores } = useStoresQuery(household?.id ?? null)
+  const { household, stores, storeDisplayNames } = useStoresWithDisplayNamesService()
   const createMutation = useCreateInventoryItemMutation()
   const deleteMutation = useDeleteInventoryItemMutation()
   const updateMutation = useUpdateInventoryItemMutation()
@@ -97,11 +94,6 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
       // Error handled by mutation state
     }
   }
-
-  const storeDisplayNames = useMemo(
-    () => getStoreDisplayNames(stores ?? [], household ?? null),
-    [stores, household]
-  )
 
   //== All four hooks are called unconditionally (React rules of hooks). Inactive scoped hooks
   //== receive null IDs which disables them via `enabled`. The all/personal hooks stay in cache

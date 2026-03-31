@@ -6,11 +6,10 @@ import { useRef, useState } from 'react'
 
 import { MoreVertical, Package, Pencil, Trash2 } from 'lucide-react'
 
-import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useCreateStoreMutation } from '@/apis/agdevx-cart-api/store/create-store.mutation'
 import { useDeleteStoreMutation } from '@/apis/agdevx-cart-api/store/delete-store.mutation'
 import { useUpdateStoreMutation } from '@/apis/agdevx-cart-api/store/update-store.mutation'
-import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
+import { useStoresWithDisplayNamesService } from '@/services/use-stores-with-display-names.service'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { DropdownMenu } from '@/shared/dropdown-menu'
 import { EmptyState } from '@/shared/empty-state'
@@ -30,8 +29,7 @@ interface PantryStoresViewProps {
 }
 
 export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onCloseCreateForm }: PantryStoresViewProps) => {
-  const { data: household, isLoading: householdLoading } = useHouseholdQuery()
-  const { data: stores, isLoading: storesLoading } = useStoresQuery(household?.id ?? null)
+  const { household, stores, isLoading } = useStoresWithDisplayNamesService()
   const createMutation = useCreateStoreMutation()
   const updateMutation = useUpdateStoreMutation()
   const deleteMutation = useDeleteStoreMutation()
@@ -40,7 +38,7 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const kebabRef = useRef<HTMLButtonElement>(null)
 
-  if (storesLoading || householdLoading) {
+  if (isLoading) {
     return (
       <div className="space-y-2 mt-2">
         {[0, 1].map((i) => (

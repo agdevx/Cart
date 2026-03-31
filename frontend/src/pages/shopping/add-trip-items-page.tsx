@@ -6,18 +6,16 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { ArrowLeft, Search } from 'lucide-react'
 
-import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
-import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { tripDetailPath } from '@/routes'
+import { useStoresWithDisplayNamesService } from '@/services/use-stores-with-display-names.service'
 import { EmptyState } from '@/shared/empty-state'
 import { ScopeFilter } from '@/shared/scope-filter'
 import { Spinner } from '@/shared/spinner'
 import { StoreFilter } from '@/shared/store-filter'
-import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 import { sortItems } from '@/utils/sort-items'
 
 type SourceFilter = 'all' | 'personal' | string
@@ -32,9 +30,8 @@ export const AddTripItemsPage = () => {
   const navigate = useNavigate()
   const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
   const { data: inventory } = useInventoryQuery()
-  const { data: household } = useHouseholdQuery()
+  const { household, stores, storeDisplayNames } = useStoresWithDisplayNamesService()
   const { data: tripItems } = useTripItemsQuery(tripId!)
-  const { data: stores } = useStoresQuery(household?.id ?? null)
   const addTripItemMutation = useAddTripItemMutation()
 
   const [searchText, setSearchText] = useState('')
@@ -64,11 +61,6 @@ export const AddTripItemsPage = () => {
     // sourceFilter is a household ID
     return stores.filter((s) => s.householdId === sourceFilter)
   }, [stores, sourceFilter])
-
-  const storeDisplayNames = useMemo(
-    () => getStoreDisplayNames(stores ?? [], household ?? null),
-    [stores, household]
-  )
 
   // Filter inventory items based on source filter, store filter, search text, and existing trip items
   const filteredItems = useMemo(() => {

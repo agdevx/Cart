@@ -6,8 +6,6 @@ import { useNavigate,useParams } from 'react-router-dom'
 
 import { ArrowLeft, ShoppingCart } from 'lucide-react'
 
-import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
-import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useDeleteTripItemMutation } from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
 import { useStartTripMutation } from '@/apis/agdevx-cart-api/trip/start-trip.mutation'
 import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
@@ -15,13 +13,13 @@ import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { activeTripPath, ROUTES, tripAddItemsPath } from '@/routes'
 import { useStoreAccordionState } from '@/services/use-store-accordion-state.service'
+import { useStoresWithDisplayNamesService } from '@/services/use-stores-with-display-names.service'
 import { EmptyState } from '@/shared/empty-state'
 import { Fab } from '@/shared/fab'
 import { SectionHeader } from '@/shared/section-header'
 import { Spinner } from '@/shared/spinner'
 import { StoreAccordion } from '@/shared/store-accordion'
 import { TripItemRow } from '@/shared/trip-item-row'
-import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 import { sortItems } from '@/utils/sort-items'
 
 export const TripDetailPage = () => {
@@ -29,17 +27,11 @@ export const TripDetailPage = () => {
   const navigate = useNavigate()
   const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
   const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!)
-  const { data: household } = useHouseholdQuery()
-  const { data: stores } = useStoresQuery(household?.id ?? null)
+  const { stores, storeDisplayNames } = useStoresWithDisplayNamesService()
   const { isExpanded, toggleStore } = useStoreAccordionState(tripId!, 'planning', trip?.isCompleted ?? false)
   const startMutation = useStartTripMutation()
   const updateMutation = useUpdateTripItemMutation()
   const deleteMutation = useDeleteTripItemMutation()
-
-  const storeDisplayNames = useMemo(
-    () => getStoreDisplayNames(stores ?? [], household ?? null),
-    [stores, household]
-  )
 
   const groupedItems = useMemo(() => {
     if (!tripItems) return []
