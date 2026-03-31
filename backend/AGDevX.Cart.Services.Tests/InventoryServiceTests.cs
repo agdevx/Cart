@@ -1,10 +1,12 @@
 // ABOUTME: Tests for InventoryService verifying privacy enforcement and authorization for inventory items
-// ABOUTME: Validates household membership checks and user ownership for both household and personal inventory items
+// ABOUTME: Validates household membership checks via User.HouseholdId and user ownership
 
+using AGDevX.Cart.Data;
 using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace AGDevX.Cart.Services.Tests;
@@ -12,16 +14,27 @@ namespace AGDevX.Cart.Services.Tests;
 public class InventoryServiceTests
 {
     private readonly Mock<IInventoryRepository> _mockInventoryRepository;
-    private readonly Mock<IHouseholdRepository> _mockHouseholdRepository;
     private readonly Mock<ITripItemRepository> _mockTripItemRepository;
+    private readonly CartDbContext _dbContext;
     private readonly InventoryService _inventoryService;
 
     public InventoryServiceTests()
     {
         _mockInventoryRepository = new Mock<IInventoryRepository>();
-        _mockHouseholdRepository = new Mock<IHouseholdRepository>();
         _mockTripItemRepository = new Mock<ITripItemRepository>();
-        _inventoryService = new InventoryService(_mockInventoryRepository.Object, _mockHouseholdRepository.Object, _mockTripItemRepository.Object);
+
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+        _dbContext = new CartDbContext(options);
+
+        _inventoryService = new InventoryService(_mockInventoryRepository.Object, _dbContext, _mockTripItemRepository.Object);
+    }
+
+    private async Task SeedUser(Guid userId, Guid? householdId = null)
+    {
+        _dbContext.Users.Add(new User { Id = userId, Email = $"{userId}@test.com", Name = "Test", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
     }
 
     [Fact]
@@ -30,27 +43,9 @@ public class InventoryServiceTests
         //== Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Test Household"
-        };
-        var member = new HouseholdMember
-        {
-            HouseholdId = householdId,
-            UserId = userId,
-            Role = "admin"
-        };
-        household.Members = new List<HouseholdMember> { member };
+        await SeedUser(userId, householdId);
 
-        var inventoryItem = new InventoryItem
-        {
-            Name = "Milk",
-            HouseholdId = householdId
-        };
-
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>()))
-                                .ReturnsAsync(household);
+        var inventoryItem = new InventoryItem { Name = "Milk", HouseholdId = householdId };
 
         _mockInventoryRepository.Setup(r => r.Create(It.IsAny<InventoryItem>(), It.IsAny<CancellationToken>()))
                                 .ReturnsAsync((InventoryItem item, CancellationToken _) => { item.Id = Guid.NewGuid(); return item; });
@@ -94,6 +89,8 @@ public class InventoryServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
+        await SeedUser(userId);
+
         var item = new InventoryItem { Id = Guid.NewGuid(), Name = "Personal Snack" };
 
         _mockInventoryRepository.Setup(r => r.Create(It.IsAny<InventoryItem>(), It.IsAny<CancellationToken>()))
@@ -112,26 +109,10 @@ public class InventoryServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household { Id = householdId, Name = "Home", Members = new List<HouseholdMember>() };
+        //== User belongs to a different household
+        await SeedUser(userId, Guid.NewGuid());
+
         var item = new InventoryItem { Id = Guid.NewGuid(), Name = "Milk", HouseholdId = householdId };
-
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
-
-        // Act
-        var act = () => _inventoryService.CreateInventoryItem(item, userId);
-
-        // Assert
-        await act.Should().ThrowAsync<UnauthorizedAccessException>();
-    }
-
-    [Fact]
-    public async Task Should_ThrowUnauthorizedAccessException_When_CreatingHouseholdItemWithInvalidHousehold()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var item = new InventoryItem { Id = Guid.NewGuid(), Name = "Milk", HouseholdId = Guid.NewGuid() };
-
-        _mockHouseholdRepository.Setup(r => r.GetById(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync((Household?)null);
 
         // Act
         var act = () => _inventoryService.CreateInventoryItem(item, userId);
@@ -146,11 +127,11 @@ public class InventoryServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household { Id = householdId, Name = "Home" };
+        await SeedUser(userId, householdId);
+
         var personalItems = new List<InventoryItem> { new() { Id = Guid.NewGuid(), Name = "Personal", OwnerUserId = userId } };
         var householdItems = new List<InventoryItem> { new() { Id = Guid.NewGuid(), Name = "Shared", HouseholdId = householdId } };
 
-        _mockHouseholdRepository.Setup(r => r.GetUserHouseholds(userId, It.IsAny<CancellationToken>())).ReturnsAsync(new[] { household });
         _mockInventoryRepository.Setup(r => r.GetPersonalItems(userId, It.IsAny<CancellationToken>())).ReturnsAsync(personalItems);
         _mockInventoryRepository.Setup(r => r.GetHouseholdItems(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(householdItems);
 
@@ -168,15 +149,9 @@ public class InventoryServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Home",
-            Members = new List<HouseholdMember> { new() { UserId = userId, HouseholdId = householdId } }
-        };
-        var items = new List<InventoryItem> { new() { Id = Guid.NewGuid(), Name = "Milk", HouseholdId = householdId } };
+        await SeedUser(userId, householdId);
 
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+        var items = new List<InventoryItem> { new() { Id = Guid.NewGuid(), Name = "Milk", HouseholdId = householdId } };
         _mockInventoryRepository.Setup(r => r.GetHouseholdItems(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(items);
 
         // Act
@@ -192,9 +167,7 @@ public class InventoryServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household { Id = householdId, Name = "Home", Members = new List<HouseholdMember>() };
-
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+        await SeedUser(userId); // No household
 
         // Act
         var act = () => _inventoryService.GetHouseholdInventory(householdId, userId);
@@ -209,19 +182,14 @@ public class InventoryServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Home",
-            Members = new List<HouseholdMember> { new() { UserId = userId, HouseholdId = householdId } }
-        };
+        await SeedUser(userId, householdId);
+
         var items = new List<InventoryItem>
         {
             new() { Id = Guid.NewGuid(), Name = "Shared", HouseholdId = householdId },
             new() { Id = Guid.NewGuid(), Name = "Personal", OwnerUserId = userId }
         };
 
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
         _mockInventoryRepository.Setup(r => r.GetMergedInventory(householdId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(items);
 
         // Act
@@ -237,9 +205,7 @@ public class InventoryServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household { Id = householdId, Name = "Home", Members = new List<HouseholdMember>() };
-
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+        await SeedUser(userId); // No household
 
         // Act
         var act = () => _inventoryService.GetMergedInventory(householdId, userId);
@@ -255,16 +221,10 @@ public class InventoryServiceTests
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
-        var item = new InventoryItem { Id = itemId, Name = "Milk", HouseholdId = householdId };
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Home",
-            Members = new List<HouseholdMember> { new() { UserId = userId, HouseholdId = householdId } }
-        };
+        await SeedUser(userId, householdId);
 
+        var item = new InventoryItem { Id = itemId, Name = "Milk", HouseholdId = householdId };
         _mockInventoryRepository.Setup(r => r.GetById(itemId, It.IsAny<CancellationToken>())).ReturnsAsync(item);
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
 
         // Act
         var result = await _inventoryService.GetById(itemId, userId);
@@ -328,11 +288,14 @@ public class InventoryServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
+        await SeedUser(userId);
+
         var existing = new InventoryItem { Id = itemId, Name = "Old", OwnerUserId = userId };
         var updated = new InventoryItem { Id = itemId, Name = "New", OwnerUserId = userId };
 
         _mockInventoryRepository.Setup(r => r.GetById(itemId, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
-        _mockInventoryRepository.Setup(r => r.Update(It.IsAny<InventoryItem>(), It.IsAny<CancellationToken>())).ReturnsAsync(updated);
+        _mockInventoryRepository.Setup(r => r.Update(It.IsAny<InventoryItem>(), It.IsAny<CancellationToken>()))
+                                .ReturnsAsync((InventoryItem i, CancellationToken _) => i);
 
         // Act
         var result = await _inventoryService.UpdateInventoryItem(updated, userId);
@@ -392,11 +355,14 @@ public class InventoryServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
+        await SeedUser(userId);
+
         var existing = new InventoryItem { Id = itemId, Name = "Old Name", OwnerUserId = userId };
         var updated = new InventoryItem { Id = itemId, Name = "Renamed Item", OwnerUserId = userId };
 
         _mockInventoryRepository.Setup(r => r.GetById(itemId, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
-        _mockInventoryRepository.Setup(r => r.Update(It.IsAny<InventoryItem>(), It.IsAny<CancellationToken>())).ReturnsAsync(updated);
+        _mockInventoryRepository.Setup(r => r.Update(It.IsAny<InventoryItem>(), It.IsAny<CancellationToken>()))
+                                .ReturnsAsync((InventoryItem i, CancellationToken _) => i);
         _mockTripItemRepository.Setup(r => r.UpdateItemNameByInventoryItemId(itemId, "Renamed Item", It.IsAny<CancellationToken>()))
                                .Returns(Task.CompletedTask);
 

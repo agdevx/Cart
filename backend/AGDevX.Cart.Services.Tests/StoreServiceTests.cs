@@ -1,10 +1,12 @@
 // ABOUTME: Unit tests for StoreService covering household-scoped and personal store operations.
-// ABOUTME: Tests verify authorization checks for household membership and user ownership.
+// ABOUTME: Tests verify authorization checks via User.HouseholdId and user ownership.
 
+using AGDevX.Cart.Data;
 using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
@@ -13,16 +15,27 @@ namespace AGDevX.Cart.Services.Tests;
 public class StoreServiceTests
 {
     private readonly Mock<IStoreRepository> _mockStoreRepository;
-    private readonly Mock<IHouseholdRepository> _mockHouseholdRepository;
     private readonly Mock<ITripItemRepository> _mockTripItemRepository;
+    private readonly CartDbContext _dbContext;
     private readonly StoreService _storeService;
 
     public StoreServiceTests()
     {
         _mockStoreRepository = new Mock<IStoreRepository>();
-        _mockHouseholdRepository = new Mock<IHouseholdRepository>();
         _mockTripItemRepository = new Mock<ITripItemRepository>();
-        _storeService = new StoreService(_mockStoreRepository.Object, _mockHouseholdRepository.Object, _mockTripItemRepository.Object);
+
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+        _dbContext = new CartDbContext(options);
+
+        _storeService = new StoreService(_mockStoreRepository.Object, _dbContext, _mockTripItemRepository.Object);
+    }
+
+    private async Task SeedUser(Guid userId, Guid? householdId = null)
+    {
+        _dbContext.Users.Add(new User { Id = userId, Email = $"{userId}@test.com", Name = "Test", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
     }
 
     [Fact]
@@ -31,27 +44,11 @@ public class StoreServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var store = new Store
-        {
-            Name = "Costco",
-            HouseholdId = householdId
-        };
+        await SeedUser(userId, householdId);
 
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Test Household",
-            Members = new List<HouseholdMember>
-            {
-                new HouseholdMember { UserId = userId, Role = "Member" }
-            }
-        };
+        var store = new Store { Name = "Costco", HouseholdId = householdId };
 
-        _mockHouseholdRepository.Setup(x => x.GetById(householdId, It.IsAny<CancellationToken>()))
-                                .ReturnsAsync(household);
-
-        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>(), It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(store);
+        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>(), It.IsAny<CancellationToken>())).ReturnsAsync(store);
 
         // Act
         var result = await _storeService.CreateStore(store, userId);
@@ -59,7 +56,6 @@ public class StoreServiceTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal("Costco", result.Name);
-        _mockHouseholdRepository.Verify(x => x.GetById(householdId, It.IsAny<CancellationToken>()), Times.Once);
         _mockStoreRepository.Verify(x => x.Create(It.IsAny<Store>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -68,14 +64,11 @@ public class StoreServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var store = new Store
-        {
-            Name = "My Local Store",
-            UserId = userId
-        };
+        await SeedUser(userId);
 
-        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>(), It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(store);
+        var store = new Store { Name = "My Local Store", UserId = userId };
+
+        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>(), It.IsAny<CancellationToken>())).ReturnsAsync(store);
 
         // Act
         var result = await _storeService.CreateStore(store, userId);
@@ -85,7 +78,6 @@ public class StoreServiceTests
         Assert.Equal("My Local Store", result.Name);
         Assert.Equal(userId, result.UserId);
         _mockStoreRepository.Verify(x => x.Create(It.IsAny<Store>(), It.IsAny<CancellationToken>()), Times.Once);
-        _mockHouseholdRepository.Verify(x => x.GetById(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -93,14 +85,11 @@ public class StoreServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var store = new Store
-        {
-            Name = "My Local Store",
-            // No UserId set — simulates what the frontend sends
-        };
+        await SeedUser(userId);
 
-        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>(), It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(store);
+        var store = new Store { Name = "My Local Store" };
+
+        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>(), It.IsAny<CancellationToken>())).ReturnsAsync(store);
 
         // Act
         var result = await _storeService.CreateStore(store, userId);
@@ -118,10 +107,9 @@ public class StoreServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household { Id = householdId, Name = "Home", Members = new List<HouseholdMember>() };
-        var store = new Store { Id = Guid.NewGuid(), Name = "Target", HouseholdId = householdId };
+        await SeedUser(userId); // No household membership
 
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+        var store = new Store { Id = Guid.NewGuid(), Name = "Target", HouseholdId = householdId };
 
         // Act
         var act = () => _storeService.CreateStore(store, userId);
@@ -131,39 +119,14 @@ public class StoreServiceTests
     }
 
     [Fact]
-    public async Task Should_OverrideUserId_When_CreatingPersonalStoreWithDifferentUserId()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var store = new Store { Id = Guid.NewGuid(), Name = "My Store", UserId = Guid.NewGuid() };
-
-        _mockStoreRepository.Setup(x => x.Create(It.IsAny<Store>(), It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(store);
-
-        // Act
-        var result = await _storeService.CreateStore(store, userId);
-
-        // Assert
-        result.Should().NotBeNull();
-        store.UserId.Should().Be(userId);
-        _mockStoreRepository.Verify(x => x.Create(It.IsAny<Store>(), It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
     public async Task Should_ReturnStores_When_GetHouseholdStoresAsMember()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Home",
-            Members = new List<HouseholdMember> { new() { UserId = userId, HouseholdId = householdId } }
-        };
-        var stores = new List<Store> { new() { Id = Guid.NewGuid(), Name = "Target", HouseholdId = householdId } };
+        await SeedUser(userId, householdId);
 
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+        var stores = new List<Store> { new() { Id = Guid.NewGuid(), Name = "Target", HouseholdId = householdId } };
         _mockStoreRepository.Setup(r => r.GetHouseholdStores(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(stores);
 
         // Act
@@ -179,8 +142,7 @@ public class StoreServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync((Household?)null);
+        await SeedUser(userId); // No household
 
         // Act
         var act = () => _storeService.GetHouseholdStores(householdId, userId);
@@ -212,16 +174,10 @@ public class StoreServiceTests
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
         var storeId = Guid.NewGuid();
-        var store = new Store { Id = storeId, Name = "Target", HouseholdId = householdId };
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Home",
-            Members = new List<HouseholdMember> { new() { UserId = userId, HouseholdId = householdId } }
-        };
+        await SeedUser(userId, householdId);
 
+        var store = new Store { Id = storeId, Name = "Target", HouseholdId = householdId };
         _mockStoreRepository.Setup(r => r.GetById(storeId, It.IsAny<CancellationToken>())).ReturnsAsync(store);
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
 
         // Act
         var result = await _storeService.GetById(storeId, userId);
@@ -285,11 +241,11 @@ public class StoreServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var storeId = Guid.NewGuid();
-        var existing = new Store { Id = storeId, Name = "Old", UserId = userId };
+        await SeedUser(userId);
 
+        var existing = new Store { Id = storeId, Name = "Old", UserId = userId };
         _mockStoreRepository.Setup(r => r.GetById(storeId, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
-        _mockStoreRepository.Setup(r => r.ExistsWithName("New", userId, null, storeId, It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(false);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("New", userId, null, storeId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
         _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>(), It.IsAny<CancellationToken>()))
                             .ReturnsAsync((Store s, CancellationToken _) => s);
 
@@ -306,11 +262,11 @@ public class StoreServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var storeId = Guid.NewGuid();
-        var existing = new Store { Id = storeId, Name = "Old", UserId = userId };
+        await SeedUser(userId);
 
+        var existing = new Store { Id = storeId, Name = "Old", UserId = userId };
         _mockStoreRepository.Setup(r => r.GetById(storeId, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
-        _mockStoreRepository.Setup(r => r.ExistsWithName("Renamed", userId, null, storeId, It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(false);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Renamed", userId, null, storeId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
         _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>(), It.IsAny<CancellationToken>()))
                             .ReturnsAsync((Store s, CancellationToken _) => s);
 
@@ -329,18 +285,11 @@ public class StoreServiceTests
         var userId = Guid.NewGuid();
         var storeId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var existing = new Store { Id = storeId, Name = "Old", HouseholdId = householdId };
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Home",
-            Members = new List<HouseholdMember> { new() { UserId = userId, HouseholdId = householdId } }
-        };
+        await SeedUser(userId, householdId);
 
+        var existing = new Store { Id = storeId, Name = "Old", HouseholdId = householdId };
         _mockStoreRepository.Setup(r => r.GetById(storeId, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
-        _mockStoreRepository.Setup(r => r.ExistsWithName("Renamed", null, householdId, storeId, It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(false);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Renamed", null, householdId, storeId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
         _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>(), It.IsAny<CancellationToken>()))
                             .ReturnsAsync((Store s, CancellationToken _) => s);
 
@@ -420,11 +369,11 @@ public class StoreServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var storeId = Guid.NewGuid();
-        var existing = new Store { Id = storeId, Name = "Old Store", UserId = userId };
+        await SeedUser(userId);
 
+        var existing = new Store { Id = storeId, Name = "Old Store", UserId = userId };
         _mockStoreRepository.Setup(r => r.GetById(storeId, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
-        _mockStoreRepository.Setup(r => r.ExistsWithName("Renamed Store", userId, null, storeId, It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(false);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Renamed Store", userId, null, storeId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
         _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>(), It.IsAny<CancellationToken>()))
                             .ReturnsAsync((Store s, CancellationToken _) => s);
         _mockTripItemRepository.Setup(r => r.UpdateStoreNameByStoreId(storeId, "Renamed Store", It.IsAny<CancellationToken>()))
@@ -443,17 +392,17 @@ public class StoreServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
+        await SeedUser(userId);
+
         var store = new Store { Name = "Costco" };
 
-        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", userId, null, null, It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(true);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", userId, null, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
         // Act
         var act = () => _storeService.CreateStore(store, userId);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-                 .WithMessage("*already exists*");
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*already exists*");
     }
 
     [Fact]
@@ -462,24 +411,17 @@ public class StoreServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var store = new Store { Name = "Costco", HouseholdId = householdId };
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Home",
-            Members = new List<HouseholdMember> { new() { UserId = userId } }
-        };
+        await SeedUser(userId, householdId);
 
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
-        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", null, householdId, null, It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(true);
+        var store = new Store { Name = "Costco", HouseholdId = householdId };
+
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", null, householdId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
         // Act
         var act = () => _storeService.CreateStore(store, userId);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-                 .WithMessage("*already exists*");
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*already exists*");
     }
 
     [Fact]
@@ -487,12 +429,12 @@ public class StoreServiceTests
     {
         // Arrange — "Costco" exists in household, creating personal "Costco"
         var userId = Guid.NewGuid();
+        await SeedUser(userId);
+
         var store = new Store { Name = "Costco" };
 
-        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", userId, null, null, It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(false);
-        _mockStoreRepository.Setup(r => r.Create(It.IsAny<Store>(), It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(store);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", userId, null, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _mockStoreRepository.Setup(r => r.Create(It.IsAny<Store>(), It.IsAny<CancellationToken>())).ReturnsAsync(store);
 
         // Act
         var result = await _storeService.CreateStore(store, userId);
@@ -509,18 +451,11 @@ public class StoreServiceTests
         var userId = Guid.NewGuid();
         var storeId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var existing = new Store { Id = storeId, Name = "My Store", UserId = userId };
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Home",
-            Members = new List<HouseholdMember> { new() { UserId = userId, HouseholdId = householdId } }
-        };
+        await SeedUser(userId, householdId);
 
+        var existing = new Store { Id = storeId, Name = "My Store", UserId = userId };
         _mockStoreRepository.Setup(r => r.GetById(storeId, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
-        _mockStoreRepository.Setup(r => r.ExistsWithName("Shared Store", null, householdId, storeId, It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(false);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Shared Store", null, householdId, storeId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
         _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>(), It.IsAny<CancellationToken>()))
                             .ReturnsAsync((Store s, CancellationToken _) => s);
 
@@ -539,18 +474,17 @@ public class StoreServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var storeId = Guid.NewGuid();
-        var existing = new Store { Id = storeId, Name = "Target", UserId = userId };
+        await SeedUser(userId);
 
+        var existing = new Store { Id = storeId, Name = "Target", UserId = userId };
         _mockStoreRepository.Setup(r => r.GetById(storeId, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
-        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", userId, null, storeId, It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(true);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", userId, null, storeId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
         // Act
         var act = () => _storeService.UpdateStore(storeId, "Costco", null, userId);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-                 .WithMessage("*already exists*");
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*already exists*");
     }
 
     [Fact]
@@ -560,25 +494,17 @@ public class StoreServiceTests
         var userId = Guid.NewGuid();
         var storeId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var existing = new Store { Id = storeId, Name = "Costco", UserId = userId };
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Home",
-            Members = new List<HouseholdMember> { new() { UserId = userId, HouseholdId = householdId } }
-        };
+        await SeedUser(userId, householdId);
 
+        var existing = new Store { Id = storeId, Name = "Costco", UserId = userId };
         _mockStoreRepository.Setup(r => r.GetById(storeId, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
-        _mockHouseholdRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
-        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", null, householdId, storeId, It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(true);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", null, householdId, storeId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
         // Act
         var act = () => _storeService.UpdateStore(storeId, "Costco", householdId, userId);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-                 .WithMessage("*already exists*");
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*already exists*");
     }
 
     [Fact]
@@ -587,11 +513,11 @@ public class StoreServiceTests
         // Arrange — "costco" → "Costco" should NOT 409
         var userId = Guid.NewGuid();
         var storeId = Guid.NewGuid();
-        var existing = new Store { Id = storeId, Name = "costco", UserId = userId };
+        await SeedUser(userId);
 
+        var existing = new Store { Id = storeId, Name = "costco", UserId = userId };
         _mockStoreRepository.Setup(r => r.GetById(storeId, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
-        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", userId, null, storeId, It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(false);
+        _mockStoreRepository.Setup(r => r.ExistsWithName("Costco", userId, null, storeId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
         _mockStoreRepository.Setup(r => r.Update(It.IsAny<Store>(), It.IsAny<CancellationToken>()))
                             .ReturnsAsync((Store s, CancellationToken _) => s);
 

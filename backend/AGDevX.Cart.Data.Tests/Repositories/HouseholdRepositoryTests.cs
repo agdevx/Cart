@@ -1,4 +1,4 @@
-// ABOUTME: Tests for HouseholdRepository verifying CRUD operations and membership management.
+// ABOUTME: Tests for HouseholdRepository verifying CRUD operations and membership queries.
 // ABOUTME: Uses InMemory database provider to test EF Core queries without requiring actual database.
 
 using AGDevX.Cart.Data;
@@ -26,7 +26,11 @@ public class HouseholdRepositoryTests
         var dbName = Guid.NewGuid().ToString();
         using var context = CreateContext(dbName);
         var repo = new HouseholdRepository(context);
-        var household = new Household { Id = Guid.NewGuid(), Name = "Test Home", InviteCode = "ABC123" };
+        var ownerId = Guid.NewGuid();
+        context.Users.Add(new User { Id = ownerId, Email = "owner@test.com", Name = "Owner" });
+        await context.SaveChangesAsync();
+
+        var household = new Household { Id = Guid.NewGuid(), Name = "Test Home", InviteCode = "ABC123", Owner1UserId = ownerId };
 
         // Act
         var result = await repo.Create(household);
@@ -44,7 +48,9 @@ public class HouseholdRepositoryTests
         var dbName = Guid.NewGuid().ToString();
         using var context = CreateContext(dbName);
         var repo = new HouseholdRepository(context);
-        var household = new Household { Id = Guid.NewGuid(), Name = "Test Home", InviteCode = "ABC123" };
+        var ownerId = Guid.NewGuid();
+        context.Users.Add(new User { Id = ownerId, Email = "owner@test.com", Name = "Owner" });
+        var household = new Household { Id = Guid.NewGuid(), Name = "Test Home", InviteCode = "ABC123", Owner1UserId = ownerId };
         context.Households.Add(household);
         await context.SaveChangesAsync();
 
@@ -72,38 +78,15 @@ public class HouseholdRepositoryTests
     }
 
     [Fact]
-    public async Task Should_IncludeMembers_When_GetById()
-    {
-        // Arrange
-        var dbName = Guid.NewGuid().ToString();
-        using var context = CreateContext(dbName);
-        var repo = new HouseholdRepository(context);
-        var householdId = Guid.NewGuid();
-        var userId = Guid.NewGuid();
-        var household = new Household { Id = householdId, Name = "Test Home", InviteCode = "ABC123" };
-        var member = new HouseholdMember { HouseholdId = householdId, UserId = userId, Role = "owner", JoinedAt = DateTime.UtcNow };
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
-        context.Households.Add(household);
-        context.HouseholdMembers.Add(member);
-        await context.SaveChangesAsync();
-
-        // Act
-        var result = await repo.GetById(householdId);
-
-        // Assert
-        result.Should().NotBeNull();
-        result!.Members.Should().HaveCount(1);
-        result.Members.First().UserId.Should().Be(userId);
-    }
-
-    [Fact]
     public async Task Should_ReturnHousehold_When_GetByInviteCodeWithExistingCode()
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
         using var context = CreateContext(dbName);
         var repo = new HouseholdRepository(context);
-        var household = new Household { Id = Guid.NewGuid(), Name = "Test Home", InviteCode = "XK7M2P" };
+        var ownerId = Guid.NewGuid();
+        context.Users.Add(new User { Id = ownerId, Email = "owner@test.com", Name = "Owner" });
+        var household = new Household { Id = Guid.NewGuid(), Name = "Test Home", InviteCode = "XK7M2P", Owner1UserId = ownerId };
         context.Households.Add(household);
         await context.SaveChangesAsync();
 
@@ -131,29 +114,66 @@ public class HouseholdRepositoryTests
     }
 
     [Fact]
-    public async Task Should_ReturnOnlyUserHouseholds_When_GetUserHouseholds()
+    public async Task Should_ReturnUserHousehold_When_GetUserHousehold()
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
         using var context = CreateContext(dbName);
         var repo = new HouseholdRepository(context);
         var userId = Guid.NewGuid();
-        var otherUserId = Guid.NewGuid();
-        var h1 = new Household { Id = Guid.NewGuid(), Name = "My Home", InviteCode = "AAA111" };
-        var h2 = new Household { Id = Guid.NewGuid(), Name = "Other Home", InviteCode = "BBB222" };
-        context.Users.Add(new User { Id = userId, Email = "me@test.com", Name = "Me" });
-        context.Users.Add(new User { Id = otherUserId, Email = "other@test.com", Name = "Other" });
-        context.Households.AddRange(h1, h2);
-        context.HouseholdMembers.Add(new HouseholdMember { HouseholdId = h1.Id, UserId = userId, Role = "owner", JoinedAt = DateTime.UtcNow });
-        context.HouseholdMembers.Add(new HouseholdMember { HouseholdId = h2.Id, UserId = otherUserId, Role = "owner", JoinedAt = DateTime.UtcNow });
+        var householdId = Guid.NewGuid();
+        var household = new Household { Id = householdId, Name = "My Home", InviteCode = "AAA111", Owner1UserId = userId };
+        context.Households.Add(household);
+        context.Users.Add(new User { Id = userId, Email = "me@test.com", Name = "Me", HouseholdId = householdId });
         await context.SaveChangesAsync();
 
         // Act
-        var result = await repo.GetUserHouseholds(userId);
+        var result = await repo.GetUserHousehold(userId);
 
         // Assert
-        result.Should().HaveCount(1);
-        result.First().Name.Should().Be("My Home");
+        result.Should().NotBeNull();
+        result!.Name.Should().Be("My Home");
+    }
+
+    [Fact]
+    public async Task Should_ReturnNull_When_GetUserHouseholdForSoloUser()
+    {
+        // Arrange
+        var dbName = Guid.NewGuid().ToString();
+        using var context = CreateContext(dbName);
+        var repo = new HouseholdRepository(context);
+        var userId = Guid.NewGuid();
+        context.Users.Add(new User { Id = userId, Email = "solo@test.com", Name = "Solo" });
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repo.GetUserHousehold(userId);
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Should_ReturnMembers_When_GetMembers()
+    {
+        // Arrange
+        var dbName = Guid.NewGuid().ToString();
+        using var context = CreateContext(dbName);
+        var repo = new HouseholdRepository(context);
+        var householdId = Guid.NewGuid();
+        var user1Id = Guid.NewGuid();
+        var user2Id = Guid.NewGuid();
+        context.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "ABC123", Owner1UserId = user1Id });
+        context.Users.Add(new User { Id = user1Id, Email = "u1@test.com", Name = "User 1", HouseholdId = householdId });
+        context.Users.Add(new User { Id = user2Id, Email = "u2@test.com", Name = "User 2", HouseholdId = householdId });
+        context.Users.Add(new User { Id = Guid.NewGuid(), Email = "solo@test.com", Name = "Solo" });
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = (await repo.GetMembers(householdId)).ToList();
+
+        // Assert
+        result.Should().HaveCount(2);
     }
 
     [Fact]
@@ -163,7 +183,9 @@ public class HouseholdRepositoryTests
         var dbName = Guid.NewGuid().ToString();
         using var context = CreateContext(dbName);
         var repo = new HouseholdRepository(context);
-        var household = new Household { Id = Guid.NewGuid(), Name = "Old Name", InviteCode = "ABC123" };
+        var ownerId = Guid.NewGuid();
+        context.Users.Add(new User { Id = ownerId, Email = "owner@test.com", Name = "Owner" });
+        var household = new Household { Id = Guid.NewGuid(), Name = "Old Name", InviteCode = "ABC123", Owner1UserId = ownerId };
         context.Households.Add(household);
         await context.SaveChangesAsync();
 
@@ -182,7 +204,9 @@ public class HouseholdRepositoryTests
         var dbName = Guid.NewGuid().ToString();
         using var context = CreateContext(dbName);
         var repo = new HouseholdRepository(context);
-        var household = new Household { Id = Guid.NewGuid(), Name = "Doomed", InviteCode = "ABC123" };
+        var ownerId = Guid.NewGuid();
+        context.Users.Add(new User { Id = ownerId, Email = "owner@test.com", Name = "Owner" });
+        var household = new Household { Id = Guid.NewGuid(), Name = "Doomed", InviteCode = "ABC123", Owner1UserId = ownerId };
         context.Households.Add(household);
         await context.SaveChangesAsync();
 
@@ -210,104 +234,66 @@ public class HouseholdRepositoryTests
     }
 
     [Fact]
-    public async Task Should_ReturnTrue_When_UserIsMember()
+    public async Task Should_ReturnTrue_When_UserIsOwner()
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
         using var context = CreateContext(dbName);
         var repo = new HouseholdRepository(context);
         var householdId = Guid.NewGuid();
-        var userId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
-        context.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "ABC123" });
-        context.HouseholdMembers.Add(new HouseholdMember { HouseholdId = householdId, UserId = userId, Role = "member", JoinedAt = DateTime.UtcNow });
+        var ownerId = Guid.NewGuid();
+        context.Users.Add(new User { Id = ownerId, Email = "owner@test.com", Name = "Owner", HouseholdId = householdId });
+        context.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "ABC123", Owner1UserId = ownerId });
         await context.SaveChangesAsync();
 
         // Act
-        var result = await repo.IsUserMember(householdId, userId);
+        var result = await repo.IsUserOwner(householdId, ownerId);
 
         // Assert
         result.Should().BeTrue();
     }
 
     [Fact]
-    public async Task Should_ReturnFalse_When_UserIsNotMember()
+    public async Task Should_ReturnTrue_When_UserIsOwner2()
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
         using var context = CreateContext(dbName);
         var repo = new HouseholdRepository(context);
+        var householdId = Guid.NewGuid();
+        var owner1Id = Guid.NewGuid();
+        var owner2Id = Guid.NewGuid();
+        context.Users.Add(new User { Id = owner1Id, Email = "o1@test.com", Name = "Owner1", HouseholdId = householdId });
+        context.Users.Add(new User { Id = owner2Id, Email = "o2@test.com", Name = "Owner2", HouseholdId = householdId });
+        context.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "ABC123", Owner1UserId = owner1Id, Owner2UserId = owner2Id });
+        await context.SaveChangesAsync();
 
         // Act
-        var result = await repo.IsUserMember(Guid.NewGuid(), Guid.NewGuid());
+        var result = await repo.IsUserOwner(householdId, owner2Id);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Should_ReturnFalse_When_UserIsNotOwner()
+    {
+        // Arrange
+        var dbName = Guid.NewGuid().ToString();
+        using var context = CreateContext(dbName);
+        var repo = new HouseholdRepository(context);
+        var householdId = Guid.NewGuid();
+        var ownerId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        context.Users.Add(new User { Id = ownerId, Email = "owner@test.com", Name = "Owner", HouseholdId = householdId });
+        context.Users.Add(new User { Id = memberId, Email = "member@test.com", Name = "Member", HouseholdId = householdId });
+        context.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "ABC123", Owner1UserId = ownerId });
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await repo.IsUserOwner(householdId, memberId);
 
         // Assert
         result.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task Should_AddMember_When_ValidMemberProvided()
-    {
-        // Arrange
-        var dbName = Guid.NewGuid().ToString();
-        using var context = CreateContext(dbName);
-        var repo = new HouseholdRepository(context);
-        var householdId = Guid.NewGuid();
-        var userId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
-        context.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "ABC123" });
-        await context.SaveChangesAsync();
-        var member = new HouseholdMember { HouseholdId = householdId, UserId = userId, Role = "member", JoinedAt = DateTime.UtcNow };
-
-        // Act
-        await repo.AddMember(member);
-
-        // Assert
-        var exists = await context.HouseholdMembers.AnyAsync(m => m.HouseholdId == householdId && m.UserId == userId);
-        exists.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task Should_RemoveMember_When_MemberExists()
-    {
-        // Arrange
-        var dbName = Guid.NewGuid().ToString();
-        using var context = CreateContext(dbName);
-        var repo = new HouseholdRepository(context);
-        var householdId = Guid.NewGuid();
-        var userId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
-        context.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "ABC123" });
-        context.HouseholdMembers.Add(new HouseholdMember { HouseholdId = householdId, UserId = userId, Role = "member", JoinedAt = DateTime.UtcNow });
-        await context.SaveChangesAsync();
-
-        // Act
-        await repo.RemoveMember(householdId, userId);
-
-        // Assert
-        var exists = await context.HouseholdMembers.AnyAsync(m => m.HouseholdId == householdId && m.UserId == userId);
-        exists.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task Should_UpdateMemberRole_When_MemberExists()
-    {
-        // Arrange
-        var dbName = Guid.NewGuid().ToString();
-        using var context = CreateContext(dbName);
-        var repo = new HouseholdRepository(context);
-        var householdId = Guid.NewGuid();
-        var userId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
-        context.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "ABC123" });
-        context.HouseholdMembers.Add(new HouseholdMember { HouseholdId = householdId, UserId = userId, Role = "member", JoinedAt = DateTime.UtcNow });
-        await context.SaveChangesAsync();
-
-        // Act
-        await repo.UpdateMemberRole(householdId, userId, "owner");
-
-        // Assert
-        var member = await context.HouseholdMembers.FirstAsync(m => m.HouseholdId == householdId && m.UserId == userId);
-        member.Role.Should().Be("owner");
     }
 }

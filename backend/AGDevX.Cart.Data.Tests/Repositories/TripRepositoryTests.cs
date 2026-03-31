@@ -1,5 +1,5 @@
-// ABOUTME: Tests for TripRepository verifying CRUD operations and collaborator management.
-// ABOUTME: Uses InMemory database provider to test trip queries including creator and collaborator access.
+// ABOUTME: Tests for TripRepository verifying CRUD operations and scope-based access control.
+// ABOUTME: Uses InMemory database provider to test trip queries with personal and household authorization.
 
 using System.Security.Claims;
 using AGDevX.Cart.Data;
@@ -91,20 +91,17 @@ public class TripRepositoryTests
     }
 
     [Fact]
-    public async Task Should_IncludeCollaboratorsAndItems_When_GetById()
+    public async Task Should_IncludeItems_When_GetById()
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
         using var context = CreateContext(dbName);
         var repo = new TripRepository(context);
-        var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var inventoryItemId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
-        context.InventoryItems.Add(new InventoryItem { Id = inventoryItemId, Name = "Milk", OwnerUserId = userId });
+        context.InventoryItems.Add(new InventoryItem { Id = inventoryItemId, Name = "Milk", OwnerUserId = Guid.NewGuid() });
         var trip = new Trip { Id = tripId, Name = "Run", IsCompleted = false };
         context.Trips.Add(trip);
-        context.TripCollaborators.Add(new TripCollaborator { TripId = tripId, UserId = userId, Trip = null!, User = null! });
         context.TripItems.Add(new TripItem { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = inventoryItemId, ItemName = "Milk", Quantity = 1 });
         await context.SaveChangesAsync();
 
@@ -113,8 +110,7 @@ public class TripRepositoryTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.Collaborators.Should().HaveCount(1);
-        result.Items.Should().HaveCount(1);
+        result!.Items.Should().HaveCount(1);
     }
 
     [Fact]
@@ -128,6 +124,8 @@ public class TripRepositoryTests
         //== Create myTrip as userId so the audit hook sets CreatedBy naturally
         using (var ctx = CreateContextForUser(dbName, userId))
         {
+            ctx.Users.Add(new User { Id = userId, Email = "me@test.com", Name = "Me" });
+            ctx.Users.Add(new User { Id = otherUserId, Email = "other@test.com", Name = "Other" });
             ctx.Trips.Add(new Trip { Id = Guid.NewGuid(), Name = "My Trip", IsCompleted = false });
             await ctx.SaveChangesAsync();
         }
@@ -142,8 +140,8 @@ public class TripRepositoryTests
         using var context = CreateContext(dbName);
         var repo = new TripRepository(context);
 
-        // Act
-        var result = await repo.GetUserTrips(userId);
+        // Act — no household, so only personal trips returned
+        var result = await repo.GetUserTrips(userId, null);
 
         // Assert
         result.Should().HaveCount(1);
@@ -151,36 +149,37 @@ public class TripRepositoryTests
     }
 
     [Fact]
-    public async Task Should_ReturnTripsWhereUserIsCollaborator_When_GetUserTrips()
+    public async Task Should_ReturnHouseholdTrips_When_GetUserTripsWithHouseholdId()
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
         var userId = Guid.NewGuid();
-        var tripId = Guid.NewGuid();
-        var creatorUserId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
 
-        //== Create trip as a different user so userId is only a collaborator, not the creator
-        using (var ctx = CreateContextForUser(dbName, creatorUserId))
+        //== Create a household trip by another user but in the same household
+        using (var ctx = CreateContextForUser(dbName, otherUserId))
         {
-            ctx.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
-            ctx.Trips.Add(new Trip { Id = tripId, Name = "Collab Trip", IsCompleted = false });
-            ctx.TripCollaborators.Add(new TripCollaborator { TripId = tripId, UserId = userId, Trip = null!, User = null! });
+            ctx.Users.Add(new User { Id = userId, Email = "me@test.com", Name = "Me", HouseholdId = householdId });
+            ctx.Users.Add(new User { Id = otherUserId, Email = "other@test.com", Name = "Other", HouseholdId = householdId });
+            ctx.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "ABC123", Owner1UserId = otherUserId });
+            ctx.Trips.Add(new Trip { Id = Guid.NewGuid(), Name = "Household Trip", IsCompleted = false, HouseholdId = householdId });
             await ctx.SaveChangesAsync();
         }
 
         using var context = CreateContext(dbName);
         var repo = new TripRepository(context);
 
-        // Act
-        var result = await repo.GetUserTrips(userId);
+        // Act — household trip should be returned because user is in the household
+        var result = await repo.GetUserTrips(userId, householdId);
 
         // Assert
         result.Should().HaveCount(1);
-        result.First().Name.Should().Be("Collab Trip");
+        result.First().Name.Should().Be("Household Trip");
     }
 
     [Fact]
-    public async Task Should_ReturnTrue_When_IsUserCollaboratorAsCreator()
+    public async Task Should_ReturnTrue_When_HasTripAccessAsCreator()
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
@@ -190,6 +189,7 @@ public class TripRepositoryTests
         //== Create trip as userId so the audit hook sets CreatedBy naturally
         using (var ctx = CreateContextForUser(dbName, userId))
         {
+            ctx.Users.Add(new User { Id = userId, Email = "me@test.com", Name = "Me" });
             ctx.Trips.Add(new Trip { Id = tripId, Name = "Trip", IsCompleted = false });
             await ctx.SaveChangesAsync();
         }
@@ -198,27 +198,29 @@ public class TripRepositoryTests
         var repo = new TripRepository(context);
 
         // Act
-        var result = await repo.IsUserCollaborator(tripId, userId);
+        var result = await repo.HasTripAccess(tripId, userId, null);
 
         // Assert
         result.Should().BeTrue();
     }
 
     [Fact]
-    public async Task Should_ReturnTrue_When_IsUserCollaboratorAsExplicitCollaborator()
+    public async Task Should_ReturnTrue_When_HasTripAccessAsHouseholdMember()
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
         var userId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var creatorUserId = Guid.NewGuid();
 
-        //== Create trip as a different user so userId is only an explicit collaborator, not the creator
-        using (var ctx = CreateContextForUser(dbName, creatorUserId))
+        //== Trip created by another user but scoped to household
+        using (var ctx = CreateContextForUser(dbName, otherUserId))
         {
-            ctx.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
-            ctx.Trips.Add(new Trip { Id = tripId, Name = "Trip", IsCompleted = false });
-            ctx.TripCollaborators.Add(new TripCollaborator { TripId = tripId, UserId = userId, Trip = null!, User = null! });
+            ctx.Users.Add(new User { Id = userId, Email = "me@test.com", Name = "Me", HouseholdId = householdId });
+            ctx.Users.Add(new User { Id = otherUserId, Email = "other@test.com", Name = "Other", HouseholdId = householdId });
+            ctx.Households.Add(new Household { Id = householdId, Name = "Home", InviteCode = "XYZ789", Owner1UserId = otherUserId });
+            ctx.Trips.Add(new Trip { Id = tripId, Name = "Household Trip", IsCompleted = false, HouseholdId = householdId });
             await ctx.SaveChangesAsync();
         }
 
@@ -226,14 +228,14 @@ public class TripRepositoryTests
         var repo = new TripRepository(context);
 
         // Act
-        var result = await repo.IsUserCollaborator(tripId, userId);
+        var result = await repo.HasTripAccess(tripId, userId, householdId);
 
         // Assert
         result.Should().BeTrue();
     }
 
     [Fact]
-    public async Task Should_ReturnFalse_When_IsUserCollaboratorForUnrelatedUser()
+    public async Task Should_ReturnFalse_When_HasTripAccessForUnrelatedUser()
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
@@ -244,14 +246,14 @@ public class TripRepositoryTests
         await context.SaveChangesAsync();
 
         // Act
-        var result = await repo.IsUserCollaborator(tripId, Guid.NewGuid());
+        var result = await repo.HasTripAccess(tripId, Guid.NewGuid(), null);
 
         // Assert
         result.Should().BeFalse();
     }
 
     [Fact]
-    public async Task Should_ReturnFalse_When_IsUserCollaboratorForNonExistingTrip()
+    public async Task Should_ReturnFalse_When_HasTripAccessForNonExistingTrip()
     {
         // Arrange
         var dbName = Guid.NewGuid().ToString();
@@ -259,53 +261,10 @@ public class TripRepositoryTests
         var repo = new TripRepository(context);
 
         // Act
-        var result = await repo.IsUserCollaborator(Guid.NewGuid(), Guid.NewGuid());
+        var result = await repo.HasTripAccess(Guid.NewGuid(), Guid.NewGuid(), null);
 
         // Assert
         result.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task Should_AddCollaborator_When_ValidIds()
-    {
-        // Arrange
-        var dbName = Guid.NewGuid().ToString();
-        using var context = CreateContext(dbName);
-        var repo = new TripRepository(context);
-        var tripId = Guid.NewGuid();
-        var userId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
-        context.Trips.Add(new Trip { Id = tripId, Name = "Trip", IsCompleted = false });
-        await context.SaveChangesAsync();
-
-        // Act
-        await repo.AddCollaborator(tripId, userId);
-
-        // Assert
-        var exists = await context.TripCollaborators.AnyAsync(c => c.TripId == tripId && c.UserId == userId);
-        exists.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task Should_RemoveCollaborator_When_CollaboratorExists()
-    {
-        // Arrange
-        var dbName = Guid.NewGuid().ToString();
-        using var context = CreateContext(dbName);
-        var repo = new TripRepository(context);
-        var tripId = Guid.NewGuid();
-        var userId = Guid.NewGuid();
-        context.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
-        context.Trips.Add(new Trip { Id = tripId, Name = "Trip", IsCompleted = false });
-        context.TripCollaborators.Add(new TripCollaborator { TripId = tripId, UserId = userId, Trip = null!, User = null! });
-        await context.SaveChangesAsync();
-
-        // Act
-        await repo.RemoveCollaborator(tripId, userId);
-
-        // Assert
-        var exists = await context.TripCollaborators.AnyAsync(c => c.TripId == tripId && c.UserId == userId);
-        exists.Should().BeFalse();
     }
 
     [Fact]

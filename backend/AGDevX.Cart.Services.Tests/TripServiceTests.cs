@@ -1,9 +1,11 @@
 // ABOUTME: Unit tests for TripService covering trip lifecycle management (create, complete, reopen)
-// ABOUTME: and collaborator functionality with authorization checks for trip access
+// ABOUTME: and scope-based authorization with personal and household trips
+using AGDevX.Cart.Data;
 using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
@@ -12,12 +14,19 @@ namespace AGDevX.Cart.Services.Tests;
 public class TripServiceTests
 {
     private readonly Mock<ITripRepository> _mockTripRepository;
+    private readonly CartDbContext _dbContext;
     private readonly TripService _tripService;
 
     public TripServiceTests()
     {
         _mockTripRepository = new Mock<ITripRepository>();
-        _tripService = new TripService(_mockTripRepository.Object);
+
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+        _dbContext = new CartDbContext(options);
+
+        _tripService = new TripService(_mockTripRepository.Object, _dbContext);
     }
 
     [Fact]
@@ -25,40 +34,35 @@ public class TripServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var tripName = "Weekly Grocery Run";
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
         _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync((Trip t, CancellationToken _) => t);
 
         // Act
-        var result = await _tripService.CreateTrip(tripName, null, userId);
+        var result = await _tripService.CreateTrip("Weekly Grocery Run", null, null, userId);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(tripName, result.Name);
+        Assert.Equal("Weekly Grocery Run", result.Name);
         Assert.False(result.IsCompleted);
         Assert.Null(result.CompletedAt);
     }
 
     [Fact]
-    public async Task Should_CompleteTrip_When_UserIsCollaborator()
+    public async Task Should_CompleteTrip_When_UserHasAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var trip = new Trip
-        {
-            Id = tripId,
-            Name = "Test Trip",
-            IsCompleted = false
-        };
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(x => x.GetById(tripId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(trip);
+        var trip = new Trip { Id = tripId, Name = "Test Trip", IsCompleted = false };
 
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(true);
-
+        _mockTripRepository.Setup(x => x.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripRepository.Setup(x => x.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync((Trip t, CancellationToken _) => t);
 
@@ -72,23 +76,15 @@ public class TripServiceTests
     }
 
     [Fact]
-    public async Task Should_ThrowException_When_CompletingTripAsNonCollaborator()
+    public async Task Should_ThrowException_When_CompletingTripWithoutAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var trip = new Trip
-        {
-            Id = tripId,
-            Name = "Test Trip",
-            IsCompleted = false
-        };
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(x => x.GetById(tripId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(trip);
-
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(false);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
@@ -100,9 +96,11 @@ public class TripServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var trips = new List<Trip> { new() { Id = Guid.NewGuid(), Name = "Trip 1", IsCompleted = false } };
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(r => r.GetUserTrips(userId, It.IsAny<CancellationToken>())).ReturnsAsync(trips);
+        var trips = new List<Trip> { new() { Id = Guid.NewGuid(), Name = "Trip 1", IsCompleted = false } };
+        _mockTripRepository.Setup(r => r.GetUserTrips(userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(trips);
 
         // Act
         var result = await _tripService.GetUserTrips(userId);
@@ -115,13 +113,17 @@ public class TripServiceTests
     public async Task Should_ReturnTrip_When_GetById()
     {
         // Arrange
+        var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var trip = new Trip { Id = tripId, Name = "My Trip", IsCompleted = false };
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
+        var trip = new Trip { Id = tripId, Name = "My Trip", IsCompleted = false };
         _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
         // Act
-        var result = await _tripService.GetById(tripId);
+        var result = await _tripService.GetById(tripId, userId);
 
         // Assert
         result.Should().NotBeNull();
@@ -129,14 +131,16 @@ public class TripServiceTests
     }
 
     [Fact]
-    public async Task Should_UpdateTripName_When_UserIsCollaborator()
+    public async Task Should_UpdateTripName_When_UserHasAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var trip = new Trip { Id = tripId, Name = "Old Name", IsCompleted = false };
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var trip = new Trip { Id = tripId, Name = "Old Name", IsCompleted = false };
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
         _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip t, CancellationToken _) => t);
 
@@ -148,13 +152,15 @@ public class TripServiceTests
     }
 
     [Fact]
-    public async Task Should_ThrowUnauthorizedAccessException_When_UpdatingTripAsNonCollaborator()
+    public async Task Should_ThrowUnauthorizedAccessException_When_UpdatingTripWithoutAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var act = () => _tripService.UpdateTrip(tripId, "New Name", null, userId);
@@ -169,8 +175,10 @@ public class TripServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync((Trip?)null);
 
         // Act
@@ -181,14 +189,15 @@ public class TripServiceTests
     }
 
     [Fact]
-    public async Task Should_DeleteTrip_When_UserIsCreator()
+    public async Task Should_DeleteTrip_When_UserHasAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var trip = new Trip { Id = tripId, Name = "Doomed", IsCompleted = false, CreatedBy = userId.ToString() };
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripRepository.Setup(r => r.Delete(tripId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
@@ -199,14 +208,15 @@ public class TripServiceTests
     }
 
     [Fact]
-    public async Task Should_ThrowUnauthorizedAccessException_When_DeletingTripAsNonCreator()
+    public async Task Should_ThrowUnauthorizedAccessException_When_DeletingTripWithoutAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var trip = new Trip { Id = tripId, Name = "Not Yours", IsCompleted = false, CreatedBy = Guid.NewGuid().ToString() };
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var act = () => _tripService.DeleteTrip(tripId, userId);
@@ -216,27 +226,16 @@ public class TripServiceTests
     }
 
     [Fact]
-    public async Task Should_ThrowKeyNotFoundException_When_DeletingNonExistingTrip()
-    {
-        // Arrange
-        _mockTripRepository.Setup(r => r.GetById(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip?)null);
-
-        // Act
-        var act = () => _tripService.DeleteTrip(Guid.NewGuid(), Guid.NewGuid());
-
-        // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>();
-    }
-
-    [Fact]
-    public async Task Should_ReopenTrip_When_UserIsCollaborator()
+    public async Task Should_ReopenTrip_When_UserHasAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var trip = new Trip { Id = tripId, Name = "Completed", IsCompleted = true, CompletedAt = DateTime.UtcNow };
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var trip = new Trip { Id = tripId, Name = "Completed", IsCompleted = true, CompletedAt = DateTime.UtcNow };
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
         _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip t, CancellationToken _) => t);
 
@@ -249,13 +248,15 @@ public class TripServiceTests
     }
 
     [Fact]
-    public async Task Should_ThrowUnauthorizedAccessException_When_ReopeningTripAsNonCollaborator()
+    public async Task Should_ThrowUnauthorizedAccessException_When_ReopeningTripWithoutAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var act = () => _tripService.ReopenTrip(tripId, userId);
@@ -265,82 +266,16 @@ public class TripServiceTests
     }
 
     [Fact]
-    public async Task Should_AddCollaborator_When_UserIsCollaborator()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var collaboratorUserId = Guid.NewGuid();
-        var tripId = Guid.NewGuid();
-
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.AddCollaborator(tripId, collaboratorUserId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-
-        // Act
-        await _tripService.AddCollaborator(tripId, userId, collaboratorUserId);
-
-        // Assert
-        _mockTripRepository.Verify(r => r.AddCollaborator(tripId, collaboratorUserId, It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task Should_ThrowUnauthorizedAccessException_When_AddingCollaboratorAsNonCollaborator()
+    public async Task Should_StartTrip_When_UserHasAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
-
-        // Act
-        var act = () => _tripService.AddCollaborator(tripId, userId, Guid.NewGuid());
-
-        // Assert
-        await act.Should().ThrowAsync<UnauthorizedAccessException>();
-    }
-
-    [Fact]
-    public async Task Should_RemoveCollaborator_When_UserIsCollaborator()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var collaboratorUserId = Guid.NewGuid();
-        var tripId = Guid.NewGuid();
-
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
-        _mockTripRepository.Setup(r => r.RemoveCollaborator(tripId, collaboratorUserId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-
-        // Act
-        await _tripService.RemoveCollaborator(tripId, userId, collaboratorUserId);
-
-        // Assert
-        _mockTripRepository.Verify(r => r.RemoveCollaborator(tripId, collaboratorUserId, It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task Should_ThrowUnauthorizedAccessException_When_RemovingCollaboratorAsNonCollaborator()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var tripId = Guid.NewGuid();
-
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
-
-        // Act
-        var act = () => _tripService.RemoveCollaborator(tripId, userId, Guid.NewGuid());
-
-        // Assert
-        await act.Should().ThrowAsync<UnauthorizedAccessException>();
-    }
-
-    [Fact]
-    public async Task Should_StartTrip_When_UserIsCollaborator()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var tripId = Guid.NewGuid();
         var trip = new Trip { Id = tripId, Name = "Planning Trip", IsCompleted = false, IsStarted = false };
-
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
         _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip t, CancellationToken _) => t);
 
@@ -354,13 +289,15 @@ public class TripServiceTests
     }
 
     [Fact]
-    public async Task Should_ThrowUnauthorizedAccessException_When_StartingTripAsNonCollaborator()
+    public async Task Should_ThrowUnauthorizedAccessException_When_StartingTripWithoutAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var act = () => _tripService.StartTrip(tripId, userId);
@@ -375,8 +312,10 @@ public class TripServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync((Trip?)null);
 
         // Act
@@ -392,6 +331,9 @@ public class TripServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
+
         var trip = new Trip
         {
             Id = tripId,
@@ -402,7 +344,7 @@ public class TripServiceTests
             StartedAt = DateTime.UtcNow.AddHours(-1)
         };
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
         _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip t, CancellationToken _) => t);
 
@@ -421,13 +363,14 @@ public class TripServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var tripName = "New Trip";
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
         _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync((Trip t, CancellationToken _) => t);
 
         // Act
-        var result = await _tripService.CreateTrip(tripName, null, userId);
+        var result = await _tripService.CreateTrip("New Trip", null, null, userId);
 
         // Assert
         result.IsStarted.Should().BeFalse();
@@ -440,12 +383,14 @@ public class TripServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var tripDate = new DateOnly(2025, 6, 15);
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
         _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync((Trip t, CancellationToken _) => t);
 
         // Act
-        var result = await _tripService.CreateTrip("Trip With Date", tripDate, userId);
+        var result = await _tripService.CreateTrip("Trip With Date", tripDate, null, userId);
 
         // Assert
         result.TripDate.Should().Be(tripDate);
@@ -456,12 +401,14 @@ public class TripServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
         _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>(), It.IsAny<CancellationToken>()))
                            .ReturnsAsync((Trip t, CancellationToken _) => t);
 
         // Act
-        var result = await _tripService.CreateTrip("Trip Without Date", null, userId);
+        var result = await _tripService.CreateTrip("Trip Without Date", null, null, userId);
 
         // Assert
         result.TripDate.Should().BeNull();
@@ -474,9 +421,11 @@ public class TripServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var tripDate = new DateOnly(2025, 8, 20);
-        var trip = new Trip { Id = tripId, Name = "Trip", IsCompleted = false };
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var trip = new Trip { Id = tripId, Name = "Trip", IsCompleted = false };
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
         _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip t, CancellationToken _) => t);
 
@@ -497,9 +446,11 @@ public class TripServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var existingDate = new DateOnly(2025, 5, 1);
-        var trip = new Trip { Id = tripId, Name = "Trip", IsCompleted = false, TripDate = existingDate };
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var trip = new Trip { Id = tripId, Name = "Trip", IsCompleted = false, TripDate = existingDate };
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
         _mockTripRepository.Setup(r => r.Update(It.IsAny<Trip>(), It.IsAny<CancellationToken>())).ReturnsAsync((Trip t, CancellationToken _) => t);
 
