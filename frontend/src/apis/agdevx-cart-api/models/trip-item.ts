@@ -11,6 +11,7 @@ export interface TripItem {
   storeId: string | null;
   notes: string | null;
   isChecked: boolean;
+  isHouseholdItem: boolean;
   checkedAt: string | null;
   inventoryItem?: {
     id: string;

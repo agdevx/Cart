@@ -8,4 +8,5 @@ export interface UserPreferences {
   locationDisplayName: string | null;
   showWeatherIcons: boolean;
   showWeatherTemps: boolean;
+  showHouseholdPage: boolean;
 }
