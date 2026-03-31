@@ -14,15 +14,31 @@ namespace AGDevX.Cart.Api.Controllers;
 [Route("api/v1/[controller]")]
 public class HouseholdController(IHouseholdService householdService) : ControllerBase
 {
-    //== Get all households for the authenticated user
+    //== Get the authenticated user's household (single-household model)
     [HttpGet]
-    public async Task<IActionResult> GetUserHouseholds(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetUserHousehold(CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            var households = await householdService.GetUserHouseholds(userId, cancellationToken);
-            return Ok(households);
+            var household = await householdService.GetUserHousehold(userId, cancellationToken);
+            return Ok(household);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
+        }
+    }
+
+    //== Get swap status (must be before {id} route to avoid route conflicts)
+    [HttpGet("swap-status")]
+    public async Task<IActionResult> GetSwapStatus(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var status = await householdService.GetSwapStatus(userId, cancellationToken);
+            return Ok(status);
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -109,7 +125,7 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
     }
 
     //== Join a household via invite code
-    [HttpPost("/api/v1/households/join")]
+    [HttpPost("join")]
     public async Task<IActionResult> JoinHousehold([FromBody] JoinHouseholdRequest request, CancellationToken cancellationToken = default)
     {
         try
@@ -129,6 +145,26 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
         catch (InvalidOperationException ex)
         {
             return Conflict(new { errorCode = "ALREADY_MEMBER", message = ex.Message });
+        }
+    }
+
+    //== Leave the current household
+    [HttpPost("{id}/leave")]
+    public async Task<IActionResult> LeaveHousehold(Guid id, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            await householdService.LeaveHousehold(userId, cancellationToken);
+            return NoContent();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { errorCode = "INVALID_OPERATION", message = ex.Message });
         }
     }
 
@@ -172,14 +208,34 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
         }
     }
 
-    //== Transfer household ownership
-    [HttpPut("{id}/owner")]
-    public async Task<IActionResult> TransferOwnership(Guid id, [FromBody] TransferOwnershipRequest request, CancellationToken cancellationToken = default)
+    //== Promote a member to owner
+    [HttpPut("{id}/owner/promote")]
+    public async Task<IActionResult> PromoteToOwner(Guid id, [FromBody] PromoteOwnerRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
             var userId = User.GetUserId();
-            await householdService.TransferOwnership(userId, id, request.UserId!.Value, cancellationToken);
+            await householdService.PromoteToOwner(userId, id, request.UserId!.Value, cancellationToken);
+            return NoContent();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { errorCode = "INVALID_REQUEST", message = ex.Message });
+        }
+    }
+
+    //== Demote an owner to regular member
+    [HttpPut("{id}/owner/demote")]
+    public async Task<IActionResult> DemoteOwner(Guid id, [FromBody] DemoteOwnerRequest request, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            await householdService.DemoteOwner(userId, id, request.UserId!.Value, cancellationToken);
             return NoContent();
         }
         catch (UnauthorizedAccessException ex)
