@@ -17,6 +17,7 @@ import { useStoresWithDisplayNamesService } from '@/services/use-stores-with-dis
 import { EmptyState } from '@/shared/empty-state'
 import { Fab } from '@/shared/fab'
 import { SectionHeader } from '@/shared/section-header'
+import { SkeletonCard } from '@/shared/skeleton-card'
 import { Spinner } from '@/shared/spinner'
 import { StoreAccordion } from '@/shared/store-accordion'
 import { TripItemRow } from '@/shared/trip-item-row'
@@ -77,10 +78,7 @@ export const TripDetailPage = () => {
             <div className="h-3 w-2/5 bg-navy/8 animate-pulse rounded-lg" />
           </div>
           {[0, 1, 2].map((i) => (
-            <div key={i} className="p-4 bg-surface rounded-xl shadow-sm space-y-2">
-              <div className="h-3 w-1/2 bg-navy/8 animate-pulse rounded-lg" />
-              <div className="h-2.5 w-1/3 bg-navy/8 animate-pulse rounded-lg" />
-            </div>
+            <SkeletonCard key={i} rows={[{ width: '50%' }, { width: '33%' }]} />
           ))}
         </div>
       </div>

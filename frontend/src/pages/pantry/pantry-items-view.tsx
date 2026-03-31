@@ -18,6 +18,7 @@ import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { DropdownMenu } from '@/shared/dropdown-menu'
 import { EmptyState } from '@/shared/empty-state'
 import { SectionHeader } from '@/shared/section-header'
+import { SkeletonCard } from '@/shared/skeleton-card'
 import { sortItems } from '@/utils/sort-items'
 
 import type { PantryItemFormData } from './pantry-item-form'
@@ -150,10 +151,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
         {createForm}
         <div className="space-y-2 mt-2">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="p-4 bg-surface rounded-xl shadow-sm space-y-2">
-              <div className="h-3 w-1/2 bg-navy/8 animate-pulse rounded-lg" />
-              <div className="h-2.5 w-1/3 bg-navy/8 animate-pulse rounded-lg" />
-            </div>
+            <SkeletonCard key={i} rows={[{ width: '50%' }, { width: '33%' }]} />
           ))}
         </div>
       </>
