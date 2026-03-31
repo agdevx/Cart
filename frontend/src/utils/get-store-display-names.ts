@@ -6,7 +6,7 @@ import type { Store } from '@/apis/agdevx-cart-api/models/store'
 
 export function getStoreDisplayNames(
   stores: Store[],
-  households: Household[]
+  household: Household | null
 ): Map<string, string> {
   const displayNames = new Map<string, string>()
 
@@ -19,10 +19,7 @@ export function getStoreDisplayNames(
     byName.set(key, group)
   }
 
-  const householdNameMap = new Map<string, string>()
-  for (const h of households) {
-    householdNameMap.set(h.id, h.name ?? 'Household')
-  }
+  const householdName = household?.name ?? 'Household'
 
   for (const [, group] of byName) {
     //== A collision requires 2+ stores with the same name in DIFFERENT scopes
@@ -30,9 +27,7 @@ export function getStoreDisplayNames(
 
     for (const store of group) {
       if (hasMultipleScopes) {
-        const label = store.householdId
-          ? householdNameMap.get(store.householdId) ?? 'Household'
-          : 'Personal'
+        const label = store.householdId ? householdName : 'Personal'
         displayNames.set(store.id, `${store.name} (${label})`)
       } else {
         displayNames.set(store.id, store.name)

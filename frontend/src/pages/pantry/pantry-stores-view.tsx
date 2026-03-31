@@ -2,11 +2,11 @@
 // ABOUTME: Groups stores by household with a personal stores section, inline editing and delete confirmation
 // ABOUTME: Accepts a filter prop to show all, personal-only, or a single household's stores
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { MoreVertical, Package, Pencil, Trash2 } from 'lucide-react'
 
-import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
+import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useCreateStoreMutation } from '@/apis/agdevx-cart-api/store/create-store.mutation'
 import { useDeleteStoreMutation } from '@/apis/agdevx-cart-api/store/delete-store.mutation'
 import { useUpdateStoreMutation } from '@/apis/agdevx-cart-api/store/update-store.mutation'
@@ -14,7 +14,6 @@ import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
 import { SectionHeader } from '@/shared/section-header'
-import { sortHouseholds } from '@/utils/sort-households'
 import { sortStores } from '@/utils/sort-stores'
 
 import type { InventoryFilter } from './pantry-items-view'
@@ -30,9 +29,8 @@ interface PantryStoresViewProps {
 }
 
 export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onCloseCreateForm }: PantryStoresViewProps) => {
-  const { data: households, isLoading: householdsLoading } = useHouseholdsQuery()
-  const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
-  const { data: stores, isLoading: storesLoading } = useStoresQuery(householdIds)
+  const { data: household, isLoading: householdLoading } = useHouseholdQuery()
+  const { data: stores, isLoading: storesLoading } = useStoresQuery(household?.id ?? null)
   const createMutation = useCreateStoreMutation()
   const updateMutation = useUpdateStoreMutation()
   const deleteMutation = useDeleteStoreMutation()
@@ -61,7 +59,7 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
     }
   }, [menuOpenId])
 
-  if (storesLoading || householdsLoading) {
+  if (storesLoading || householdLoading) {
     return (
       <div className="space-y-2 mt-2">
         {[0, 1].map((i) => (
@@ -74,22 +72,18 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
     )
   }
 
-  const householdStoresMap = new Map<string, ReadonlyArray<NonNullable<typeof stores>[number]>>()
-  for (const household of households || []) {
-    householdStoresMap.set(
-      household.id,
-      sortStores(stores?.filter((s) => s.householdId === household.id) || [])
-    )
-  }
+  const householdStores = household
+    ? sortStores(stores?.filter((s) => s.householdId === household.id) || [])
+    : []
   const personalStores = sortStores(stores?.filter((s) => s.userId !== null) || [])
 
   /* Derive the filtered set based on the active scope filter */
-  const householdId = filter.startsWith('household:') ? filter.split(':')[1] : null
+  const filterHouseholdId = filter.startsWith('household:') ? filter.split(':')[1] : null
   const filteredStores =
     filter === 'personal'
       ? personalStores
-      : householdId
-        ? (householdStoresMap.get(householdId) ?? [])
+      : filterHouseholdId
+        ? householdStores
         : null // null means "all" — use grouped view
 
   /* True when the currently visible scope has no stores (not just the global list) */
@@ -185,7 +179,7 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
           initialName={store.name}
           initialScope={store.householdId ?? 'personal'}
           stores={stores ?? []}
-          households={households}
+          household={household}
           isPending={updateMutation.isPending}
           onSubmit={handleSaveEdit}
           onCancel={handleCancelEdit}
@@ -200,7 +194,7 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
       {showCreateForm && (
         <CreatePantryStoreForm
           stores={stores ?? []}
-          households={households}
+          household={household}
           isPending={createMutation.isPending}
           onSubmit={handleCreate}
           onCancel={onCloseCreateForm}
@@ -240,23 +234,17 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
             </div>
           )}
 
-          {/* Household store sections — sorted alphabetically by household name */}
-          {sortHouseholds(households || []).map((household) => {
-            const householdStores = householdStoresMap.get(household.id) || []
-            if (householdStores.length === 0) {
-              return null
-            }
-            return (
-              <div key={household.id} className="mb-6">
-                <div className="mt-4">
-                  <SectionHeader title={`${household.name ?? ''} (${householdStores.length})`} />
-                </div>
-                <div className="space-y-2">
-                  {householdStores.map(renderStoreRow)}
-                </div>
+          {/* Household store section */}
+          {householdStores.length > 0 && (
+            <div className="mb-6">
+              <div className="mt-4">
+                <SectionHeader title={`${household?.name ?? ''} (${householdStores.length})`} />
               </div>
-            )
-          })}
+              <div className="space-y-2">
+                {householdStores.map(renderStoreRow)}
+              </div>
+            </div>
+          )}
         </>
       )}
 

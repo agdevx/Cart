@@ -3,7 +3,7 @@
 
 import { useState } from 'react'
 
-import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
+import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import type { InventoryFilter } from '@/pages/pantry/pantry-items-view'
 import { PantryItemsView } from '@/pages/pantry/pantry-items-view'
@@ -19,7 +19,7 @@ export const PantryPage = () => {
   const [filter, setFilter] = useState<InventoryFilter>('all')
   const [showItemCreateForm, setShowItemCreateForm] = useState(false)
   const [showStoreCreateForm, setShowStoreCreateForm] = useState(false)
-  const { data: households } = useHouseholdsQuery()
+  const { data: household } = useHouseholdQuery()
   useInventoryQuery() // prefetch for child PantryItemsView
 
   return (
@@ -56,14 +56,16 @@ export const PantryPage = () => {
       </div>
 
       {/* Filter Tabs — both Items and Stores tabs */}
-      <div className="mb-4">
-        <ScopeFilter
-          aria-label="Filter inventory"
-          value={filter === 'all' ? 'all' : filter === 'personal' ? 'personal' : filter.split(':')[1]}
-          onChange={(v) => setFilter(v === 'all' ? 'all' : v === 'personal' ? 'personal' : `household:${v}`)}
-          households={households}
-        />
-      </div>
+      {household && (
+        <div className="mb-4">
+          <ScopeFilter
+            aria-label="Filter inventory"
+            value={filter === 'all' ? 'all' : filter === 'personal' ? 'personal' : filter.split(':')[1]}
+            onChange={(v) => setFilter(v === 'all' ? 'all' : v === 'personal' ? 'personal' : `household:${v}`)}
+            household={household}
+          />
+        </div>
+      )}
 
       {/* Items View */}
       {activeTab === 'items' && (

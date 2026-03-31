@@ -5,7 +5,7 @@ import { useMemo, useRef, useState } from 'react'
 
 import { MoreVertical, Package, Pencil, Trash2 } from 'lucide-react'
 
-import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
+import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useCreateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/create-inventory-item.mutation'
 import { useDeleteInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/delete-inventory-item.mutation'
 import { useUpdateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/update-inventory-item.mutation'
@@ -20,7 +20,6 @@ import { DropdownMenu } from '@/shared/dropdown-menu'
 import { EmptyState } from '@/shared/empty-state'
 import { SectionHeader } from '@/shared/section-header'
 import { getStoreDisplayNames } from '@/utils/get-store-display-names'
-import { sortHouseholds } from '@/utils/sort-households'
 import { sortItems } from '@/utils/sort-items'
 
 import type { PantryItemFormData } from './pantry-item-form'
@@ -59,9 +58,8 @@ const getCreateInitialScope = (filter: InventoryFilter): string => {
 
 export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCloseCreateForm }: PantryItemsViewProps) => {
   const { type: filterType, id: filterId } = parseFilter(filter)
-  const { data: households } = useHouseholdsQuery()
-  const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
-  const { data: stores } = useStoresQuery(householdIds)
+  const { data: household } = useHouseholdQuery()
+  const { data: stores } = useStoresQuery(household?.id ?? null)
   const createMutation = useCreateInventoryItemMutation()
   const deleteMutation = useDeleteInventoryItemMutation()
   const updateMutation = useUpdateInventoryItemMutation()
@@ -101,8 +99,8 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
   }
 
   const storeDisplayNames = useMemo(
-    () => getStoreDisplayNames(stores ?? [], households ?? []),
-    [stores, households]
+    () => getStoreDisplayNames(stores ?? [], household ?? null),
+    [stores, household]
   )
 
   //== All four hooks are called unconditionally (React rules of hooks). Inactive scoped hooks
@@ -145,7 +143,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
   const createForm = showCreateForm && (
     <CreatePantryItemForm
       initialScope={getCreateInitialScope(filter)}
-      households={households}
+      household={household}
       allStores={stores ?? []}
       storeDisplayNames={storeDisplayNames}
       isPending={createMutation.isPending}
@@ -193,7 +191,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
       initialScope={item.householdId || 'personal'}
       initialDefaultStoreId={item.defaultStoreId}
       ownerUserId={item.ownerUserId}
-      households={households}
+      household={household}
       allStores={stores ?? []}
       storeDisplayNames={storeDisplayNames}
       isPending={updateMutation.isPending}
@@ -244,16 +242,12 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
     </div>
   )
 
-  //== For "all" filter, group by household sections
+  //== For "all" filter, group into personal and household sections
   if (filterType === 'all') {
-    const householdItemsMap = new Map<string, InventoryItem[]>()
-    for (const household of households || []) {
-      householdItemsMap.set(
-        household.id,
-        sortedItems.filter((item) => item.householdId === household.id)
-      )
-    }
     const personalItems = sortedItems.filter((item) => item.ownerUserId !== null)
+    const householdItems = household
+      ? sortedItems.filter((item) => item.householdId === household.id)
+      : []
 
     return (
       <div className="animate-fade-in">
@@ -268,18 +262,14 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
           </div>
         )}
 
-        {sortHouseholds(households || []).map((household) => {
-          const householdItems = householdItemsMap.get(household.id) || []
-          if (householdItems.length === 0) return null
-          return (
-            <div key={household.id} className="mb-6">
-              <SectionHeader title={`${household.name ?? ''} (${householdItems.length})`} />
-              <div className="space-y-2">
-                {householdItems.map(renderItem)}
-              </div>
+        {householdItems.length > 0 && (
+          <div className="mb-6">
+            <SectionHeader title={`${household?.name ?? ''} (${householdItems.length})`} />
+            <div className="space-y-2">
+              {householdItems.map(renderItem)}
             </div>
-          )
-        })}
+          </div>
+        )}
 
         {deleteConfirm && (
           <ConfirmDialog
