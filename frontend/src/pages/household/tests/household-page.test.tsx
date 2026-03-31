@@ -12,7 +12,7 @@ import * as householdQueryModule from '@/apis/agdevx-cart-api/household/use-hous
 import * as membersQueryModule from '@/apis/agdevx-cart-api/household/use-household-members.query'
 import * as inviteCodeQueryModule from '@/apis/agdevx-cart-api/household/use-invite-code.query'
 import * as swapStatusQueryModule from '@/apis/agdevx-cart-api/household/use-swap-status.query'
-import type { Household, HouseholdMember } from '@/apis/agdevx-cart-api/models/household'
+import type { Household, HouseholdMember, SwapStatusResponse } from '@/apis/agdevx-cart-api/models/household'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 import * as useAuthModule from '@/auth/use-auth'
 
@@ -119,7 +119,7 @@ const setupMocks = (overrides?: {
   vi.spyOn(swapStatusQueryModule, 'useSwapStatusQuery').mockReturnValue({
     data: { scenario: 'none', currentHouseholdId: null, currentHouseholdName: null, coOwnerName: null },
     isLoading: false,
-  } as unknown as UseQueryResult<any>)
+  } as unknown as UseQueryResult<SwapStatusResponse>)
 }
 
 describe('HouseholdPage', () => {

@@ -25,6 +25,7 @@ const planningTrip: Trip = {
   createdBy: 'user-1',
   createdDate: '2026-02-14T10:00:00Z',
   modifiedBy: null,
+  householdId: null,
   modifiedDate: null,
 }
 
@@ -40,6 +41,7 @@ const activeTrip: Trip = {
   createdBy: 'user-1',
   createdDate: '2026-02-15T10:00:00Z',
   modifiedBy: null,
+  householdId: null,
   modifiedDate: null,
 }
 
@@ -55,6 +57,7 @@ const personalTrip: Trip = {
   createdBy: 'user-1',
   createdDate: '2026-02-15T10:00:00Z',
   modifiedBy: null,
+  householdId: null,
   modifiedDate: null,
 }
 
@@ -70,6 +73,7 @@ const completedTrip: Trip = {
   createdBy: 'user-1',
   createdDate: '2026-02-18T10:00:00Z',
   modifiedBy: null,
+  householdId: null,
   modifiedDate: null,
 }
 
