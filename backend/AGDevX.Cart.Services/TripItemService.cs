@@ -1,34 +1,33 @@
 // ABOUTME: Service implementation for TripItem business logic including add, update, delete operations
-// ABOUTME: and check/uncheck functionality with authorization checks ensuring user is trip collaborator
+// ABOUTME: and check/uncheck functionality with scope-based authorization via HasTripAccess
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using AGDevX.Cart.Data;
 using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Shared.Models;
 
 namespace AGDevX.Cart.Services;
 
-public class TripItemService(ITripItemRepository tripItemRepository, ITripRepository tripRepository, ITripEventService tripEventService, IInventoryRepository inventoryRepository, IStoreRepository storeRepository) : ITripItemService
+public class TripItemService(ITripItemRepository tripItemRepository, ITripRepository tripRepository, ITripEventService tripEventService, IInventoryRepository inventoryRepository, IStoreRepository storeRepository, CartDbContext dbContext) : ITripItemService
 {
     private readonly ITripItemRepository _tripItemRepository = tripItemRepository;
     private readonly ITripRepository _tripRepository = tripRepository;
     private readonly ITripEventService _tripEventService = tripEventService;
     private readonly IInventoryRepository _inventoryRepository = inventoryRepository;
     private readonly IStoreRepository _storeRepository = storeRepository;
+    private readonly CartDbContext _dbContext = dbContext;
 
     //== Serializer options that handle EF Core circular navigation properties
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
         ReferenceHandler = ReferenceHandler.IgnoreCycles
     };
+
     public async Task<TripItem> AddTripItem(Guid tripId, Guid inventoryItemId, int quantity, Guid userId, string? notes = null, Guid? storeId = null, CancellationToken cancellationToken = default)
     {
-        //== Verify user is collaborator before adding item to trip
-        var isCollaborator = await _tripRepository.IsUserCollaborator(tripId, userId, cancellationToken);
-        if (!isCollaborator)
-        {
-            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
-        }
+        //== Verify user has access before adding item to trip
+        await VerifyTripAccess(tripId, userId, cancellationToken);
 
         //== Lookup inventory item to populate denormalized name
         var inventoryItem = await _inventoryRepository.GetById(inventoryItemId, cancellationToken)
@@ -54,6 +53,7 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
             StoreId = storeId,
             IsChecked = false,
             CheckedAt = null,
+            IsHouseholdItem = inventoryItem.HouseholdId.HasValue,
         };
 
         var created = await _tripItemRepository.Create(tripItem, cancellationToken);
@@ -73,14 +73,19 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
 
     public async Task<IEnumerable<TripItem>> GetTripItems(Guid tripId, Guid userId, CancellationToken cancellationToken = default)
     {
-        //== Verify user is collaborator before retrieving trip items
-        var isCollaborator = await _tripRepository.IsUserCollaborator(tripId, userId, cancellationToken);
-        if (!isCollaborator)
+        //== Verify user has access before retrieving trip items
+        await VerifyTripAccess(tripId, userId, cancellationToken);
+
+        var items = await _tripItemRepository.GetTripItems(tripId, cancellationToken);
+        var trip = await _tripRepository.GetById(tripId, cancellationToken);
+
+        //== Household trip: filter out personal items not created by this user
+        if (trip?.HouseholdId != null)
         {
-            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
+            items = items.Where(ti => ti.IsHouseholdItem || ti.CreatedBy == userId).ToList();
         }
 
-        return await _tripItemRepository.GetTripItems(tripId, cancellationToken);
+        return items;
     }
 
     public async Task<TripItem?> GetById(Guid id, Guid userId, CancellationToken cancellationToken = default)
@@ -91,12 +96,8 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
             return null;
         }
 
-        //== Verify user is collaborator before retrieving trip item
-        var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId, cancellationToken);
-        if (!isCollaborator)
-        {
-            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
-        }
+        //== Verify user has access before retrieving trip item
+        await VerifyTripAccess(tripItem.TripId, userId, cancellationToken);
 
         return tripItem;
     }
@@ -106,12 +107,8 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
         var tripItem = await _tripItemRepository.GetById(id, cancellationToken)
                             ?? throw new KeyNotFoundException("Trip item not found");
 
-        //== Verify user is collaborator before updating trip item
-        var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId, cancellationToken);
-        if (!isCollaborator)
-        {
-            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
-        }
+        //== Verify user has access before updating trip item
+        await VerifyTripAccess(tripItem.TripId, userId, cancellationToken);
 
         //== Update trip item properties
         tripItem.Quantity = quantity;
@@ -149,12 +146,8 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
         var tripItem = await _tripItemRepository.GetById(id, cancellationToken)
                             ?? throw new KeyNotFoundException("Trip item not found");
 
-        //== Verify user is collaborator before deleting trip item
-        var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId, cancellationToken);
-        if (!isCollaborator)
-        {
-            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
-        }
+        //== Verify user has access before deleting trip item
+        await VerifyTripAccess(tripItem.TripId, userId, cancellationToken);
 
         await _tripItemRepository.Delete(id, cancellationToken);
 
@@ -174,12 +167,8 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
         var tripItem = await _tripItemRepository.GetById(id, cancellationToken)
                             ?? throw new KeyNotFoundException("Trip item not found");
 
-        //== Verify user is collaborator before checking/unchecking trip item
-        var isCollaborator = await _tripRepository.IsUserCollaborator(tripItem.TripId, userId, cancellationToken);
-        if (!isCollaborator)
-        {
-            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
-        }
+        //== Verify user has access before checking/unchecking trip item
+        await VerifyTripAccess(tripItem.TripId, userId, cancellationToken);
 
         //== Set IsChecked and CheckedAt based on isChecked parameter
         if (isChecked)
@@ -206,5 +195,18 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
         });
 
         return updated;
+    }
+
+    private async Task VerifyTripAccess(Guid tripId, Guid userId, CancellationToken cancellationToken)
+    {
+        var user = await _dbContext.Users.FindAsync(new object[] { userId }, cancellationToken)
+            ?? throw new UnauthorizedAccessException("User not found");
+
+        var hasAccess = await _tripRepository.HasTripAccess(tripId, userId, user.HouseholdId, cancellationToken);
+
+        if (!hasAccess)
+        {
+            throw new UnauthorizedAccessException("User does not have access to this trip");
+        }
     }
 }
