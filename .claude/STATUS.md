@@ -22,7 +22,7 @@ This is the single source of truth for where the project stands. Read it at the 
 | Suite              | Tests | Files                      |
 | ------------------ | ----- | -------------------------- |
 | Backend — Data     | 70    | AGDevX.Cart.Data.Tests     |
-| Backend — Services | 118   | AGDevX.Cart.Services.Tests |
+| Backend — Services | 129   | AGDevX.Cart.Services.Tests |
 | Backend — API      | 112   | AGDevX.Cart.Api.Tests      |
 | Backend — Auth     | 22    | AGDevX.Cart.Auth.Tests     |
 | Frontend — Vitest  | 556   | 86 test files              |
