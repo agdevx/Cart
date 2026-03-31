@@ -1,22 +1,17 @@
 // ABOUTME: All/Personal/Household filter tabs used on pantry and add-trip-items pages
-// ABOUTME: Sorts households alphabetically and handles tab selection
-
-import { useMemo } from 'react'
-
-import { sortHouseholds } from '@/utils/sort-households'
+// ABOUTME: Shows three tabs when a household exists, returns null otherwise
 
 interface ScopeFilterProps {
   readonly value: string
   readonly onChange: (value: string) => void
-  readonly households: ReadonlyArray<{ readonly id: string; readonly name: string | null }> | undefined
+  readonly household: { readonly id: string; readonly name: string | null } | null | undefined
   readonly 'aria-label'?: string
 }
 
-export const ScopeFilter = ({ value, onChange, households, 'aria-label': ariaLabel }: ScopeFilterProps) => {
-  const sorted = useMemo(
-    () => sortHouseholds(households || []),
-    [households]
-  )
+export const ScopeFilter = ({ value, onChange, household, 'aria-label': ariaLabel }: ScopeFilterProps) => {
+  if (!household) {
+    return null
+  }
 
   const buttonClass = (isActive: boolean) =>
     `flex-shrink-0 px-4 py-2 text-sm font-display font-bold rounded-lg transition-colors ${
@@ -43,17 +38,14 @@ export const ScopeFilter = ({ value, onChange, households, 'aria-label': ariaLab
       >
         Personal
       </button>
-      {sorted.map((household) => (
-        <button
-          key={household.id}
-          role="tab"
-          aria-selected={value === household.id}
-          onClick={() => onChange(household.id)}
-          className={buttonClass(value === household.id)}
-        >
-          {household.name}
-        </button>
-      ))}
+      <button
+        role="tab"
+        aria-selected={value === household.id}
+        onClick={() => onChange(household.id)}
+        className={buttonClass(value === household.id)}
+      >
+        {household.name} Household
+      </button>
     </div>
   )
 }
