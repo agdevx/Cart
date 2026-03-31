@@ -124,22 +124,33 @@ public class CartDbContext(DbContextOptions<CartDbContext> options, IHttpContext
     //== Automatically populate audit fields on BaseEntity entries
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var userId = httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                     ?? "System";
+        var userIdClaim = httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var now = DateTime.UtcNow;
 
         foreach (var entry in ChangeTracker.Entries<BaseEntity>())
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreatedBy = userId;
+                /*
+                 * For self-referencing entities (e.g., User registration), CreatedBy may already
+                 * be set to the entity's own Id before SaveChanges. Only overwrite if it's empty.
+                 */
+                if (entry.Entity.CreatedBy == Guid.Empty && userIdClaim != null && Guid.TryParse(userIdClaim, out var parsedUserId))
+                {
+                    entry.Entity.CreatedBy = parsedUserId;
+                    entry.Entity.ModifiedBy = parsedUserId;
+                }
+
                 entry.Entity.CreatedDate = now;
-                entry.Entity.ModifiedBy = userId;
                 entry.Entity.ModifiedDate = now;
             }
             else if (entry.State == EntityState.Modified)
             {
-                entry.Entity.ModifiedBy = userId;
+                if (userIdClaim != null && Guid.TryParse(userIdClaim, out var parsedModifiedBy))
+                {
+                    entry.Entity.ModifiedBy = parsedModifiedBy;
+                }
+
                 entry.Entity.ModifiedDate = now;
             }
         }

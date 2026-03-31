@@ -31,6 +31,10 @@ public class AuthService(CartDbContext context, ISecurityAuditLogger securityAud
             Name = request.Name
         };
 
+        //== Self-reference: user is their own creator during registration
+        user.CreatedBy = user.Id;
+        user.ModifiedBy = user.Id;
+
         context.Users.Add(user);
         await context.SaveChangesAsync(cancellationToken);
 
