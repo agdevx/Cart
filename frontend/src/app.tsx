@@ -11,10 +11,7 @@ import { queryClient } from '@/apis/tanstack-query/query-client'
 import { AuthProvider } from '@/auth/auth-provider'
 import { useAuth } from '@/auth/use-auth'
 import { HomePage } from '@/pages/home/home-page'
-import { CreateHouseholdPage } from '@/pages/household/create-household-page'
-import { HouseholdDetailPage } from '@/pages/household/household-detail-page'
 import { HouseholdPage } from '@/pages/household/household-page'
-import { JoinHouseholdPage } from '@/pages/household/join-household-page'
 import { LoginPage } from '@/pages/login/login-page'
 import { PantryPage } from '@/pages/pantry/pantry-page'
 import { RegisterPage } from '@/pages/register/register-page'
@@ -66,9 +63,6 @@ export const AppRoutes = () => (
       <Route path={ROUTES.TRIP_ADD_ITEMS} element={<ProtectedRoute><AuthenticatedLayout><AddTripItemsPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path={ROUTES.ACTIVE_TRIP} element={<ProtectedRoute><AuthenticatedLayout><ActiveTripPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path={ROUTES.HOUSEHOLD} element={<ProtectedRoute><AuthenticatedLayout><HouseholdPage /></AuthenticatedLayout></ProtectedRoute>} />
-      <Route path={ROUTES.HOUSEHOLD_CREATE} element={<ProtectedRoute><AuthenticatedLayout><CreateHouseholdPage /></AuthenticatedLayout></ProtectedRoute>} />
-      <Route path={ROUTES.HOUSEHOLD_JOIN} element={<ProtectedRoute><AuthenticatedLayout><JoinHouseholdPage /></AuthenticatedLayout></ProtectedRoute>} />
-      <Route path={ROUTES.HOUSEHOLD_DETAIL} element={<ProtectedRoute><AuthenticatedLayout><HouseholdDetailPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path={ROUTES.SETTINGS} element={<ProtectedRoute><AuthenticatedLayout><SettingsPage /></AuthenticatedLayout></ProtectedRoute>} />
       <Route path="/" element={<Navigate to={ROUTES.HOME} replace />} />
     </Routes>

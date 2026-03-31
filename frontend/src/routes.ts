@@ -11,13 +11,9 @@ export const ROUTES = {
   TRIP_ADD_ITEMS: '/shopping/:tripId/add-items',
   ACTIVE_TRIP: '/shopping/:tripId/active',
   HOUSEHOLD: '/household',
-  HOUSEHOLD_CREATE: '/household/create',
-  HOUSEHOLD_JOIN: '/household/join',
-  HOUSEHOLD_DETAIL: '/household/:id',
   SETTINGS: '/settings',
 } as const
 
 export const tripDetailPath = (tripId: string) => `/shopping/${tripId}`
 export const tripAddItemsPath = (tripId: string) => `/shopping/${tripId}/add-items`
 export const activeTripPath = (tripId: string) => `/shopping/${tripId}/active`
-export const householdDetailPath = (id: string) => `/household/${id}`
