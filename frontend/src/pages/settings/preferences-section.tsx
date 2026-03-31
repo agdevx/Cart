@@ -8,6 +8,7 @@ import { MapPin, MapPinOff, Navigation, Search } from 'lucide-react'
 import { useUpdateUserPreferencesMutation } from '@/apis/agdevx-cart-api/user-preferences/update-user-preferences.mutation'
 import { useUserPreferencesQuery } from '@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query'
 import { Spinner } from '@/shared/spinner'
+import { ToggleSwitch } from '@/shared/toggle-switch'
 
 /** All supported default page options with their display labels and route paths */
 const DEFAULT_PAGE_OPTIONS = [
@@ -204,67 +205,25 @@ export const PreferencesSection = () => {
         </div>
 
         {/* Show Weather Icons */}
-        <div className="border-t border-bg px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-text-tertiary">Show weather icons in calendar</div>
-            <button
-              onClick={handleShowWeatherIconsChange}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                showWeatherIcons ? 'bg-teal' : 'bg-bg-warm'
-              }`}
-              role="switch"
-              aria-checked={showWeatherIcons}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                  showWeatherIcons ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-        </div>
+        <ToggleSwitch
+          label="Show weather icons in calendar"
+          checked={showWeatherIcons}
+          onChange={handleShowWeatherIconsChange}
+        />
 
         {/* Show Weather Temperatures */}
-        <div className="border-t border-bg px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-text-tertiary">Show temperatures in calendar</div>
-            <button
-              onClick={handleShowWeatherTempsChange}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                showWeatherTemps ? 'bg-teal' : 'bg-bg-warm'
-              }`}
-              role="switch"
-              aria-checked={showWeatherTemps}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                  showWeatherTemps ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-        </div>
+        <ToggleSwitch
+          label="Show temperatures in calendar"
+          checked={showWeatherTemps}
+          onChange={handleShowWeatherTempsChange}
+        />
 
         {/* Show Household Page */}
-        <div className="border-t border-bg px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-text-tertiary">Show Household tab in navigation</div>
-            <button
-              onClick={handleShowHouseholdPageChange}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                showHouseholdPage ? 'bg-teal' : 'bg-bg-warm'
-              }`}
-              role="switch"
-              aria-checked={showHouseholdPage}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                  showHouseholdPage ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-        </div>
+        <ToggleSwitch
+          label="Show Household tab in navigation"
+          checked={showHouseholdPage}
+          onChange={handleShowHouseholdPageChange}
+        />
 
         <div className="border-t border-bg px-4 py-3">
           {/* Location header + current value */}
