@@ -60,8 +60,8 @@ export const PantryPage = () => {
         <div className="mb-4">
           <ScopeFilter
             aria-label="Filter inventory"
-            value={filter === 'all' ? 'all' : filter === 'personal' ? 'personal' : filter.split(':')[1]}
-            onChange={(v) => setFilter(v === 'all' ? 'all' : v === 'personal' ? 'personal' : `household:${v}`)}
+            value={filter}
+            onChange={setFilter}
             household={household}
           />
         </div>

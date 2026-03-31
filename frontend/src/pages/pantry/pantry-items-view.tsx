@@ -1,4 +1,4 @@
-// ABOUTME: Pantry items view with filter support for all, personal, household, and merged views
+// ABOUTME: Pantry items view with filter support for all, personal, and household views
 // ABOUTME: Groups items by household in "all" view, flat list for scoped filters, inline create and edit forms
 
 import { useMemo, useRef, useState } from 'react'
@@ -10,7 +10,6 @@ import { useDeleteInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory
 import { useUpdateInventoryItemMutation } from '@/apis/agdevx-cart-api/inventory/update-inventory-item.mutation'
 import { useHouseholdInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-household-inventory.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
-import { useMergedInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-merged-inventory.query'
 import { usePersonalInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-personal-inventory.query'
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
 import { useStoresWithDisplayNamesService } from '@/services/use-stores-with-display-names.service'
@@ -24,7 +23,13 @@ import { sortItems } from '@/utils/sort-items'
 import type { PantryItemFormData } from './pantry-item-form'
 import { CreatePantryItemForm, EditPantryItemForm } from './pantry-item-form'
 
-export type InventoryFilter = 'all' | 'personal' | `household:${string}` | `merged:${string}`
+/**
+ * Filter for pantry inventory views.
+ * - 'all' — show all items
+ * - 'personal' — personal items only
+ * - Any other string — a household ID, showing that household's items
+ */
+export type InventoryFilter = string
 
 interface PantryItemsViewProps {
   readonly filter: InventoryFilter
@@ -33,30 +38,20 @@ interface PantryItemsViewProps {
   readonly onCloseCreateForm: () => void
 }
 
-type FilterType = 'all' | 'personal' | 'household' | 'merged'
-
-const parseFilter = (filter: InventoryFilter): { type: FilterType; id: string | null } => {
-  if (filter === 'all' || filter === 'personal') {
-    return { type: filter, id: null }
-  }
-  const [type, id] = filter.split(':')
-  return { type: type as FilterType, id }
-}
-
 //== Derive the default scope for the create form based on the active filter.
 //== Empty string means "All" filter — the user must choose a scope before submitting.
 const getCreateInitialScope = (filter: InventoryFilter): string => {
   if (filter === 'personal') {
     return 'personal'
   }
-  if (filter.startsWith('household:')) {
-    return filter.split(':')[1]
+  if (filter !== 'all') {
+    return filter
   }
   return ''
 }
 
 export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCloseCreateForm }: PantryItemsViewProps) => {
-  const { type: filterType, id: filterId } = parseFilter(filter)
+  const isHouseholdFilter = filter !== 'all' && filter !== 'personal'
   const { household, stores, storeDisplayNames } = useStoresWithDisplayNamesService()
   const createMutation = useCreateInventoryItemMutation()
   const deleteMutation = useDeleteInventoryItemMutation()
@@ -96,25 +91,17 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
     }
   }
 
-  //== All four hooks are called unconditionally (React rules of hooks). Inactive scoped hooks
+  //== All three hooks are called unconditionally (React rules of hooks). Inactive scoped hooks
   //== receive null IDs which disables them via `enabled`. The all/personal hooks stay in cache
   //== when not active — TanStack Query handles this efficiently with no unnecessary refetches.
   const allQuery = useInventoryQuery()
   const personalQuery = usePersonalInventoryQuery()
-  const householdQuery = useHouseholdInventoryQuery(filterType === 'household' ? filterId : null)
-  const mergedQuery = useMergedInventoryQuery(filterType === 'merged' ? filterId : null)
+  const householdQuery = useHouseholdInventoryQuery(isHouseholdFilter ? filter : null)
 
   const activeQuery = (() => {
-    switch (filterType) {
-      case 'personal':
-        return personalQuery
-      case 'household':
-        return householdQuery
-      case 'merged':
-        return mergedQuery
-      default:
-        return allQuery
-    }
+    if (filter === 'personal') { return personalQuery }
+    if (isHouseholdFilter) { return householdQuery }
+    return allQuery
   })()
 
   const items = activeQuery.data
@@ -233,7 +220,7 @@ export const PantryItemsView = ({ filter, showCreateForm, onOpenCreateForm, onCl
   )
 
   //== For "all" filter, group into personal and household sections
-  if (filterType === 'all') {
+  if (filter === 'all') {
     const personalItems = sortedItems.filter((item) => item.ownerUserId !== null)
     const householdItems = household
       ? sortedItems.filter((item) => item.householdId === household.id)

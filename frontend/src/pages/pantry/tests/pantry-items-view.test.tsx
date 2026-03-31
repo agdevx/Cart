@@ -47,11 +47,6 @@ const mockHouseholdItems: InventoryItem[] = [
   { id: '1', name: 'Milk', defaultStoreId: null, notes: 'Organic', ownerUserId: null, householdId: 'h1', createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
 ]
 
-const mockMergedItems: InventoryItem[] = [
-  { id: '1', name: 'Milk', defaultStoreId: null, notes: 'Organic', ownerUserId: null, householdId: 'h1', createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
-  { id: '3', name: 'My Snacks', defaultStoreId: null, notes: null, ownerUserId: 'user1', householdId: null, createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
-]
-
 const mockStores: Store[] = [
   { id: 's1', name: 'Costco', householdId: 'h1', userId: null, createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
   { id: 's2', name: 'Corner Market', householdId: null, userId: 'user1', createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
@@ -177,40 +172,10 @@ describe('PantryItemsView', () => {
       isLoading: false,
     } as UseQueryResult<InventoryItem[]>)
 
-    renderView('household:h1')
+    renderView('h1')
 
     expect(screen.getByText('Milk')).toBeInTheDocument()
     expect(screen.queryByText('My Snacks')).not.toBeInTheDocument()
-  })
-
-  it('renders merged items with merged filter', () => {
-    setupDefaultMocks()
-
-    vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
-      data: undefined,
-      isLoading: false,
-    } as UseQueryResult<InventoryItem[]>)
-
-    vi.spyOn(personalInventoryModule, 'usePersonalInventoryQuery').mockReturnValue({
-      data: undefined,
-      isLoading: false,
-    } as UseQueryResult<InventoryItem[]>)
-
-    vi.spyOn(householdInventoryModule, 'useHouseholdInventoryQuery').mockReturnValue({
-      data: undefined,
-      isLoading: false,
-    } as UseQueryResult<InventoryItem[]>)
-
-    vi.spyOn(mergedInventoryModule, 'useMergedInventoryQuery').mockReturnValue({
-      data: mockMergedItems,
-      isLoading: false,
-    } as UseQueryResult<InventoryItem[]>)
-
-    renderView('merged:h1')
-
-    expect(screen.getByText('Milk')).toBeInTheDocument()
-    expect(screen.getByText('My Snacks')).toBeInTheDocument()
-    expect(screen.queryByText('Bread')).not.toBeInTheDocument()
   })
 
   it('shows empty state when no items match', () => {

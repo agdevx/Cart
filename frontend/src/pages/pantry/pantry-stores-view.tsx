@@ -55,11 +55,11 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
   const personalStores = sortStores(stores?.filter((s) => s.userId !== null) || [])
 
   /* Derive the filtered set based on the active scope filter */
-  const filterHouseholdId = filter.startsWith('household:') ? filter.split(':')[1] : null
+  const isHouseholdFilter = filter !== 'all' && filter !== 'personal'
   const filteredStores =
     filter === 'personal'
       ? personalStores
-      : filterHouseholdId
+      : isHouseholdFilter
         ? householdStores
         : null // null means "all" — use grouped view
 

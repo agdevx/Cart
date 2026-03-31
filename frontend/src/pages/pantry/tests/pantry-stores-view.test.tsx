@@ -35,7 +35,7 @@ const mockStores: Store[] = [
 ]
 
 const renderView = (
-  filter: 'all' | 'personal' | `household:${string}` = 'all',
+  filter: string = 'all',
   showCreateForm = false
 ) => {
   const onOpenCreateForm = vi.fn()

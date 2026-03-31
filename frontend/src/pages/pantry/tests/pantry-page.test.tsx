@@ -117,7 +117,7 @@ describe('PantryPage', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Smith Family Household' }))
 
     const view = screen.getByTestId('pantry-items-view')
-    expect(view).toHaveAttribute('data-filter', 'household:h1')
+    expect(view).toHaveAttribute('data-filter', 'h1')
   })
 
   it('renders FAB button for adding items', () => {
