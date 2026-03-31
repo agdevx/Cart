@@ -28,9 +28,9 @@ const mockHousehold: Household = {
   name: 'Smith Family',
   owner1UserId: 'u1',
   owner2UserId: null,
-  createdBy: null,
+  createdBy: 'u1',
   createdDate: '2024-01-01',
-  modifiedBy: null,
+  modifiedBy: 'u1',
   modifiedDate: null,
 }
 

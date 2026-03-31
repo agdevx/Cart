@@ -27,6 +27,7 @@ describe('useUserPreferencesQuery', () => {
       locationDisplayName: 'New York, NY',
       showWeatherIcons: true,
       showWeatherTemps: true,
+      showHouseholdPage: true,
     }
 
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({

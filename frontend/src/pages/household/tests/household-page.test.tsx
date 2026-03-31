@@ -71,7 +71,7 @@ const mockHousehold: Household = {
   owner2UserId: null,
   createdBy: 'current-user',
   createdDate: '2024-01-01',
-  modifiedBy: null,
+  modifiedBy: 'current-user',
   modifiedDate: null,
 }
 

@@ -22,15 +22,9 @@ describe('useHouseholdMembersQuery', () => {
   it('fetches household members successfully', async () => {
     const mockMembers: HouseholdMember[] = [
       {
-        id: '1',
-        householdId: 'h1',
         userId: 'u1',
-        joinedAt: '2024-01-01',
-        role: 'owner',
-        createdBy: 'u1',
-        createdDate: '2024-01-01',
-        modifiedBy: null,
-        modifiedDate: null,
+        name: 'User One',
+        isOwner: true,
       },
     ]
 

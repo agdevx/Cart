@@ -14,6 +14,7 @@ const makeTrip = (overrides: Partial<Trip>): Trip => ({
   id: 'trip-1',
   name: 'Weekly Groceries',
   createdByUserId: 'user-1',
+  householdId: null,
   isStarted: false,
   startedAt: null,
   isCompleted: false,

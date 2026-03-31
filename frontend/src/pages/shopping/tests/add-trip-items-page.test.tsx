@@ -42,6 +42,7 @@ const mockTrip: Trip = {
   id: 'trip1',
   name: 'Weekly Groceries',
   createdByUserId: 'user1',
+  householdId: null,
   isStarted: false,
   startedAt: null,
   isCompleted: false,
@@ -66,6 +67,7 @@ const mockTripItems: TripItem[] = [
     notes: null,
     isChecked: false,
     checkedAt: null,
+    isHouseholdItem: false,
     createdBy: 'user1',
     createdDate: '2024-01-15',
     modifiedBy: null,
@@ -154,7 +156,7 @@ const mockHousehold: Household = {
   owner2UserId: null,
   createdBy: 'user1',
   createdDate: '2024-01-01',
-  modifiedBy: null,
+  modifiedBy: 'user1',
   modifiedDate: null,
 }
 

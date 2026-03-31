@@ -24,6 +24,7 @@ describe('useTripQuery', () => {
       id: '1',
       name: 'Grocery Shopping',
       createdByUserId: 'user1',
+      householdId: null,
       isStarted: false,
       startedAt: null,
       isCompleted: false,
