@@ -6,7 +6,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
+import * as householdQueryModule from '@/apis/agdevx-cart-api/household/use-household.query'
 import * as createInventoryItemModule from '@/apis/agdevx-cart-api/inventory/create-inventory-item.mutation'
 import * as deleteInventoryModule from '@/apis/agdevx-cart-api/inventory/delete-inventory-item.mutation'
 import * as updateInventoryItemModule from '@/apis/agdevx-cart-api/inventory/update-inventory-item.mutation'
@@ -23,14 +23,19 @@ import { queryClient } from '@/apis/tanstack-query/query-client'
 import type { InventoryFilter } from '../pantry-items-view'
 import { PantryItemsView } from '../pantry-items-view'
 
-const mockHouseholds: Household[] = [
-  { id: 'h1', name: 'Smith Family', createdBy: null, createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
-  { id: 'h2', name: 'Book Club', createdBy: null, createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
-]
+const mockHousehold: Household = {
+  id: 'h1',
+  name: 'Smith Family',
+  owner1UserId: 'u1',
+  owner2UserId: null,
+  createdBy: 'u1',
+  createdDate: '2024-01-01',
+  modifiedBy: 'u1',
+  modifiedDate: null,
+}
 
 const mockAllItems: InventoryItem[] = [
   { id: '1', name: 'Milk', defaultStoreId: null, notes: 'Organic', ownerUserId: null, householdId: 'h1', createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
-  { id: '2', name: 'Bread', defaultStoreId: null, notes: null, ownerUserId: null, householdId: 'h2', createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
   { id: '3', name: 'My Snacks', defaultStoreId: null, notes: null, ownerUserId: 'user1', householdId: null, createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
 ]
 
@@ -40,11 +45,6 @@ const mockPersonalItems: InventoryItem[] = [
 
 const mockHouseholdItems: InventoryItem[] = [
   { id: '1', name: 'Milk', defaultStoreId: null, notes: 'Organic', ownerUserId: null, householdId: 'h1', createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
-]
-
-const mockMergedItems: InventoryItem[] = [
-  { id: '1', name: 'Milk', defaultStoreId: null, notes: 'Organic', ownerUserId: null, householdId: 'h1', createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
-  { id: '3', name: 'My Snacks', defaultStoreId: null, notes: null, ownerUserId: 'user1', householdId: null, createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
 ]
 
 const mockStores: Store[] = [
@@ -68,10 +68,10 @@ const renderView = (filter: InventoryFilter = 'all', options?: { showCreateForm?
 }
 
 const setupDefaultMocks = () => {
-  vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
-    data: mockHouseholds,
+  vi.spyOn(householdQueryModule, 'useHouseholdQuery').mockReturnValue({
+    data: mockHousehold,
     isLoading: false,
-  } as UseQueryResult<Household[]>)
+  } as UseQueryResult<Household | null>)
 
   vi.spyOn(deleteInventoryModule, 'useDeleteInventoryItemMutation').mockReturnValue({
     mutateAsync: vi.fn(),
@@ -112,12 +112,10 @@ describe('PantryItemsView', () => {
 
     //== Per-household section headers with item counts
     expect(screen.getByText('Smith Family (1)')).toBeInTheDocument()
-    expect(screen.getByText('Book Club (1)')).toBeInTheDocument()
     expect(screen.getByText('Personal Items (1)')).toBeInTheDocument()
 
     //== Items
     expect(screen.getByText('Milk')).toBeInTheDocument()
-    expect(screen.getByText('Bread')).toBeInTheDocument()
     expect(screen.getByText('My Snacks')).toBeInTheDocument()
   })
 
@@ -174,40 +172,10 @@ describe('PantryItemsView', () => {
       isLoading: false,
     } as UseQueryResult<InventoryItem[]>)
 
-    renderView('household:h1')
+    renderView('h1')
 
     expect(screen.getByText('Milk')).toBeInTheDocument()
     expect(screen.queryByText('My Snacks')).not.toBeInTheDocument()
-  })
-
-  it('renders merged items with merged filter', () => {
-    setupDefaultMocks()
-
-    vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
-      data: undefined,
-      isLoading: false,
-    } as UseQueryResult<InventoryItem[]>)
-
-    vi.spyOn(personalInventoryModule, 'usePersonalInventoryQuery').mockReturnValue({
-      data: undefined,
-      isLoading: false,
-    } as UseQueryResult<InventoryItem[]>)
-
-    vi.spyOn(householdInventoryModule, 'useHouseholdInventoryQuery').mockReturnValue({
-      data: undefined,
-      isLoading: false,
-    } as UseQueryResult<InventoryItem[]>)
-
-    vi.spyOn(mergedInventoryModule, 'useMergedInventoryQuery').mockReturnValue({
-      data: mockMergedItems,
-      isLoading: false,
-    } as UseQueryResult<InventoryItem[]>)
-
-    renderView('merged:h1')
-
-    expect(screen.getByText('Milk')).toBeInTheDocument()
-    expect(screen.getByText('My Snacks')).toBeInTheDocument()
-    expect(screen.queryByText('Bread')).not.toBeInTheDocument()
   })
 
   it('shows empty state when no items match', () => {
@@ -366,10 +334,10 @@ describe('PantryItemsView', () => {
 
   it('calls deleteMutation when confirm dialog is confirmed', async () => {
     const mockMutateAsync = vi.fn()
-    vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
-      data: mockHouseholds,
+    vi.spyOn(householdQueryModule, 'useHouseholdQuery').mockReturnValue({
+      data: mockHousehold,
       isLoading: false,
-    } as UseQueryResult<Household[]>)
+    } as UseQueryResult<Household | null>)
 
     vi.spyOn(deleteInventoryModule, 'useDeleteInventoryItemMutation').mockReturnValue({
       mutateAsync: mockMutateAsync,
@@ -525,7 +493,7 @@ describe('PantryItemsView', () => {
 
       //== Form fields should be visible
       expect(screen.getByLabelText('Item Name')).toBeInTheDocument()
-      expect(screen.getByLabelText('Scope')).toBeInTheDocument()
+      expect(screen.getByText('Scope')).toBeInTheDocument()
       expect(screen.getByLabelText('Notes (optional)')).toBeInTheDocument()
       expect(screen.getByLabelText('Default Store (optional)')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Create' })).toBeInTheDocument()
@@ -559,9 +527,8 @@ describe('PantryItemsView', () => {
 
       await user.type(screen.getByLabelText('Item Name'), 'Bananas')
 
-      //== Select personal scope to enable submit
-      await user.click(screen.getByLabelText('Scope'))
-      await user.click(screen.getByRole('button', { name: 'Personal' }))
+      //== Select personal scope via radio button to enable submit
+      await user.click(screen.getByRole('radio', { name: 'Personal' }))
 
       await user.click(screen.getByRole('button', { name: 'Create' }))
 
@@ -598,11 +565,8 @@ describe('PantryItemsView', () => {
 
       await user.type(screen.getByLabelText('Item Name'), 'Milk')
 
-      //== Open scope dropdown and select the household
-      //== ScopeSelect renders household name and description as separate elements
-      await user.click(screen.getByLabelText('Scope'))
-      const householdOption = screen.getByRole('button', { name: /Smith Family/ })
-      await user.click(householdOption)
+      //== Select the household scope via radio button
+      await user.click(screen.getByRole('radio', { name: 'Smith Family Household' }))
 
       await user.click(screen.getByRole('button', { name: 'Create' }))
 
@@ -636,9 +600,8 @@ describe('PantryItemsView', () => {
       await user.type(screen.getByLabelText('Item Name'), 'Eggs')
       await user.type(screen.getByLabelText('Notes (optional)'), 'Free range')
 
-      //== Select personal scope to populate the store list
-      await user.click(screen.getByLabelText('Scope'))
-      await user.click(screen.getByRole('button', { name: 'Personal' }))
+      //== Select personal scope via radio button to populate the store list
+      await user.click(screen.getByRole('radio', { name: 'Personal' }))
 
       //== Select a default store (s2 is the personal store "Corner Market")
       const storeSelect = screen.getByLabelText('Default Store (optional)')
@@ -768,7 +731,7 @@ describe('PantryItemsView', () => {
       expect(nameInput).toBeInTheDocument()
       expect(nameInput).toHaveValue('My Snacks')
 
-      expect(screen.getByLabelText('Scope')).toBeInTheDocument()
+      expect(screen.getByText('Scope')).toBeInTheDocument()
       expect(screen.getByLabelText('Notes (optional)')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument()
@@ -870,10 +833,8 @@ describe('PantryItemsView', () => {
       await user.click(screen.getByLabelText('Item actions'))
       await user.click(screen.getByText('Edit'))
 
-      //== Change scope to Smith Family household
-      await user.click(screen.getByLabelText('Scope'))
-      const householdOption = screen.getByRole('button', { name: /Smith Family/ })
-      await user.click(householdOption)
+      //== Change scope to Smith Family household via radio button
+      await user.click(screen.getByRole('radio', { name: 'Smith Family Household' }))
 
       await user.click(screen.getByRole('button', { name: 'Save' }))
 

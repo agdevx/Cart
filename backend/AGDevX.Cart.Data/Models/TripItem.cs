@@ -1,5 +1,5 @@
 // ABOUTME: Links inventory items to specific trips with shopping details
-// ABOUTME: Tracks quantity, store preference, notes, and checked status for each item
+// ABOUTME: Tracks quantity, store preference, notes, checked status, and scope snapshot
 namespace AGDevX.Cart.Data.Models;
 
 public class TripItem : BaseEntity
@@ -33,4 +33,10 @@ public class TripItem : BaseEntity
 
     //== When the item was checked off
     public DateTime? CheckedAt { get; set; }
+
+    //== Scope snapshot: true if the source InventoryItem was household-scoped when added.
+    //== Used for visibility filtering on household trips — personal items are only
+    //== visible to the user who added them (CreatedBy). This denormalization ensures
+    //== correct visibility even if the source InventoryItem is later deleted.
+    public bool IsHouseholdItem { get; set; }
 }

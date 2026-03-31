@@ -21,9 +21,8 @@ export const useRemoveHouseholdMemberMutation = () => {
         { method: 'DELETE' }
       )
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['household', variables.householdId, 'members'] })
-      queryClient.invalidateQueries({ queryKey: ['households'] })
+    onSuccess: (_data, _variables) => {
+      queryClient.invalidateQueries({ queryKey: ['household'] })
     },
   })
 }

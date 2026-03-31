@@ -16,7 +16,6 @@ import { TripCard } from '../trip-card'
 const planningTrip: Trip = {
   id: 'trip-0',
   name: 'Planning Trip',
-  createdByUserId: 'user-1',
   isStarted: false,
   startedAt: null,
   isCompleted: false,
@@ -24,14 +23,14 @@ const planningTrip: Trip = {
   tripDate: null,
   createdBy: 'user-1',
   createdDate: '2026-02-14T10:00:00Z',
-  modifiedBy: null,
+  modifiedBy: 'user-1',
+  householdId: null,
   modifiedDate: null,
 }
 
 const activeTrip: Trip = {
   id: 'trip-1',
   name: 'Weekly Groceries',
-  createdByUserId: 'user-1',
   isStarted: true,
   startedAt: '2026-02-15T10:00:00Z',
   isCompleted: false,
@@ -39,14 +38,14 @@ const activeTrip: Trip = {
   tripDate: null,
   createdBy: 'user-1',
   createdDate: '2026-02-15T10:00:00Z',
-  modifiedBy: null,
+  modifiedBy: 'user-1',
+  householdId: null,
   modifiedDate: null,
 }
 
 const personalTrip: Trip = {
   id: 'trip-3',
   name: 'Personal Run',
-  createdByUserId: 'user-1',
   isStarted: true,
   startedAt: '2026-02-15T10:00:00Z',
   isCompleted: false,
@@ -54,14 +53,14 @@ const personalTrip: Trip = {
   tripDate: null,
   createdBy: 'user-1',
   createdDate: '2026-02-15T10:00:00Z',
-  modifiedBy: null,
+  modifiedBy: 'user-1',
+  householdId: null,
   modifiedDate: null,
 }
 
 const completedTrip: Trip = {
   id: 'trip-2',
   name: 'Costco Run',
-  createdByUserId: 'user-1',
   isStarted: true,
   startedAt: '2026-02-18T10:00:00Z',
   isCompleted: true,
@@ -69,7 +68,8 @@ const completedTrip: Trip = {
   tripDate: null,
   createdBy: 'user-1',
   createdDate: '2026-02-18T10:00:00Z',
-  modifiedBy: null,
+  modifiedBy: 'user-1',
+  householdId: null,
   modifiedDate: null,
 }
 
@@ -103,14 +103,14 @@ describe('TripCard', () => {
     expect(screen.getByText(/Trip Date:/)).toBeInTheDocument()
   })
 
-  it('renders started trip with name and started date', () => {
+  it('renders started trip with name and trip date', () => {
     render(
       <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
     expect(screen.getByText('Weekly Groceries')).toBeInTheDocument()
-    expect(screen.getByText(/Started:/)).toBeInTheDocument()
+    expect(screen.getByText(/Trip Date:/)).toBeInTheDocument()
   })
 
   it('renders completed trip with completion date', () => {
@@ -246,7 +246,7 @@ describe('TripCard', () => {
     fireEvent.click(screen.getByLabelText('Trip actions'))
 
     const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.mouseDown(deleteBtn)
+    fireEvent.pointerDown(deleteBtn)
 
     //== Should not fire before the hold duration completes
     expect(mockOnDelete).not.toHaveBeenCalled()
@@ -269,8 +269,8 @@ describe('TripCard', () => {
     fireEvent.click(screen.getByLabelText('Trip actions'))
 
     const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.mouseDown(deleteBtn)
-    fireEvent.mouseUp(deleteBtn)
+    fireEvent.pointerDown(deleteBtn)
+    fireEvent.pointerUp(deleteBtn)
 
     act(() => { vi.advanceTimersByTime(3000) })
 
@@ -280,7 +280,7 @@ describe('TripCard', () => {
     vi.useRealTimers()
   })
 
-  it('does not call onDelete if mouse leaves before 3 seconds', () => {
+  it('does not call onDelete if pointer leaves before 3 seconds', () => {
     vi.useFakeTimers()
 
     render(
@@ -291,8 +291,8 @@ describe('TripCard', () => {
     fireEvent.click(screen.getByLabelText('Trip actions'))
 
     const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.mouseDown(deleteBtn)
-    fireEvent.mouseLeave(deleteBtn)
+    fireEvent.pointerDown(deleteBtn)
+    fireEvent.pointerLeave(deleteBtn)
 
     act(() => { vi.advanceTimersByTime(3000) })
 

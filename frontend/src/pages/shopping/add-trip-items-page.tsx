@@ -6,18 +6,16 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { ArrowLeft, Search } from 'lucide-react'
 
-import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
-import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { tripDetailPath } from '@/routes'
+import { useStoresWithDisplayNamesService } from '@/services/use-stores-with-display-names.service'
 import { EmptyState } from '@/shared/empty-state'
 import { ScopeFilter } from '@/shared/scope-filter'
 import { Spinner } from '@/shared/spinner'
 import { StoreFilter } from '@/shared/store-filter'
-import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 import { sortItems } from '@/utils/sort-items'
 
 type SourceFilter = 'all' | 'personal' | string
@@ -32,10 +30,8 @@ export const AddTripItemsPage = () => {
   const navigate = useNavigate()
   const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
   const { data: inventory } = useInventoryQuery()
-  const { data: households } = useHouseholdsQuery()
+  const { household, stores, storeDisplayNames } = useStoresWithDisplayNamesService()
   const { data: tripItems } = useTripItemsQuery(tripId!)
-  const householdIds = useMemo(() => households?.map((h) => h.id) ?? [], [households])
-  const { data: stores } = useStoresQuery(householdIds)
   const addTripItemMutation = useAddTripItemMutation()
 
   const [searchText, setSearchText] = useState('')
@@ -65,11 +61,6 @@ export const AddTripItemsPage = () => {
     // sourceFilter is a household ID
     return stores.filter((s) => s.householdId === sourceFilter)
   }, [stores, sourceFilter])
-
-  const storeDisplayNames = useMemo(
-    () => getStoreDisplayNames(stores ?? [], households ?? []),
-    [stores, households]
-  )
 
   // Filter inventory items based on source filter, store filter, search text, and existing trip items
   const filteredItems = useMemo(() => {
@@ -115,7 +106,7 @@ export const AddTripItemsPage = () => {
   const updateQuantity = (itemId: string, quantity: number) => {
     setSelectedItems((prev) => ({
       ...prev,
-      [itemId]: { ...prev[itemId], quantity: Math.max(1, quantity) },
+      [itemId]: { ...prev[itemId], quantity },
     }))
   }
 
@@ -150,7 +141,6 @@ export const AddTripItemsPage = () => {
 
   const getSourceLabel = (householdId: string | null): string => {
     if (!householdId) return 'Personal'
-    const household = households?.find((h) => h.id === householdId)
     return household?.name || 'Household'
   }
 
@@ -205,7 +195,7 @@ export const AddTripItemsPage = () => {
         <ScopeFilter
           value={sourceFilter}
           onChange={setSourceFilter}
-          households={households}
+          household={household}
         />
 
         {/* Store filter */}
@@ -274,9 +264,10 @@ export const AddTripItemsPage = () => {
                     id={`qty-${item.id}`}
                     aria-label="Quantity"
                     type="number"
-                    min={1}
-                    value={selectedItems[item.id].quantity}
-                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10) || 1)}
+                    min={0}
+                    value={selectedItems[item.id].quantity ?? ''}
+                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10) || 0)}
+                    onBlur={() => updateQuantity(item.id, selectedItems[item.id].quantity ?? 0)}
                     className="w-14 px-2 py-2 text-center border border-navy/10 rounded-xl bg-surface text-text text-sm focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
                   />
                 </div>

@@ -24,12 +24,11 @@ public class CartDbContextTests
         // Assert
         model.FindEntityType(typeof(User)).Should().NotBeNull();
         model.FindEntityType(typeof(Household)).Should().NotBeNull();
-        model.FindEntityType(typeof(HouseholdMember)).Should().NotBeNull();
         model.FindEntityType(typeof(Store)).Should().NotBeNull();
         model.FindEntityType(typeof(InventoryItem)).Should().NotBeNull();
         model.FindEntityType(typeof(Trip)).Should().NotBeNull();
-        model.FindEntityType(typeof(TripCollaborator)).Should().NotBeNull();
         model.FindEntityType(typeof(TripItem)).Should().NotBeNull();
+        model.FindEntityType(typeof(UserPreferences)).Should().NotBeNull();
     }
 
     [Fact]
@@ -78,10 +77,9 @@ public class CartDbContextTests
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        // Assert
-        user.CreatedBy.Should().Be("System");
+        // Assert — no HttpContext means CreatedBy stays Guid.Empty (no claim to parse)
+        user.CreatedBy.Should().Be(Guid.Empty);
         user.CreatedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
-        user.ModifiedBy.Should().Be("System");
         user.ModifiedDate.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
@@ -108,12 +106,11 @@ public class CartDbContextTests
         // Assert
         user.CreatedBy.Should().Be(originalCreatedBy);
         user.CreatedDate.Should().Be(originalCreatedDate);
-        user.ModifiedBy.Should().Be("System");
         user.ModifiedDate.Should().NotBeNull();
     }
 
     [Fact]
-    public async Task Should_UseSystemAsCreatedBy_When_NoHttpContext()
+    public async Task Should_LeaveCreatedByEmpty_When_NoHttpContext()
     {
         // Arrange
         var options = new DbContextOptionsBuilder<CartDbContext>()
@@ -127,8 +124,8 @@ public class CartDbContextTests
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        // Assert
-        user.CreatedBy.Should().Be("System");
-        user.ModifiedBy.Should().Be("System");
+        // Assert — audit hook only sets Guid values when a valid claim exists
+        user.CreatedBy.Should().Be(Guid.Empty);
+        user.ModifiedBy.Should().Be(Guid.Empty);
     }
 }

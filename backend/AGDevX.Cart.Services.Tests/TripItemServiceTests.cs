@@ -1,10 +1,12 @@
 // ABOUTME: Unit tests for TripItemService covering trip item operations (add, check/uncheck)
-// ABOUTME: with authorization checks ensuring users are collaborators on the trip
+// ABOUTME: with scope-based authorization checks ensuring users have trip access
+using AGDevX.Cart.Data;
 using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
 using AGDevX.Cart.Shared.Models;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
@@ -17,6 +19,7 @@ public class TripItemServiceTests
     private readonly Mock<ITripEventService> _mockTripEventService;
     private readonly Mock<IInventoryRepository> _mockInventoryRepository;
     private readonly Mock<IStoreRepository> _mockStoreRepository;
+    private readonly CartDbContext _dbContext;
     private readonly TripItemService _tripItemService;
 
     public TripItemServiceTests()
@@ -26,16 +29,29 @@ public class TripItemServiceTests
         _mockTripEventService = new Mock<ITripEventService>();
         _mockInventoryRepository = new Mock<IInventoryRepository>();
         _mockStoreRepository = new Mock<IStoreRepository>();
+
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+        _dbContext = new CartDbContext(options);
+
         _tripItemService = new TripItemService(
             _mockTripItemRepository.Object,
             _mockTripRepository.Object,
             _mockTripEventService.Object,
             _mockInventoryRepository.Object,
-            _mockStoreRepository.Object);
+            _mockStoreRepository.Object,
+            _dbContext);
+    }
+
+    private async Task SeedUser(Guid userId, Guid? householdId = null)
+    {
+        _dbContext.Users.Add(new User { Id = userId, Email = $"{userId}@test.com", Name = "Test", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
     }
 
     [Fact]
-    public async Task Should_AddItemToTrip_When_UserIsCollaborator()
+    public async Task Should_AddItemToTrip_When_UserHasAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -43,13 +59,11 @@ public class TripItemServiceTests
         var inventoryItemId = Guid.NewGuid();
         var quantity = 2;
         var notes = "Get the organic brand";
+        await SeedUser(userId);
 
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(true);
-
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockInventoryRepository.Setup(x => x.GetById(inventoryItemId, It.IsAny<CancellationToken>()))
                                 .ReturnsAsync(new InventoryItem { Id = inventoryItemId, Name = "Milk" });
-
         _mockTripItemRepository.Setup(x => x.Create(It.IsAny<TripItem>(), It.IsAny<CancellationToken>()))
                                .ReturnsAsync((TripItem ti, CancellationToken _) => ti);
 
@@ -68,12 +82,14 @@ public class TripItemServiceTests
     }
 
     [Fact]
-    public async Task Should_CheckItem_When_UserIsCollaborator()
+    public async Task Should_CheckItem_When_UserHasAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripItemId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        await SeedUser(userId);
+
         var tripItem = new TripItem
         {
             Id = tripItemId,
@@ -85,12 +101,8 @@ public class TripItemServiceTests
             CheckedAt = null,
         };
 
-        _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>()))
-                               .ReturnsAsync(tripItem);
-
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(true);
-
+        _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>())).ReturnsAsync(tripItem);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripItemRepository.Setup(x => x.Update(It.IsAny<TripItem>(), It.IsAny<CancellationToken>()))
                                .ReturnsAsync((TripItem ti, CancellationToken _) => ti);
 
@@ -104,12 +116,14 @@ public class TripItemServiceTests
     }
 
     [Fact]
-    public async Task Should_UncheckItem_When_UserIsCollaborator()
+    public async Task Should_UncheckItem_When_UserHasAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripItemId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        await SeedUser(userId);
+
         var tripItem = new TripItem
         {
             Id = tripItemId,
@@ -121,12 +135,8 @@ public class TripItemServiceTests
             CheckedAt = DateTime.UtcNow,
         };
 
-        _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>()))
-                               .ReturnsAsync(tripItem);
-
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(true);
-
+        _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>())).ReturnsAsync(tripItem);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripItemRepository.Setup(x => x.Update(It.IsAny<TripItem>(), It.IsAny<CancellationToken>()))
                                .ReturnsAsync((TripItem ti, CancellationToken _) => ti);
 
@@ -140,15 +150,15 @@ public class TripItemServiceTests
     }
 
     [Fact]
-    public async Task Should_ThrowException_When_AddingItemAsNonCollaborator()
+    public async Task Should_ThrowException_When_AddingItemWithoutAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var inventoryItemId = Guid.NewGuid();
+        await SeedUser(userId);
 
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(false);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
@@ -156,12 +166,14 @@ public class TripItemServiceTests
     }
 
     [Fact]
-    public async Task Should_ThrowException_When_CheckingItemAsNonCollaborator()
+    public async Task Should_ThrowException_When_CheckingItemWithoutAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripItemId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        await SeedUser(userId);
+
         var tripItem = new TripItem
         {
             Id = tripItemId,
@@ -172,11 +184,8 @@ public class TripItemServiceTests
             IsChecked = false,
         };
 
-        _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>()))
-                               .ReturnsAsync(tripItem);
-
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(false);
+        _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>())).ReturnsAsync(tripItem);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
@@ -191,19 +200,16 @@ public class TripItemServiceTests
         var tripId = Guid.NewGuid();
         var inventoryItemId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
-        var quantity = 2;
+        await SeedUser(userId);
 
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(true);
-
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockInventoryRepository.Setup(x => x.GetById(inventoryItemId, It.IsAny<CancellationToken>()))
                                 .ReturnsAsync(new InventoryItem { Id = inventoryItemId, Name = "Milk" });
-
         _mockTripItemRepository.Setup(x => x.Create(It.IsAny<TripItem>(), It.IsAny<CancellationToken>()))
                                .ReturnsAsync((TripItem ti, CancellationToken _) => { ti.Id = itemId; return ti; });
 
         // Act
-        await _tripItemService.AddTripItem(tripId, inventoryItemId, quantity, userId, null, null);
+        await _tripItemService.AddTripItem(tripId, inventoryItemId, 2, userId, null, null);
 
         // Assert
         _mockTripEventService.Verify(x => x.PublishEvent(
@@ -218,21 +224,12 @@ public class TripItemServiceTests
         var userId = Guid.NewGuid();
         var tripItemId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var tripItem = new TripItem
-        {
-            Id = tripItemId,
-            TripId = tripId,
-            InventoryItemId = Guid.NewGuid(),
-            ItemName = "Test Item",
-            Quantity = 1,
-        };
+        await SeedUser(userId);
 
-        _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>()))
-                               .ReturnsAsync(tripItem);
+        var tripItem = new TripItem { Id = tripItemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Test Item", Quantity = 1 };
 
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(true);
-
+        _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>())).ReturnsAsync(tripItem);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripItemRepository.Setup(x => x.Update(It.IsAny<TripItem>(), It.IsAny<CancellationToken>()))
                                .ReturnsAsync((TripItem ti, CancellationToken _) => ti);
 
@@ -252,23 +249,12 @@ public class TripItemServiceTests
         var userId = Guid.NewGuid();
         var tripItemId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var tripItem = new TripItem
-        {
-            Id = tripItemId,
-            TripId = tripId,
-            InventoryItemId = Guid.NewGuid(),
-            ItemName = "Test Item",
-            Quantity = 1,
-            IsChecked = false,
-            CheckedAt = null,
-        };
+        await SeedUser(userId);
 
-        _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>()))
-                               .ReturnsAsync(tripItem);
+        var tripItem = new TripItem { Id = tripItemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Test Item", Quantity = 1, IsChecked = false, CheckedAt = null };
 
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(true);
-
+        _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>())).ReturnsAsync(tripItem);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripItemRepository.Setup(x => x.Update(It.IsAny<TripItem>(), It.IsAny<CancellationToken>()))
                                .ReturnsAsync((TripItem ti, CancellationToken _) => ti);
 
@@ -288,23 +274,13 @@ public class TripItemServiceTests
         var userId = Guid.NewGuid();
         var tripItemId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var tripItem = new TripItem
-        {
-            Id = tripItemId,
-            TripId = tripId,
-            InventoryItemId = Guid.NewGuid(),
-            ItemName = "Test Item",
-            Quantity = 1,
-        };
+        await SeedUser(userId);
 
-        _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>()))
-                               .ReturnsAsync(tripItem);
+        var tripItem = new TripItem { Id = tripItemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Test Item", Quantity = 1 };
 
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>()))
-                           .ReturnsAsync(true);
-
-        _mockTripItemRepository.Setup(x => x.Delete(tripItemId, It.IsAny<CancellationToken>()))
-                               .Returns(Task.CompletedTask);
+        _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>())).ReturnsAsync(tripItem);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripItemRepository.Setup(x => x.Delete(tripItemId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
         await _tripItemService.DeleteTripItem(tripItemId, userId);
@@ -316,15 +292,17 @@ public class TripItemServiceTests
     }
 
     [Fact]
-    public async Task Should_ReturnItems_When_GetTripItemsAsCollaborator()
+    public async Task Should_ReturnItems_When_GetTripItemsWithAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var items = new List<TripItem> { new() { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 1 } };
+        await SeedUser(userId);
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var items = new List<TripItem> { new() { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 1, IsHouseholdItem = false, CreatedBy = userId } };
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripItemRepository.Setup(r => r.GetTripItems(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(items);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(new Trip { Id = tripId, Name = "Trip", IsCompleted = false });
 
         // Act
         var result = await _tripItemService.GetTripItems(tripId, userId);
@@ -334,13 +312,14 @@ public class TripItemServiceTests
     }
 
     [Fact]
-    public async Task Should_ThrowUnauthorizedAccessException_When_GetTripItemsAsNonCollaborator()
+    public async Task Should_ThrowUnauthorizedAccessException_When_GetTripItemsWithoutAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        await SeedUser(userId);
 
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var act = () => _tripItemService.GetTripItems(tripId, userId);
@@ -350,16 +329,17 @@ public class TripItemServiceTests
     }
 
     [Fact]
-    public async Task Should_ReturnItem_When_GetByIdAsCollaborator()
+    public async Task Should_ReturnItem_When_GetByIdWithAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
-        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 2 };
+        await SeedUser(userId);
 
+        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 2 };
         _mockTripItemRepository.Setup(r => r.GetById(itemId, It.IsAny<CancellationToken>())).ReturnsAsync(tripItem);
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
         // Act
         var result = await _tripItemService.GetById(itemId, userId);
@@ -383,16 +363,17 @@ public class TripItemServiceTests
     }
 
     [Fact]
-    public async Task Should_ThrowUnauthorizedAccessException_When_GetByIdAsNonCollaborator()
+    public async Task Should_ThrowUnauthorizedAccessException_When_GetByIdWithoutAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
-        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 1 };
+        await SeedUser(userId);
 
+        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 1 };
         _mockTripItemRepository.Setup(r => r.GetById(itemId, It.IsAny<CancellationToken>())).ReturnsAsync(tripItem);
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var act = () => _tripItemService.GetById(itemId, userId);
@@ -415,16 +396,17 @@ public class TripItemServiceTests
     }
 
     [Fact]
-    public async Task Should_DeleteTripItem_When_UserIsCollaborator()
+    public async Task Should_DeleteTripItem_When_UserHasAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
-        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 1 };
+        await SeedUser(userId);
 
+        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 1 };
         _mockTripItemRepository.Setup(r => r.GetById(itemId, It.IsAny<CancellationToken>())).ReturnsAsync(tripItem);
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripItemRepository.Setup(r => r.Delete(itemId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
@@ -435,16 +417,17 @@ public class TripItemServiceTests
     }
 
     [Fact]
-    public async Task Should_ThrowUnauthorizedAccessException_When_DeletingTripItemAsNonCollaborator()
+    public async Task Should_ThrowUnauthorizedAccessException_When_DeletingTripItemWithoutAccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var itemId = Guid.NewGuid();
-        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 1 };
+        await SeedUser(userId);
 
+        var tripItem = new TripItem { Id = itemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", Quantity = 1 };
         _mockTripItemRepository.Setup(r => r.GetById(itemId, It.IsAny<CancellationToken>())).ReturnsAsync(tripItem);
-        _mockTripRepository.Setup(r => r.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         // Act
         var act = () => _tripItemService.DeleteTripItem(itemId, userId);
@@ -473,8 +456,9 @@ public class TripItemServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var inventoryItemId = Guid.NewGuid();
+        await SeedUser(userId);
 
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockInventoryRepository.Setup(x => x.GetById(inventoryItemId, It.IsAny<CancellationToken>()))
                                 .ReturnsAsync(new InventoryItem { Id = inventoryItemId, Name = "Organic Eggs" });
         _mockTripItemRepository.Setup(x => x.Create(It.IsAny<TripItem>(), It.IsAny<CancellationToken>()))
@@ -495,21 +479,13 @@ public class TripItemServiceTests
         var userId = Guid.NewGuid();
         var tripItemId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var oldStoreId = Guid.NewGuid();
         var newStoreId = Guid.NewGuid();
-        var tripItem = new TripItem
-        {
-            Id = tripItemId,
-            TripId = tripId,
-            InventoryItemId = Guid.NewGuid(),
-            ItemName = "Milk",
-            StoreName = "Costco",
-            StoreId = oldStoreId,
-            Quantity = 1,
-        };
+        await SeedUser(userId);
+
+        var tripItem = new TripItem { Id = tripItemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", StoreName = "Costco", StoreId = Guid.NewGuid(), Quantity = 1 };
 
         _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>())).ReturnsAsync(tripItem);
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockStoreRepository.Setup(x => x.GetById(newStoreId, It.IsAny<CancellationToken>()))
                             .ReturnsAsync(new Store { Id = newStoreId, Name = "Walmart" });
         _mockTripItemRepository.Setup(x => x.Update(It.IsAny<TripItem>(), It.IsAny<CancellationToken>()))
@@ -530,19 +506,12 @@ public class TripItemServiceTests
         var userId = Guid.NewGuid();
         var tripItemId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-        var tripItem = new TripItem
-        {
-            Id = tripItemId,
-            TripId = tripId,
-            InventoryItemId = Guid.NewGuid(),
-            ItemName = "Milk",
-            StoreName = "Costco",
-            StoreId = Guid.NewGuid(),
-            Quantity = 1,
-        };
+        await SeedUser(userId);
+
+        var tripItem = new TripItem { Id = tripItemId, TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Milk", StoreName = "Costco", StoreId = Guid.NewGuid(), Quantity = 1 };
 
         _mockTripItemRepository.Setup(x => x.GetById(tripItemId, It.IsAny<CancellationToken>())).ReturnsAsync(tripItem);
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockTripItemRepository.Setup(x => x.Update(It.IsAny<TripItem>(), It.IsAny<CancellationToken>()))
                                .ReturnsAsync((TripItem ti, CancellationToken _) => ti);
 
@@ -562,8 +531,9 @@ public class TripItemServiceTests
         var tripId = Guid.NewGuid();
         var inventoryItemId = Guid.NewGuid();
         var storeId = Guid.NewGuid();
+        await SeedUser(userId);
 
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockInventoryRepository.Setup(x => x.GetById(inventoryItemId, It.IsAny<CancellationToken>()))
                                 .ReturnsAsync(new InventoryItem { Id = inventoryItemId, Name = "Milk" });
         _mockStoreRepository.Setup(x => x.GetById(storeId, It.IsAny<CancellationToken>()))
@@ -587,8 +557,9 @@ public class TripItemServiceTests
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var inventoryItemId = Guid.NewGuid();
+        await SeedUser(userId);
 
-        _mockTripRepository.Setup(x => x.IsUserCollaborator(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         _mockInventoryRepository.Setup(x => x.GetById(inventoryItemId, It.IsAny<CancellationToken>()))
                                 .ReturnsAsync(new InventoryItem { Id = inventoryItemId, Name = "Bread" });
         _mockTripItemRepository.Setup(x => x.Create(It.IsAny<TripItem>(), It.IsAny<CancellationToken>()))
@@ -599,5 +570,138 @@ public class TripItemServiceTests
 
         // Assert
         result.StoreName.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task AddTripItem_WithHouseholdItem_SetsIsHouseholdItemTrue()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var inventoryItemId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        await SeedUser(userId, householdId);
+
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, householdId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockInventoryRepository.Setup(x => x.GetById(inventoryItemId, It.IsAny<CancellationToken>()))
+                                .ReturnsAsync(new InventoryItem { Id = inventoryItemId, Name = "Shared Milk", HouseholdId = householdId });
+        _mockTripItemRepository.Setup(x => x.Create(It.IsAny<TripItem>(), It.IsAny<CancellationToken>()))
+                               .ReturnsAsync((TripItem ti, CancellationToken _) => ti);
+
+        // Act
+        var result = await _tripItemService.AddTripItem(tripId, inventoryItemId, 1, userId, null, null);
+
+        // Assert
+        result.IsHouseholdItem.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task AddTripItem_WithPersonalItem_SetsIsHouseholdItemFalse()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var inventoryItemId = Guid.NewGuid();
+        await SeedUser(userId);
+
+        _mockTripRepository.Setup(x => x.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockInventoryRepository.Setup(x => x.GetById(inventoryItemId, It.IsAny<CancellationToken>()))
+                                .ReturnsAsync(new InventoryItem { Id = inventoryItemId, Name = "My Snacks", OwnerUserId = userId });
+        _mockTripItemRepository.Setup(x => x.Create(It.IsAny<TripItem>(), It.IsAny<CancellationToken>()))
+                               .ReturnsAsync((TripItem ti, CancellationToken _) => ti);
+
+        // Act
+        var result = await _tripItemService.AddTripItem(tripId, inventoryItemId, 1, userId, null, null);
+
+        // Assert
+        result.IsHouseholdItem.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetTripItems_OnHouseholdTrip_FiltersPersonalItemsFromOtherUsers()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        await SeedUser(userId, householdId);
+
+        var items = new List<TripItem>
+        {
+            new() { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Household Milk", Quantity = 1, IsHouseholdItem = true, CreatedBy = otherUserId },
+            new() { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Other User Snacks", Quantity = 1, IsHouseholdItem = false, CreatedBy = otherUserId },
+            new() { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "My Personal Item", Quantity = 1, IsHouseholdItem = false, CreatedBy = userId },
+        };
+
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, householdId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripItemRepository.Setup(r => r.GetTripItems(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(items);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>()))
+                           .ReturnsAsync(new Trip { Id = tripId, Name = "Household Trip", IsCompleted = false, HouseholdId = householdId });
+
+        // Act
+        var result = (await _tripItemService.GetTripItems(tripId, userId)).ToList();
+
+        // Assert — other user's personal item should be filtered out
+        result.Should().HaveCount(2);
+        result.Should().Contain(i => i.ItemName == "Household Milk");
+        result.Should().Contain(i => i.ItemName == "My Personal Item");
+        result.Should().NotContain(i => i.ItemName == "Other User Snacks");
+    }
+
+    [Fact]
+    public async Task GetTripItems_OnHouseholdTrip_ShowsHouseholdItemsToAllUsers()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var otherUserId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        await SeedUser(userId, householdId);
+
+        var items = new List<TripItem>
+        {
+            new() { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Shared Eggs", Quantity = 1, IsHouseholdItem = true, CreatedBy = otherUserId },
+            new() { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Shared Bread", Quantity = 1, IsHouseholdItem = true, CreatedBy = userId },
+        };
+
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, householdId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripItemRepository.Setup(r => r.GetTripItems(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(items);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>()))
+                           .ReturnsAsync(new Trip { Id = tripId, Name = "Household Trip", IsCompleted = false, HouseholdId = householdId });
+
+        // Act
+        var result = (await _tripItemService.GetTripItems(tripId, userId)).ToList();
+
+        // Assert — all household items visible regardless of creator
+        result.Should().HaveCount(2);
+        result.Should().Contain(i => i.ItemName == "Shared Eggs");
+        result.Should().Contain(i => i.ItemName == "Shared Bread");
+    }
+
+    [Fact]
+    public async Task GetTripItems_OnPersonalTrip_ShowsAllItems()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var tripId = Guid.NewGuid();
+        await SeedUser(userId);
+
+        var items = new List<TripItem>
+        {
+            new() { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Item A", Quantity = 1, IsHouseholdItem = false, CreatedBy = userId },
+            new() { Id = Guid.NewGuid(), TripId = tripId, InventoryItemId = Guid.NewGuid(), ItemName = "Item B", Quantity = 2, IsHouseholdItem = true, CreatedBy = userId },
+        };
+
+        _mockTripRepository.Setup(r => r.HasTripAccess(tripId, userId, null, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockTripItemRepository.Setup(r => r.GetTripItems(tripId, It.IsAny<CancellationToken>())).ReturnsAsync(items);
+        _mockTripRepository.Setup(r => r.GetById(tripId, It.IsAny<CancellationToken>()))
+                           .ReturnsAsync(new Trip { Id = tripId, Name = "Personal Trip", IsCompleted = false });
+
+        // Act
+        var result = (await _tripItemService.GetTripItems(tripId, userId)).ToList();
+
+        // Assert — no filtering on personal trips
+        result.Should().HaveCount(2);
     }
 }

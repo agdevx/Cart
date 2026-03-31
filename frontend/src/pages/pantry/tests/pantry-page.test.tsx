@@ -5,7 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
+import * as householdQueryModule from '@/apis/agdevx-cart-api/household/use-household.query'
 import * as inventoryQueryModule from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import type { Household } from '@/apis/agdevx-cart-api/models/household'
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
@@ -29,10 +29,16 @@ vi.mock('../pantry-stores-view', () => ({
   PantryStoresView: () => <div data-testid="pantry-stores-view">Stores view</div>,
 }))
 
-const mockHouseholds: Household[] = [
-  { id: 'h1', name: 'Smith Family', createdBy: null, createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
-  { id: 'h2', name: 'Book Club', createdBy: null, createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
-]
+const mockHousehold: Household = {
+  id: 'h1',
+  name: 'Smith Family',
+  owner1UserId: 'u1',
+  owner2UserId: null,
+  createdBy: 'u1',
+  createdDate: '2024-01-01',
+  modifiedBy: 'u1',
+  modifiedDate: null,
+}
 
 const mockInventoryItems: InventoryItem[] = [
   { id: 'item1', name: 'Milk', defaultStoreId: null, notes: null, ownerUserId: 'user1', householdId: null, createdBy: 'user1', createdDate: '2024-01-01', modifiedBy: null, modifiedDate: null },
@@ -53,10 +59,10 @@ describe('PantryPage', () => {
     queryClient.clear()
     vi.clearAllMocks()
 
-    vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
-      data: mockHouseholds,
+    vi.spyOn(householdQueryModule, 'useHouseholdQuery').mockReturnValue({
+      data: mockHousehold,
       isLoading: false,
-    } as UseQueryResult<Household[]>)
+    } as UseQueryResult<Household | null>)
 
     vi.spyOn(inventoryQueryModule, 'useInventoryQuery').mockReturnValue({
       data: mockInventoryItems,
@@ -81,13 +87,12 @@ describe('PantryPage', () => {
     expect(screen.getByRole('tablist', { name: 'Filter inventory' })).toBeInTheDocument()
   })
 
-  it('renders filter tabs for all, personal, and each household', () => {
+  it('renders filter tabs for all, personal, and household', () => {
     renderPage()
 
     expect(screen.getByRole('tab', { name: 'All' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Personal' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Smith Family' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Book Club' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Smith Family Household' })).toBeInTheDocument()
   })
 
   it('passes filter value to PantryItemsView', () => {
@@ -109,10 +114,10 @@ describe('PantryPage', () => {
   it('updates filter to household when household tab is clicked', () => {
     renderPage()
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Smith Family' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Smith Family Household' }))
 
     const view = screen.getByTestId('pantry-items-view')
-    expect(view).toHaveAttribute('data-filter', 'household:h1')
+    expect(view).toHaveAttribute('data-filter', 'h1')
   })
 
   it('renders FAB button for adding items', () => {

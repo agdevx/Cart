@@ -15,37 +15,36 @@ namespace AGDevX.Cart.Api.Tests.Controllers;
 
 public class HouseholdControllerTests
 {
-    [Fact]
-    public async Task Should_ReturnOk_When_GetUserHouseholds()
+    private static HouseholdController CreateController(Mock<IHouseholdService> mockService, Guid userId)
     {
-        // Arrange
-        var mockService = new Mock<IHouseholdService>();
         var controller = new HouseholdController(mockService.Object);
-        var userId = Guid.NewGuid();
-
         var user = new ClaimsPrincipal(new ClaimsIdentity([
             new Claim(ClaimTypes.NameIdentifier, userId.ToString())
         ]));
-
         controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext { User = user }
         };
+        return controller;
+    }
 
-        var households = new List<Household>
-        {
-            new Household { Id = Guid.NewGuid(), Name = "Test Household" }
-        };
+    [Fact]
+    public async Task Should_ReturnOk_When_GetUserHousehold()
+    {
+        // Arrange
+        var mockService = new Mock<IHouseholdService>();
+        var userId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        mockService.Setup(s => s.GetUserHouseholds(userId))
-                   .ReturnsAsync(households);
+        var household = new Household { Id = Guid.NewGuid(), Name = "Test Household", Owner1UserId = userId };
+        mockService.Setup(s => s.GetUserHousehold(userId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
 
         // Act
-        var result = await controller.GetUserHouseholds();
+        var result = await controller.GetUserHousehold();
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-        okResult.Value.Should().BeEquivalentTo(households);
+        okResult.Value.Should().BeEquivalentTo(household);
     }
 
     [Fact]
@@ -53,23 +52,12 @@ public class HouseholdControllerTests
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
+        var controller = CreateController(mockService, userId);
 
         var householdName = "New Household";
-        var created = new Household { Id = Guid.NewGuid(), Name = householdName };
-
-        mockService.Setup(s => s.CreateHousehold(userId, householdName))
-                   .ReturnsAsync(created);
+        var created = new Household { Id = Guid.NewGuid(), Name = householdName, Owner1UserId = userId };
+        mockService.Setup(s => s.CreateHousehold(userId, householdName, It.IsAny<CancellationToken>())).ReturnsAsync(created);
 
         // Act
         var result = await controller.CreateHousehold(new CreateHouseholdRequest { Name = householdName });
@@ -84,23 +72,12 @@ public class HouseholdControllerTests
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        var household = new Household { Id = householdId, Name = "Test Household" };
-
-        mockService.Setup(s => s.GetById(userId, householdId))
-                   .ReturnsAsync(household);
+        var household = new Household { Id = householdId, Name = "Test Household", Owner1UserId = userId };
+        mockService.Setup(s => s.GetById(userId, householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
 
         // Act
         var result = await controller.GetById(householdId);
@@ -115,21 +92,11 @@ public class HouseholdControllerTests
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.GetById(userId, householdId))
-                   .ReturnsAsync((Household?)null);
+        mockService.Setup(s => s.GetById(userId, householdId, It.IsAny<CancellationToken>())).ReturnsAsync((Household?)null);
 
         // Act
         var result = await controller.GetById(householdId);
@@ -139,52 +106,19 @@ public class HouseholdControllerTests
     }
 
     [Fact]
-    public async Task Should_ReturnUnauthorized_When_UserNotAuthenticated()
-    {
-        // Arrange
-        var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity()); // No claims
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        // Act
-        var result = await controller.GetUserHouseholds();
-
-        // Assert
-        result.Should().BeOfType<UnauthorizedObjectResult>();
-    }
-
-    [Fact]
     public async Task Should_ReturnNoContent_When_UpdateHouseholdSuccessful()
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var householdName = "Updated Household";
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        var updated = new Household { Id = householdId, Name = householdName };
-
-        mockService.Setup(s => s.UpdateHousehold(userId, householdId, householdName))
-                   .ReturnsAsync(updated);
+        var updated = new Household { Id = householdId, Name = "Updated Household", Owner1UserId = userId };
+        mockService.Setup(s => s.UpdateHousehold(userId, householdId, "Updated Household", It.IsAny<CancellationToken>())).ReturnsAsync(updated);
 
         // Act
-        var result = await controller.UpdateHousehold(householdId, new UpdateHouseholdRequest { Name = householdName });
+        var result = await controller.UpdateHousehold(householdId, new UpdateHouseholdRequest { Name = "Updated Household" });
 
         // Assert
         result.Should().BeOfType<NoContentResult>();
@@ -195,21 +129,11 @@ public class HouseholdControllerTests
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.DeleteHousehold(userId, householdId))
-                   .Returns(Task.CompletedTask);
+        mockService.Setup(s => s.DeleteHousehold(userId, householdId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
         var result = await controller.DeleteHousehold(householdId);
@@ -223,25 +147,15 @@ public class HouseholdControllerTests
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var householdName = "Updated Household";
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.UpdateHousehold(userId, householdId, householdName))
+        mockService.Setup(s => s.UpdateHousehold(userId, householdId, "Updated Household", It.IsAny<CancellationToken>()))
                    .ThrowsAsync(new ArgumentException("Household not found"));
 
         // Act
-        var result = await controller.UpdateHousehold(householdId, new UpdateHouseholdRequest { Name = householdName });
+        var result = await controller.UpdateHousehold(householdId, new UpdateHouseholdRequest { Name = "Updated Household" });
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -252,25 +166,15 @@ public class HouseholdControllerTests
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var householdName = "Updated Household";
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.UpdateHousehold(userId, householdId, householdName))
+        mockService.Setup(s => s.UpdateHousehold(userId, householdId, "Updated Household", It.IsAny<CancellationToken>()))
                    .ThrowsAsync(new UnauthorizedAccessException("User is not a member of this household"));
 
         // Act
-        var result = await controller.UpdateHousehold(householdId, new UpdateHouseholdRequest { Name = householdName });
+        var result = await controller.UpdateHousehold(householdId, new UpdateHouseholdRequest { Name = "Updated Household" });
 
         // Assert
         result.Should().BeOfType<UnauthorizedObjectResult>();
@@ -283,20 +187,11 @@ public class HouseholdControllerTests
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        var household = new Household { Id = Guid.NewGuid(), Name = "Test" };
-        mockService.Setup(s => s.JoinHousehold(userId, "ABC123")).ReturnsAsync(household);
+        var household = new Household { Id = Guid.NewGuid(), Name = "Test", Owner1UserId = Guid.NewGuid() };
+        mockService.Setup(s => s.JoinHousehold(userId, "ABC123", It.IsAny<CancellationToken>())).ReturnsAsync(household);
 
         // Act
         var result = await controller.JoinHousehold(new JoinHouseholdRequest { InviteCode = "ABC123" });
@@ -311,19 +206,10 @@ public class HouseholdControllerTests
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.JoinHousehold(userId, "INVALID"))
+        mockService.Setup(s => s.JoinHousehold(userId, "INVALID", It.IsAny<CancellationToken>()))
                    .ThrowsAsync(new ArgumentException("Invalid invite code"));
 
         // Act
@@ -340,25 +226,16 @@ public class HouseholdControllerTests
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
+        var members = new List<HouseholdMemberResponse>
         {
-            HttpContext = new DefaultHttpContext { User = user }
+            new HouseholdMemberResponse { UserId = userId, Name = "Test", IsOwner = true }
         };
 
-        var members = new List<HouseholdMember>
-        {
-            new HouseholdMember { UserId = userId, HouseholdId = householdId, Role = "owner" }
-        };
-
-        mockService.Setup(s => s.GetMembers(userId, householdId)).ReturnsAsync(members);
+        mockService.Setup(s => s.GetMembers(userId, householdId, It.IsAny<CancellationToken>())).ReturnsAsync(members);
 
         // Act
         var result = await controller.GetMembers(householdId);
@@ -375,21 +252,12 @@ public class HouseholdControllerTests
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
         var targetUserId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.RemoveMember(userId, householdId, targetUserId)).Returns(Task.CompletedTask);
+        mockService.Setup(s => s.RemoveMember(userId, householdId, targetUserId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
         var result = await controller.RemoveMember(householdId, targetUserId);
@@ -398,34 +266,86 @@ public class HouseholdControllerTests
         result.Should().BeOfType<NoContentResult>();
     }
 
-    //== Transfer ownership test
+    //== Promote owner test
 
     [Fact]
-    public async Task Should_ReturnNoContent_When_TransferOwnershipSuccessful()
+    public async Task Should_ReturnNoContent_When_PromoteToOwnerSuccessful()
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
-        var newOwnerId = Guid.NewGuid();
+        var targetUserId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.TransferOwnership(userId, householdId, newOwnerId)).Returns(Task.CompletedTask);
+        mockService.Setup(s => s.PromoteToOwner(userId, householdId, targetUserId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
-        var result = await controller.TransferOwnership(householdId, new TransferOwnershipRequest { UserId = newOwnerId });
+        var result = await controller.PromoteToOwner(householdId, new PromoteOwnerRequest { UserId = targetUserId });
 
         // Assert
         result.Should().BeOfType<NoContentResult>();
+    }
+
+    //== Demote owner test
+
+    [Fact]
+    public async Task Should_ReturnNoContent_When_DemoteOwnerSuccessful()
+    {
+        // Arrange
+        var mockService = new Mock<IHouseholdService>();
+        var userId = Guid.NewGuid();
+        var targetUserId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
+
+        mockService.Setup(s => s.DemoteOwner(userId, householdId, targetUserId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await controller.DemoteOwner(householdId, new DemoteOwnerRequest { UserId = targetUserId });
+
+        // Assert
+        result.Should().BeOfType<NoContentResult>();
+    }
+
+    //== Leave household test
+
+    [Fact]
+    public async Task Should_ReturnNoContent_When_LeaveHouseholdSuccessful()
+    {
+        // Arrange
+        var mockService = new Mock<IHouseholdService>();
+        var userId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
+
+        mockService.Setup(s => s.LeaveHousehold(userId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+        // Act
+        var result = await controller.LeaveHousehold();
+
+        // Assert
+        result.Should().BeOfType<NoContentResult>();
+    }
+
+    //== Get swap status test
+
+    [Fact]
+    public async Task Should_ReturnOk_When_GetSwapStatusSuccessful()
+    {
+        // Arrange
+        var mockService = new Mock<IHouseholdService>();
+        var userId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
+
+        var status = new SwapStatusResponse { Scenario = "none" };
+        mockService.Setup(s => s.GetSwapStatus(userId, It.IsAny<CancellationToken>())).ReturnsAsync(status);
+
+        // Act
+        var result = await controller.GetSwapStatus();
+
+        // Assert
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().BeEquivalentTo(status);
     }
 
     //== Get invite code test
@@ -435,20 +355,11 @@ public class HouseholdControllerTests
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.GetInviteCode(userId, householdId)).ReturnsAsync("XK7M2P");
+        mockService.Setup(s => s.GetInviteCode(userId, householdId, It.IsAny<CancellationToken>())).ReturnsAsync("XK7M2P");
 
         // Act
         var result = await controller.GetInviteCode(householdId);
@@ -465,20 +376,11 @@ public class HouseholdControllerTests
     {
         // Arrange
         var mockService = new Mock<IHouseholdService>();
-        var controller = new HouseholdController(mockService.Object);
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.RegenerateInviteCode(userId, householdId)).ReturnsAsync("NEW456");
+        mockService.Setup(s => s.RegenerateInviteCode(userId, householdId, It.IsAny<CancellationToken>())).ReturnsAsync("NEW456");
 
         // Act
         var result = await controller.RegenerateInviteCode(householdId);

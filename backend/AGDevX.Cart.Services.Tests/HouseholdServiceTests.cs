@@ -1,9 +1,12 @@
 // ABOUTME: Unit tests for HouseholdService business logic.
-// ABOUTME: Verifies household creation, retrieval, updates, and authorization.
+// ABOUTME: Verifies household creation, joining, leaving, ownership, and authorization.
 
+using AGDevX.Cart.Data;
+using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 using AGDevX.Cart.Services;
-using AGDevX.Cart.Data.Models;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
@@ -12,30 +15,51 @@ namespace AGDevX.Cart.Services.Tests;
 public class HouseholdServiceTests
 {
     private readonly Mock<IHouseholdRepository> _mockRepository;
+    private readonly Mock<ITripRepository> _mockTripRepository;
+    private readonly Mock<IUserPreferencesRepository> _mockPrefsRepository;
+    private readonly CartDbContext _dbContext;
     private readonly IHouseholdService _service;
 
     public HouseholdServiceTests()
     {
         _mockRepository = new Mock<IHouseholdRepository>();
-        _service = new HouseholdService(_mockRepository.Object);
+        _mockTripRepository = new Mock<ITripRepository>();
+        _mockPrefsRepository = new Mock<IUserPreferencesRepository>();
+
+        var options = new DbContextOptionsBuilder<CartDbContext>()
+                      .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                      .Options;
+        _dbContext = new CartDbContext(options);
+
+        _service = new HouseholdService(
+            _mockRepository.Object,
+            _mockTripRepository.Object,
+            _mockPrefsRepository.Object,
+            _dbContext);
     }
 
+    //== CreateHousehold tests
+
     [Fact]
-    public async Task Should_CreateHousehold_When_UserCreatesNew()
+    public async Task Should_CreateHousehold_When_UserHasNoHousehold()
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var householdName = "Test Household";
+        var user = new User { Id = userId, Email = "test@test.com", Name = "Test" };
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync();
 
         _mockRepository.Setup(r => r.Create(It.IsAny<Household>(), It.IsAny<CancellationToken>()))
                        .ReturnsAsync((Household h, CancellationToken _) => h);
 
         // Act
-        var result = await _service.CreateHousehold(userId, householdName);
+        var result = await _service.CreateHousehold(userId, "My Household");
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Equal(householdName, result.Name);
+        result.Should().NotBeNull();
+        result.Name.Should().Be("My Household");
+        result.Owner1UserId.Should().Be(userId);
+        result.InviteCode.Should().HaveLength(6);
         _mockRepository.Verify(r => r.Create(It.IsAny<Household>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -46,51 +70,58 @@ public class HouseholdServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
+        var user = new User { Id = userId, Email = "test@test.com", Name = "Test" };
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync();
+
         var household = new Household
         {
             Id = Guid.NewGuid(),
             Name = "Test",
             InviteCode = "ABC123",
-            Members = new List<HouseholdMember>()
+            Owner1UserId = Guid.NewGuid()
         };
 
         _mockRepository.Setup(r => r.GetByInviteCode("ABC123", It.IsAny<CancellationToken>())).ReturnsAsync(household);
-        _mockRepository.Setup(r => r.AddMember(It.IsAny<HouseholdMember>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
         var result = await _service.JoinHousehold(userId, "ABC123");
 
         // Assert
-        Assert.Equal(household.Id, result.Id);
-        _mockRepository.Verify(r => r.AddMember(It.Is<HouseholdMember>(m =>
-            m.UserId == userId && m.HouseholdId == household.Id && m.Role == "member"
-        ), It.IsAny<CancellationToken>()), Times.Once);
+        result.Id.Should().Be(household.Id);
+        var updatedUser = await _dbContext.Users.FindAsync(userId);
+        updatedUser!.HouseholdId.Should().Be(household.Id);
     }
 
     [Fact]
     public async Task Should_ThrowArgumentException_When_InvalidInviteCode()
     {
         // Arrange
+        var userId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test" });
+        await _dbContext.SaveChangesAsync();
+
         _mockRepository.Setup(r => r.GetByInviteCode("INVALID", It.IsAny<CancellationToken>())).ReturnsAsync((Household?)null);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() => _service.JoinHousehold(Guid.NewGuid(), "INVALID"));
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.JoinHousehold(userId, "INVALID"));
     }
 
     [Fact]
-    public async Task Should_ThrowInvalidOperationException_When_AlreadyMember()
+    public async Task Should_ThrowInvalidOperationException_When_AlreadyMemberOfSameHousehold()
     {
         // Arrange
         var userId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
+
         var household = new Household
         {
-            Id = Guid.NewGuid(),
+            Id = householdId,
             Name = "Test",
             InviteCode = "ABC123",
-            Members = new List<HouseholdMember>
-            {
-                new HouseholdMember { UserId = userId, HouseholdId = Guid.NewGuid(), Role = "member" }
-            }
+            Owner1UserId = Guid.NewGuid()
         };
 
         _mockRepository.Setup(r => r.GetByInviteCode("ABC123", It.IsAny<CancellationToken>())).ReturnsAsync(household);
@@ -99,84 +130,106 @@ public class HouseholdServiceTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => _service.JoinHousehold(userId, "ABC123"));
     }
 
-    //== RemoveMember tests
+    //== LeaveHousehold tests
 
     [Fact]
-    public async Task Should_RemoveMember_When_OwnerRemovesOther()
+    public async Task Should_LeaveHousehold_When_NonOwnerMember()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var ownerId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "member@test.com", Name = "Member", HouseholdId = householdId });
+        _dbContext.Users.Add(new User { Id = ownerId, Email = "owner@test.com", Name = "Owner", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
+
+        var household = new Household { Id = householdId, Name = "Home", InviteCode = "ABC123", Owner1UserId = ownerId };
+        _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetMembers(householdId, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(new List<User>
+                       {
+                           new() { Id = ownerId, Name = "Owner" },
+                           new() { Id = userId, Name = "Member" }
+                       });
+
+        // Act
+        await _service.LeaveHousehold(userId);
+
+        // Assert
+        var user = await _dbContext.Users.FindAsync(userId);
+        user!.HouseholdId.Should().BeNull();
+        _mockTripRepository.Verify(r => r.DeletePersonalTripItemsForUser(householdId, userId, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Should_ThrowInvalidOperationException_When_NotInAnyHousehold()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "solo@test.com", Name = "Solo" });
+        await _dbContext.SaveChangesAsync();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.LeaveHousehold(userId));
+    }
+
+    [Fact]
+    public async Task Should_ThrowInvalidOperationException_When_SoleOwnerWithOtherMembers()
     {
         // Arrange
         var ownerId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Test",
-            Members = new List<HouseholdMember>
-            {
-                new HouseholdMember { UserId = ownerId, HouseholdId = householdId, Role = "owner" },
-                new HouseholdMember { UserId = memberId, HouseholdId = householdId, Role = "member" }
-            }
-        };
+        _dbContext.Users.Add(new User { Id = ownerId, Email = "owner@test.com", Name = "Owner", HouseholdId = householdId });
+        _dbContext.Users.Add(new User { Id = memberId, Email = "member@test.com", Name = "Member", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
 
+        var household = new Household { Id = householdId, Name = "Home", InviteCode = "ABC123", Owner1UserId = ownerId };
         _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
-        _mockRepository.Setup(r => r.RemoveMember(householdId, memberId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        _mockRepository.Setup(r => r.GetMembers(householdId, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(new List<User>
+                       {
+                           new() { Id = ownerId, Name = "Owner" },
+                           new() { Id = memberId, Name = "Member" }
+                       });
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.LeaveHousehold(ownerId));
+    }
+
+    //== RemoveMember tests
+
+    [Fact]
+    public async Task Should_RemoveMember_When_OwnerRemovesNonOwner()
+    {
+        // Arrange
+        var ownerId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = memberId, Email = "member@test.com", Name = "Member", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
+
+        var household = new Household { Id = householdId, Name = "Test", InviteCode = "ABC123", Owner1UserId = ownerId };
+        _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
 
         // Act
         await _service.RemoveMember(ownerId, householdId, memberId);
 
         // Assert
-        _mockRepository.Verify(r => r.RemoveMember(householdId, memberId, It.IsAny<CancellationToken>()), Times.Once);
+        var user = await _dbContext.Users.FindAsync(memberId);
+        user!.HouseholdId.Should().BeNull();
     }
 
     [Fact]
-    public async Task Should_RemoveMember_When_MemberRemovesSelf()
+    public async Task Should_ThrowInvalidOperation_When_RemovingSelf()
     {
         // Arrange
-        var memberId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Test",
-            Members = new List<HouseholdMember>
-            {
-                new HouseholdMember { UserId = Guid.NewGuid(), HouseholdId = householdId, Role = "owner" },
-                new HouseholdMember { UserId = memberId, HouseholdId = householdId, Role = "member" }
-            }
-        };
-
-        _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
-        _mockRepository.Setup(r => r.RemoveMember(householdId, memberId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-
-        // Act
-        await _service.RemoveMember(memberId, householdId, memberId);
-
-        // Assert
-        _mockRepository.Verify(r => r.RemoveMember(householdId, memberId, It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task Should_ThrowInvalidOperation_When_OwnerTriesToRemoveSelf()
-    {
-        // Arrange
-        var ownerId = Guid.NewGuid();
-        var householdId = Guid.NewGuid();
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Test",
-            Members = new List<HouseholdMember>
-            {
-                new HouseholdMember { UserId = ownerId, HouseholdId = householdId, Role = "owner" }
-            }
-        };
-
-        _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _service.RemoveMember(ownerId, householdId, ownerId));
+            _service.RemoveMember(userId, householdId, userId));
     }
 
     [Fact]
@@ -185,19 +238,10 @@ public class HouseholdServiceTests
         // Arrange
         var memberId = Guid.NewGuid();
         var otherId = Guid.NewGuid();
+        var ownerId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Test",
-            Members = new List<HouseholdMember>
-            {
-                new HouseholdMember { UserId = Guid.NewGuid(), HouseholdId = householdId, Role = "owner" },
-                new HouseholdMember { UserId = memberId, HouseholdId = householdId, Role = "member" },
-                new HouseholdMember { UserId = otherId, HouseholdId = householdId, Role = "member" }
-            }
-        };
 
+        var household = new Household { Id = householdId, Name = "Test", InviteCode = "ABC123", Owner1UserId = ownerId };
         _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
 
         // Act & Assert
@@ -205,84 +249,101 @@ public class HouseholdServiceTests
             _service.RemoveMember(memberId, householdId, otherId));
     }
 
-    //== TransferOwnership tests
+    [Fact]
+    public async Task Should_ThrowInvalidOperation_When_RemovingAnotherOwner()
+    {
+        // Arrange
+        var owner1Id = Guid.NewGuid();
+        var owner2Id = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+
+        var household = new Household { Id = householdId, Name = "Test", InviteCode = "ABC123", Owner1UserId = owner1Id, Owner2UserId = owner2Id };
+        _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _service.RemoveMember(owner1Id, householdId, owner2Id));
+    }
+
+    //== PromoteToOwner tests
 
     [Fact]
-    public async Task Should_TransferOwnership_When_OwnerTransfers()
+    public async Task Should_PromoteToOwner_When_SlotAvailable()
     {
         // Arrange
         var ownerId = Guid.NewGuid();
-        var newOwnerId = Guid.NewGuid();
-        var householdId = Guid.NewGuid();
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Test",
-            Members = new List<HouseholdMember>
-            {
-                new HouseholdMember { UserId = ownerId, HouseholdId = householdId, Role = "owner" },
-                new HouseholdMember { UserId = newOwnerId, HouseholdId = householdId, Role = "member" }
-            }
-        };
-
-        _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
-        _mockRepository.Setup(r => r.UpdateMemberRole(householdId, ownerId, "member", It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-        _mockRepository.Setup(r => r.UpdateMemberRole(householdId, newOwnerId, "owner", It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-
-        // Act
-        await _service.TransferOwnership(ownerId, householdId, newOwnerId);
-
-        // Assert
-        _mockRepository.Verify(r => r.UpdateMemberRole(householdId, ownerId, "member", It.IsAny<CancellationToken>()), Times.Once);
-        _mockRepository.Verify(r => r.UpdateMemberRole(householdId, newOwnerId, "owner", It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task Should_ThrowUnauthorized_When_NonOwnerTransfers()
-    {
-        // Arrange
         var memberId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Test",
-            Members = new List<HouseholdMember>
-            {
-                new HouseholdMember { UserId = Guid.NewGuid(), HouseholdId = householdId, Role = "owner" },
-                new HouseholdMember { UserId = memberId, HouseholdId = householdId, Role = "member" }
-            }
-        };
+        _dbContext.Users.Add(new User { Id = memberId, Email = "member@test.com", Name = "Member", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
 
+        var household = new Household { Id = householdId, Name = "Test", InviteCode = "ABC123", Owner1UserId = ownerId };
         _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.Update(It.IsAny<Household>(), It.IsAny<CancellationToken>()))
+                       .ReturnsAsync((Household h, CancellationToken _) => h);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _service.TransferOwnership(memberId, householdId, Guid.NewGuid()));
+        // Act
+        await _service.PromoteToOwner(ownerId, householdId, memberId);
+
+        // Assert
+        household.Owner2UserId.Should().Be(memberId);
+        _mockRepository.Verify(r => r.Update(It.IsAny<Household>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
-    public async Task Should_ThrowArgument_When_TransferToNonMember()
+    public async Task Should_ThrowInvalidOperation_When_BothOwnerSlotsFilled()
     {
         // Arrange
-        var ownerId = Guid.NewGuid();
-        var nonMemberId = Guid.NewGuid();
+        var owner1Id = Guid.NewGuid();
+        var owner2Id = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Test",
-            Members = new List<HouseholdMember>
-            {
-                new HouseholdMember { UserId = ownerId, HouseholdId = householdId, Role = "owner" }
-            }
-        };
+        _dbContext.Users.Add(new User { Id = memberId, Email = "member@test.com", Name = "Member", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
 
+        var household = new Household { Id = householdId, Name = "Test", InviteCode = "ABC123", Owner1UserId = owner1Id, Owner2UserId = owner2Id };
         _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() =>
-            _service.TransferOwnership(ownerId, householdId, nonMemberId));
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _service.PromoteToOwner(owner1Id, householdId, memberId));
+    }
+
+    //== DemoteOwner tests
+
+    [Fact]
+    public async Task Should_DemoteOwner2_When_TwoOwners()
+    {
+        // Arrange
+        var owner1Id = Guid.NewGuid();
+        var owner2Id = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+
+        var household = new Household { Id = householdId, Name = "Test", InviteCode = "ABC123", Owner1UserId = owner1Id, Owner2UserId = owner2Id };
+        _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.Update(It.IsAny<Household>(), It.IsAny<CancellationToken>()))
+                       .ReturnsAsync((Household h, CancellationToken _) => h);
+
+        // Act
+        await _service.DemoteOwner(owner1Id, householdId, owner2Id);
+
+        // Assert
+        household.Owner2UserId.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Should_ThrowInvalidOperation_When_DemotingLastOwner()
+    {
+        // Arrange
+        var ownerId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+
+        var household = new Household { Id = householdId, Name = "Test", InviteCode = "ABC123", Owner1UserId = ownerId };
+        _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _service.DemoteOwner(ownerId, householdId, ownerId));
     }
 
     //== RegenerateInviteCode tests
@@ -293,16 +354,7 @@ public class HouseholdServiceTests
         // Arrange
         var ownerId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Test",
-            InviteCode = "OLD123",
-            Members = new List<HouseholdMember>
-            {
-                new HouseholdMember { UserId = ownerId, HouseholdId = householdId, Role = "owner" }
-            }
-        };
+        var household = new Household { Id = householdId, Name = "Test", InviteCode = "OLD123", Owner1UserId = ownerId };
 
         _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
         _mockRepository.Setup(r => r.Update(It.IsAny<Household>(), It.IsAny<CancellationToken>())).ReturnsAsync((Household h, CancellationToken _) => h);
@@ -322,16 +374,7 @@ public class HouseholdServiceTests
         // Arrange
         var memberId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household
-        {
-            Id = householdId,
-            Name = "Test",
-            Members = new List<HouseholdMember>
-            {
-                new HouseholdMember { UserId = Guid.NewGuid(), HouseholdId = householdId, Role = "owner" },
-                new HouseholdMember { UserId = memberId, HouseholdId = householdId, Role = "member" }
-            }
-        };
+        var household = new Household { Id = householdId, Name = "Test", InviteCode = "OLD123", Owner1UserId = Guid.NewGuid() };
 
         _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
 
@@ -348,20 +391,22 @@ public class HouseholdServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var members = new List<HouseholdMember>
-        {
-            new HouseholdMember { UserId = userId, HouseholdId = householdId, Role = "owner" }
-        };
-        var household = new Household { Id = householdId, Name = "Test", Members = members };
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
 
+        var household = new Household { Id = householdId, Name = "Test", InviteCode = "ABC123", Owner1UserId = userId };
         _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
-        _mockRepository.Setup(r => r.IsUserMember(householdId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _mockRepository.Setup(r => r.GetMembers(householdId, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(new List<User> { new() { Id = userId, Name = "Test" } });
 
         // Act
         var result = await _service.GetMembers(userId, householdId);
 
         // Assert
         Assert.Single(result);
+        var member = result.First();
+        member.UserId.Should().Be(userId);
+        member.IsOwner.Should().BeTrue();
     }
 
     [Fact]
@@ -370,15 +415,171 @@ public class HouseholdServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var householdId = Guid.NewGuid();
-        var household = new Household { Id = householdId, Name = "Test", InviteCode = "ABC123", Members = [] };
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
 
+        var household = new Household { Id = householdId, Name = "Test", InviteCode = "ABC123", Owner1UserId = Guid.NewGuid() };
         _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
-        _mockRepository.Setup(r => r.IsUserMember(householdId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
         // Act
         var result = await _service.GetInviteCode(userId, householdId);
 
         // Assert
         Assert.Equal("ABC123", result);
+    }
+
+    //== GetSwapStatus tests
+
+    [Fact]
+    public async Task Should_ReturnNoneScenario_When_UserHasNoHousehold()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "solo@test.com", Name = "Solo" });
+        await _dbContext.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetSwapStatus(userId);
+
+        // Assert
+        result.Scenario.Should().Be("none");
+    }
+
+    [Fact]
+    public async Task GetSwapStatus_WhenRegularMember_ReturnsRegularMember()
+    {
+        // Arrange
+        var ownerId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = memberId, Email = "member@test.com", Name = "Member", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
+
+        var household = new Household { Id = householdId, Name = "Home", InviteCode = "ABC123", Owner1UserId = ownerId };
+        _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetMembers(householdId, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(new List<User>
+                       {
+                           new() { Id = ownerId, Name = "Owner" },
+                           new() { Id = memberId, Name = "Member" }
+                       });
+
+        // Act
+        var result = await _service.GetSwapStatus(memberId);
+
+        // Assert
+        result.Scenario.Should().Be("regular-member");
+        result.CurrentHouseholdId.Should().Be(householdId);
+        result.CurrentHouseholdName.Should().Be("Home");
+    }
+
+    [Fact]
+    public async Task GetSwapStatus_WhenOwnerWithCoOwner_ReturnsHasCoOwner()
+    {
+        // Arrange
+        var owner1Id = Guid.NewGuid();
+        var owner2Id = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = owner1Id, Email = "owner1@test.com", Name = "Owner1", HouseholdId = householdId });
+        _dbContext.Users.Add(new User { Id = owner2Id, Email = "owner2@test.com", Name = "Owner2", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
+
+        var household = new Household { Id = householdId, Name = "Home", InviteCode = "ABC123", Owner1UserId = owner1Id, Owner2UserId = owner2Id };
+        _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetMembers(householdId, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(new List<User>
+                       {
+                           new() { Id = owner1Id, Name = "Owner1" },
+                           new() { Id = owner2Id, Name = "Owner2" }
+                       });
+
+        // Act
+        var result = await _service.GetSwapStatus(owner1Id);
+
+        // Assert
+        result.Scenario.Should().Be("has-co-owner");
+        result.CoOwnerName.Should().Be("Owner2");
+        result.CurrentHouseholdId.Should().Be(householdId);
+    }
+
+    [Fact]
+    public async Task GetSwapStatus_WhenSoleMember_ReturnsSoleMember()
+    {
+        // Arrange
+        var ownerId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = ownerId, Email = "owner@test.com", Name = "Owner", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
+
+        var household = new Household { Id = householdId, Name = "Home", InviteCode = "ABC123", Owner1UserId = ownerId };
+        _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetMembers(householdId, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(new List<User>
+                       {
+                           new() { Id = ownerId, Name = "Owner" }
+                       });
+
+        // Act
+        var result = await _service.GetSwapStatus(ownerId);
+
+        // Assert
+        result.Scenario.Should().Be("sole-member");
+        result.CurrentHouseholdId.Should().Be(householdId);
+    }
+
+    [Fact]
+    public async Task GetSwapStatus_WhenOwnerWithoutCoOwnerButOtherMembers_ReturnsOwnershipTransferRequired()
+    {
+        // Arrange
+        var ownerId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = ownerId, Email = "owner@test.com", Name = "Owner", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
+
+        var household = new Household { Id = householdId, Name = "Home", InviteCode = "ABC123", Owner1UserId = ownerId };
+        _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetMembers(householdId, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(new List<User>
+                       {
+                           new() { Id = ownerId, Name = "Owner" },
+                           new() { Id = memberId, Name = "Member" }
+                       });
+
+        // Act
+        var result = await _service.GetSwapStatus(ownerId);
+
+        // Assert
+        result.Scenario.Should().Be("ownership-transfer-required");
+        result.CurrentHouseholdId.Should().Be(householdId);
+    }
+
+    //== LeaveHousehold — sole member dissolves
+
+    [Fact]
+    public async Task LeaveHousehold_WhenSoleMember_DeletesHousehold()
+    {
+        // Arrange
+        var ownerId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = ownerId, Email = "owner@test.com", Name = "Owner", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
+
+        var household = new Household { Id = householdId, Name = "Home", InviteCode = "ABC123", Owner1UserId = ownerId };
+        _mockRepository.Setup(r => r.GetById(householdId, It.IsAny<CancellationToken>())).ReturnsAsync(household);
+        _mockRepository.Setup(r => r.GetMembers(householdId, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(new List<User>
+                       {
+                           new() { Id = ownerId, Name = "Owner" }
+                       });
+        _mockRepository.Setup(r => r.Delete(householdId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+        // Act
+        await _service.LeaveHousehold(ownerId);
+
+        // Assert
+        var user = await _dbContext.Users.FindAsync(ownerId);
+        user!.HouseholdId.Should().BeNull();
+        _mockRepository.Verify(r => r.Delete(householdId, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

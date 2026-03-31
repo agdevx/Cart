@@ -39,7 +39,7 @@ const mockTrips: Trip[] = [
   {
     id: 'trip1',
     name: 'Weekly Groceries',
-    createdByUserId: 'user1',
+    householdId: null,
     isStarted: true,
     startedAt: '2024-01-15',
     isCompleted: false,
@@ -47,13 +47,13 @@ const mockTrips: Trip[] = [
     tripDate: null,
     createdBy: 'user1',
     createdDate: '2024-01-15',
-    modifiedBy: null,
+    modifiedBy: 'user1',
     modifiedDate: null,
   },
   {
     id: 'trip2',
     name: 'Holiday Shopping',
-    createdByUserId: 'user1',
+    householdId: null,
     isStarted: true,
     startedAt: '2024-01-15',
     isCompleted: true,
@@ -67,7 +67,7 @@ const mockTrips: Trip[] = [
   {
     id: 'trip3',
     name: 'Planned Trip',
-    createdByUserId: 'user1',
+    householdId: null,
     isStarted: false,
     startedAt: null,
     isCompleted: false,
@@ -75,7 +75,7 @@ const mockTrips: Trip[] = [
     tripDate: null,
     createdBy: 'user1',
     createdDate: '2024-01-22',
-    modifiedBy: null,
+    modifiedBy: 'user1',
     modifiedDate: null,
   },
 ]
@@ -198,7 +198,7 @@ describe('ShoppingPage', () => {
 
     //== Hold the delete button for the full duration
     const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.mouseDown(deleteBtn)
+    fireEvent.pointerDown(deleteBtn)
 
     //== Not fired yet
     expect(deleteMutateFn).not.toHaveBeenCalled()
@@ -219,8 +219,8 @@ describe('ShoppingPage', () => {
 
     //== Start and immediately cancel the hold
     const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.mouseDown(deleteBtn)
-    fireEvent.mouseUp(deleteBtn)
+    fireEvent.pointerDown(deleteBtn)
+    fireEvent.pointerUp(deleteBtn)
 
     act(() => { vi.advanceTimersByTime(3000) })
 
@@ -272,7 +272,7 @@ describe('ShoppingPage', () => {
     const createdTrip: Trip = {
       id: 'new-trip-123',
       name: 'Weekend Run',
-      createdByUserId: 'user1',
+      householdId: null,
       isStarted: false,
       startedAt: null,
       isCompleted: false,
@@ -280,7 +280,7 @@ describe('ShoppingPage', () => {
       tripDate: null,
       createdBy: 'user1',
       createdDate: '2024-02-01',
-      modifiedBy: null,
+      modifiedBy: 'user1',
       modifiedDate: null,
     }
 
@@ -313,6 +313,7 @@ describe('ShoppingPage', () => {
       expect(mutateAsyncFn).toHaveBeenCalledWith({
         name: 'Weekend Run',
         tripDate: expectedDate,
+        householdId: null,
       })
       expect(mockNavigate).toHaveBeenCalledWith('/shopping/new-trip-123')
     })

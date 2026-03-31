@@ -8,7 +8,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import * as householdsQueryModule from '@/apis/agdevx-cart-api/household/use-households.query'
+import * as householdQueryModule from '@/apis/agdevx-cart-api/household/use-household.query'
 import * as inventoryQueryModule from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
 import type { Household } from '@/apis/agdevx-cart-api/models/household'
 import type { InventoryItem } from '@/apis/agdevx-cart-api/models/inventory-item'
@@ -41,7 +41,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 const mockTrip: Trip = {
   id: 'trip1',
   name: 'Weekly Groceries',
-  createdByUserId: 'user1',
+  householdId: null,
   isStarted: false,
   startedAt: null,
   isCompleted: false,
@@ -49,7 +49,7 @@ const mockTrip: Trip = {
   tripDate: null,
   createdBy: 'user1',
   createdDate: '2024-01-15',
-  modifiedBy: null,
+  modifiedBy: 'user1',
   modifiedDate: null,
 }
 
@@ -66,9 +66,10 @@ const mockTripItems: TripItem[] = [
     notes: null,
     isChecked: false,
     checkedAt: null,
+    isHouseholdItem: false,
     createdBy: 'user1',
     createdDate: '2024-01-15',
-    modifiedBy: null,
+    modifiedBy: 'user1',
     modifiedDate: null,
   },
 ]
@@ -147,16 +148,16 @@ const mockStores: Store[] = [
   },
 ]
 
-const mockHouseholds: Household[] = [
-  {
-    id: 'hh1',
-    name: 'Test Household',
-    createdBy: 'user1',
-    createdDate: '2024-01-01',
-    modifiedBy: null,
-    modifiedDate: null,
-  },
-]
+const mockHousehold: Household = {
+  id: 'hh1',
+  name: 'Test Household',
+  owner1UserId: 'user1',
+  owner2UserId: null,
+  createdBy: 'user1',
+  createdDate: '2024-01-01',
+  modifiedBy: 'user1',
+  modifiedDate: null,
+}
 
 const addMutateAsyncFn = vi.fn()
 
@@ -176,10 +177,10 @@ const setupMocks = () => {
     isLoading: false,
   } as unknown as UseQueryResult<InventoryItem[]>)
 
-  vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
-    data: mockHouseholds,
+  vi.spyOn(householdQueryModule, 'useHouseholdQuery').mockReturnValue({
+    data: mockHousehold,
     isLoading: false,
-  } as unknown as UseQueryResult<Household[]>)
+  } as unknown as UseQueryResult<Household | null>)
 
   vi.spyOn(storesQueryModule, 'useStoresQuery').mockReturnValue({
     data: mockStores,
@@ -348,10 +349,10 @@ describe('AddTripItemsPage', () => {
       data: mockInventory,
       isLoading: false,
     } as unknown as UseQueryResult<InventoryItem[]>)
-    vi.spyOn(householdsQueryModule, 'useHouseholdsQuery').mockReturnValue({
-      data: mockHouseholds,
+    vi.spyOn(householdQueryModule, 'useHouseholdQuery').mockReturnValue({
+      data: mockHousehold,
       isLoading: false,
-    } as unknown as UseQueryResult<Household[]>)
+    } as unknown as UseQueryResult<Household | null>)
     vi.spyOn(storesQueryModule, 'useStoresQuery').mockReturnValue({
       data: [...mockStores, householdStore],
       isLoading: false,
@@ -363,8 +364,8 @@ describe('AddTripItemsPage', () => {
 
     render(<AddTripItemsPage />, { wrapper })
 
-    //== Click on "Test Household" source filter
-    fireEvent.click(screen.getByRole('tab', { name: 'Test Household' }))
+    //== Click on "Test Household Household" source filter
+    fireEvent.click(screen.getByRole('tab', { name: 'Test Household Household' }))
 
     //== Store filter should show only household store (H-Mart) + All
     const tablists = screen.getAllByRole('tablist')

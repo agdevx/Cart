@@ -176,6 +176,7 @@ describe('PreferencesSection', () => {
       locationDisplayName: 'New York, NY',
       showWeatherIcons: true,
       showWeatherTemps: true,
+      showHouseholdPage: true,
     })
   })
 

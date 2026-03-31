@@ -1,5 +1,5 @@
 // ABOUTME: Tests for trip API controller endpoints
-// ABOUTME: Validates trip CRUD operations, lifecycle management (complete/reopen), collaborator management, and authorization
+// ABOUTME: Validates trip CRUD operations, lifecycle management (complete/reopen), and authorization
 
 using System.Security.Claims;
 using AGDevX.Cart.Api.Controllers;
@@ -15,30 +15,29 @@ namespace AGDevX.Cart.Api.Tests.Controllers;
 
 public class TripControllerTests
 {
+    private static TripController CreateController(Mock<ITripService> mockService, Guid userId)
+    {
+        var controller = new TripController(mockService.Object);
+        var user = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        ]));
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+        return controller;
+    }
+
     [Fact]
     public async Task Should_ReturnOk_When_GetUserTrips()
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        var trips = new List<Trip>
-        {
-            new Trip { Id = Guid.NewGuid(), Name = "Weekly Grocery" }
-        };
-
-        mockService.Setup(s => s.GetUserTrips(userId))
-                   .ReturnsAsync(trips);
+        var trips = new List<Trip> { new Trip { Id = Guid.NewGuid(), Name = "Weekly Grocery" } };
+        mockService.Setup(s => s.GetUserTrips(userId, It.IsAny<CancellationToken>())).ReturnsAsync(trips);
 
         // Act
         var result = await controller.GetUserTrips();
@@ -53,23 +52,12 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
+        var controller = CreateController(mockService, userId);
 
         var trip = new Trip { Id = tripId, Name = "Test Trip" };
-
-        mockService.Setup(s => s.GetById(tripId))
-                   .ReturnsAsync(trip);
+        mockService.Setup(s => s.GetById(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
 
         // Act
         var result = await controller.GetById(tripId);
@@ -84,21 +72,11 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.GetById(tripId))
-                   .ReturnsAsync((Trip?)null);
+        mockService.Setup(s => s.GetById(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync((Trip?)null);
 
         // Act
         var result = await controller.GetById(tripId);
@@ -112,22 +90,13 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
+        var controller = CreateController(mockService, userId);
 
         var createRequest = new CreateTripRequest { Name = "New Trip" };
         var trip = new Trip { Id = Guid.NewGuid(), Name = "New Trip" };
 
-        mockService.Setup(s => s.CreateTrip(createRequest.Name, createRequest.TripDate, userId, It.IsAny<CancellationToken>()))
+        mockService.Setup(s => s.CreateTrip(createRequest.Name, createRequest.TripDate, createRequest.HouseholdId, userId, It.IsAny<CancellationToken>()))
                    .ReturnsAsync(trip);
 
         // Act
@@ -144,9 +113,7 @@ public class TripControllerTests
         // Arrange
         var mockService = new Mock<ITripService>();
         var controller = new TripController(mockService.Object);
-
         var user = new ClaimsPrincipal(new ClaimsIdentity()); // No claims
-
         controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext { User = user }
@@ -164,18 +131,9 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
+        var controller = CreateController(mockService, userId);
 
         var request = new UpdateTripRequest { Name = "Updated Trip" };
         var trip = new Trip { Id = tripId, Name = "Updated Trip" };
@@ -195,21 +153,11 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
+        var controller = CreateController(mockService, userId);
 
         var request = new UpdateTripRequest { Name = "Updated Trip" };
-
         mockService.Setup(s => s.UpdateTrip(tripId, request.Name, request.TripDate, userId, It.IsAny<CancellationToken>()))
                    .ThrowsAsync(new ArgumentException("Trip not found"));
 
@@ -225,23 +173,13 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
+        var controller = CreateController(mockService, userId);
 
         var request = new UpdateTripRequest { Name = "Updated Trip" };
-
         mockService.Setup(s => s.UpdateTrip(tripId, request.Name, request.TripDate, userId, It.IsAny<CancellationToken>()))
-                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to update this trip"));
+                   .ThrowsAsync(new UnauthorizedAccessException("Not authorized"));
 
         // Act
         var result = await controller.Update(tripId, request);
@@ -255,21 +193,11 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.DeleteTrip(tripId, userId))
-                   .Returns(Task.CompletedTask);
+        mockService.Setup(s => s.DeleteTrip(tripId, userId, It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
         var result = await controller.Delete(tripId);
@@ -283,20 +211,11 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.DeleteTrip(tripId, userId))
+        mockService.Setup(s => s.DeleteTrip(tripId, userId, It.IsAny<CancellationToken>()))
                    .ThrowsAsync(new ArgumentException("Trip not found"));
 
         // Act
@@ -311,21 +230,12 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.DeleteTrip(tripId, userId))
-                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to delete this trip"));
+        mockService.Setup(s => s.DeleteTrip(tripId, userId, It.IsAny<CancellationToken>()))
+                   .ThrowsAsync(new UnauthorizedAccessException("Not authorized"));
 
         // Act
         var result = await controller.Delete(tripId);
@@ -339,29 +249,12 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        var trip = new Trip
-        {
-            Id = tripId,
-            Name = "Completed Trip",
-            IsCompleted = true,
-            CompletedAt = DateTime.UtcNow
-        };
-
-        mockService.Setup(s => s.CompleteTrip(tripId, userId))
-                   .ReturnsAsync(trip);
+        var trip = new Trip { Id = tripId, Name = "Completed Trip", IsCompleted = true, CompletedAt = DateTime.UtcNow };
+        mockService.Setup(s => s.CompleteTrip(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
 
         // Act
         var result = await controller.Complete(tripId);
@@ -376,20 +269,11 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.CompleteTrip(tripId, userId))
+        mockService.Setup(s => s.CompleteTrip(tripId, userId, It.IsAny<CancellationToken>()))
                    .ThrowsAsync(new ArgumentException("Trip not found"));
 
         // Act
@@ -404,21 +288,12 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.CompleteTrip(tripId, userId))
-                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to complete this trip"));
+        mockService.Setup(s => s.CompleteTrip(tripId, userId, It.IsAny<CancellationToken>()))
+                   .ThrowsAsync(new UnauthorizedAccessException("Not authorized"));
 
         // Act
         var result = await controller.Complete(tripId);
@@ -432,29 +307,12 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        var trip = new Trip
-        {
-            Id = tripId,
-            Name = "Reopened Trip",
-            IsCompleted = false,
-            CompletedAt = null
-        };
-
-        mockService.Setup(s => s.ReopenTrip(tripId, userId))
-                   .ReturnsAsync(trip);
+        var trip = new Trip { Id = tripId, Name = "Reopened Trip", IsCompleted = false };
+        mockService.Setup(s => s.ReopenTrip(tripId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(trip);
 
         // Act
         var result = await controller.Reopen(tripId);
@@ -469,20 +327,11 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.ReopenTrip(tripId, userId))
+        mockService.Setup(s => s.ReopenTrip(tripId, userId, It.IsAny<CancellationToken>()))
                    .ThrowsAsync(new ArgumentException("Trip not found"));
 
         // Act
@@ -497,21 +346,12 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.ReopenTrip(tripId, userId))
-                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to reopen this trip"));
+        mockService.Setup(s => s.ReopenTrip(tripId, userId, It.IsAny<CancellationToken>()))
+                   .ThrowsAsync(new UnauthorizedAccessException("Not authorized"));
 
         // Act
         var result = await controller.Reopen(tripId);
@@ -521,214 +361,26 @@ public class TripControllerTests
     }
 
     [Fact]
-    public async Task Should_ReturnNoContent_When_AddCollaboratorSuccessful()
+    public async Task Should_PassTripDateAndHouseholdIdToService_When_CreateTripRequestIncludesThem()
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
-        var userId = Guid.NewGuid();
-        var tripId = Guid.NewGuid();
-        var collaboratorUserId = Guid.NewGuid();
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        var request = new AddCollaboratorRequest { UserId = collaboratorUserId };
-
-        mockService.Setup(s => s.AddCollaborator(tripId, userId, collaboratorUserId))
-                   .Returns(Task.CompletedTask);
-
-        // Act
-        var result = await controller.AddCollaborator(tripId, request);
-
-        // Assert
-        result.Should().BeOfType<NoContentResult>();
-    }
-
-    [Fact]
-    public async Task Should_ReturnNotFound_When_AddCollaboratorTripNotFound()
-    {
-        // Arrange
-        var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
-        var userId = Guid.NewGuid();
-        var tripId = Guid.NewGuid();
-        var collaboratorUserId = Guid.NewGuid();
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        var request = new AddCollaboratorRequest { UserId = collaboratorUserId };
-
-        mockService.Setup(s => s.AddCollaborator(tripId, userId, collaboratorUserId))
-                   .ThrowsAsync(new ArgumentException("Trip not found"));
-
-        // Act
-        var result = await controller.AddCollaborator(tripId, request);
-
-        // Assert
-        result.Should().BeOfType<NotFoundObjectResult>();
-    }
-
-    [Fact]
-    public async Task Should_ReturnUnauthorized_When_AddCollaboratorUnauthorized()
-    {
-        // Arrange
-        var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
-        var userId = Guid.NewGuid();
-        var tripId = Guid.NewGuid();
-        var collaboratorUserId = Guid.NewGuid();
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        var request = new AddCollaboratorRequest { UserId = collaboratorUserId };
-
-        mockService.Setup(s => s.AddCollaborator(tripId, userId, collaboratorUserId))
-                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to add collaborators to this trip"));
-
-        // Act
-        var result = await controller.AddCollaborator(tripId, request);
-
-        // Assert
-        result.Should().BeOfType<UnauthorizedObjectResult>();
-    }
-
-    [Fact]
-    public async Task Should_ReturnNoContent_When_RemoveCollaboratorSuccessful()
-    {
-        // Arrange
-        var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
-        var userId = Guid.NewGuid();
-        var tripId = Guid.NewGuid();
-        var collaboratorUserId = Guid.NewGuid();
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.RemoveCollaborator(tripId, userId, collaboratorUserId))
-                   .Returns(Task.CompletedTask);
-
-        // Act
-        var result = await controller.RemoveCollaborator(tripId, collaboratorUserId);
-
-        // Assert
-        result.Should().BeOfType<NoContentResult>();
-    }
-
-    [Fact]
-    public async Task Should_ReturnNotFound_When_RemoveCollaboratorTripNotFound()
-    {
-        // Arrange
-        var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
-        var userId = Guid.NewGuid();
-        var tripId = Guid.NewGuid();
-        var collaboratorUserId = Guid.NewGuid();
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.RemoveCollaborator(tripId, userId, collaboratorUserId))
-                   .ThrowsAsync(new ArgumentException("Trip not found"));
-
-        // Act
-        var result = await controller.RemoveCollaborator(tripId, collaboratorUserId);
-
-        // Assert
-        result.Should().BeOfType<NotFoundObjectResult>();
-    }
-
-    [Fact]
-    public async Task Should_ReturnUnauthorized_When_RemoveCollaboratorUnauthorized()
-    {
-        // Arrange
-        var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
-        var userId = Guid.NewGuid();
-        var tripId = Guid.NewGuid();
-        var collaboratorUserId = Guid.NewGuid();
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        mockService.Setup(s => s.RemoveCollaborator(tripId, userId, collaboratorUserId))
-                   .ThrowsAsync(new UnauthorizedAccessException("User is not authorized to remove collaborators from this trip"));
-
-        // Act
-        var result = await controller.RemoveCollaborator(tripId, collaboratorUserId);
-
-        // Assert
-        result.Should().BeOfType<UnauthorizedObjectResult>();
-    }
-
-    [Fact]
-    public async Task Should_PassTripDateToService_When_CreateTripRequestIncludesTripDate()
-    {
-        // Arrange
-        var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripDate = new DateOnly(2025, 9, 10);
+        var householdId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
 
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
+        var createRequest = new CreateTripRequest { Name = "Dated Trip", TripDate = tripDate, HouseholdId = householdId };
+        var trip = new Trip { Id = Guid.NewGuid(), Name = "Dated Trip", TripDate = tripDate, HouseholdId = householdId };
 
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
-
-        var createRequest = new CreateTripRequest { Name = "Dated Trip", TripDate = tripDate };
-        var trip = new Trip { Id = Guid.NewGuid(), Name = "Dated Trip", TripDate = tripDate };
-
-        mockService.Setup(s => s.CreateTrip(createRequest.Name, tripDate, userId, It.IsAny<CancellationToken>()))
+        mockService.Setup(s => s.CreateTrip(createRequest.Name, tripDate, householdId, userId, It.IsAny<CancellationToken>()))
                    .ReturnsAsync(trip);
 
         // Act
         var result = await controller.Create(createRequest);
 
         // Assert
-        mockService.Verify(s => s.CreateTrip(createRequest.Name, tripDate, userId, It.IsAny<CancellationToken>()), Times.Once);
+        mockService.Verify(s => s.CreateTrip(createRequest.Name, tripDate, householdId, userId, It.IsAny<CancellationToken>()), Times.Once);
         var createdResult = result.Should().BeOfType<CreatedAtActionResult>().Subject;
         createdResult.Value.Should().BeEquivalentTo(trip);
     }
@@ -738,19 +390,10 @@ public class TripControllerTests
     {
         // Arrange
         var mockService = new Mock<ITripService>();
-        var controller = new TripController(mockService.Object);
         var userId = Guid.NewGuid();
         var tripId = Guid.NewGuid();
         var tripDate = new DateOnly(2025, 10, 5);
-
-        var user = new ClaimsPrincipal(new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-        ]));
-
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext { User = user }
-        };
+        var controller = CreateController(mockService, userId);
 
         var request = new UpdateTripRequest { Name = "Updated Trip", TripDate = tripDate };
         var trip = new Trip { Id = tripId, Name = "Updated Trip", TripDate = tripDate };

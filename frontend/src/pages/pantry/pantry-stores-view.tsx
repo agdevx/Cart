@@ -2,19 +2,19 @@
 // ABOUTME: Groups stores by household with a personal stores section, inline editing and delete confirmation
 // ABOUTME: Accepts a filter prop to show all, personal-only, or a single household's stores
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { MoreVertical, Package, Pencil, Trash2 } from 'lucide-react'
 
-import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
 import { useCreateStoreMutation } from '@/apis/agdevx-cart-api/store/create-store.mutation'
 import { useDeleteStoreMutation } from '@/apis/agdevx-cart-api/store/delete-store.mutation'
 import { useUpdateStoreMutation } from '@/apis/agdevx-cart-api/store/update-store.mutation'
-import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
+import { useStoresWithDisplayNamesService } from '@/services/use-stores-with-display-names.service'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
+import { DropdownMenu } from '@/shared/dropdown-menu'
 import { EmptyState } from '@/shared/empty-state'
 import { SectionHeader } from '@/shared/section-header'
-import { sortHouseholds } from '@/utils/sort-households'
+import { SkeletonCard } from '@/shared/skeleton-card'
 import { sortStores } from '@/utils/sort-stores'
 
 import type { InventoryFilter } from './pantry-items-view'
@@ -30,66 +30,37 @@ interface PantryStoresViewProps {
 }
 
 export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onCloseCreateForm }: PantryStoresViewProps) => {
-  const { data: households, isLoading: householdsLoading } = useHouseholdsQuery()
-  const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
-  const { data: stores, isLoading: storesLoading } = useStoresQuery(householdIds)
+  const { household, stores, isLoading } = useStoresWithDisplayNamesService()
   const createMutation = useCreateStoreMutation()
   const updateMutation = useUpdateStoreMutation()
   const deleteMutation = useDeleteStoreMutation()
   const [editingStoreId, setEditingStoreId] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
+  const kebabRef = useRef<HTMLButtonElement>(null)
 
-  useEffect(() => {
-    if (!menuOpenId) return
-    const handleMouseDown = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpenId(null)
-      }
-    }
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setMenuOpenId(null)
-      }
-    }
-    document.addEventListener('mousedown', handleMouseDown)
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.removeEventListener('mousedown', handleMouseDown)
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [menuOpenId])
-
-  if (storesLoading || householdsLoading) {
+  if (isLoading) {
     return (
       <div className="space-y-2 mt-2">
         {[0, 1].map((i) => (
-          <div key={i} className="p-4 bg-surface rounded-xl shadow-sm space-y-2">
-            <div className="h-3 w-[45%] bg-navy/8 animate-pulse rounded-lg" />
-            <div className="h-2.5 w-1/5 bg-navy/8 animate-pulse rounded-lg" />
-          </div>
+          <SkeletonCard key={i} rows={[{ width: '45%' }, { width: '20%' }]} />
         ))}
       </div>
     )
   }
 
-  const householdStoresMap = new Map<string, ReadonlyArray<NonNullable<typeof stores>[number]>>()
-  for (const household of households || []) {
-    householdStoresMap.set(
-      household.id,
-      sortStores(stores?.filter((s) => s.householdId === household.id) || [])
-    )
-  }
+  const householdStores = household
+    ? sortStores(stores?.filter((s) => s.householdId === household.id) || [])
+    : []
   const personalStores = sortStores(stores?.filter((s) => s.userId !== null) || [])
 
   /* Derive the filtered set based on the active scope filter */
-  const householdId = filter.startsWith('household:') ? filter.split(':')[1] : null
+  const isHouseholdFilter = filter !== 'all' && filter !== 'personal'
   const filteredStores =
     filter === 'personal'
       ? personalStores
-      : householdId
-        ? (householdStoresMap.get(householdId) ?? [])
+      : isHouseholdFilter
+        ? householdStores
         : null // null means "all" — use grouped view
 
   /* True when the currently visible scope has no stores (not just the global list) */
@@ -149,8 +120,9 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
     <div key={store.id}>
       <div className="p-4 bg-surface rounded-xl shadow-sm flex justify-between items-center">
         <span className="font-bold text-navy">{store.name}</span>
-        <div className="relative" ref={menuOpenId === store.id ? menuRef : undefined}>
+        <div>
           <button
+            ref={menuOpenId === store.id ? kebabRef : undefined}
             onClick={() => setMenuOpenId(menuOpenId === store.id ? null : store.id)}
             aria-label="Store actions"
             className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-navy/8 transition-colors"
@@ -158,7 +130,7 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
             <MoreVertical className="w-5 h-5 text-text-tertiary" />
           </button>
           {menuOpenId === store.id && (
-            <div className="absolute right-0 top-full mt-1 bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-10 min-w-[140px]">
+            <DropdownMenu anchorRef={kebabRef} onClose={() => setMenuOpenId(null)}>
               <button
                 onClick={() => { setMenuOpenId(null); handleStartEdit(store) }}
                 className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
@@ -173,7 +145,7 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
                 <Trash2 className="w-4 h-4" />
                 Delete
               </button>
-            </div>
+            </DropdownMenu>
           )}
         </div>
       </div>
@@ -185,7 +157,7 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
           initialName={store.name}
           initialScope={store.householdId ?? 'personal'}
           stores={stores ?? []}
-          households={households}
+          household={household}
           isPending={updateMutation.isPending}
           onSubmit={handleSaveEdit}
           onCancel={handleCancelEdit}
@@ -200,7 +172,7 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
       {showCreateForm && (
         <CreatePantryStoreForm
           stores={stores ?? []}
-          households={households}
+          household={household}
           isPending={createMutation.isPending}
           onSubmit={handleCreate}
           onCancel={onCloseCreateForm}
@@ -240,23 +212,17 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
             </div>
           )}
 
-          {/* Household store sections — sorted alphabetically by household name */}
-          {sortHouseholds(households || []).map((household) => {
-            const householdStores = householdStoresMap.get(household.id) || []
-            if (householdStores.length === 0) {
-              return null
-            }
-            return (
-              <div key={household.id} className="mb-6">
-                <div className="mt-4">
-                  <SectionHeader title={`${household.name ?? ''} (${householdStores.length})`} />
-                </div>
-                <div className="space-y-2">
-                  {householdStores.map(renderStoreRow)}
-                </div>
+          {/* Household store section */}
+          {householdStores.length > 0 && (
+            <div className="mb-6">
+              <div className="mt-4">
+                <SectionHeader title={`${household?.name ?? ''} (${householdStores.length})`} />
               </div>
-            )
-          })}
+              <div className="space-y-2">
+                {householdStores.map(renderStoreRow)}
+              </div>
+            </div>
+          )}
         </>
       )}
 

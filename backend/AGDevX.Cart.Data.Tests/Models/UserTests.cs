@@ -19,8 +19,8 @@ public class UserTests
         user.Email.Should().BeNull();
         user.PasswordHash.Should().BeNull();
         user.Name.Should().BeNull();
-        user.HouseholdMemberships.Should().NotBeNull();
-        user.HouseholdMemberships.Should().BeEmpty();
+        user.HouseholdId.Should().BeNull();
+        user.Household.Should().BeNull();
     }
 
     [Fact]

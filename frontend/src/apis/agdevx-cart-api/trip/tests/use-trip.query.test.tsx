@@ -23,7 +23,7 @@ describe('useTripQuery', () => {
     const mockTrip: Trip = {
       id: '1',
       name: 'Grocery Shopping',
-      createdByUserId: 'user1',
+      householdId: null,
       isStarted: false,
       startedAt: null,
       isCompleted: false,
@@ -31,7 +31,7 @@ describe('useTripQuery', () => {
       tripDate: null,
       createdBy: 'user1',
       createdDate: '2024-01-01',
-      modifiedBy: null,
+      modifiedBy: 'user1',
       modifiedDate: null,
     }
 

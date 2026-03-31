@@ -9,6 +9,9 @@ public class UserPreferences : BaseEntity
 
     public string? DefaultPage { get; set; }
 
+    //== Controls whether the Household tab appears in the bottom nav
+    public bool ShowHouseholdPage { get; set; } = true;
+
     public double? LocationLatitude { get; set; }
 
     public double? LocationLongitude { get; set; }

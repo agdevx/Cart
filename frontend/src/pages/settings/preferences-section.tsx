@@ -8,6 +8,7 @@ import { MapPin, MapPinOff, Navigation, Search } from 'lucide-react'
 import { useUpdateUserPreferencesMutation } from '@/apis/agdevx-cart-api/user-preferences/update-user-preferences.mutation'
 import { useUserPreferencesQuery } from '@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query'
 import { Spinner } from '@/shared/spinner'
+import { ToggleSwitch } from '@/shared/toggle-switch'
 
 /** All supported default page options with their display labels and route paths */
 const DEFAULT_PAGE_OPTIONS = [
@@ -41,6 +42,7 @@ export const PreferencesSection = () => {
   const [locationName, setLocationName] = useState<string | null>(preferences?.locationDisplayName ?? null)
   const [showWeatherIcons, setShowWeatherIcons] = useState(preferences?.showWeatherIcons ?? true)
   const [showWeatherTemps, setShowWeatherTemps] = useState(preferences?.showWeatherTemps ?? true)
+  const [showHouseholdPage, setShowHouseholdPage] = useState(preferences?.showHouseholdPage ?? true)
   const [isDirty, setIsDirty] = useState(false)
 
   const [citySearch, setCitySearch] = useState('')
@@ -60,6 +62,7 @@ export const PreferencesSection = () => {
     setLocationName(preferences?.locationDisplayName ?? null)
     setShowWeatherIcons(preferences?.showWeatherIcons ?? true)
     setShowWeatherTemps(preferences?.showWeatherTemps ?? true)
+    setShowHouseholdPage(preferences?.showHouseholdPage ?? true)
     setIsDirty(false)
   }, [preferences])
 
@@ -153,6 +156,11 @@ export const PreferencesSection = () => {
     setIsDirty(true)
   }
 
+  const handleShowHouseholdPageChange = () => {
+    setShowHouseholdPage(prev => !prev)
+    setIsDirty(true)
+  }
+
   /** Sends all current local state in a single mutation to avoid partial-update overwrites */
   const handleSave = () => {
     updateMutation.mutate({
@@ -162,6 +170,7 @@ export const PreferencesSection = () => {
       locationDisplayName: locationName,
       showWeatherIcons,
       showWeatherTemps,
+      showHouseholdPage,
     })
   }
 
@@ -196,46 +205,25 @@ export const PreferencesSection = () => {
         </div>
 
         {/* Show Weather Icons */}
-        <div className="border-t border-bg px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-text-tertiary">Show weather icons in calendar</div>
-            <button
-              onClick={handleShowWeatherIconsChange}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                showWeatherIcons ? 'bg-teal' : 'bg-bg-warm'
-              }`}
-              role="switch"
-              aria-checked={showWeatherIcons}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                  showWeatherIcons ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-        </div>
+        <ToggleSwitch
+          label="Show weather icons in calendar"
+          checked={showWeatherIcons}
+          onChange={handleShowWeatherIconsChange}
+        />
 
         {/* Show Weather Temperatures */}
-        <div className="border-t border-bg px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-text-tertiary">Show temperatures in calendar</div>
-            <button
-              onClick={handleShowWeatherTempsChange}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                showWeatherTemps ? 'bg-teal' : 'bg-bg-warm'
-              }`}
-              role="switch"
-              aria-checked={showWeatherTemps}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                  showWeatherTemps ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-        </div>
+        <ToggleSwitch
+          label="Show temperatures in calendar"
+          checked={showWeatherTemps}
+          onChange={handleShowWeatherTempsChange}
+        />
+
+        {/* Show Household Page */}
+        <ToggleSwitch
+          label="Show Household tab in navigation"
+          checked={showHouseholdPage}
+          onChange={handleShowHouseholdPageChange}
+        />
 
         <div className="border-t border-bg px-4 py-3">
           {/* Location header + current value */}
@@ -279,12 +267,12 @@ export const PreferencesSection = () => {
               onChange={(e) => setCitySearch(e.target.value)}
               onKeyDown={handleCitySearchKeyDown}
               placeholder="Search city..."
-              className="flex-1 px-3 py-2 border border-navy/10 rounded-xl bg-surface text-sm text-text placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+              className="flex-1 min-w-0 px-3 py-2 border border-navy/10 rounded-xl bg-surface text-sm text-text placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
             />
             <button
               onClick={() => void handleCitySearch()}
               disabled={isSearching || !citySearch.trim()}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 bg-teal text-white rounded-xl text-sm font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
+              className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 bg-teal text-white rounded-xl text-sm font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
             >
               {isSearching ? <Spinner /> : <Search className="w-3.5 h-3.5" />}
               Search

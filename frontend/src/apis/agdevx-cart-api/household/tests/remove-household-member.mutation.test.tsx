@@ -62,8 +62,7 @@ describe('useRemoveHouseholdMemberMutation', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['household', 'h1', 'members'] })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['households'] })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['household'] })
   })
 
   it('handles remove error', async () => {

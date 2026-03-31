@@ -8,7 +8,7 @@ import { getStoreDisplayNames } from './get-store-display-names'
 const makeStore = (overrides: Partial<Store> & { id: string; name: string }): Store => ({
   householdId: null,
   userId: null,
-  createdBy: null,
+  createdBy: 'system',
   createdDate: '',
   modifiedBy: null,
   modifiedDate: null,
@@ -18,9 +18,11 @@ const makeStore = (overrides: Partial<Store> & { id: string; name: string }): St
 const makeHousehold = (id: string, name: string): Household => ({
   id,
   name,
-  createdBy: null,
+  owner1UserId: 'u1',
+  owner2UserId: null,
+  createdBy: 'system',
   createdDate: '',
-  modifiedBy: null,
+  modifiedBy: 'system',
   modifiedDate: null,
 })
 
@@ -30,9 +32,9 @@ describe('getStoreDisplayNames', () => {
       makeStore({ id: '1', name: 'Costco', userId: 'u1' }),
       makeStore({ id: '2', name: 'Target', householdId: 'h1' }),
     ]
-    const households = [makeHousehold('h1', 'Smith Family')]
+    const household = makeHousehold('h1', 'Smith Family')
 
-    const result = getStoreDisplayNames(stores, households)
+    const result = getStoreDisplayNames(stores, household)
 
     expect(result.get('1')).toBe('Costco')
     expect(result.get('2')).toBe('Target')
@@ -43,9 +45,9 @@ describe('getStoreDisplayNames', () => {
       makeStore({ id: '1', name: 'Costco', userId: 'u1' }),
       makeStore({ id: '2', name: 'Costco', householdId: 'h1' }),
     ]
-    const households = [makeHousehold('h1', 'Smith Family')]
+    const household = makeHousehold('h1', 'Smith Family')
 
-    const result = getStoreDisplayNames(stores, households)
+    const result = getStoreDisplayNames(stores, household)
 
     expect(result.get('1')).toBe('Costco (Personal)')
     expect(result.get('2')).toBe('Costco (Smith Family)')
@@ -56,28 +58,12 @@ describe('getStoreDisplayNames', () => {
       makeStore({ id: '1', name: 'costco', userId: 'u1' }),
       makeStore({ id: '2', name: 'Costco', householdId: 'h1' }),
     ]
-    const households = [makeHousehold('h1', 'Smith Family')]
+    const household = makeHousehold('h1', 'Smith Family')
 
-    const result = getStoreDisplayNames(stores, households)
+    const result = getStoreDisplayNames(stores, household)
 
     expect(result.get('1')).toBe('costco (Personal)')
     expect(result.get('2')).toBe('Costco (Smith Family)')
-  })
-
-  it('should disambiguate stores from different households', () => {
-    const stores = [
-      makeStore({ id: '1', name: 'Costco', householdId: 'h1' }),
-      makeStore({ id: '2', name: 'Costco', householdId: 'h2' }),
-    ]
-    const households = [
-      makeHousehold('h1', 'Smith Family'),
-      makeHousehold('h2', 'Jones Family'),
-    ]
-
-    const result = getStoreDisplayNames(stores, households)
-
-    expect(result.get('1')).toBe('Costco (Smith Family)')
-    expect(result.get('2')).toBe('Costco (Jones Family)')
   })
 
   it('should not disambiguate stores with same name in same scope', () => {
@@ -87,44 +73,26 @@ describe('getStoreDisplayNames', () => {
       makeStore({ id: '2', name: 'Target', userId: 'u1' }),
     ]
 
-    const result = getStoreDisplayNames(stores, [])
+    const result = getStoreDisplayNames(stores, null)
 
     expect(result.get('1')).toBe('Costco')
     expect(result.get('2')).toBe('Target')
   })
 
   it('should handle empty store list', () => {
-    const result = getStoreDisplayNames([], [])
+    const result = getStoreDisplayNames([], null)
     expect(result.size).toBe(0)
   })
 
-  it('should fall back to "Household" when household not found in list', () => {
+  it('should fall back to "Household" when no household provided', () => {
     const stores = [
       makeStore({ id: '1', name: 'Costco', userId: 'u1' }),
       makeStore({ id: '2', name: 'Costco', householdId: 'h-unknown' }),
     ]
 
-    const result = getStoreDisplayNames(stores, [])
+    const result = getStoreDisplayNames(stores, null)
 
     expect(result.get('1')).toBe('Costco (Personal)')
     expect(result.get('2')).toBe('Costco (Household)')
-  })
-
-  it('should handle three-way collision (personal + two households)', () => {
-    const stores = [
-      makeStore({ id: '1', name: 'Costco', userId: 'u1' }),
-      makeStore({ id: '2', name: 'Costco', householdId: 'h1' }),
-      makeStore({ id: '3', name: 'Costco', householdId: 'h2' }),
-    ]
-    const households = [
-      makeHousehold('h1', 'Smith Family'),
-      makeHousehold('h2', 'Jones Family'),
-    ]
-
-    const result = getStoreDisplayNames(stores, households)
-
-    expect(result.get('1')).toBe('Costco (Personal)')
-    expect(result.get('2')).toBe('Costco (Smith Family)')
-    expect(result.get('3')).toBe('Costco (Jones Family)')
   })
 })

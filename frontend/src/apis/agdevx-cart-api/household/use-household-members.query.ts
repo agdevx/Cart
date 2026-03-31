@@ -1,5 +1,5 @@
 // ABOUTME: Query hook for fetching household members
-// ABOUTME: Returns list of members with roles for a specific household
+// ABOUTME: Returns list of members with userId, name, and isOwner flag
 
 import { useQuery } from '@tanstack/react-query'
 

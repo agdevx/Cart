@@ -1,14 +1,16 @@
 // ABOUTME: Bottom tab navigation component
-// ABOUTME: Mobile-first navigation with 5 tabs
+// ABOUTME: Mobile-first navigation with conditional Household tab based on user preferences
 
 import { Link, useLocation } from 'react-router-dom'
 
 import { House, Package, Settings, ShoppingCart, Users } from 'lucide-react'
 
+import { useUserPreferencesQuery } from '@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query'
 import { ROUTES } from '@/routes'
 
 export const BottomNav = () => {
   const location = useLocation()
+  const { data: preferences } = useUserPreferencesQuery()
 
   const isActive = (path: string) => location.pathname.startsWith(path)
 
@@ -16,7 +18,9 @@ export const BottomNav = () => {
     { path: ROUTES.HOME, label: 'Home', icon: House },
     { path: ROUTES.SHOPPING, label: 'Shopping', icon: ShoppingCart },
     { path: ROUTES.PANTRY, label: 'Pantry', icon: Package },
-    { path: ROUTES.HOUSEHOLD, label: 'Household', icon: Users },
+    ...(preferences?.showHouseholdPage !== false
+      ? [{ path: ROUTES.HOUSEHOLD, label: 'Household', icon: Users }]
+      : []),
     { path: ROUTES.SETTINGS, label: 'Settings', icon: Settings },
   ]
 

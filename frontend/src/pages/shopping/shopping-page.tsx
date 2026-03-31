@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { ChevronDown, ShoppingCart } from 'lucide-react'
 
+import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useCreateTripMutation } from '@/apis/agdevx-cart-api/trip/create-trip.mutation'
 import { useDeleteTripMutation } from '@/apis/agdevx-cart-api/trip/delete-trip.mutation'
 import { useReopenTripMutation } from '@/apis/agdevx-cart-api/trip/reopen-trip.mutation'
@@ -16,12 +17,14 @@ import { EmptyState } from '@/shared/empty-state'
 import { Fab } from '@/shared/fab'
 import { PageHeader } from '@/shared/page-header'
 import { SectionHeader } from '@/shared/section-header'
+import { SkeletonCard } from '@/shared/skeleton-card'
 import { TripCard } from '@/shared/trip-card'
 
 import { TripCreateForm } from './trip-create-form'
 
 export const ShoppingPage = () => {
   const navigate = useNavigate()
+  const { data: household } = useHouseholdQuery()
   const { data: trips, isLoading } = useTripsQuery()
   const createMutation = useCreateTripMutation()
   const updateMutation = useUpdateTripMutation()
@@ -41,9 +44,9 @@ export const ShoppingPage = () => {
       return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
     }) || []
 
-  const handleCreateTrip = async ({ name, tripDate }: { name: string; tripDate: string | null }) => {
+  const handleCreateTrip = async ({ name, tripDate, householdId }: { name: string; tripDate: string | null; householdId: string | null }) => {
     try {
-      const newTrip = await createMutation.mutateAsync({ name, tripDate })
+      const newTrip = await createMutation.mutateAsync({ name, tripDate, householdId })
       setShowCreateForm(false)
       navigate(tripDetailPath(newTrip.id))
     } catch {
@@ -70,11 +73,7 @@ export const ShoppingPage = () => {
         <div className="h-9 w-48 bg-navy/8 animate-pulse rounded-lg mb-6" />
         <div className="space-y-4">
           {[0, 1].map((i) => (
-            <div key={i} className="p-4 bg-surface rounded-xl shadow-sm space-y-3">
-              <div className="h-3 w-3/5 bg-navy/8 animate-pulse rounded-lg" />
-              <div className="h-2.5 w-2/5 bg-navy/8 animate-pulse rounded-lg" />
-              <div className="h-2 w-full bg-navy/8 animate-pulse rounded-full" />
-            </div>
+            <SkeletonCard key={i} rows={[{ width: '60%' }, { width: '40%' }, { width: '100%' }]} />
           ))}
         </div>
       </div>
@@ -88,6 +87,7 @@ export const ShoppingPage = () => {
       {showCreateForm && (
         <TripCreateForm
           key={formKey}
+          household={household}
           onSubmit={handleCreateTrip}
           onCancel={() => setShowCreateForm(false)}
           isPending={createMutation.isPending}

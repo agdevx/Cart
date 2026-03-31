@@ -14,17 +14,17 @@ export const useJoinHouseholdMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationKey: ['households', 'join'],
+    mutationKey: ['household', 'join'],
     meta: { handlesErrors: true },
     mutationFn: async (request: JoinHouseholdRequest): Promise<Household> => {
-      const response = await apiFetch('/api/v1/households/join', {
+      const response = await apiFetch('/api/v1/household/join', {
         method: 'POST',
         body: JSON.stringify(request),
       })
       return response.json() as Promise<Household>
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['households'] })
+      queryClient.invalidateQueries({ queryKey: ['household'] })
     },
   })
 }

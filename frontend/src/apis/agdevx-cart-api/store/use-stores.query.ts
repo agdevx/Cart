@@ -1,5 +1,5 @@
 // ABOUTME: Query hook for fetching all stores (personal + household)
-// ABOUTME: Combines personal stores with household stores from all provided household IDs
+// ABOUTME: Combines personal stores with household stores from the user's household
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
@@ -8,16 +8,19 @@ import { useAuth } from '@/auth/use-auth'
 import { apiFetch } from '../agdevx-cart-api-config'
 import type { Store } from '../models/store'
 
-export const useStoresQuery = (householdIds: string[]) => {
+export const useStoresQuery = (householdId: string | null) => {
   const { isAuthenticated } = useAuth()
 
   return useQuery({
-    queryKey: ['stores', householdIds],
+    queryKey: ['stores', householdId],
     queryFn: async (): Promise<Store[]> => {
-      const responses = await Promise.all([
-        apiFetch('/api/v1/store/personal'),
-        ...householdIds.map((id) => apiFetch(`/api/v1/store/household/${id}`)),
-      ])
+      const requests = [apiFetch('/api/v1/store/personal')]
+
+      if (householdId) {
+        requests.push(apiFetch(`/api/v1/store/household/${householdId}`))
+      }
+
+      const responses = await Promise.all(requests)
 
       const allStores: Store[] = []
       for (const response of responses) {

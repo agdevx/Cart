@@ -24,9 +24,11 @@ describe('useJoinHouseholdMutation', () => {
     const mockHousehold: Household = {
       id: '1',
       name: 'Existing Household',
+      owner1UserId: 'user1',
+      owner2UserId: null,
       createdBy: 'user1',
       createdDate: '2024-01-01',
-      modifiedBy: null,
+      modifiedBy: 'user1',
       modifiedDate: null,
     }
 
@@ -49,19 +51,21 @@ describe('useJoinHouseholdMutation', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data).toEqual(mockHousehold)
-    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/households/join', {
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/household/join', {
       method: 'POST',
       body: JSON.stringify({ inviteCode: 'ABC123' }),
     })
   })
 
-  it('invalidates households query on success', async () => {
+  it('invalidates household query on success', async () => {
     const mockHousehold: Household = {
       id: '1',
       name: 'Existing Household',
+      owner1UserId: 'user1',
+      owner2UserId: null,
       createdBy: 'user1',
       createdDate: '2024-01-01',
-      modifiedBy: null,
+      modifiedBy: 'user1',
       modifiedDate: null,
     }
 
@@ -85,7 +89,7 @@ describe('useJoinHouseholdMutation', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['households'] })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['household'] })
   })
 
   it('handles join error', async () => {

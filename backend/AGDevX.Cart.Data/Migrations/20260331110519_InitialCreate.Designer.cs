@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AGDevX.Cart.Data.Migrations
 {
     [DbContext(typeof(CartDbContext))]
-    [Migration("20260329181432_AddShowWeatherIconsToUserPreferences")]
-    partial class AddShowWeatherIconsToUserPreferences
+    [Migration("20260331110519_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,7 +26,7 @@ namespace AGDevX.Cart.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedDate")
@@ -37,13 +37,21 @@ namespace AGDevX.Cart.Data.Migrations
                         .HasMaxLength(8)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ModifiedBy")
+                    b.Property<Guid>("ModifiedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("Owner1UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("Owner2UserId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -51,44 +59,11 @@ namespace AGDevX.Cart.Data.Migrations
                     b.HasIndex("InviteCode")
                         .IsUnique();
 
+                    b.HasIndex("Owner1UserId");
+
+                    b.HasIndex("Owner2UserId");
+
                     b.ToTable("Households");
-                });
-
-            modelBuilder.Entity("AGDevX.Cart.Data.Models.HouseholdMember", b =>
-                {
-                    b.Property<Guid>("HouseholdId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("JoinedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("HouseholdId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("HouseholdMembers");
                 });
 
             modelBuilder.Entity("AGDevX.Cart.Data.Models.InventoryItem", b =>
@@ -97,7 +72,7 @@ namespace AGDevX.Cart.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedDate")
@@ -109,7 +84,7 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Property<Guid?>("HouseholdId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ModifiedBy")
+                    b.Property<Guid>("ModifiedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("ModifiedDate")
@@ -142,7 +117,7 @@ namespace AGDevX.Cart.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedDate")
@@ -151,7 +126,7 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Property<Guid?>("HouseholdId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ModifiedBy")
+                    b.Property<Guid>("ModifiedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("ModifiedDate")
@@ -170,6 +145,10 @@ namespace AGDevX.Cart.Data.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("Name", "HouseholdId");
+
+                    b.HasIndex("Name", "UserId");
+
                     b.ToTable("Stores");
                 });
 
@@ -182,10 +161,13 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("HouseholdId")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsCompleted")
@@ -194,7 +176,7 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Property<bool>("IsStarted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ModifiedBy")
+                    b.Property<Guid>("ModifiedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("ModifiedDate")
@@ -212,37 +194,11 @@ namespace AGDevX.Cart.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("HouseholdId");
+
                     b.ToTable("Trips");
-                });
-
-            modelBuilder.Entity("AGDevX.Cart.Data.Models.TripCollaborator", b =>
-                {
-                    b.Property<Guid>("TripId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("TripId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("TripCollaborators");
                 });
 
             modelBuilder.Entity("AGDevX.Cart.Data.Models.TripItem", b =>
@@ -254,7 +210,7 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Property<DateTime?>("CheckedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedDate")
@@ -266,11 +222,14 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Property<bool>("IsChecked")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsHouseholdItem")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("ItemName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ModifiedBy")
+                    b.Property<Guid>("ModifiedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("ModifiedDate")
@@ -308,7 +267,7 @@ namespace AGDevX.Cart.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedDate")
@@ -318,7 +277,10 @@ namespace AGDevX.Cart.Data.Migrations
                         .HasMaxLength(254)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ModifiedBy")
+                    b.Property<Guid?>("HouseholdId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ModifiedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("ModifiedDate")
@@ -337,6 +299,8 @@ namespace AGDevX.Cart.Data.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
+                    b.HasIndex("HouseholdId");
+
                     b.ToTable("Users");
                 });
 
@@ -346,7 +310,7 @@ namespace AGDevX.Cart.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedDate")
@@ -364,13 +328,19 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Property<double?>("LocationLongitude")
                         .HasColumnType("REAL");
 
-                    b.Property<string>("ModifiedBy")
+                    b.Property<Guid>("ModifiedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("ShowHouseholdPage")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("ShowWeatherIcons")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ShowWeatherTemps")
                         .HasColumnType("INTEGER");
 
                     b.Property<Guid>("UserId")
@@ -384,23 +354,22 @@ namespace AGDevX.Cart.Data.Migrations
                     b.ToTable("UserPreferences");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Data.Models.HouseholdMember", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.Household", b =>
                 {
-                    b.HasOne("AGDevX.Cart.Data.Models.Household", "Household")
-                        .WithMany("Members")
-                        .HasForeignKey("HouseholdId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("AGDevX.Cart.Data.Models.User", "Owner1User")
+                        .WithMany()
+                        .HasForeignKey("Owner1UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("AGDevX.Cart.Data.Models.User", "User")
-                        .WithMany("HouseholdMemberships")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("AGDevX.Cart.Data.Models.User", "Owner2User")
+                        .WithMany()
+                        .HasForeignKey("Owner2UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("Household");
+                    b.Navigation("Owner1User");
 
-                    b.Navigation("User");
+                    b.Navigation("Owner2User");
                 });
 
             modelBuilder.Entity("AGDevX.Cart.Data.Models.InventoryItem", b =>
@@ -417,7 +386,8 @@ namespace AGDevX.Cart.Data.Migrations
 
                     b.HasOne("AGDevX.Cart.Data.Models.User", "OwnerUser")
                         .WithMany()
-                        .HasForeignKey("OwnerUserId");
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("DefaultStore");
 
@@ -435,30 +405,22 @@ namespace AGDevX.Cart.Data.Migrations
 
                     b.HasOne("AGDevX.Cart.Data.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Household");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Data.Models.TripCollaborator", b =>
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.Trip", b =>
                 {
-                    b.HasOne("AGDevX.Cart.Data.Models.Trip", "Trip")
-                        .WithMany("Collaborators")
-                        .HasForeignKey("TripId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AGDevX.Cart.Data.Models.User", "User")
+                    b.HasOne("AGDevX.Cart.Data.Models.Household", "Household")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("HouseholdId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.Navigation("Trip");
-
-                    b.Navigation("User");
+                    b.Navigation("Household");
                 });
 
             modelBuilder.Entity("AGDevX.Cart.Data.Models.TripItem", b =>
@@ -486,6 +448,16 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Navigation("Trip");
                 });
 
+            modelBuilder.Entity("AGDevX.Cart.Data.Models.User", b =>
+                {
+                    b.HasOne("AGDevX.Cart.Data.Models.Household", "Household")
+                        .WithMany()
+                        .HasForeignKey("HouseholdId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Household");
+                });
+
             modelBuilder.Entity("AGDevX.Cart.Data.Models.UserPreferences", b =>
                 {
                     b.HasOne("AGDevX.Cart.Data.Models.User", "User")
@@ -497,21 +469,9 @@ namespace AGDevX.Cart.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AGDevX.Cart.Data.Models.Household", b =>
-                {
-                    b.Navigation("Members");
-                });
-
             modelBuilder.Entity("AGDevX.Cart.Data.Models.Trip", b =>
                 {
-                    b.Navigation("Collaborators");
-
                     b.Navigation("Items");
-                });
-
-            modelBuilder.Entity("AGDevX.Cart.Data.Models.User", b =>
-                {
-                    b.Navigation("HouseholdMemberships");
                 });
 #pragma warning restore 612, 618
         }

@@ -16,6 +16,7 @@ public class UserPreferencesService(IUserPreferencesRepository repository) : IUs
         return new UserPreferencesResponse
         {
             DefaultPage = prefs?.DefaultPage,
+            ShowHouseholdPage = prefs?.ShowHouseholdPage ?? true,
             LocationLatitude = prefs?.LocationLatitude,
             LocationLongitude = prefs?.LocationLongitude,
             LocationDisplayName = prefs?.LocationDisplayName,
@@ -30,6 +31,7 @@ public class UserPreferencesService(IUserPreferencesRepository repository) : IUs
         {
             UserId = userId,
             DefaultPage = request.DefaultPage,
+            ShowHouseholdPage = request.ShowHouseholdPage ?? true,
             LocationLatitude = request.LocationLatitude,
             LocationLongitude = request.LocationLongitude,
             LocationDisplayName = request.LocationDisplayName,
@@ -42,6 +44,7 @@ public class UserPreferencesService(IUserPreferencesRepository repository) : IUs
         return new UserPreferencesResponse
         {
             DefaultPage = saved.DefaultPage,
+            ShowHouseholdPage = saved.ShowHouseholdPage,
             LocationLatitude = saved.LocationLatitude,
             LocationLongitude = saved.LocationLongitude,
             LocationDisplayName = saved.LocationDisplayName,

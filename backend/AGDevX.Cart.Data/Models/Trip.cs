@@ -1,5 +1,5 @@
 // ABOUTME: Represents a discrete shopping session or trip
-// ABOUTME: Tracks items to purchase, collaborators, and completion status
+// ABOUTME: Can be personal (HouseholdId null) or household-scoped (visible to all members)
 namespace AGDevX.Cart.Data.Models;
 
 public class Trip : BaseEntity
@@ -22,8 +22,9 @@ public class Trip : BaseEntity
     //== User-facing date for the trip (e.g., "when is this trip")
     public DateOnly? TripDate { get; set; }
 
-    //== Users who can collaborate on this trip
-    public ICollection<TripCollaborator> Collaborators { get; set; } = [];
+    //== Household scope — null means personal trip (creator only), set means visible to all household members
+    public Guid? HouseholdId { get; set; }
+    public Household? Household { get; set; }
 
     //== Items to purchase on this trip
     public ICollection<TripItem> Items { get; set; } = [];

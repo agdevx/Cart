@@ -24,7 +24,7 @@ describe('useStartTripMutation', () => {
     const mockTrip: Trip = {
       id: 'trip1',
       name: 'Grocery Shopping',
-      createdByUserId: 'user1',
+      householdId: null,
       isStarted: true,
       startedAt: '2024-01-15T10:00:00Z',
       isCompleted: false,
@@ -66,7 +66,7 @@ describe('useStartTripMutation', () => {
     const mockTrip: Trip = {
       id: 'trip1',
       name: 'Personal Trip',
-      createdByUserId: 'user1',
+      householdId: null,
       isStarted: true,
       startedAt: '2024-01-15T10:00:00Z',
       isCompleted: false,

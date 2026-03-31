@@ -6,6 +6,8 @@ public class UserPreferencesResponse
 {
     public string? DefaultPage { get; set; }
 
+    public bool ShowHouseholdPage { get; set; } = true;
+
     public double? LocationLatitude { get; set; }
 
     public double? LocationLongitude { get; set; }

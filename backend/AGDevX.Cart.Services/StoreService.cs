@@ -1,22 +1,22 @@
 // ABOUTME: Service implementation for Store business logic.
-// ABOUTME: Validates household membership for household stores and user ownership for personal stores.
+// ABOUTME: Validates household membership via User.HouseholdId and user ownership for personal stores.
 
+using AGDevX.Cart.Data;
 using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 
 namespace AGDevX.Cart.Services;
 
-public class StoreService(IStoreRepository storeRepository, IHouseholdRepository householdRepository, ITripItemRepository tripItemRepository) : IStoreService
+public class StoreService(IStoreRepository storeRepository, CartDbContext dbContext, ITripItemRepository tripItemRepository) : IStoreService
 {
     public async Task<Store> CreateStore(Store store, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Household-scoped store: verify user is a member
         if (store.HouseholdId.HasValue)
         {
-            var household = await householdRepository.GetById(store.HouseholdId.Value, cancellationToken)
-                                ?? throw new UnauthorizedAccessException("Household not found");
+            var user = await GetUserOrThrow(userId, cancellationToken);
 
-            if (!household.Members.Any(m => m.UserId == userId))
+            if (user.HouseholdId != store.HouseholdId.Value)
             {
                 throw new UnauthorizedAccessException("User is not a member of this household");
             }
@@ -42,8 +42,9 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
     public async Task<IEnumerable<Store>> GetHouseholdStores(Guid householdId, Guid userId, CancellationToken cancellationToken = default)
     {
         //== Verify user is a member of the household
-        var household = await householdRepository.GetById(householdId, cancellationToken);
-        if (household == null || !household.Members.Any(m => m.UserId == userId))
+        var user = await GetUserOrThrow(userId, cancellationToken);
+
+        if (user.HouseholdId != householdId)
         {
             throw new UnauthorizedAccessException("User is not a member of this household");
         }
@@ -67,8 +68,9 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
         //== Household store: verify user is a member
         if (store.HouseholdId.HasValue)
         {
-            var household = await householdRepository.GetById(store.HouseholdId.Value, cancellationToken);
-            if (household == null || !household.Members.Any(m => m.UserId == userId))
+            var user = await GetUserOrThrow(userId, cancellationToken);
+
+            if (user.HouseholdId != store.HouseholdId.Value)
             {
                 throw new UnauthorizedAccessException("User is not a member of this household");
             }
@@ -95,10 +97,9 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
         if (householdId.HasValue)
         {
             //== Moving to household: verify membership
-            var household = await householdRepository.GetById(householdId.Value, cancellationToken)
-                                ?? throw new UnauthorizedAccessException("Household not found");
+            var user = await GetUserOrThrow(userId, cancellationToken);
 
-            if (!household.Members.Any(m => m.UserId == userId))
+            if (user.HouseholdId != householdId.Value)
             {
                 throw new UnauthorizedAccessException("User is not a member of this household");
             }
@@ -137,5 +138,12 @@ public class StoreService(IStoreRepository storeRepository, IHouseholdRepository
                         ?? throw new UnauthorizedAccessException("Store not found or access denied");
 
         await storeRepository.Delete(id, cancellationToken);
+    }
+
+    private async Task<User> GetUserOrThrow(Guid userId, CancellationToken cancellationToken)
+    {
+        var user = await dbContext.Users.FindAsync(new object[] { userId }, cancellationToken)
+            ?? throw new UnauthorizedAccessException("User not found");
+        return user;
     }
 }

@@ -6,8 +6,6 @@ import { useNavigate,useParams } from 'react-router-dom'
 
 import { ArrowLeft, ShoppingCart } from 'lucide-react'
 
-import { useHouseholdsQuery } from '@/apis/agdevx-cart-api/household/use-households.query'
-import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import { useDeleteTripItemMutation } from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
 import { useStartTripMutation } from '@/apis/agdevx-cart-api/trip/start-trip.mutation'
 import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
@@ -15,44 +13,30 @@ import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { activeTripPath, ROUTES, tripAddItemsPath } from '@/routes'
 import { useStoreAccordionState } from '@/services/use-store-accordion-state.service'
+import { useStoresWithDisplayNamesService } from '@/services/use-stores-with-display-names.service'
 import { EmptyState } from '@/shared/empty-state'
 import { Fab } from '@/shared/fab'
 import { SectionHeader } from '@/shared/section-header'
+import { SkeletonCard } from '@/shared/skeleton-card'
 import { Spinner } from '@/shared/spinner'
 import { StoreAccordion } from '@/shared/store-accordion'
 import { TripItemRow } from '@/shared/trip-item-row'
-import { getStoreDisplayNames } from '@/utils/get-store-display-names'
+import { groupTripItemsByStore } from '@/utils/group-trip-items-by-store'
 
 export const TripDetailPage = () => {
   const { tripId } = useParams<{ tripId: string }>()
   const navigate = useNavigate()
   const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
   const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!)
-  const { data: households } = useHouseholdsQuery()
-  const householdIds = useMemo(() => households?.map((h) => h.id) || [], [households])
-  const { data: stores } = useStoresQuery(householdIds)
+  const { stores, storeDisplayNames } = useStoresWithDisplayNamesService()
   const { isExpanded, toggleStore } = useStoreAccordionState(tripId!, 'planning', trip?.isCompleted ?? false)
   const startMutation = useStartTripMutation()
   const updateMutation = useUpdateTripItemMutation()
   const deleteMutation = useDeleteTripItemMutation()
 
-  const storeDisplayNames = useMemo(
-    () => getStoreDisplayNames(stores ?? [], households ?? []),
-    [stores, households]
-  )
-
   const groupedItems = useMemo(() => {
     if (!tripItems) return []
-    const groups: Record<string, typeof tripItems> = {}
-    tripItems.forEach((item) => {
-      const key = item.storeName ?? 'Any Store'
-      ;(groups[key] ??= []).push(item)
-    })
-    return Object.entries(groups).sort(([a], [b]) => {
-      if (a === 'Any Store') return 1
-      if (b === 'Any Store') return -1
-      return a.localeCompare(b)
-    })
+    return groupTripItemsByStore(tripItems)
   }, [tripItems])
 
   const handleStartShopping = async () => {
@@ -83,10 +67,7 @@ export const TripDetailPage = () => {
             <div className="h-3 w-2/5 bg-navy/8 animate-pulse rounded-lg" />
           </div>
           {[0, 1, 2].map((i) => (
-            <div key={i} className="p-4 bg-surface rounded-xl shadow-sm space-y-2">
-              <div className="h-3 w-1/2 bg-navy/8 animate-pulse rounded-lg" />
-              <div className="h-2.5 w-1/3 bg-navy/8 animate-pulse rounded-lg" />
-            </div>
+            <SkeletonCard key={i} rows={[{ width: '50%' }, { width: '33%' }]} />
           ))}
         </div>
       </div>

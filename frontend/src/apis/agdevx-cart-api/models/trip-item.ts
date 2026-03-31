@@ -11,6 +11,7 @@ export interface TripItem {
   storeId: string | null;
   notes: string | null;
   isChecked: boolean;
+  isHouseholdItem: boolean;
   checkedAt: string | null;
   inventoryItem?: {
     id: string;
@@ -18,8 +19,8 @@ export interface TripItem {
     notes: string | null;
     defaultStoreId: string | null;
   } | null;
-  createdBy: string | null;
+  createdBy: string;
   createdDate: string;
-  modifiedBy: string | null;
+  modifiedBy: string;
   modifiedDate: string | null;
 }
