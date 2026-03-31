@@ -1,23 +1,23 @@
-// ABOUTME: Mutation hook for transferring household ownership
-// ABOUTME: Allows current owner to transfer ownership to another member
+// ABOUTME: Mutation hook for demoting a household co-owner to regular member
+// ABOUTME: Removes owner2 status and invalidates household + members queries
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { apiFetch } from '../agdevx-cart-api-config'
 
-interface TransferOwnershipRequest {
+interface DemoteOwnerRequest {
   householdId: string
   userId: string
 }
 
-export const useTransferHouseholdOwnershipMutation = () => {
+export const useDemoteOwnerMutation = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationKey: ['households', 'transfer-ownership'],
-    mutationFn: async (request: TransferOwnershipRequest): Promise<void> => {
+    mutationKey: ['household', 'demote-owner'],
+    mutationFn: async (request: DemoteOwnerRequest): Promise<void> => {
       await apiFetch(
-        `/api/v1/household/${request.householdId}/owner`,
+        `/api/v1/household/${request.householdId}/owner/demote`,
         {
           method: 'PUT',
           body: JSON.stringify({ userId: request.userId }),
@@ -25,6 +25,7 @@ export const useTransferHouseholdOwnershipMutation = () => {
       )
     },
     onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['household'] })
       queryClient.invalidateQueries({ queryKey: ['household', variables.householdId, 'members'] })
     },
   })
