@@ -102,6 +102,12 @@ public class CartDbContext(DbContextOptions<CartDbContext> options, IHttpContext
             entity.HasIndex(ti => ti.InventoryItemId);
             entity.HasIndex(ti => ti.StoreId);
 
+            //== Cascade delete trip items when their trip is deleted
+            entity.HasOne(ti => ti.Trip)
+                  .WithMany(t => t.Items)
+                  .HasForeignKey(ti => ti.TripId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
             //== SET NULL on InventoryItem delete so trip items survive pantry cleanup
             entity.HasOne(ti => ti.InventoryItem)
                   .WithMany()
