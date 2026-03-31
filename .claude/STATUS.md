@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated:** 2026-03-29
+**Last Updated:** 2026-03-31
 
 ## How to Use This File
 
@@ -21,16 +21,16 @@ This is the single source of truth for where the project stands. Read it at the 
 
 | Suite              | Tests | Files                      |
 | ------------------ | ----- | -------------------------- |
-| Backend — Data     | 73    | AGDevX.Cart.Data.Tests     |
-| Backend — Services | 120   | AGDevX.Cart.Services.Tests |
-| Backend — API      | 116   | AGDevX.Cart.Api.Tests      |
+| Backend — Data     | 70    | AGDevX.Cart.Data.Tests     |
+| Backend — Services | 118   | AGDevX.Cart.Services.Tests |
+| Backend — API      | 112   | AGDevX.Cart.Api.Tests      |
 | Backend — Auth     | 22    | AGDevX.Cart.Auth.Tests     |
-| Frontend — Vitest  | 588   | 91 test files              |
+| Frontend — Vitest  | 556   | 86 test files              |
 
 ## Known Issues / Tech Debt
 
-- Trip collaborator management has backend endpoints but no frontend UI
 - No CI/CD pipeline (`.github/workflows/` has CI + deploy workflows, pending first merge to main)
+- BaseEntity audit FK Restrict cascades (CreatedBy/ModifiedBy → User) are not configured in DbContext — user deletion is already blocked by other Restrict FKs, so this is a documentation gap, not a functional one
 
 ---
 
@@ -38,7 +38,7 @@ This is the single source of truth for where the project stands. Read it at the 
 
 | Enhancement               | Planning Doc                                                                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Trip Collaborator UI      | No planning doc yet (backend endpoints exist: `POST/DELETE /api/v1/trip/{id}/collaborators`)                                    |
+| Contributor/SSE Epic      | No planning doc yet (trip collaborator UX and SSE visibility filtering deferred from single-household migration)                  |
 | Home Page — Activity Feed | No planning doc yet (14 event types, dedicated ActivityEvent table, separate household vs personal sections)                     |
 | Home Page — Shopping List Preview | No planning doc yet                                                                                                       |
 | Home Page — Trip Templates | No planning doc yet                                                                                                              |
@@ -54,8 +54,9 @@ This is the single source of truth for where the project stands. Read it at the 
 
 | Enhancement       | Planning Doc                                                                                  |
 | ----------------- | --------------------------------------------------------------------------------------------- |
-| Docker Deployment | [docs/active/2026-03-28-docker-deployment.md](../docs/active/2026-03-28-docker-deployment.md) |
-| Home Page         | [docs/active/2026-03-29-home-page.md](../docs/active/2026-03-29-home-page.md)                 |
+| Docker Deployment    | [docs/active/2026-03-28-docker-deployment.md](../docs/active/2026-03-28-docker-deployment.md)           |
+| Home Page            | [docs/active/2026-03-29-home-page.md](../docs/active/2026-03-29-home-page.md)                           |
+| Single Household     | [docs/active/2026-03-30-single-household.md](../docs/active/2026-03-30-single-household.md)             |
 
 ## Completed Enhancements
 
