@@ -1,18 +1,31 @@
 // ABOUTME: Service implementation for Trip business logic including lifecycle management (create, complete, reopen)
-// ABOUTME: and collaborator functionality with authorization checks for trip access
+// ABOUTME: Uses scope-based authorization: personal trips are creator-only, household trips allow any member
+using AGDevX.Cart.Data;
 using AGDevX.Cart.Data.Models;
 using AGDevX.Cart.Data.Repositories;
 
 namespace AGDevX.Cart.Services;
 
-public class TripService(ITripRepository tripRepository) : ITripService
+public class TripService(ITripRepository tripRepository, CartDbContext dbContext) : ITripService
 {
-    public async Task<Trip> CreateTrip(string name, DateOnly? tripDate, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<Trip> CreateTrip(string name, DateOnly? tripDate, Guid? householdId, Guid userId, CancellationToken cancellationToken = default)
     {
+        //== If household trip, verify user belongs to that household
+        if (householdId.HasValue)
+        {
+            var user = await GetUserOrThrow(userId, cancellationToken);
+
+            if (user.HouseholdId != householdId.Value)
+            {
+                throw new UnauthorizedAccessException("User is not a member of the specified household");
+            }
+        }
+
         var trip = new Trip
         {
             Name = name,
             TripDate = tripDate,
+            HouseholdId = householdId,
             IsCompleted = false,
             CompletedAt = null,
             IsStarted = false,
@@ -24,22 +37,23 @@ public class TripService(ITripRepository tripRepository) : ITripService
 
     public async Task<IEnumerable<Trip>> GetUserTrips(Guid userId, CancellationToken cancellationToken = default)
     {
-        return await tripRepository.GetUserTrips(userId, cancellationToken);
+        var user = await GetUserOrThrow(userId, cancellationToken);
+        return await tripRepository.GetUserTrips(userId, user.HouseholdId, cancellationToken);
     }
 
-    public async Task<Trip?> GetById(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Trip?> GetById(Guid id, Guid userId, CancellationToken cancellationToken = default)
     {
+        var user = await GetUserOrThrow(userId, cancellationToken);
+        await VerifyTripAccess(id, userId, user.HouseholdId, cancellationToken);
+
         return await tripRepository.GetById(id, cancellationToken);
     }
 
     public async Task<Trip> UpdateTrip(Guid tripId, string name, DateOnly? tripDate, Guid userId, CancellationToken cancellationToken = default)
     {
-        //== Verify user is collaborator before updating trip
-        var isCollaborator = await tripRepository.IsUserCollaborator(tripId, userId, cancellationToken);
-        if (!isCollaborator)
-        {
-            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
-        }
+        //== Verify user has access before updating trip
+        var user = await GetUserOrThrow(userId, cancellationToken);
+        await VerifyTripAccess(tripId, userId, user.HouseholdId, cancellationToken);
 
         var trip = await tripRepository.GetById(tripId, cancellationToken)
                         ?? throw new KeyNotFoundException("Trip not found");
@@ -56,26 +70,18 @@ public class TripService(ITripRepository tripRepository) : ITripService
 
     public async Task DeleteTrip(Guid tripId, Guid userId, CancellationToken cancellationToken = default)
     {
-        //== Only creator can delete trip
-        var trip = await tripRepository.GetById(tripId, cancellationToken)
-                        ?? throw new KeyNotFoundException("Trip not found");
-
-        if (trip.CreatedBy != userId.ToString())
-        {
-            throw new UnauthorizedAccessException("Only the creator can delete the trip");
-        }
+        //== Verify user has access (personal = creator only, household = any member)
+        var user = await GetUserOrThrow(userId, cancellationToken);
+        await VerifyTripAccess(tripId, userId, user.HouseholdId, cancellationToken);
 
         await tripRepository.Delete(tripId, cancellationToken);
     }
 
     public async Task<Trip> StartTrip(Guid tripId, Guid userId, CancellationToken cancellationToken = default)
     {
-        //== Verify user is collaborator before starting trip
-        var isCollaborator = await tripRepository.IsUserCollaborator(tripId, userId, cancellationToken);
-        if (!isCollaborator)
-        {
-            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
-        }
+        //== Verify user has access before starting trip
+        var user = await GetUserOrThrow(userId, cancellationToken);
+        await VerifyTripAccess(tripId, userId, user.HouseholdId, cancellationToken);
 
         var trip = await tripRepository.GetById(tripId, cancellationToken)
                         ?? throw new KeyNotFoundException("Trip not found");
@@ -93,12 +99,9 @@ public class TripService(ITripRepository tripRepository) : ITripService
 
     public async Task<Trip> CompleteTrip(Guid tripId, Guid userId, CancellationToken cancellationToken = default)
     {
-        //== Verify user is collaborator before completing trip
-        var isCollaborator = await tripRepository.IsUserCollaborator(tripId, userId, cancellationToken);
-        if (!isCollaborator)
-        {
-            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
-        }
+        //== Verify user has access before completing trip
+        var user = await GetUserOrThrow(userId, cancellationToken);
+        await VerifyTripAccess(tripId, userId, user.HouseholdId, cancellationToken);
 
         var trip = await tripRepository.GetById(tripId, cancellationToken)
                         ?? throw new KeyNotFoundException("Trip not found");
@@ -116,12 +119,9 @@ public class TripService(ITripRepository tripRepository) : ITripService
 
     public async Task<Trip> ReopenTrip(Guid tripId, Guid userId, CancellationToken cancellationToken = default)
     {
-        //== Verify user is collaborator before reopening trip
-        var isCollaborator = await tripRepository.IsUserCollaborator(tripId, userId, cancellationToken);
-        if (!isCollaborator)
-        {
-            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
-        }
+        //== Verify user has access before reopening trip
+        var user = await GetUserOrThrow(userId, cancellationToken);
+        await VerifyTripAccess(tripId, userId, user.HouseholdId, cancellationToken);
 
         var trip = await tripRepository.GetById(tripId, cancellationToken)
                         ?? throw new KeyNotFoundException("Trip not found");
@@ -133,27 +133,20 @@ public class TripService(ITripRepository tripRepository) : ITripService
         return await tripRepository.Update(trip, cancellationToken);
     }
 
-    public async Task AddCollaborator(Guid tripId, Guid userId, Guid collaboratorUserId, CancellationToken cancellationToken = default)
+    private async Task<User> GetUserOrThrow(Guid userId, CancellationToken cancellationToken)
     {
-        //== Verify user is trip collaborator before adding new collaborators
-        var isCollaborator = await tripRepository.IsUserCollaborator(tripId, userId, cancellationToken);
-        if (!isCollaborator)
-        {
-            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
-        }
-
-        await tripRepository.AddCollaborator(tripId, collaboratorUserId, cancellationToken);
+        var user = await dbContext.Users.FindAsync(new object[] { userId }, cancellationToken)
+            ?? throw new UnauthorizedAccessException("User not found");
+        return user;
     }
 
-    public async Task RemoveCollaborator(Guid tripId, Guid userId, Guid collaboratorUserId, CancellationToken cancellationToken = default)
+    private async Task VerifyTripAccess(Guid tripId, Guid userId, Guid? userHouseholdId, CancellationToken cancellationToken)
     {
-        //== Verify user is trip collaborator before removing collaborators
-        var isCollaborator = await tripRepository.IsUserCollaborator(tripId, userId, cancellationToken);
-        if (!isCollaborator)
-        {
-            throw new UnauthorizedAccessException("User is not a collaborator on this trip");
-        }
+        var hasAccess = await tripRepository.HasTripAccess(tripId, userId, userHouseholdId, cancellationToken);
 
-        await tripRepository.RemoveCollaborator(tripId, collaboratorUserId, cancellationToken);
+        if (!hasAccess)
+        {
+            throw new UnauthorizedAccessException("User does not have access to this trip");
+        }
     }
 }
