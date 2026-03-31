@@ -460,4 +460,23 @@ public class TripServiceTests
         // Assert
         result.TripDate.Should().Be(existingDate, "null tripDate should not overwrite an existing value");
     }
+
+    [Fact]
+    public async Task CreateTrip_WithHouseholdId_SetsTripHouseholdId()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        _dbContext.Users.Add(new User { Id = userId, Email = "test@test.com", Name = "Test", HouseholdId = householdId });
+        await _dbContext.SaveChangesAsync();
+
+        _mockTripRepository.Setup(x => x.Create(It.IsAny<Trip>(), It.IsAny<CancellationToken>()))
+                           .ReturnsAsync((Trip t, CancellationToken _) => t);
+
+        // Act
+        var result = await _tripService.CreateTrip("Household Trip", null, householdId, userId);
+
+        // Assert
+        result.HouseholdId.Should().Be(householdId);
+    }
 }
