@@ -198,7 +198,7 @@ describe('ShoppingPage', () => {
 
     //== Hold the delete button for the full duration
     const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.mouseDown(deleteBtn)
+    fireEvent.pointerDown(deleteBtn)
 
     //== Not fired yet
     expect(deleteMutateFn).not.toHaveBeenCalled()
@@ -219,8 +219,8 @@ describe('ShoppingPage', () => {
 
     //== Start and immediately cancel the hold
     const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.mouseDown(deleteBtn)
-    fireEvent.mouseUp(deleteBtn)
+    fireEvent.pointerDown(deleteBtn)
+    fireEvent.pointerUp(deleteBtn)
 
     act(() => { vi.advanceTimersByTime(3000) })
 

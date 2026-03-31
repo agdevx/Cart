@@ -246,7 +246,7 @@ describe('TripCard', () => {
     fireEvent.click(screen.getByLabelText('Trip actions'))
 
     const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.mouseDown(deleteBtn)
+    fireEvent.pointerDown(deleteBtn)
 
     //== Should not fire before the hold duration completes
     expect(mockOnDelete).not.toHaveBeenCalled()
@@ -269,8 +269,8 @@ describe('TripCard', () => {
     fireEvent.click(screen.getByLabelText('Trip actions'))
 
     const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.mouseDown(deleteBtn)
-    fireEvent.mouseUp(deleteBtn)
+    fireEvent.pointerDown(deleteBtn)
+    fireEvent.pointerUp(deleteBtn)
 
     act(() => { vi.advanceTimersByTime(3000) })
 
@@ -280,7 +280,7 @@ describe('TripCard', () => {
     vi.useRealTimers()
   })
 
-  it('does not call onDelete if mouse leaves before 3 seconds', () => {
+  it('does not call onDelete if pointer leaves before 3 seconds', () => {
     vi.useFakeTimers()
 
     render(
@@ -291,8 +291,8 @@ describe('TripCard', () => {
     fireEvent.click(screen.getByLabelText('Trip actions'))
 
     const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.mouseDown(deleteBtn)
-    fireEvent.mouseLeave(deleteBtn)
+    fireEvent.pointerDown(deleteBtn)
+    fireEvent.pointerLeave(deleteBtn)
 
     act(() => { vi.advanceTimersByTime(3000) })
 
