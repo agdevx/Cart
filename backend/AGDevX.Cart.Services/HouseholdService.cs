@@ -20,8 +20,7 @@ public class HouseholdService(
 
     private static string GenerateInviteCode()
     {
-        var random = new Random();
-        return new string(Enumerable.Range(0, 6).Select(_ => InviteCodeChars[random.Next(InviteCodeChars.Length)]).ToArray());
+        return new string(Enumerable.Range(0, 6).Select(_ => InviteCodeChars[Random.Shared.Next(InviteCodeChars.Length)]).ToArray());
     }
 
     //== Create a new household and auto-swap out of any existing household
@@ -234,14 +233,14 @@ public class HouseholdService(
         }
 
         //== Owner — check for co-owner
-        var coOwnerUserId = household.Owner1UserId == userId ? household.Owner2UserId : (Guid?)household.Owner1UserId;
-
         /*
          * If the user IS Owner1, the co-owner is Owner2 (nullable).
          * If the user IS Owner2, the co-owner is Owner1 (always populated).
          * But Owner1 could theoretically equal the user only when they're Owner1,
          * so we check both directions.
          */
+        Guid? coOwnerUserId;
+
         if (household.Owner2UserId == userId)
         {
             coOwnerUserId = household.Owner1UserId;
@@ -351,11 +350,7 @@ public class HouseholdService(
         }
 
         //== Fill the empty owner slot
-        if (household.Owner1UserId == Guid.Empty)
-        {
-            household.Owner1UserId = targetUserId;
-        }
-        else if (household.Owner2UserId == null)
+        if (household.Owner2UserId == null)
         {
             household.Owner2UserId = targetUserId;
         }
@@ -388,8 +383,7 @@ public class HouseholdService(
             throw new ArgumentException("Target user is not an owner");
         }
 
-        var wouldLeaveZeroOwners = (isTargetOwner1 && household.Owner2UserId == null) ||
-                                   (isTargetOwner2 && household.Owner1UserId == Guid.Empty);
+        var wouldLeaveZeroOwners = isTargetOwner1 && household.Owner2UserId == null;
 
         if (wouldLeaveZeroOwners)
         {
@@ -520,6 +514,7 @@ public class HouseholdService(
     {
         var prefs = await userPreferencesRepository.GetByUserId(userId, cancellationToken);
 
+        //== No preferences row yet — schema default is ShowHouseholdPage=true, so the tab will show
         if (prefs != null)
         {
             prefs.ShowHouseholdPage = true;
