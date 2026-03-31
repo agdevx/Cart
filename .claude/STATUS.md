@@ -25,7 +25,7 @@ This is the single source of truth for where the project stands. Read it at the 
 | Backend — Services | 129   | AGDevX.Cart.Services.Tests |
 | Backend — API      | 112   | AGDevX.Cart.Api.Tests      |
 | Backend — Auth     | 22    | AGDevX.Cart.Auth.Tests     |
-| Frontend — Vitest  | 556   | 86 test files              |
+| Frontend — Vitest  | 555   | 86 test files              |
 
 ## Known Issues / Tech Debt
 
@@ -55,8 +55,6 @@ This is the single source of truth for where the project stands. Read it at the 
 | Enhancement       | Planning Doc                                                                                  |
 | ----------------- | --------------------------------------------------------------------------------------------- |
 | Docker Deployment    | [docs/active/2026-03-28-docker-deployment.md](../docs/active/2026-03-28-docker-deployment.md)           |
-| Home Page            | [docs/active/2026-03-29-home-page.md](../docs/active/2026-03-29-home-page.md)                           |
-| Single Household     | [docs/active/2026-03-30-single-household.md](../docs/active/2026-03-30-single-household.md)             |
 
 ## Completed Enhancements
 
@@ -82,3 +80,5 @@ This is the single source of truth for where the project stands. Read it at the 
 | UX Polish & Delight                                        | 2026-03-11 | [docs/archive/2026-03-10-ux-polish.md](../docs/archive/2026-03-10-ux-polish.md)                                                         |
 | Frontend Quality (Validation, Error Boundary, A11y)        | 2026-03-11 | [docs/archive/2026-03-11-frontend-quality.md](../docs/archive/2026-03-11-frontend-quality.md)                                           |
 | Backend Resilience (Timeouts, CancellationToken, /api/v1/) | 2026-03-11 | [docs/archive/2026-03-11-backend-resilience.md](../docs/archive/2026-03-11-backend-resilience.md)                                       |
+| Home Page (Greeting, Trip Calendar, Weather, Preferences)  | 2026-03-29 | [docs/archive/2026-03-29-home-page.md](../docs/archive/2026-03-29-home-page.md)                                                         |
+| Single Household Architecture                              | 2026-03-31 | [docs/archive/2026-03-30-single-household.md](../docs/archive/2026-03-30-single-household.md)                                           |
