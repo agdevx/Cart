@@ -7,7 +7,7 @@ import type { Store } from '@/apis/agdevx-cart-api/models/store'
 import { useFieldValidation } from '@/services/use-field-validation.service'
 import { ActionCancelFormButtons } from '@/shared/action-cancel-form-buttons'
 import { FormField } from '@/shared/form-field'
-import { ScopeSelect } from '@/shared/scope-select'
+import { ScopeRadio } from '@/shared/scope-radio'
 import { isRequired, maxLength } from '@/utils/validation-rules'
 
 export interface PantryStoreFormData {
@@ -17,7 +17,7 @@ export interface PantryStoreFormData {
 
 interface CreatePantryStoreFormProps {
   stores: ReadonlyArray<Store>
-  households: ReadonlyArray<{ id: string; name: string | null }> | undefined
+  household: { id: string; name: string | null } | null | undefined
   isPending: boolean
   onSubmit: (data: PantryStoreFormData) => void
   onCancel: () => void
@@ -28,7 +28,7 @@ interface EditPantryStoreFormProps {
   initialName: string
   initialScope: string
   stores: ReadonlyArray<Store>
-  households: ReadonlyArray<{ id: string; name: string | null }> | undefined
+  household: { id: string; name: string | null } | null | undefined
   isPending: boolean
   onSubmit: (data: PantryStoreFormData) => void
   onCancel: () => void
@@ -36,7 +36,7 @@ interface EditPantryStoreFormProps {
 
 export const CreatePantryStoreForm = ({
   stores,
-  households,
+  household,
   isPending,
   onSubmit,
   onCancel,
@@ -93,14 +93,11 @@ export const CreatePantryStoreForm = ({
       </FormField>
 
       <FormField label="Scope" htmlFor="storeScope">
-        <ScopeSelect
+        <ScopeRadio
           value={storeScope}
           onChange={setStoreScope}
-          personalLabel="Personal"
-          households={households}
-          householdDescription="Household"
+          household={household}
           disabled={isPending}
-          aria-label="Scope"
         />
       </FormField>
 
@@ -119,7 +116,7 @@ export const EditPantryStoreForm = ({
   initialName,
   initialScope,
   stores,
-  households,
+  household,
   isPending,
   onSubmit,
   onCancel,
@@ -173,14 +170,11 @@ export const EditPantryStoreForm = ({
       </FormField>
 
       <FormField label="Scope" htmlFor={`editStoreScope-${storeId}`}>
-        <ScopeSelect
+        <ScopeRadio
           value={editingScope}
           onChange={setEditingScope}
-          personalLabel="Personal"
-          households={households}
-          householdDescription="Household"
+          household={household}
           disabled={isPending}
-          aria-label="Edit scope"
         />
       </FormField>
 
