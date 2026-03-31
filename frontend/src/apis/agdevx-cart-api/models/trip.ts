@@ -4,15 +4,14 @@
 export interface Trip {
   id: string;
   name: string;
-  createdByUserId: string;
   householdId: string | null;
   isStarted: boolean;
   startedAt: string | null;
   isCompleted: boolean;
   completedAt: string | null;
   tripDate: string | null;
-  createdBy: string | null;
+  createdBy: string;
   createdDate: string;
-  modifiedBy: string | null;
+  modifiedBy: string;
   modifiedDate: string | null;
 }

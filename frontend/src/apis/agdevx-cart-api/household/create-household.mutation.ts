@@ -24,7 +24,7 @@ export const useCreateHouseholdMutation = () => {
       return response.json() as Promise<Household>;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['households'] })
+      queryClient.invalidateQueries({ queryKey: ['household'] })
     },
   })
 }

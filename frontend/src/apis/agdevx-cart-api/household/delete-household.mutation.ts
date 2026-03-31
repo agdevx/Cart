@@ -16,7 +16,7 @@ export const useDeleteHouseholdMutation = () => {
       })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['households'] })
+      queryClient.invalidateQueries({ queryKey: ['household'] })
     },
   })
 }
