@@ -2,13 +2,14 @@
 // ABOUTME: Supports inline edit form (name), delete, reopen actions with active/completed visual states
 // ABOUTME: Delete requires a 3-second long press to prevent accidental deletion — no confirmation dialog needed
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { MoreVertical, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import { activeTripPath, tripDetailPath } from '@/routes'
+import { useLongPressService } from '@/services/use-long-press.service'
 
 import { ActionCancelFormButtons } from './action-cancel-form-buttons'
 import { DropdownMenu } from './dropdown-menu'
@@ -29,12 +30,18 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
   const [editName, setEditName] = useState(trip.name)
   const [editDate, setEditDate] = useState(trip.tripDate ?? '')
 
-  /* Long-press delete state: whether the button is currently being held */
-  const [deletePressing, setDeletePressing] = useState(false)
-
   const kebabRef = useRef<HTMLButtonElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleDeleteComplete = useCallback(() => {
+    setMenuOpen(false)
+    onDelete(trip.id, trip.name)
+  }, [onDelete, trip.id, trip.name])
+
+  const { pressing: deletePressing, handlers: deleteHandlers, duration: deleteHoldDuration } = useLongPressService({
+    duration: DELETE_HOLD_DURATION_MS,
+    onComplete: handleDeleteComplete,
+  })
 
   // Auto-focus and select text when entering edit mode
   useEffect(() => {
@@ -57,31 +64,6 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
     setEditName(trip.name)
     setEditDate(trip.tripDate ?? '')
     setEditing(true)
-  }
-
-  const cancelDeleteHold = () => {
-    if (deleteTimerRef.current) {
-      clearTimeout(deleteTimerRef.current)
-      deleteTimerRef.current = null
-    }
-    setDeletePressing(false)
-  }
-
-  const handleDeletePointerDown = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDeletePressing(true)
-    deleteTimerRef.current = setTimeout(() => {
-      setDeletePressing(false)
-      setMenuOpen(false)
-      onDelete(trip.id, trip.name)
-    }, DELETE_HOLD_DURATION_MS)
-  }
-
-  const handleDeletePointerUp = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    cancelDeleteHold()
   }
 
   const handleReopenClick = (e: React.MouseEvent) => {
@@ -152,21 +134,17 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
               )}
               {/* Delete uses long-press: no click handler, hold for 3 seconds to confirm */}
               <button
-                onMouseDown={handleDeletePointerDown}
-                onMouseUp={handleDeletePointerUp}
-                onMouseLeave={cancelDeleteHold}
-                onTouchStart={handleDeletePointerDown}
-                onTouchEnd={handleDeletePointerUp}
+                {...deleteHandlers}
                 aria-label="Hold to delete trip"
                 className="relative w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral overflow-hidden select-none"
               >
-                {/* Fill bar animates from left to right over DELETE_HOLD_DURATION_MS when pressing */}
+                {/* Fill bar animates from left to right over the hold duration when pressing */}
                 <span
                   aria-hidden="true"
                   className="absolute inset-0 bg-coral/15 origin-left"
                   style={{
                     transform: deletePressing ? 'scaleX(1)' : 'scaleX(0)',
-                    transition: deletePressing ? `transform ${DELETE_HOLD_DURATION_MS}ms linear` : 'none',
+                    transition: deletePressing ? `transform ${deleteHoldDuration}ms linear` : 'none',
                     transformOrigin: 'left center',
                   }}
                 />
