@@ -18,10 +18,13 @@ public class TripItemService(ITripItemRepository tripItemRepository, ITripReposi
     private readonly IStoreRepository _storeRepository = storeRepository;
     private readonly CartDbContext _dbContext = dbContext;
 
-    //== Serializer options that handle EF Core circular navigation properties
+    //== Serializer options that handle EF Core circular navigation properties.
+    //== CamelCase naming matches ASP.NET's default serializer so SSE event filtering
+    //== in TripEventsController can reliably match property names in the JSON payload.
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
-        ReferenceHandler = ReferenceHandler.IgnoreCycles
+        ReferenceHandler = ReferenceHandler.IgnoreCycles,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
     public async Task<TripItem> AddTripItem(Guid tripId, Guid inventoryItemId, int quantity, Guid userId, string? notes = null, Guid? storeId = null, CancellationToken cancellationToken = default)

@@ -148,9 +148,9 @@ public class HouseholdController(IHouseholdService householdService) : Controlle
         }
     }
 
-    //== Leave the current household
-    [HttpPost("{id}/leave")]
-    public async Task<IActionResult> LeaveHousehold(Guid id, CancellationToken cancellationToken = default)
+    //== Leave the current household (single-household model — ID is implicit from user's membership)
+    [HttpPost("leave")]
+    public async Task<IActionResult> LeaveHousehold(CancellationToken cancellationToken = default)
     {
         try
         {
