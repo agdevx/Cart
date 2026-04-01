@@ -50,6 +50,7 @@ This is the single source of truth for where the project stands. Read it at the 
 | Container Image Versioning | No planning doc yet (review tagging strategy for Docker Hub images)                                                             |
 | NuGet Package Updates     | No planning doc yet                                                                                                             |
 | Watchtower Auto-Deploy    | No planning doc yet (auto-pull and restart cart containers on new Docker Hub images, scope to cart only — not infra containers)  |
+| Container Health Checks   | No planning doc yet (Docker HEALTHCHECK in Dockerfiles + depends_on conditions, prerequisite for Watchtower rollback safety)    |
 
 ## In Progress Enhancements
 
