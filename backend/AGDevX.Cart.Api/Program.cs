@@ -132,6 +132,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 //== API Endpoints
+//== Block search engine crawling (defense-in-depth for direct backend access)
+app.MapGet("/robots.txt", () => Results.Text("User-agent: *\nDisallow: /\n", "text/plain"));
+
 app.MapControllers();
 
 app.Run();
