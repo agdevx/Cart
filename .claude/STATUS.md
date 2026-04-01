@@ -38,7 +38,7 @@ This is the single source of truth for where the project stands. Read it at the 
 
 | Enhancement               | Planning Doc                                                                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Contributor/SSE Epic      | No planning doc yet (trip collaborator UX and SSE visibility filtering deferred from single-household migration)                  |
+| Contributor/SSE Epic      | No planning doc yet (trip collaborator UX, SSE visibility filtering deferred from single-household migration, SSE heartbeat needed for Cloudflare Tunnel — 100s idle timeout kills connections without keepalive) |
 | Home Page — Activity Feed | No planning doc yet (14 event types, dedicated ActivityEvent table, separate household vs personal sections)                     |
 | Home Page — Shopping List Preview | No planning doc yet                                                                                                       |
 | Home Page — Trip Templates | No planning doc yet                                                                                                              |
