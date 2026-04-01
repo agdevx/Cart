@@ -49,6 +49,7 @@ This is the single source of truth for where the project stands. Read it at the 
 | Database Index Review     | No planning doc yet (audit and add proper indexes to DB tables)                                                                 |
 | Container Image Versioning | No planning doc yet (review tagging strategy for Docker Hub images)                                                             |
 | NuGet Package Updates     | No planning doc yet                                                                                                             |
+| Watchtower Auto-Deploy    | No planning doc yet (auto-pull and restart cart containers on new Docker Hub images, scope to cart only — not infra containers)  |
 
 ## In Progress Enhancements
 
