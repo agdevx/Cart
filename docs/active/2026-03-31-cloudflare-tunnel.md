@@ -343,4 +343,386 @@ The `cloudflared` CLI on the host OS can be uninstalled. Keep `cert.pem` backed 
 
 ## Implementation Plan
 
-_To be written after design approval._
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Migrate AGDevX.Cart from Tailscale-only access to Cloudflare Tunnel with public HTTPS, remove the `/cart` sub-path prefix, and block search engine crawling.
+
+**Architecture:** Cloudflare Tunnel → Caddy reverse proxy → backend/frontend containers. Three independent Docker Compose stacks on a shared Docker network. No sub-path prefix — app lives at root of its subdomain.
+
+**Tech Stack:** Docker, Docker Compose, Caddy, Cloudflare Tunnel (`cloudflared`), Nginx, .NET 10, Vite/React
+
+---
+
+### Task 1: Add Frontend robots.txt
+
+**Files:**
+- Create: `frontend/public/robots.txt`
+
+- [ ] **Step 1: Create robots.txt**
+
+Create `frontend/public/robots.txt`:
+
+```
+User-agent: *
+Disallow: /
+```
+
+Files in `frontend/public/` are copied to the build output root by Vite. Nginx will serve this at `/robots.txt` automatically.
+
+- [ ] **Step 2: Verify the file is picked up by the build**
+
+Run from `frontend/`:
+
+```bash
+npx vite build
+```
+
+Then check the output:
+
+```bash
+ls dist/robots.txt
+```
+
+Expected: File exists in `dist/`.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add frontend/public/robots.txt
+git commit -m "feat: add robots.txt to block search engine crawling"
+```
+
+---
+
+### Task 2: Add Backend robots.txt Endpoint
+
+**Files:**
+- Modify: `backend/AGDevX.Cart.Api/Program.cs:134`
+
+- [ ] **Step 1: Add the endpoint**
+
+In `backend/AGDevX.Cart.Api/Program.cs`, add a minimal endpoint before the existing `app.MapControllers();` line (line 134):
+
+```csharp
+//== Block search engine crawling
+app.MapGet("/robots.txt", () => Results.Text("User-agent: *\nDisallow: /\n", "text/plain"));
+```
+
+This handles the case where a crawler hits `/api/robots.txt` or if Caddy routes a `/robots.txt` request to the backend. The frontend's copy handles the primary case; this is a safety net.
+
+- [ ] **Step 2: Run backend tests**
+
+Run from `backend/`:
+
+```bash
+dotnet test
+```
+
+Expected: All 333 tests pass (no existing tests affected).
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add backend/AGDevX.Cart.Api/Program.cs
+git commit -m "feat: add robots.txt endpoint to backend API"
+```
+
+---
+
+### Task 3: Update Caddyfile Template
+
+**Files:**
+- Modify: `deploy/caddy/Caddyfile`
+
+- [ ] **Step 1: Replace the Caddyfile**
+
+Replace the entire contents of `deploy/caddy/Caddyfile` with:
+
+```
+{
+	auto_https off
+	admin off
+}
+
+(cart-routes) {
+	handle /api/* {
+		reverse_proxy backend:2946
+	}
+
+	handle {
+		reverse_proxy frontend:3750
+	}
+}
+
+http://<your-hostname> {
+	import cart-routes
+}
+
+:80 {
+	import cart-routes
+}
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add deploy/caddy/Caddyfile
+git commit -m "refactor: simplify Caddyfile for root-path hosting with hostname routing"
+```
+
+---
+
+### Task 4: Update Caddy Compose Template
+
+**Files:**
+- Modify: `deploy/caddy/docker-compose.yml`
+
+- [ ] **Step 1: Replace the compose file**
+
+Replace the entire contents of `deploy/caddy/docker-compose.yml` with:
+
+```yaml
+services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    networks:
+      - agdevx-internal-docker-network
+    restart: unless-stopped
+
+networks:
+  agdevx-internal-docker-network:
+    name: agdevx-internal-docker-network
+    driver: bridge
+```
+
+Changes from the previous version:
+- Network renamed from `proxy` to `agdevx-internal-docker-network`
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add deploy/caddy/docker-compose.yml
+git commit -m "refactor: rename Docker network to agdevx-internal-docker-network"
+```
+
+---
+
+### Task 5: Update Cart Compose Template
+
+**Files:**
+- Modify: `deploy/cart/docker-compose.yml`
+
+- [ ] **Step 1: Replace the compose file**
+
+Replace the entire contents of `deploy/cart/docker-compose.yml` with:
+
+```yaml
+services:
+  frontend:
+    image: agdevx/cart-frontend:latest
+    networks:
+      - agdevx-internal-docker-network
+    restart: unless-stopped
+
+  backend:
+    image: agdevx/cart-backend:latest
+    env_file: .env
+    volumes:
+      - ${CART_DB_PATH:?Set CART_DB_PATH in .env}:/app/data
+    networks:
+      - agdevx-internal-docker-network
+    restart: unless-stopped
+
+networks:
+  agdevx-internal-docker-network:
+    external: true
+```
+
+Changes from the previous version:
+- Network renamed from `proxy` to `agdevx-internal-docker-network`
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add deploy/cart/docker-compose.yml
+git commit -m "refactor: rename Docker network to agdevx-internal-docker-network"
+```
+
+---
+
+### Task 6: Add Cloudflared Compose and Config Templates
+
+**Files:**
+- Create: `deploy/cloudflared/docker-compose.yml`
+- Create: `deploy/cloudflared/config.yml.example`
+
+- [ ] **Step 1: Create the compose file**
+
+Create `deploy/cloudflared/docker-compose.yml`:
+
+```yaml
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel run
+    volumes:
+      - ./config.yml:/etc/cloudflared/config.yml:ro
+      - ./credentials.json:/etc/cloudflared/credentials.json:ro
+    networks:
+      - agdevx-internal-docker-network
+    restart: unless-stopped
+
+networks:
+  agdevx-internal-docker-network:
+    external: true
+```
+
+- [ ] **Step 2: Create the config template**
+
+Create `deploy/cloudflared/config.yml.example`:
+
+```yaml
+# Cloudflare Tunnel configuration
+# Copy this file to config.yml and replace placeholders with your values.
+#
+# To find your tunnel ID:
+#   cloudflared tunnel list
+#
+# The credentials.json file is produced by:
+#   cloudflared tunnel create <tunnel-name>
+# Rename the output file (<tunnel-id>.json) to credentials.json.
+
+tunnel: <tunnel-id>
+credentials-file: /etc/cloudflared/credentials.json
+
+ingress:
+  - hostname: <your-hostname>
+    service: http://caddy:80
+  - service: http_status:404
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add deploy/cloudflared/
+git commit -m "feat: add cloudflared Docker Compose and config templates"
+```
+
+---
+
+### Task 7: Rewrite DEPLOYMENT.md
+
+**Files:**
+- Modify: `docs/DEPLOYMENT.md`
+
+- [ ] **Step 1: Replace DEPLOYMENT.md**
+
+Replace the entire contents of `docs/DEPLOYMENT.md`. This is a full rewrite — the previous version described Tailscale-based access with `/cart` sub-path routing, which no longer applies.
+
+The new DEPLOYMENT.md should mirror the structure of the design spec's sections. Use these sections from this document as the source of truth for content:
+
+- **Architecture Overview** — use the "Container Architecture" diagram and "How Requests Flow" sections from the design spec. Add a "Why This Architecture" subsection covering: public HTTPS with zero cert management, no inbound ports, local fallback via port 80, Caddy as shared infrastructure, container isolation.
+- **Components** — one subsection each for: Cloudflare Tunnel (cloudflared), Caddy (Reverse Proxy), Frontend (Nginx + SPA), Backend (.NET API), Docker Network. Pull details from the design spec's corresponding sections.
+- **CI/CD Pipeline** — copy from the existing DEPLOYMENT.md (this section is unchanged). Includes: How It Works diagram, Triggers table, Image Tags, Required GitHub Secrets.
+- **Server Setup (One-Time)** — use the "Server Setup" section from the design spec. Steps: Create the Tunnel, Create DNS Record, Create the Database Folder, Create the Caddy Stack, Create the Cloudflared Stack, Create the Cart Stack, Verify, Clean Up.
+- **Updating the Application** — copy from the existing DEPLOYMENT.md (unchanged).
+- **Rolling Back** — copy from the existing DEPLOYMENT.md (unchanged).
+- **Adding Future Apps** — use the "Adding Future Apps" section from the design spec. Show config.yml ingress example, Caddyfile site block example, DNS record, network join, restart commands.
+- **Database** — copy from the existing DEPLOYMENT.md (unchanged, except update network name references if any).
+- **Troubleshooting** — use the "Troubleshooting" section from the design spec. Add the existing DEPLOYMENT.md's troubleshooting items that still apply.
+- **File Reference** — update to include the new cloudflared files. Two tables: "In the Repo" and "On the Server".
+
+All code blocks must use proper triple-backtick fencing. Replace all `<your-hostname>` and `<tunnel-id>` placeholders consistently. Remove all Tailscale references. Replace `proxy` network name with `agdevx-internal-docker-network` everywhere.
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add docs/DEPLOYMENT.md
+git commit -m "docs: rewrite DEPLOYMENT.md for Cloudflare Tunnel architecture"
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add docs/DEPLOYMENT.md
+git commit -m "docs: rewrite DEPLOYMENT.md for Cloudflare Tunnel architecture"
+```
+
+---
+
+### Task 8: Update STATUS.md
+
+**Files:**
+- Modify: `.claude/STATUS.md`
+
+- [ ] **Step 1: Move Docker Deployment to Completed and add Cloudflare Tunnel entry**
+
+In `.claude/STATUS.md`, move the "Docker Deployment" row from the "In Progress Enhancements" table to the "Completed Enhancements" table. Use the merge date of the PR that delivers this work for the "Completed" column.
+
+Then verify there are no stale references — the Docker Deployment planning doc should be moved from `docs/active/` to `docs/archive/`.
+
+- [ ] **Step 2: Move planning docs**
+
+Move the Docker deployment docs to the archive (they're for the completed Tailscale-based deployment):
+
+```bash
+git mv docs/active/2026-03-28-docker-deployment.md docs/archive/
+git mv docs/active/2026-03-28-docker-deployment-plan.md docs/archive/
+```
+
+The Cloudflare Tunnel doc (`docs/active/2026-03-31-cloudflare-tunnel.md`) stays in `active/` until this work is complete, then moves to `archive/`.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add .claude/STATUS.md docs/active/ docs/archive/
+git commit -m "docs: update STATUS.md, archive Docker deployment docs"
+```
+
+---
+
+### Task 9: Run Full Test Suite and Verify
+
+- [ ] **Step 1: Run backend tests**
+
+Run from `backend/`:
+
+```bash
+dotnet test
+```
+
+Expected: All 333 tests pass.
+
+- [ ] **Step 2: Run frontend tests**
+
+Run from `frontend/`:
+
+```bash
+npx vitest run
+```
+
+Expected: All 555 tests pass.
+
+- [ ] **Step 3: Run TypeScript check**
+
+Run from `frontend/`:
+
+```bash
+npx tsc -b --noEmit
+```
+
+Expected: No errors.
+
+- [ ] **Step 4: Run lint**
+
+Run from `frontend/`:
+
+```bash
+npx eslint src/
+```
+
+Expected: No errors.
