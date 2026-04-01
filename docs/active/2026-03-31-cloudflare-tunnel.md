@@ -74,7 +74,13 @@ Cloudflare Edge (DDoS, bot protection, TLS termination)
 
 **No inbound ports on the server.** `cloudflared` connects outbound to Cloudflare — no firewall/router port forwarding needed. Port 80 is exposed to the local network only (no public exposure without explicit router config).
 
+**Rate limiting.** The backend already enforces rate limiting: 5 requests/min per IP on auth endpoints (login, register, logout) and 60 requests/min per IP globally. This is implemented via ASP.NET's `AddRateLimiter` middleware. No additional rate limiting is needed for the tunnel migration.
+
+**Cookie auth.** The `.Cart.Auth` cookie is configured with `SecurePolicy = SameAsRequest` — the cookie's `Secure` flag matches the request protocol. Over HTTPS (tunnel), the cookie is `Secure`. Over HTTP (local access), it's not. This means login works in both scenarios. `SameSite` is `Lax`, and no explicit `Path` is set (defaults to `/`), so the sub-path removal has no impact on cookies.
+
 **Cloudflare edge protections.** DDoS protection is on by default (free tier). Bot detection, WAF rules, and rate limiting are available in the Cloudflare dashboard and can be enabled later. These are dashboard settings, not `cloudflared` config.
+
+**Search engine crawling.** Both the frontend and backend serve a `robots.txt` that disallows all crawlers. This prevents search engines from indexing the app now that it's publicly accessible.
 
 ### Docker Network
 
@@ -116,7 +122,7 @@ Caddy uses two site blocks — one for tunnel traffic (matched by hostname) and 
     }
 }
 
-<your-hostname> {
+http://<your-hostname> {
     import cart-routes
 }
 
@@ -127,7 +133,7 @@ Caddy uses two site blocks — one for tunnel traffic (matched by hostname) and 
 
 The `<your-hostname>` placeholder in the template must be replaced with the actual hostname (e.g., `cart.example.com`) when deploying. The `(cart-routes)` snippet avoids duplicating the routing logic across both blocks.
 
-- **`<your-hostname>` block** — matches tunnel traffic by `Host` header. When future apps are added, each gets its own hostname block.
+- **`http://<your-hostname>` block** — matches tunnel traffic by `Host` header. The explicit `http://` scheme prevents Caddy from attempting automatic HTTPS certificate provisioning. When future apps are added, each gets its own hostname block.
 - **`:80` block** — matches any request on port 80, enabling local network access at `http://<local-ip>`.
 
 `auto_https` is off because TLS is handled by Cloudflare, not Caddy.
@@ -140,7 +146,7 @@ The tunnel is locally-managed via `config.yml` on the server. `cloudflared` read
 
 ```yaml
 tunnel: <tunnel-id>
-credentials-file: /etc/cloudflared/<tunnel-id>.json
+credentials-file: /etc/cloudflared/credentials.json
 
 ingress:
   - hostname: <your-hostname>
@@ -148,7 +154,7 @@ ingress:
   - service: http_status:404
 ```
 
-**Tunnel creation** is a one-time CLI operation on the host OS using the `cloudflared` binary. It produces a credentials JSON file (`<tunnel-id>.json`) that authorizes the container to connect to the tunnel.
+**Tunnel creation** is a one-time CLI operation on the host OS using the `cloudflared` binary. It produces a credentials JSON file (`<tunnel-id>.json`) in `~/.cloudflared/`. Rename this file to `credentials.json` when copying it to the server — the tunnel ID is already specified in `config.yml`'s `tunnel:` field, so the filename doesn't need to carry it.
 
 **DNS:** A proxied CNAME record in Cloudflare maps the hostname to `<tunnel-id>.cfargotunnel.com`. The orange cloud (proxy) must be on — this is how Cloudflare knows to route traffic through the tunnel.
 
@@ -166,7 +172,7 @@ No new tunnels or `cloudflared` containers needed.
 
 ### Docker Images
 
-No changes to the Docker images. The existing `agdevx/cart-backend` and `agdevx/cart-frontend` images work as-is. The `cloudflared/cloudflared` official image is used directly — no custom build.
+No changes to the Docker images. The existing `agdevx/cart-backend` and `agdevx/cart-frontend` images work as-is. The `cloudflare/cloudflared` official image is used directly — no custom build.
 
 ### Compose File Changes
 
@@ -175,11 +181,11 @@ No changes to the Docker images. The existing `agdevx/cart-backend` and `agdevx/
 ```yaml
 services:
   cloudflared:
-    image: cloudflared/cloudflared:latest
+    image: cloudflare/cloudflared:latest
     command: tunnel run
     volumes:
       - ./config.yml:/etc/cloudflared/config.yml:ro
-      - ./<tunnel-id>.json:/etc/cloudflared/<tunnel-id>.json:ro
+      - ./credentials.json:/etc/cloudflared/credentials.json:ro
     networks:
       - agdevx-internal-docker-network
     restart: unless-stopped
@@ -247,6 +253,8 @@ Repo changes are limited to:
 - Updated Cart compose template (rename network)
 - New cloudflared compose template
 - New `config.yml.example` template
+- New `robots.txt` in `frontend/public/` (disallow all crawlers)
+- New `robots.txt` endpoint in the backend (disallow all crawlers)
 - Updated `docs/DEPLOYMENT.md`
 
 ### Server Setup (One-Time)
@@ -288,10 +296,10 @@ Create the folder and files on the server:
 ```
 C:\docker\cloudflared\docker-compose.yml
 C:\docker\cloudflared\config.yml
-C:\docker\cloudflared\<tunnel-id>.json
+C:\docker\cloudflared\credentials.json
 ```
 
-Copy `docker-compose.yml` and `config.yml` from `deploy/cloudflared/` in the repo. Replace placeholders with your tunnel ID and hostname. Copy the `<tunnel-id>.json` credentials file from `~/.cloudflared/`.
+Copy `docker-compose.yml` and `config.yml` from `deploy/cloudflared/` in the repo. Replace placeholders with your tunnel ID and hostname. Copy the `<tunnel-id>.json` credentials file from `~/.cloudflared/` and rename it to `credentials.json`.
 
 #### 4. Update Existing Stacks
 
@@ -319,6 +327,14 @@ Open `https://cart.<your-domain>` in a browser. You should see the login page wi
 #### 7. Clean Up
 
 The `cloudflared` CLI on the host OS can be uninstalled. Keep `cert.pem` backed up somewhere safe in case you need to create or delete tunnels in the future.
+
+### Troubleshooting
+
+**Tunnel won't connect.** The `cloudflared` container requires outbound internet access to establish the tunnel to Cloudflare's edge. If the server's firewall or router blocks outbound traffic, the tunnel won't establish. Check `docker compose logs cloudflared` for connection errors.
+
+**Login works via tunnel but not locally (or vice versa).** The `.Cart.Auth` cookie uses `SecurePolicy = SameAsRequest`, so it adapts to the protocol. If login fails on one path, check that the backend is receiving requests on the expected protocol.
+
+**Old cached SPA after update.** Hard refresh (Ctrl+Shift+R) or clear browser cache. The PWA service worker may also cache aggressively — check the Application tab in DevTools.
 
 ### Documentation Updates
 
