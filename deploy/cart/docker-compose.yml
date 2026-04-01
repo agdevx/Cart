@@ -2,7 +2,7 @@ services:
   frontend:
     image: agdevx/cart-frontend:latest
     networks:
-      - proxy
+      - agdevx-internal-docker-network
     restart: unless-stopped
 
   backend:
@@ -11,9 +11,9 @@ services:
     volumes:
       - ${CART_DB_PATH:?Set CART_DB_PATH in .env}:/app/data
     networks:
-      - proxy
+      - agdevx-internal-docker-network
     restart: unless-stopped
 
 networks:
-  proxy:
+  agdevx-internal-docker-network:
     external: true
