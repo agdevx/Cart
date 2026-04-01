@@ -397,18 +397,18 @@ git commit -m "feat: add robots.txt to block search engine crawling"
 ### Task 2: Add Backend robots.txt Endpoint
 
 **Files:**
-- Modify: `backend/AGDevX.Cart.Api/Program.cs:134`
+- Modify: `backend/AGDevX.Cart.Api/Program.cs:135`
 
 - [ ] **Step 1: Add the endpoint**
 
-In `backend/AGDevX.Cart.Api/Program.cs`, add a minimal endpoint before the existing `app.MapControllers();` line (line 134):
+In `backend/AGDevX.Cart.Api/Program.cs`, add a minimal endpoint before the existing `app.MapControllers();` line (line 135):
 
 ```csharp
-//== Block search engine crawling
+//== Block search engine crawling (defense-in-depth for direct backend access)
 app.MapGet("/robots.txt", () => Results.Text("User-agent: *\nDisallow: /\n", "text/plain"));
 ```
 
-This handles the case where a crawler hits `/api/robots.txt` or if Caddy routes a `/robots.txt` request to the backend. The frontend's copy handles the primary case; this is a safety net.
+In the normal architecture, `/robots.txt` requests go to the frontend (Caddy only routes `/api/*` to the backend). This endpoint is defense-in-depth — it only fires if someone accesses the backend directly, bypassing Caddy.
 
 - [ ] **Step 2: Run backend tests**
 
@@ -418,7 +418,7 @@ Run from `backend/`:
 dotnet test
 ```
 
-Expected: All 333 tests pass (no existing tests affected).
+Expected: All tests pass (no existing tests affected).
 
 - [ ] **Step 3: Commit**
 
@@ -645,13 +645,6 @@ git add docs/DEPLOYMENT.md
 git commit -m "docs: rewrite DEPLOYMENT.md for Cloudflare Tunnel architecture"
 ```
 
-- [ ] **Step 2: Commit**
-
-```bash
-git add docs/DEPLOYMENT.md
-git commit -m "docs: rewrite DEPLOYMENT.md for Cloudflare Tunnel architecture"
-```
-
 ---
 
 ### Task 8: Update STATUS.md
@@ -695,7 +688,7 @@ Run from `backend/`:
 dotnet test
 ```
 
-Expected: All 333 tests pass.
+Expected: All tests pass.
 
 - [ ] **Step 2: Run frontend tests**
 
@@ -705,7 +698,7 @@ Run from `frontend/`:
 npx vitest run
 ```
 
-Expected: All 555 tests pass.
+Expected: All tests pass.
 
 - [ ] **Step 3: Run TypeScript check**
 
