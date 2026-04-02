@@ -220,13 +220,13 @@ networks:
 ```yaml
 services:
   frontend:
-    image: agdevx/cart-frontend:latest
+    image: agdevx/cart-frontend:${CART_IMAGE_TAG:-latest}
     networks:
       - agdevx-internal-docker-network
     restart: unless-stopped
 
   backend:
-    image: agdevx/cart-backend:latest
+    image: agdevx/cart-backend:${CART_IMAGE_TAG:-latest}
     env_file: .env
     volumes:
       - ${CART_DB_PATH:?Set CART_DB_PATH in .env}:/app/data
@@ -523,13 +523,13 @@ Replace the entire contents of `deploy/cart/docker-compose.yml` with:
 ```yaml
 services:
   frontend:
-    image: agdevx/cart-frontend:latest
+    image: agdevx/cart-frontend:${CART_IMAGE_TAG:-latest}
     networks:
       - agdevx-internal-docker-network
     restart: unless-stopped
 
   backend:
-    image: agdevx/cart-backend:latest
+    image: agdevx/cart-backend:${CART_IMAGE_TAG:-latest}
     env_file: .env
     volumes:
       - ${CART_DB_PATH:?Set CART_DB_PATH in .env}:/app/data
