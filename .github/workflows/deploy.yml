@@ -27,24 +27,30 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Get short SHA
-        id: sha
-        run: echo "short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Compute image tags
+        id: tags
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            BACKEND_TAGS="agdevx/cart-backend:latest,agdevx/cart-backend:${SHORT_SHA}"
+            FRONTEND_TAGS="agdevx/cart-frontend:latest,agdevx/cart-frontend:${SHORT_SHA}"
+          else
+            BACKEND_TAGS="agdevx/cart-backend:preview-${SHORT_SHA}"
+            FRONTEND_TAGS="agdevx/cart-frontend:preview-${SHORT_SHA}"
+          fi
+          echo "backend=${BACKEND_TAGS}" >> $GITHUB_OUTPUT
+          echo "frontend=${FRONTEND_TAGS}" >> $GITHUB_OUTPUT
 
       - name: Build and push backend
         uses: docker/build-push-action@v6
         with:
           context: ./backend
           push: true
-          tags: |
-            agdevx/cart-backend:latest
-            agdevx/cart-backend:${{ steps.sha.outputs.short }}
+          tags: ${{ steps.tags.outputs.backend }}
 
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
           push: true
-          tags: |
-            agdevx/cart-frontend:latest
-            agdevx/cart-frontend:${{ steps.sha.outputs.short }}
+          tags: ${{ steps.tags.outputs.frontend }}
