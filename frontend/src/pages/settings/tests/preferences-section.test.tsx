@@ -113,14 +113,15 @@ describe('PreferencesSection', () => {
     expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument()
   })
 
-  it('defaults to /shopping as selected page when no preferences are loaded', () => {
+  it('defaults to /home as selected page when no preferences are loaded', () => {
     vi.mocked(useUserPreferencesQuery).mockReturnValue({
       data: undefined,
     } as unknown as ReturnType<typeof useUserPreferencesQuery>)
 
     render(createElement(PreferencesSection), { wrapper })
 
-    expect(screen.getByRole('button', { name: 'Shopping' }).className).toContain('bg-teal')
+    //== Home should be highlighted since login navigates to /home when defaultPage is null
+    expect(screen.getByRole('button', { name: 'Home' }).className).toContain('bg-teal')
   })
 
   it('does not show Save button when there are no unsaved changes', () => {

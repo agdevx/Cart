@@ -36,7 +36,7 @@ export const PreferencesSection = () => {
   const updateMutation = useUpdateUserPreferencesMutation()
 
   /** Local state mirrors query data; changes here are unsaved until the user clicks Save */
-  const [selectedPage, setSelectedPage] = useState(preferences?.defaultPage ?? '/shopping')
+  const [selectedPage, setSelectedPage] = useState(preferences?.defaultPage ?? '/home')
   const [locationLat, setLocationLat] = useState<number | null>(preferences?.locationLatitude ?? null)
   const [locationLon, setLocationLon] = useState<number | null>(preferences?.locationLongitude ?? null)
   const [locationName, setLocationName] = useState<string | null>(preferences?.locationDisplayName ?? null)
@@ -56,7 +56,7 @@ export const PreferencesSection = () => {
    * resets local state and clears dirty so the Save button disappears.
    */
   useEffect(() => {
-    setSelectedPage(preferences?.defaultPage ?? '/shopping')
+    setSelectedPage(preferences?.defaultPage ?? '/home')
     setLocationLat(preferences?.locationLatitude ?? null)
     setLocationLon(preferences?.locationLongitude ?? null)
     setLocationName(preferences?.locationDisplayName ?? null)
