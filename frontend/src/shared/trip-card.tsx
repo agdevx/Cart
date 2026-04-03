@@ -191,7 +191,16 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
     </>
   )
 
-  // Active trips are links (unless editing), completed trips are read-only links
+  // When editing, render as div instead of link to prevent navigation
+  if (editing) {
+    return (
+      <div className="block p-5 bg-surface rounded-2xl shadow-sm border-2 border-transparent">
+        {cardContent}
+      </div>
+    )
+  }
+
+  // Completed trips are read-only links
   if (trip.isCompleted) {
     return (
       <Link
@@ -200,15 +209,6 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
       >
         {cardContent}
       </Link>
-    )
-  }
-
-  // When editing, render as div instead of link to prevent navigation
-  if (editing) {
-    return (
-      <div className="block p-5 bg-surface rounded-2xl shadow-sm border-2 border-transparent">
-        {cardContent}
-      </div>
     )
   }
 
