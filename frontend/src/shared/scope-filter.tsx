@@ -21,7 +21,7 @@ export const ScopeFilter = ({ value, onChange, household, 'aria-label': ariaLabe
     }`
 
   return (
-    <div role="tablist" aria-label={ariaLabel} className="flex bg-bg-warm rounded-xl p-1 overflow-x-auto">
+    <div role="tablist" aria-label={ariaLabel} className="flex bg-bg-warm rounded-xl p-1 overflow-x-auto scrollbar-hide whitespace-nowrap">
       <button
         role="tab"
         aria-selected={value === 'all'}
@@ -44,7 +44,7 @@ export const ScopeFilter = ({ value, onChange, household, 'aria-label': ariaLabe
         onClick={() => onChange(household.id)}
         className={buttonClass(value === household.id)}
       >
-        {household.name} Household
+        <span className="truncate max-w-[10rem]">{household.name} Household</span>
       </button>
     </div>
   )
