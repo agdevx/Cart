@@ -21,6 +21,7 @@ import { useSwapStatusQuery } from '@/apis/agdevx-cart-api/household/use-swap-st
 import { useAuth } from '@/auth/use-auth'
 import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { EmptyState } from '@/shared/empty-state'
+import { Fab } from '@/shared/fab'
 import { PageHeader } from '@/shared/page-header'
 import { SectionHeader } from '@/shared/section-header'
 import { getErrorMessage } from '@/utils/error-messages'
@@ -64,6 +65,7 @@ export const HouseholdPage = () => {
   const [dangerZoneOpen, setDangerZoneOpen] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
+  const [noHouseholdForm, setNoHouseholdForm] = useState<'create' | 'join' | null>(null)
 
   /* Swap modal state — tracks which action triggered it and the target name */
   const [swapAction, setSwapAction] = useState<{
@@ -247,70 +249,107 @@ export const HouseholdPage = () => {
         <PageHeader>Your <span className="text-teal">Household</span></PageHeader>
 
         <div className="px-5">
-          <EmptyState
-            icon={Users}
-            title="No household yet"
-            subtitle="Create a new household or join one with an invite code"
-          />
+          {/* Inline create form — shown when FAB "Create Household" is tapped */}
+          {noHouseholdForm === 'create' && (
+            <div className="mt-3 mb-4 p-5 bg-surface rounded-2xl shadow-sm">
+              <SectionHeader title="Create Household" />
+              <form onSubmit={handleCreateSubmit} className="space-y-3">
+                <input
+                  type="text"
+                  autoFocus
+                  value={createName}
+                  onChange={(e) => setCreateName(e.target.value)}
+                  placeholder="Household name"
+                  className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+                  disabled={createMutation.isPending}
+                />
 
-          {/* Create Household card */}
-          <div className="mt-6 p-5 bg-surface rounded-2xl shadow-sm">
-            <SectionHeader title="Create Household" />
-            <form onSubmit={handleCreateSubmit} className="space-y-3">
-              <input
-                type="text"
-                value={createName}
-                onChange={(e) => setCreateName(e.target.value)}
-                placeholder="Household name"
-                className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-                disabled={createMutation.isPending}
-              />
+                {createMutation.isError && (
+                  <div className="p-3 bg-coral/10 text-coral rounded-xl font-semibold text-sm">
+                    {getErrorMessage(createMutation.error)}
+                  </div>
+                )}
 
-              {createMutation.isError && (
-                <div className="p-3 bg-coral/10 text-coral rounded-xl font-semibold text-sm">
-                  {getErrorMessage(createMutation.error)}
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => { setNoHouseholdForm(null); setCreateName('') }}
+                    className="flex-1 py-3 bg-bg-warm text-navy rounded-xl font-display font-bold text-sm hover:bg-navy/10 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!createName.trim() || createMutation.isPending}
+                    className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold text-sm hover:bg-teal-light disabled:opacity-50 transition-colors"
+                  >
+                    {createMutation.isPending ? 'Creating...' : 'Create'}
+                  </button>
                 </div>
-              )}
+              </form>
+            </div>
+          )}
 
-              <button
-                type="submit"
-                disabled={!createName.trim() || createMutation.isPending}
-                className="w-full py-3 bg-teal text-white rounded-xl font-display font-bold text-sm hover:bg-teal-light disabled:opacity-50 transition-colors"
-              >
-                {createMutation.isPending ? 'Creating...' : 'Create'}
-              </button>
-            </form>
-          </div>
+          {/* Inline join form — shown when FAB "Join Household" is tapped */}
+          {noHouseholdForm === 'join' && (
+            <div className="mt-3 mb-4 p-5 bg-surface rounded-2xl shadow-sm">
+              <SectionHeader title="Join with Invite Code" />
+              <form onSubmit={handleJoinSubmit} className="space-y-3">
+                <input
+                  type="text"
+                  autoFocus
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  placeholder="Enter invite code"
+                  className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text font-mono tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
+                  disabled={joinMutation.isPending}
+                />
 
-          {/* Join Household card */}
-          <div className="mt-4 p-5 bg-surface rounded-2xl shadow-sm">
-            <SectionHeader title="Join with Invite Code" />
-            <form onSubmit={handleJoinSubmit} className="space-y-3">
-              <input
-                type="text"
-                value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                placeholder="Enter invite code"
-                className="w-full px-4 py-3 border border-navy/10 rounded-xl bg-surface text-text font-mono tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
-                disabled={joinMutation.isPending}
-              />
+                {joinMutation.isError && (
+                  <div className="p-3 bg-coral/10 text-coral rounded-xl font-semibold text-sm">
+                    {getErrorMessage(joinMutation.error)}
+                  </div>
+                )}
 
-              {joinMutation.isError && (
-                <div className="p-3 bg-coral/10 text-coral rounded-xl font-semibold text-sm">
-                  {getErrorMessage(joinMutation.error)}
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => { setNoHouseholdForm(null); setJoinCode('') }}
+                    className="flex-1 py-3 bg-bg-warm text-navy rounded-xl font-display font-bold text-sm hover:bg-navy/10 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!joinCode.trim() || joinMutation.isPending}
+                    className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold text-sm hover:bg-teal-light disabled:opacity-50 transition-colors"
+                  >
+                    {joinMutation.isPending ? 'Joining...' : 'Join'}
+                  </button>
                 </div>
-              )}
+              </form>
+            </div>
+          )}
 
-              <button
-                type="submit"
-                disabled={!joinCode.trim() || joinMutation.isPending}
-                className="w-full py-3 bg-teal text-white rounded-xl font-display font-bold text-sm hover:bg-teal-light disabled:opacity-50 transition-colors"
-              >
-                {joinMutation.isPending ? 'Joining...' : 'Join'}
-              </button>
-            </form>
-          </div>
+          {/* Empty state — visible when no inline form is open */}
+          {!noHouseholdForm && (
+            <EmptyState
+              icon={Users}
+              title="No household yet"
+              subtitle="Create a new household or join one with an invite code"
+            />
+          )}
         </div>
+
+        {/* FAB — two actions; hidden while a form is open */}
+        {!noHouseholdForm && (
+          <Fab
+            actions={[
+              { label: 'Create Household', onClick: () => setNoHouseholdForm('create') },
+              { label: 'Join Household', onClick: () => setNoHouseholdForm('join') },
+            ]}
+          />
+        )}
 
         {/* Swap confirmation modal */}
         {swapAction && swapStatus && (

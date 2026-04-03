@@ -6,6 +6,7 @@ import { MemoryRouter } from 'react-router-dom'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as householdQueryModule from '@/apis/agdevx-cart-api/household/use-household.query'
@@ -146,13 +147,50 @@ describe('HouseholdPage', () => {
     expect(screen.getByText('No household yet')).toBeInTheDocument()
   })
 
-  it('renders create and join forms when no household', () => {
+  it('renders FAB with create and join actions when no household', async () => {
     setupMocks({ household: null })
+    const user = userEvent.setup()
 
     renderPage()
 
+    //== FAB should be visible with "Open actions menu" label (multi-action mode)
+    const fab = screen.getByLabelText('Open actions menu')
+    expect(fab).toBeInTheDocument()
+
+    //== Open the FAB menu to reveal actions
+    await user.click(fab)
     expect(screen.getByText('Create Household')).toBeInTheDocument()
-    expect(screen.getByText('Join with Invite Code')).toBeInTheDocument()
+    expect(screen.getByText('Join Household')).toBeInTheDocument()
+  })
+
+  it('shows create form when FAB create action is clicked', async () => {
+    setupMocks({ household: null })
+    const user = userEvent.setup()
+
+    renderPage()
+
+    //== Open FAB menu and click "Create Household"
+    await user.click(screen.getByLabelText('Open actions menu'))
+    await user.click(screen.getByText('Create Household'))
+
+    //== Inline create form should appear with header and input
+    expect(screen.getByPlaceholderText('Household name')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument()
+  })
+
+  it('shows join form when FAB join action is clicked', async () => {
+    setupMocks({ household: null })
+    const user = userEvent.setup()
+
+    renderPage()
+
+    //== Open FAB menu and click "Join Household"
+    await user.click(screen.getByLabelText('Open actions menu'))
+    await user.click(screen.getByText('Join Household'))
+
+    //== Inline join form should appear with invite code input
+    expect(screen.getByPlaceholderText('Enter invite code')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument()
   })
 
   it('renders household name when in a household', () => {
