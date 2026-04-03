@@ -25,6 +25,7 @@ public class UserPreferencesRepository(CartDbContext context) : IUserPreferences
         else
         {
             existing.DefaultPage = preferences.DefaultPage;
+            existing.ShowHouseholdPage = preferences.ShowHouseholdPage;
             existing.LocationLatitude = preferences.LocationLatitude;
             existing.LocationLongitude = preferences.LocationLongitude;
             existing.LocationDisplayName = preferences.LocationDisplayName;
