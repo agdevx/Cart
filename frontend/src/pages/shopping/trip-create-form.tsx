@@ -79,14 +79,16 @@ export const TripCreateForm = ({ household, isPending, onSubmit, onCancel }: Tri
         />
       </FormField>
 
-      <FormField label="Scope" htmlFor="tripScope">
-        <ScopeRadio
-          value={tripScope}
-          onChange={setTripScope}
-          household={household}
-          disabled={isPending}
-        />
-      </FormField>
+      {household && (
+        <FormField label="Scope" htmlFor="tripScope">
+          <ScopeRadio
+            value={tripScope}
+            onChange={setTripScope}
+            household={household}
+            disabled={isPending}
+          />
+        </FormField>
+      )}
 
       <ActionCancelFormButtons
         onCancel={onCancel}

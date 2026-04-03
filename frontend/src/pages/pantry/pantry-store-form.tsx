@@ -92,14 +92,16 @@ export const CreatePantryStoreForm = ({
         />
       </FormField>
 
-      <FormField label="Scope" htmlFor="storeScope">
-        <ScopeRadio
-          value={storeScope}
-          onChange={setStoreScope}
-          household={household}
-          disabled={isPending}
-        />
-      </FormField>
+      {household && (
+        <FormField label="Scope" htmlFor="storeScope">
+          <ScopeRadio
+            value={storeScope}
+            onChange={setStoreScope}
+            household={household}
+            disabled={isPending}
+          />
+        </FormField>
+      )}
 
       <ActionCancelFormButtons
         onCancel={onCancel}
@@ -169,14 +171,16 @@ export const EditPantryStoreForm = ({
         />
       </FormField>
 
-      <FormField label="Scope" htmlFor={`editStoreScope-${storeId}`}>
-        <ScopeRadio
-          value={editingScope}
-          onChange={setEditingScope}
-          household={household}
-          disabled={isPending}
-        />
-      </FormField>
+      {household && (
+        <FormField label="Scope" htmlFor={`editStoreScope-${storeId}`}>
+          <ScopeRadio
+            value={editingScope}
+            onChange={setEditingScope}
+            household={household}
+            disabled={isPending}
+          />
+        </FormField>
+      )}
 
       <ActionCancelFormButtons
         onCancel={onCancel}
