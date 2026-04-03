@@ -73,7 +73,7 @@ export const ShoppingPage = () => {
     updateMutation.mutate({ tripId, name, tripDate })
   }
 
-  /* Long-press in TripCard is the confirmation — fire the mutation directly */
+  /* TripCard shows a confirmation dialog with hold-to-delete — fire the mutation directly */
   const handleDelete = (tripId: string, _tripName: string) => {
     deleteMutation.mutate(tripId)
   }

@@ -1,6 +1,6 @@
 // ABOUTME: Tests for TripCard component covering rendering, kebab menu, inline edit form, and action callbacks
 // ABOUTME: Validates active vs completed trip behavior, link navigation, and outside-click menu dismissal
-// ABOUTME: Delete uses a 3-second long-press — tests use vi.useFakeTimers() to advance time
+// ABOUTME: Delete opens a confirmation dialog with a 3-second hold-to-delete button
 
 import { BrowserRouter } from 'react-router-dom'
 
@@ -123,7 +123,7 @@ describe('TripCard', () => {
     expect(screen.getByText(/Completed:/)).toBeInTheDocument()
   })
 
-  it('shows kebab menu with Edit and Hold-to-Delete for active trip', () => {
+  it('shows kebab menu with Edit and Delete for active trip', () => {
     render(
       <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
@@ -132,12 +132,12 @@ describe('TripCard', () => {
     fireEvent.click(screen.getByLabelText('Trip actions'))
 
     expect(screen.getByText('Edit')).toBeInTheDocument()
-    expect(screen.getByText('Hold to Delete')).toBeInTheDocument()
+    expect(screen.getByText('Delete')).toBeInTheDocument()
     //== Active trips should NOT have Reopen option
     expect(screen.queryByText('Reopen')).not.toBeInTheDocument()
   })
 
-  it('shows kebab menu with Edit, Reopen, and Hold-to-Delete for completed trip', () => {
+  it('shows kebab menu with Edit, Reopen, and Delete for completed trip', () => {
     render(
       <TripCard trip={completedTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
@@ -147,7 +147,7 @@ describe('TripCard', () => {
 
     expect(screen.getByText('Edit')).toBeInTheDocument()
     expect(screen.getByText('Reopen')).toBeInTheDocument()
-    expect(screen.getByText('Hold to Delete')).toBeInTheDocument()
+    expect(screen.getByText('Delete')).toBeInTheDocument()
   })
 
   it('shows edit form below card content when Edit is clicked', () => {
@@ -235,7 +235,24 @@ describe('TripCard', () => {
     expect(screen.getByText('Save')).toBeDisabled()
   })
 
-  it('calls onDelete after holding the delete button for 3 seconds', () => {
+  it('opens confirmation dialog when Delete is clicked in kebab menu', () => {
+    render(
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      { wrapper }
+    )
+
+    fireEvent.click(screen.getByLabelText('Trip actions'))
+    fireEvent.click(screen.getByText('Delete'))
+
+    //== Confirmation dialog should be visible
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText('Delete Trip')).toBeInTheDocument()
+    expect(screen.getByText(/Delete "Weekly Groceries"\?/)).toBeInTheDocument()
+    expect(screen.getByText('Hold to Delete')).toBeInTheDocument()
+    expect(screen.getByText('Cancel')).toBeInTheDocument()
+  })
+
+  it('calls onDelete after holding the delete button for 3 seconds in confirmation dialog', () => {
     vi.useFakeTimers()
 
     render(
@@ -244,9 +261,10 @@ describe('TripCard', () => {
     )
 
     fireEvent.click(screen.getByLabelText('Trip actions'))
+    fireEvent.click(screen.getByText('Delete'))
 
-    const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.pointerDown(deleteBtn)
+    const holdBtn = screen.getByText('Hold to Delete')
+    fireEvent.pointerDown(holdBtn)
 
     //== Should not fire before the hold duration completes
     expect(mockOnDelete).not.toHaveBeenCalled()
@@ -258,7 +276,7 @@ describe('TripCard', () => {
     vi.useRealTimers()
   })
 
-  it('does not call onDelete if mouse is released before 3 seconds', () => {
+  it('does not call onDelete if hold is released early in confirmation dialog', () => {
     vi.useFakeTimers()
 
     render(
@@ -267,10 +285,11 @@ describe('TripCard', () => {
     )
 
     fireEvent.click(screen.getByLabelText('Trip actions'))
+    fireEvent.click(screen.getByText('Delete'))
 
-    const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.pointerDown(deleteBtn)
-    fireEvent.pointerUp(deleteBtn)
+    const holdBtn = screen.getByText('Hold to Delete')
+    fireEvent.pointerDown(holdBtn)
+    fireEvent.pointerUp(holdBtn)
 
     act(() => { vi.advanceTimersByTime(3000) })
 
@@ -280,26 +299,23 @@ describe('TripCard', () => {
     vi.useRealTimers()
   })
 
-  it('does not call onDelete if pointer leaves before 3 seconds', () => {
-    vi.useFakeTimers()
-
+  it('closes confirmation dialog when Cancel is clicked', () => {
     render(
       <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
       { wrapper }
     )
 
     fireEvent.click(screen.getByLabelText('Trip actions'))
+    fireEvent.click(screen.getByText('Delete'))
 
-    const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.pointerDown(deleteBtn)
-    fireEvent.pointerLeave(deleteBtn)
+    //== Dialog should be open
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
 
-    act(() => { vi.advanceTimersByTime(3000) })
+    fireEvent.click(screen.getByText('Cancel'))
 
-    //== Timer was cancelled — onDelete should never fire
+    //== Dialog should be closed
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(mockOnDelete).not.toHaveBeenCalled()
-
-    vi.useRealTimers()
   })
 
   it('calls onReopen with tripId when Reopen is clicked on completed trip', () => {

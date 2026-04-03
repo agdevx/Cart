@@ -1,17 +1,17 @@
 // ABOUTME: TripCard component for displaying a trip with kebab menu actions
 // ABOUTME: Supports inline edit form (name), delete, reopen actions with active/completed visual states
-// ABOUTME: Delete requires a 3-second long press to prevent accidental deletion — no confirmation dialog needed
+// ABOUTME: Delete opens a confirmation dialog with a 3-second hold-to-delete button
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { MoreVertical, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import { activeTripPath, tripDetailPath } from '@/routes'
-import { useLongPressService } from '@/services/use-long-press.service'
 
 import { ActionCancelFormButtons } from './action-cancel-form-buttons'
+import { ConfirmDialog } from './confirm-dialog'
 import { DropdownMenu } from './dropdown-menu'
 
 interface TripCardProps {
@@ -29,19 +29,10 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState(trip.name)
   const [editDate, setEditDate] = useState(trip.tripDate ?? '')
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
 
   const kebabRef = useRef<HTMLButtonElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-
-  const handleDeleteComplete = useCallback(() => {
-    setMenuOpen(false)
-    onDelete(trip.id, trip.name)
-  }, [onDelete, trip.id, trip.name])
-
-  const { pressing: deletePressing, handlers: deleteHandlers, duration: deleteHoldDuration } = useLongPressService({
-    duration: DELETE_HOLD_DURATION_MS,
-    onComplete: handleDeleteComplete,
-  })
 
   // Auto-focus and select text when entering edit mode
   useEffect(() => {
@@ -132,24 +123,12 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
                   Reopen
                 </button>
               )}
-              {/* Delete uses long-press: no click handler, hold for 3 seconds to confirm */}
               <button
-                {...deleteHandlers}
-                aria-label="Hold to delete trip"
-                className="relative w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral overflow-hidden select-none"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setMenuOpen(false); setDeleteConfirm(true) }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-coral hover:bg-coral/5 transition-colors"
               >
-                {/* Fill bar animates from left to right over the hold duration when pressing */}
-                <span
-                  aria-hidden="true"
-                  className="absolute inset-0 bg-coral/15 origin-left"
-                  style={{
-                    transform: deletePressing ? 'scaleX(1)' : 'scaleX(0)',
-                    transition: deletePressing ? `transform ${deleteHoldDuration}ms linear` : 'none',
-                    transformOrigin: 'left center',
-                  }}
-                />
-                <Trash2 className="relative w-4 h-4" />
-                <span className="relative">{deletePressing ? 'Hold to Delete…' : 'Hold to Delete'}</span>
+                <Trash2 className="w-4 h-4" />
+                Delete
               </button>
             </DropdownMenu>
           )}
@@ -187,6 +166,18 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
             onSubmit={commitEdit}
           />
         </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {deleteConfirm && (
+        <ConfirmDialog
+          title="Delete Trip"
+          message={`Delete "${trip.name}"? This can't be undone.`}
+          confirmLabel="Hold to Delete"
+          onConfirm={() => { setDeleteConfirm(false); onDelete(trip.id, trip.name) }}
+          onCancel={() => setDeleteConfirm(false)}
+          holdDuration={DELETE_HOLD_DURATION_MS}
+        />
       )}
     </>
   )

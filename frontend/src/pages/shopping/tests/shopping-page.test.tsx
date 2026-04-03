@@ -187,7 +187,7 @@ describe('ShoppingPage', () => {
     expect(updateMutateFn).toHaveBeenCalledWith({ tripId: 'trip1', name: 'Saturday Groceries', tripDate: null })
   })
 
-  it('deletes a trip after the 3-second long press completes', () => {
+  it('deletes a trip after confirming via hold-to-delete dialog', () => {
     vi.useFakeTimers()
     setupMocks()
     render(<ShoppingPage />, { wrapper })
@@ -196,9 +196,15 @@ describe('ShoppingPage', () => {
     const kebabButtons = screen.getAllByLabelText('Trip actions')
     fireEvent.click(kebabButtons[0])
 
+    //== Click Delete to open confirmation dialog
+    fireEvent.click(screen.getByText('Delete'))
+
+    //== Confirmation dialog should appear
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+
     //== Hold the delete button for the full duration
-    const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.pointerDown(deleteBtn)
+    const holdBtn = screen.getByText('Hold to Delete')
+    fireEvent.pointerDown(holdBtn)
 
     //== Not fired yet
     expect(deleteMutateFn).not.toHaveBeenCalled()
@@ -208,7 +214,7 @@ describe('ShoppingPage', () => {
     expect(deleteMutateFn).toHaveBeenCalledWith('trip1')
   })
 
-  it('does not delete a trip if the hold is released early', () => {
+  it('does not delete a trip if the hold is released early in dialog', () => {
     vi.useFakeTimers()
     setupMocks()
     render(<ShoppingPage />, { wrapper })
@@ -217,10 +223,13 @@ describe('ShoppingPage', () => {
     const kebabButtons = screen.getAllByLabelText('Trip actions')
     fireEvent.click(kebabButtons[0])
 
+    //== Click Delete to open confirmation dialog
+    fireEvent.click(screen.getByText('Delete'))
+
     //== Start and immediately cancel the hold
-    const deleteBtn = screen.getByLabelText('Hold to delete trip')
-    fireEvent.pointerDown(deleteBtn)
-    fireEvent.pointerUp(deleteBtn)
+    const holdBtn = screen.getByText('Hold to Delete')
+    fireEvent.pointerDown(holdBtn)
+    fireEvent.pointerUp(holdBtn)
 
     act(() => { vi.advanceTimersByTime(3000) })
 
