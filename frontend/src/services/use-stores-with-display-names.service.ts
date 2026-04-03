@@ -9,7 +9,7 @@ import { getStoreDisplayNames } from '@/utils/get-store-display-names'
 
 export const useStoresWithDisplayNamesService = () => {
   const { data: household, isLoading: householdLoading } = useHouseholdQuery()
-  const { data: stores, isLoading: storesLoading } = useStoresQuery(household?.id ?? null)
+  const { data: stores, isLoading: storesLoading, isFetching: storesFetching } = useStoresQuery(household?.id ?? null)
 
   const storeDisplayNames = useMemo(
     () => getStoreDisplayNames(stores ?? [], household ?? null),
@@ -20,6 +20,6 @@ export const useStoresWithDisplayNamesService = () => {
     household,
     stores,
     storeDisplayNames,
-    isLoading: householdLoading || storesLoading,
+    isLoading: householdLoading || storesLoading || storesFetching,
   }
 }
