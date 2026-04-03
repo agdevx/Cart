@@ -206,7 +206,10 @@ export const PreferencesSection = () => {
         showHouseholdPage,
       },
       {
-        onSuccess: () => toast.success('Preferences saved'),
+        onSuccess: () => {
+          toast.success('Preferences saved')
+          updateMutation.reset()
+        },
       }
     )
   }
