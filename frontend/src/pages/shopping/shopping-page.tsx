@@ -90,7 +90,7 @@ export const ShoppingPage = () => {
           household={household}
           onSubmit={handleCreateTrip}
           onCancel={() => setShowCreateForm(false)}
-          isPending={createMutation.isPending}
+          isPending={createMutation.isPending || createMutation.isSuccess}
         />
       )}
 

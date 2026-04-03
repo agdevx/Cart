@@ -318,10 +318,10 @@ export const PreferencesSection = () => {
           <div className="border-t border-bg px-4 py-3">
             <button
               onClick={handleSave}
-              disabled={updateMutation.isPending}
+              disabled={updateMutation.isPending || updateMutation.isSuccess}
               className="w-full flex items-center justify-center py-2.5 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
             >
-              {updateMutation.isPending ? <Spinner /> : 'Save'}
+              {(updateMutation.isPending || updateMutation.isSuccess) ? <Spinner /> : 'Save'}
             </button>
           </div>
         )}

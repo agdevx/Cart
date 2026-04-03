@@ -166,7 +166,7 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
         <CreatePantryStoreForm
           stores={stores ?? []}
           household={household}
-          isPending={createMutation.isPending}
+          isPending={createMutation.isPending || createMutation.isSuccess}
           onSubmit={handleCreate}
           onCancel={onCloseCreateForm}
         />

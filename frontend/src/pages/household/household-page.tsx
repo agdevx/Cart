@@ -280,10 +280,10 @@ export const HouseholdPage = () => {
                   </button>
                   <button
                     type="submit"
-                    disabled={!createName.trim() || createMutation.isPending}
+                    disabled={!createName.trim() || createMutation.isPending || createMutation.isSuccess}
                     className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold text-sm hover:bg-teal-light disabled:opacity-50 transition-colors"
                   >
-                    {createMutation.isPending ? 'Creating...' : 'Create'}
+                    {(createMutation.isPending || createMutation.isSuccess) ? 'Creating...' : 'Create'}
                   </button>
                 </div>
               </form>
@@ -321,10 +321,10 @@ export const HouseholdPage = () => {
                   </button>
                   <button
                     type="submit"
-                    disabled={!joinCode.trim() || joinMutation.isPending}
+                    disabled={!joinCode.trim() || joinMutation.isPending || joinMutation.isSuccess}
                     className="flex-1 py-3 bg-teal text-white rounded-xl font-display font-bold text-sm hover:bg-teal-light disabled:opacity-50 transition-colors"
                   >
-                    {joinMutation.isPending ? 'Joining...' : 'Join'}
+                    {(joinMutation.isPending || joinMutation.isSuccess) ? 'Joining...' : 'Join'}
                   </button>
                 </div>
               </form>
