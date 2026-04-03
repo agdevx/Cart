@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react'
 
 import { MapPin, MapPinOff, Navigation, Search } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { useUpdateUserPreferencesMutation } from '@/apis/agdevx-cart-api/user-preferences/update-user-preferences.mutation'
 import { useUserPreferencesQuery } from '@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query'
@@ -191,15 +192,20 @@ export const PreferencesSection = () => {
 
   /** Sends all current local state in a single mutation to avoid partial-update overwrites */
   const handleSave = () => {
-    updateMutation.mutate({
-      defaultPage: selectedPage,
-      locationLatitude: locationLat,
-      locationLongitude: locationLon,
-      locationDisplayName: locationName,
-      showWeatherIcons,
-      showWeatherTemps,
-      showHouseholdPage,
-    })
+    updateMutation.mutate(
+      {
+        defaultPage: selectedPage,
+        locationLatitude: locationLat,
+        locationLongitude: locationLon,
+        locationDisplayName: locationName,
+        showWeatherIcons,
+        showWeatherTemps,
+        showHouseholdPage,
+      },
+      {
+        onSuccess: () => toast.success('Preferences saved'),
+      }
+    )
   }
 
   return (

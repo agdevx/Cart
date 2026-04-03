@@ -170,15 +170,18 @@ describe('PreferencesSection', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Save' }))
 
     expect(mockMutate).toHaveBeenCalledOnce()
-    expect(mockMutate).toHaveBeenCalledWith({
-      defaultPage: '/pantry',
-      locationLatitude: 40.71,
-      locationLongitude: -74.0,
-      locationDisplayName: 'New York, NY',
-      showWeatherIcons: true,
-      showWeatherTemps: true,
-      showHouseholdPage: true,
-    })
+    expect(mockMutate).toHaveBeenCalledWith(
+      {
+        defaultPage: '/pantry',
+        locationLatitude: 40.71,
+        locationLongitude: -74.0,
+        locationDisplayName: 'New York, NY',
+        showWeatherIcons: true,
+        showWeatherTemps: true,
+        showHouseholdPage: true,
+      },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    )
   })
 
   it('shows Save button after clearing location', async () => {
