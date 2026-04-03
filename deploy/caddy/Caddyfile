@@ -3,14 +3,20 @@
 	admin off
 }
 
-:80 {
-	handle /cart/api/* {
-		uri strip_prefix /cart
+(cart-routes) {
+	handle /api/* {
 		reverse_proxy backend:2946
 	}
 
-	handle /cart* {
-		uri strip_prefix /cart
+	handle {
 		reverse_proxy frontend:3750
 	}
+}
+
+http://<your-hostname> {
+	import cart-routes
+}
+
+:80 {
+	import cart-routes
 }

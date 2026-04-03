@@ -3,7 +3,7 @@
 
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import type { DailyWeather } from '@/apis/open-meteo/weather-types'
@@ -39,6 +39,13 @@ describe('CalendarDayPopover', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    // Pin "today" so the isPast check doesn't depend on when the test runs.
+    // shouldAdvanceTime lets setTimeout/setInterval work normally (needed by userEvent).
+    vi.useFakeTimers({ now: new Date(2026, 2, 30), shouldAdvanceTime: true })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   it('shows formatted date in the header', () => {

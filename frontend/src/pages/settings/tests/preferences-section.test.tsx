@@ -193,7 +193,7 @@ describe('PreferencesSection', () => {
     expect(screen.getByText('No location set')).toBeInTheDocument()
   })
 
-  it('disables Save button while mutation is pending', () => {
+  it('disables Save button while mutation is pending', async () => {
     setupMutation(true)
     vi.mocked(useUserPreferencesQuery).mockReturnValue({
       data: { defaultPage: '/shopping', locationLatitude: null, locationLongitude: null, locationDisplayName: null },
@@ -210,7 +210,7 @@ describe('PreferencesSection', () => {
     const { rerender } = render(createElement(PreferencesSection), { wrapper })
 
     // Change the page to go dirty, then switch to isPending=true
-    void userEvent.click(screen.getByRole('button', { name: 'Pantry' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Pantry' }))
 
     setupMutation(true)
     rerender(createElement(PreferencesSection))

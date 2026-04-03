@@ -7,6 +7,7 @@ Self-hosted grocery shopping list application with real-time collaboration.
 - Cookie-based authentication with email + password (BCrypt hashing)
 - Session persistence across page reloads
 - User profile management (name, email, password)
+- Home page with personalized greeting, trip calendar, and user preferences
 - Household management (create/join with invite codes, ownership transfer)
 - Personal and household inventory items with filtered views (all, personal, per-household, merged)
 - Store management (personal and household) with uniqueness enforcement
@@ -18,11 +19,12 @@ Self-hosted grocery shopping list application with real-time collaboration.
 - Automatic audit fields (CreatedBy, ModifiedBy, timestamps) via EF Core SaveChanges override
 - Real-time collaboration via Server-Sent Events
 - Progressive Web App (installable, offline support)
-- Mobile-first design with bottom navigation
+- Mobile-first design with bottom navigation and floating action buttons
 - Request timeouts (30s default, SSE excluded) with CancellationToken propagation
 - Rate limiting (5/min auth, 60/min general)
 - Security headers (CSP, X-Frame-Options, etc.)
 - Security audit logging
+- Docker deployment via Cloudflare Tunnel with CI/CD pipeline
 
 ## Tech Stack
 
@@ -36,13 +38,20 @@ Self-hosted grocery shopping list application with real-time collaboration.
 
 **Frontend:**
 - React 19
-- TypeScript
-- Vite
+- TypeScript 6
+- Vite 8
 - Tailwind CSS 4
 - TanStack Query (React Query)
 - Jotai (state management)
 - Vitest + React Testing Library (unit tests)
 - Playwright (E2E tests)
+
+**Infrastructure:**
+- Docker (multi-stage builds)
+- Cloudflare Tunnel (public HTTPS, zero cert management)
+- Caddy (reverse proxy)
+- Nginx (SPA static file serving)
+- GitHub Actions (CI/CD)
 
 ## Project Structure
 
@@ -61,22 +70,23 @@ AGDevX.Cart/                          # Monorepo root
 │   └── AGDevX.Cart.Shared/          # DTOs, configuration, security
 ├── frontend/                         # React 19 PWA
 │   ├── src/
-│   │   ├── apis/                    # API client (TanStack Query hooks)
-│   │   ├── auth/                    # Auth provider + useAuth hook
-│   │   ├── features/                # Feature components (bottom-nav, PWA install)
-│   │   ├── hooks/                   # Custom hooks (field validation, focus trap, SSE)
+│   │   ├── apis/                    # apiFetch wrapper + TanStack Query hooks
+│   │   ├── auth/                    # AuthProvider, useAuth hook, session management
 │   │   ├── libs/                    # SSE client
-│   │   ├── pages/                   # Page components + shared UI
+│   │   ├── pages/                   # Each page gets its own folder (components + tests)
+│   │   ├── services/                # Data fetching and business logic hooks
+│   │   ├── shared/                  # Components used by multiple pages
 │   │   ├── state/                   # Jotai atoms (auth, household scope)
 │   │   ├── styles/                  # globals.css (Tailwind theme, animations)
-│   │   ├── utils/                   # Validation rules, helpers
+│   │   ├── utils/                   # Pure utility functions
 │   │   └── utilities/               # Test setup, error messages
 │   ├── tests/
 │   │   ├── browser-tests/           # Playwright browser tests (mocked API)
 │   │   └── e2e-integration-tests/   # Playwright E2E tests (real backend)
-│   └── public/                      # Static assets + PWA manifest
+│   └── public/                      # Static assets, PWA manifest, robots.txt
 ├── deploy/                           # Server deployment templates
 │   ├── caddy/                       # Shared Caddy reverse proxy
+│   ├── cloudflared/                 # Cloudflare Tunnel agent
 │   └── cart/                        # Cart app stack (compose + env)
 ├── docs/
 │   ├── DEVELOPMENT.md               # Setup, running, testing guide
@@ -190,6 +200,10 @@ All endpoints use the `/api/v1/` prefix.
 - `DELETE /api/v1/tripitem/{id}` - Delete trip item
 - `POST /api/v1/tripitem/{id}/check` - Check item off
 - `POST /api/v1/tripitem/{id}/uncheck` - Uncheck item
+
+### User Preferences
+- `GET /api/v1/user/preferences` - Get user preferences
+- `PUT /api/v1/user/preferences` - Update user preferences
 
 ### Real-Time Events
 - `GET /api/v1/trips/{tripId}/events` - SSE endpoint for trip updates

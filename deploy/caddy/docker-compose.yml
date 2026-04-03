@@ -6,10 +6,10 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
     networks:
-      - proxy
+      - agdevx-internal-docker-network
     restart: unless-stopped
 
 networks:
-  proxy:
-    name: proxy
+  agdevx-internal-docker-network:
+    name: agdevx-internal-docker-network
     driver: bridge

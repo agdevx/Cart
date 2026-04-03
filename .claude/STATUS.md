@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated:** 2026-03-31
+**Last Updated:** 2026-04-01
 
 ## How to Use This File
 
@@ -38,7 +38,7 @@ This is the single source of truth for where the project stands. Read it at the 
 
 | Enhancement               | Planning Doc                                                                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Contributor/SSE Epic      | No planning doc yet (trip collaborator UX and SSE visibility filtering deferred from single-household migration)                  |
+| Contributor/SSE Epic      | No planning doc yet (trip collaborator UX, SSE visibility filtering deferred from single-household migration, SSE heartbeat needed for Cloudflare Tunnel — 100s idle timeout kills connections without keepalive) |
 | Home Page — Activity Feed | No planning doc yet (14 event types, dedicated ActivityEvent table, separate household vs personal sections)                     |
 | Home Page — Shopping List Preview | No planning doc yet                                                                                                       |
 | Home Page — Trip Templates | No planning doc yet                                                                                                              |
@@ -49,12 +49,14 @@ This is the single source of truth for where the project stands. Read it at the 
 | Database Index Review     | No planning doc yet (audit and add proper indexes to DB tables)                                                                 |
 | Container Image Versioning | No planning doc yet (review tagging strategy for Docker Hub images)                                                             |
 | NuGet Package Updates     | No planning doc yet                                                                                                             |
+| Watchtower Auto-Deploy    | No planning doc yet (auto-pull and restart cart containers on new Docker Hub images, scope to cart only — not infra containers)  |
+| Container Health Checks   | No planning doc yet (Docker HEALTHCHECK in Dockerfiles + depends_on conditions, prerequisite for Watchtower rollback safety)    |
 
 ## In Progress Enhancements
 
 | Enhancement       | Planning Doc                                                                                  |
 | ----------------- | --------------------------------------------------------------------------------------------- |
-| Docker Deployment    | [docs/active/2026-03-28-docker-deployment.md](../docs/active/2026-03-28-docker-deployment.md)           |
+| Cloudflare Tunnel Migration | [docs/active/2026-03-31-cloudflare-tunnel.md](../docs/active/2026-03-31-cloudflare-tunnel.md) |
 
 ## Completed Enhancements
 
@@ -82,3 +84,4 @@ This is the single source of truth for where the project stands. Read it at the 
 | Backend Resilience (Timeouts, CancellationToken, /api/v1/) | 2026-03-11 | [docs/archive/2026-03-11-backend-resilience.md](../docs/archive/2026-03-11-backend-resilience.md)                                       |
 | Home Page (Greeting, Trip Calendar, Weather, Preferences)  | 2026-03-29 | [docs/archive/2026-03-29-home-page.md](../docs/archive/2026-03-29-home-page.md)                                                         |
 | Single Household Architecture                              | 2026-03-31 | [docs/archive/2026-03-30-single-household.md](../docs/archive/2026-03-30-single-household.md)                                           |
+| Docker Deployment                                          | 2026-03-31 | [docs/archive/2026-03-28-docker-deployment.md](../docs/archive/2026-03-28-docker-deployment.md)                                         |
