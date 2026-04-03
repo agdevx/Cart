@@ -103,13 +103,13 @@ describe('PantryStoresView', () => {
     vi.clearAllMocks()
   })
 
-  it('renders nothing while loading', () => {
+  it('renders empty container while loading', () => {
     setupMocks({ storesLoading: true, householdLoading: true })
 
-    const { container } = renderView()
+    renderView()
 
-    //== Component returns null during loading — no visible content
-    expect(container.innerHTML).toBe('')
+    //== Component renders an empty wrapper during loading to prevent layout flash
+    expect(screen.queryByText('No stores yet')).not.toBeInTheDocument()
   })
 
   it('renders household and personal store sections', () => {

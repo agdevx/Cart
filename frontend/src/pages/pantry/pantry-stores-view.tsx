@@ -39,7 +39,19 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
   const kebabRef = useRef<HTMLButtonElement>(null)
 
   if (isLoading) {
-    return null
+    return (
+      <div className="animate-fade-in">
+        {showCreateForm && (
+          <CreatePantryStoreForm
+            stores={[]}
+            household={undefined}
+            isPending={createMutation.isPending || createMutation.isSuccess}
+            onSubmit={handleCreate}
+            onCancel={onCloseCreateForm}
+          />
+        )}
+      </div>
+    )
   }
 
   const householdStores = household
