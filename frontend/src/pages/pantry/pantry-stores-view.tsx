@@ -14,7 +14,6 @@ import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { DropdownMenu } from '@/shared/dropdown-menu'
 import { EmptyState } from '@/shared/empty-state'
 import { SectionHeader } from '@/shared/section-header'
-import { SkeletonCard } from '@/shared/skeleton-card'
 import { sortStores } from '@/utils/sort-stores'
 
 import type { InventoryFilter } from './pantry-items-view'
@@ -39,12 +38,30 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const kebabRef = useRef<HTMLButtonElement>(null)
 
+  const handleCreate = async (data: PantryStoreFormData) => {
+    try {
+      await createMutation.mutateAsync({
+        name: data.name,
+        householdId: data.householdId,
+      })
+      onCloseCreateForm()
+    } catch {
+      // Error handled by mutation state
+    }
+  }
+
   if (isLoading) {
     return (
-      <div className="space-y-2 mt-2">
-        {[0, 1].map((i) => (
-          <SkeletonCard key={i} rows={[{ width: '45%' }, { width: '20%' }]} />
-        ))}
+      <div className="animate-fade-in">
+        {showCreateForm && (
+          <CreatePantryStoreForm
+            stores={[]}
+            household={undefined}
+            isPending={createMutation.isPending || createMutation.isSuccess}
+            onSubmit={handleCreate}
+            onCancel={onCloseCreateForm}
+          />
+        )}
       </div>
     )
   }
@@ -65,18 +82,6 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
 
   /* True when the currently visible scope has no stores (not just the global list) */
   const isFilteredEmpty = filteredStores !== null ? filteredStores.length === 0 : !stores || stores.length === 0
-
-  const handleCreate = async (data: PantryStoreFormData) => {
-    try {
-      await createMutation.mutateAsync({
-        name: data.name,
-        householdId: data.householdId,
-      })
-      onCloseCreateForm()
-    } catch {
-      // Error handled by mutation state
-    }
-  }
 
   const handleStartEdit = (store: NonNullable<typeof stores>[number]) => {
     setEditingStoreId(store.id)
@@ -173,7 +178,7 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
         <CreatePantryStoreForm
           stores={stores ?? []}
           household={household}
-          isPending={createMutation.isPending}
+          isPending={createMutation.isPending || createMutation.isSuccess}
           onSubmit={handleCreate}
           onCancel={onCloseCreateForm}
         />
@@ -184,7 +189,13 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
         <EmptyState
           icon={Package}
           title="No stores yet"
-          subtitle="Add your first store to organize your shopping"
+          subtitle={
+            filter === 'all'
+              ? 'Add your first store to organize your shopping'
+              : filter === 'personal'
+                ? 'Add a personal store to get started'
+                : `No stores in this household yet`
+          }
           actionLabel="Add Store"
           onAction={onOpenCreateForm}
         />

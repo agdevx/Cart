@@ -191,10 +191,10 @@ export const RegisterPage = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={registerMutation.isPending || !isValid}
+            disabled={registerMutation.isPending || registerMutation.isSuccess || !isValid}
             className="flex w-full items-center justify-center bg-teal text-white py-3 px-4 rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
           >
-            {registerMutation.isPending ? <Spinner /> : 'Sign up'}
+            {(registerMutation.isPending || registerMutation.isSuccess) ? <Spinner /> : 'Sign up'}
           </button>
 
           {/* Link to Login */}

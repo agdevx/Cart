@@ -51,6 +51,7 @@ public class UserPreferencesServiceTests
         {
             UserId = userId,
             DefaultPage = "home",
+            ShowHouseholdPage = false,
             LocationLatitude = 47.6062,
             LocationLongitude = -122.3321,
             LocationDisplayName = "Seattle, WA",
@@ -65,6 +66,7 @@ public class UserPreferencesServiceTests
         // Assert
         result.Should().NotBeNull();
         result.DefaultPage.Should().Be("home");
+        result.ShowHouseholdPage.Should().BeFalse();
         result.LocationLatitude.Should().Be(47.6062);
         result.LocationLongitude.Should().Be(-122.3321);
         result.LocationDisplayName.Should().Be("Seattle, WA");
@@ -78,6 +80,7 @@ public class UserPreferencesServiceTests
         var request = new UpdateUserPreferencesRequest
         {
             DefaultPage = "shopping",
+            ShowHouseholdPage = false,
             LocationLatitude = 40.7128,
             LocationLongitude = -74.0060,
             LocationDisplayName = "New York, NY",
@@ -92,12 +95,13 @@ public class UserPreferencesServiceTests
         // Assert
         result.Should().NotBeNull();
         result.DefaultPage.Should().Be("shopping");
+        result.ShowHouseholdPage.Should().BeFalse();
         result.LocationLatitude.Should().Be(40.7128);
         result.LocationLongitude.Should().Be(-74.0060);
         result.LocationDisplayName.Should().Be("New York, NY");
 
         _mockRepository.Verify(r => r.CreateOrUpdate(
-            It.Is<UserPreferences>(p => p.UserId == userId && p.DefaultPage == "shopping"),
+            It.Is<UserPreferences>(p => p.UserId == userId && p.DefaultPage == "shopping" && p.ShowHouseholdPage == false),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
+import { useStoresQuery } from '@/apis/agdevx-cart-api/store/use-stores.query'
 import type { InventoryFilter } from '@/pages/pantry/pantry-items-view'
 import { PantryItemsView } from '@/pages/pantry/pantry-items-view'
 import { PantryStoresView } from '@/pages/pantry/pantry-stores-view'
@@ -21,6 +22,7 @@ export const PantryPage = () => {
   const [showStoreCreateForm, setShowStoreCreateForm] = useState(false)
   const { data: household } = useHouseholdQuery()
   useInventoryQuery() // prefetch for child PantryItemsView
+  useStoresQuery(household?.id ?? null) // prefetch for child PantryStoresView
 
   return (
     <div className="pb-4 animate-fade-in">

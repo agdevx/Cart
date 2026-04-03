@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react'
 
 import { MapPin, MapPinOff, Navigation, Search } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { useUpdateUserPreferencesMutation } from '@/apis/agdevx-cart-api/user-preferences/update-user-preferences.mutation'
 import { useUserPreferencesQuery } from '@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query'
@@ -36,7 +37,7 @@ export const PreferencesSection = () => {
   const updateMutation = useUpdateUserPreferencesMutation()
 
   /** Local state mirrors query data; changes here are unsaved until the user clicks Save */
-  const [selectedPage, setSelectedPage] = useState(preferences?.defaultPage ?? '/shopping')
+  const [selectedPage, setSelectedPage] = useState(preferences?.defaultPage ?? '/home')
   const [locationLat, setLocationLat] = useState<number | null>(preferences?.locationLatitude ?? null)
   const [locationLon, setLocationLon] = useState<number | null>(preferences?.locationLongitude ?? null)
   const [locationName, setLocationName] = useState<string | null>(preferences?.locationDisplayName ?? null)
@@ -56,7 +57,7 @@ export const PreferencesSection = () => {
    * resets local state and clears dirty so the Save button disappears.
    */
   useEffect(() => {
-    setSelectedPage(preferences?.defaultPage ?? '/shopping')
+    setSelectedPage(preferences?.defaultPage ?? '/home')
     setLocationLat(preferences?.locationLatitude ?? null)
     setLocationLon(preferences?.locationLongitude ?? null)
     setLocationName(preferences?.locationDisplayName ?? null)
@@ -81,14 +82,42 @@ export const PreferencesSection = () => {
     setLocationError('')
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const lat = position.coords.latitude
         const lon = position.coords.longitude
-        const displayName = `Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)}`
 
         setLocationLat(lat)
         setLocationLon(lon)
-        setLocationName(displayName)
+
+        /* Reverse-geocode coordinates to a human-readable city name via Nominatim */
+        try {
+          const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+          const response = await fetch(url, {
+            headers: { 'User-Agent': 'AGDevX.Cart/1.0 (https://github.com/AGDevX/Cart)' },
+          })
+          const data = await response.json()
+          const address = data?.address
+
+          if (address) {
+            const city = address.city || address.town || address.village || address.hamlet || address.municipality || ''
+            const state = address.state || ''
+            const country = address.country || ''
+
+            /* "City, State" for US addresses, "City, Country" for international */
+            const isUS = address.country_code === 'us'
+            const displayName = city
+              ? `${city}, ${isUS ? state : country}`
+              : `${state || country}`
+
+            setLocationName(displayName)
+          } else {
+            setLocationName(`Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)}`)
+          }
+        } catch {
+          /* Fall back to raw coordinates if reverse geocoding fails */
+          setLocationName(`Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)}`)
+        }
+
         setIsDirty(true)
         setIsLocating(false)
       },
@@ -157,21 +186,38 @@ export const PreferencesSection = () => {
   }
 
   const handleShowHouseholdPageChange = () => {
-    setShowHouseholdPage(prev => !prev)
+    setShowHouseholdPage(prev => {
+      const next = !prev
+
+      /* Reset default page if Household tab is being hidden while it's selected */
+      if (!next && selectedPage === '/household') {
+        setSelectedPage('/home')
+      }
+
+      return next
+    })
     setIsDirty(true)
   }
 
   /** Sends all current local state in a single mutation to avoid partial-update overwrites */
   const handleSave = () => {
-    updateMutation.mutate({
-      defaultPage: selectedPage,
-      locationLatitude: locationLat,
-      locationLongitude: locationLon,
-      locationDisplayName: locationName,
-      showWeatherIcons,
-      showWeatherTemps,
-      showHouseholdPage,
-    })
+    updateMutation.mutate(
+      {
+        defaultPage: selectedPage,
+        locationLatitude: locationLat,
+        locationLongitude: locationLon,
+        locationDisplayName: locationName,
+        showWeatherIcons,
+        showWeatherTemps,
+        showHouseholdPage,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Preferences saved')
+          updateMutation.reset()
+        },
+      }
+    )
   }
 
   return (
@@ -185,7 +231,7 @@ export const PreferencesSection = () => {
         <div className="px-4 py-3">
           <div className="text-xs text-text-tertiary mb-2">Default Page</div>
           <div className="flex gap-1.5">
-            {DEFAULT_PAGE_OPTIONS.map((option) => {
+            {DEFAULT_PAGE_OPTIONS.filter((option) => option.path !== '/household' || showHouseholdPage).map((option) => {
               const isSelected = selectedPage === option.path
               return (
                 <button
@@ -266,7 +312,7 @@ export const PreferencesSection = () => {
               value={citySearch}
               onChange={(e) => setCitySearch(e.target.value)}
               onKeyDown={handleCitySearchKeyDown}
-              placeholder="Search city..."
+              placeholder="Search by city or zip"
               className="flex-1 min-w-0 px-3 py-2 border border-navy/10 rounded-xl bg-surface text-sm text-text placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
             />
             <button
@@ -290,10 +336,10 @@ export const PreferencesSection = () => {
           <div className="border-t border-bg px-4 py-3">
             <button
               onClick={handleSave}
-              disabled={updateMutation.isPending}
+              disabled={updateMutation.isPending || updateMutation.isSuccess}
               className="w-full flex items-center justify-center py-2.5 bg-teal text-white rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
             >
-              {updateMutation.isPending ? <Spinner /> : 'Save'}
+              {(updateMutation.isPending || updateMutation.isSuccess) ? <Spinner /> : 'Save'}
             </button>
           </div>
         )}

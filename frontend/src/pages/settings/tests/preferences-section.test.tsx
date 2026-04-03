@@ -9,12 +9,14 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useUpdateUserPreferencesMutation } from '@/apis/agdevx-cart-api/user-preferences/update-user-preferences.mutation'
 import { useUserPreferencesQuery } from '@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 
 import { PreferencesSection } from '../preferences-section'
 
+vi.mock('@/apis/agdevx-cart-api/household/use-household.query')
 vi.mock('@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query')
 vi.mock('@/apis/agdevx-cart-api/user-preferences/update-user-preferences.mutation')
 
@@ -36,6 +38,11 @@ describe('PreferencesSection', () => {
     vi.clearAllMocks()
     queryClient.clear()
     setupMutation()
+
+    //== Default: user has a household — tests that need no-household override this
+    vi.mocked(useHouseholdQuery).mockReturnValue({
+      data: { id: 'h1', name: 'Test Household' },
+    } as unknown as ReturnType<typeof useHouseholdQuery>)
   })
 
   it('renders all default page options', () => {
@@ -49,6 +56,19 @@ describe('PreferencesSection', () => {
     expect(screen.getByRole('button', { name: 'Shopping' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Pantry' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Household' })).toBeInTheDocument()
+  })
+
+  it('hides Household default page option when showHouseholdPage is false', () => {
+    vi.mocked(useUserPreferencesQuery).mockReturnValue({
+      data: { defaultPage: '/home', locationLatitude: null, locationLongitude: null, locationDisplayName: null, showHouseholdPage: false },
+    } as unknown as ReturnType<typeof useUserPreferencesQuery>)
+
+    render(createElement(PreferencesSection), { wrapper })
+
+    expect(screen.getByRole('button', { name: 'Home' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Shopping' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Pantry' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Household' })).not.toBeInTheDocument()
   })
 
   it('highlights the current default page', () => {
@@ -89,7 +109,7 @@ describe('PreferencesSection', () => {
 
     render(createElement(PreferencesSection), { wrapper })
 
-    expect(screen.getByPlaceholderText('Search city...')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Search by city or zip')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument()
   })
 
@@ -113,14 +133,15 @@ describe('PreferencesSection', () => {
     expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument()
   })
 
-  it('defaults to /shopping as selected page when no preferences are loaded', () => {
+  it('defaults to /home as selected page when no preferences are loaded', () => {
     vi.mocked(useUserPreferencesQuery).mockReturnValue({
       data: undefined,
     } as unknown as ReturnType<typeof useUserPreferencesQuery>)
 
     render(createElement(PreferencesSection), { wrapper })
 
-    expect(screen.getByRole('button', { name: 'Shopping' }).className).toContain('bg-teal')
+    //== Home should be highlighted since login navigates to /home when defaultPage is null
+    expect(screen.getByRole('button', { name: 'Home' }).className).toContain('bg-teal')
   })
 
   it('does not show Save button when there are no unsaved changes', () => {
@@ -169,15 +190,18 @@ describe('PreferencesSection', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Save' }))
 
     expect(mockMutate).toHaveBeenCalledOnce()
-    expect(mockMutate).toHaveBeenCalledWith({
-      defaultPage: '/pantry',
-      locationLatitude: 40.71,
-      locationLongitude: -74.0,
-      locationDisplayName: 'New York, NY',
-      showWeatherIcons: true,
-      showWeatherTemps: true,
-      showHouseholdPage: true,
-    })
+    expect(mockMutate).toHaveBeenCalledWith(
+      {
+        defaultPage: '/pantry',
+        locationLatitude: 40.71,
+        locationLongitude: -74.0,
+        locationDisplayName: 'New York, NY',
+        showWeatherIcons: true,
+        showWeatherTemps: true,
+        showHouseholdPage: true,
+      },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    )
   })
 
   it('shows Save button after clearing location', async () => {
@@ -191,6 +215,53 @@ describe('PreferencesSection', () => {
 
     expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument()
     expect(screen.getByText('No location set')).toBeInTheDocument()
+  })
+
+  it('shows city name from reverse geocoding after "Use my location"', async () => {
+    vi.mocked(useUserPreferencesQuery).mockReturnValue({
+      data: { defaultPage: '/shopping', locationLatitude: null, locationLongitude: null, locationDisplayName: null },
+    } as unknown as ReturnType<typeof useUserPreferencesQuery>)
+
+    /*
+     * Mock navigator.geolocation to immediately return coordinates.
+     * Mock fetch to return a Nominatim-shaped response with a US address.
+     */
+    const mockGetCurrentPosition = vi.fn(
+      (success: PositionCallback) => {
+        success({
+          coords: { latitude: 41.4993, longitude: -81.6944 },
+        } as GeolocationPosition)
+      }
+    )
+
+    Object.defineProperty(globalThis.navigator, 'geolocation', {
+      value: { getCurrentPosition: mockGetCurrentPosition },
+      configurable: true,
+    })
+
+    const originalFetch = globalThis.fetch
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      json: async () => ({
+        address: {
+          city: 'Cleveland',
+          state: 'Ohio',
+          country: 'United States',
+          country_code: 'us',
+        },
+      }),
+    })
+
+    render(createElement(PreferencesSection), { wrapper })
+
+    await userEvent.click(screen.getByRole('button', { name: /use my location/i }))
+
+    //== After geolocation + reverse geocoding, the display name should appear
+    expect(await screen.findByText('Cleveland, Ohio')).toBeInTheDocument()
+
+    //== Save button should appear since dirty state was set
+    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument()
+
+    globalThis.fetch = originalFetch
   })
 
   it('disables Save button while mutation is pending', async () => {

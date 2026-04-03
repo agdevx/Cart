@@ -72,7 +72,7 @@ export const AppRoutes = () => (
 const App = () => {
   return (
     <>
-      <Toaster position="bottom-right" />
+      <Toaster position="bottom-right" toastOptions={{ classNames: { success: '[&>[data-icon]]:text-teal' } }} />
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <BrowserRouter basename={import.meta.env.VITE_BASE_PATH || '/'}>

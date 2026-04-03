@@ -86,9 +86,9 @@ export const HomePage = () => {
             setSelectedDate(null)
             navigate(tripDetailPath(tripId))
           }}
-          onPlanTrip={(_date) => {
+          onPlanTrip={(planDate) => {
             setSelectedDate(null)
-            // TODO: navigate to create trip with pre-filled date
+            navigate(`/shopping?planDate=${planDate}`)
           }}
         />
       )}

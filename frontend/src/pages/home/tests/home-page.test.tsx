@@ -5,7 +5,8 @@ import { BrowserRouter } from 'react-router-dom'
 
 import { QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as tripsQueryModule from '@/apis/agdevx-cart-api/trip/use-trips.query'
 import * as userPreferencesQueryModule from '@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query'
@@ -75,6 +76,10 @@ describe('HomePage', () => {
     vi.clearAllMocks()
   })
 
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('renders the greeting card with the authenticated user name', () => {
     setupMocks()
     render(<HomePage />, { wrapper })
@@ -97,6 +102,25 @@ describe('HomePage', () => {
     render(<HomePage />, { wrapper })
 
     expect(screen.getByText('Home')).toBeInTheDocument()
+  })
+
+  it('navigates to /shopping?planDate=YYYY-MM-DD when "Plan a trip" is clicked', async () => {
+    vi.useFakeTimers({ now: new Date(2026, 2, 15), shouldAdvanceTime: true })
+    const user = userEvent.setup()
+
+    setupMocks()
+
+    render(<HomePage />, { wrapper })
+
+    //== Click a future day (March 20) to open the popover
+    const dayButton = screen.getByLabelText(/^20 2026-03-20/)
+    await user.click(dayButton)
+
+    //== Popover should appear with "Plan a trip" action
+    const planButton = await screen.findByText('Plan a trip')
+    await user.click(planButton)
+
+    expect(mockNavigate).toHaveBeenCalledWith('/shopping?planDate=2026-03-20')
   })
 
   it('shows loading state by not crashing when queries are pending', () => {

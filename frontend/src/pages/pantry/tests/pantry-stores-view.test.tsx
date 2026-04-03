@@ -103,14 +103,13 @@ describe('PantryStoresView', () => {
     vi.clearAllMocks()
   })
 
-  it('renders loading state', () => {
+  it('renders empty container while loading', () => {
     setupMocks({ storesLoading: true, householdLoading: true })
 
-    const { container } = renderView()
+    renderView()
 
-    //== Skeleton loader divs should be visible with animate-pulse class
-    const skeletons = container.querySelectorAll('.animate-pulse')
-    expect(skeletons.length).toBeGreaterThan(0)
+    //== Component renders an empty wrapper during loading to prevent layout flash
+    expect(screen.queryByText('No stores yet')).not.toBeInTheDocument()
   })
 
   it('renders household and personal store sections', () => {

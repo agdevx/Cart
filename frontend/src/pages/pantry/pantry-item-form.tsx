@@ -55,7 +55,7 @@ export const CreatePantryItemForm = ({
 }: CreatePantryItemFormProps) => {
   const [itemName, setItemName] = useState('')
   const [itemNotes, setItemNotes] = useState('')
-  const [itemScope, setItemScope] = useState<string>(initialScope)
+  const [itemScope, setItemScope] = useState<string>(household ? initialScope : 'personal')
   const [itemDefaultStoreId, setItemDefaultStoreId] = useState<string | null>(null)
 
   //== Filter stores by the selected scope so only relevant options are shown
@@ -108,17 +108,19 @@ export const CreatePantryItemForm = ({
         />
       </FormField>
 
-      <FormField label="Scope" htmlFor="itemScope">
-        <ScopeRadio
-          value={itemScope}
-          onChange={(val) => {
-            setItemScope(val)
-            setItemDefaultStoreId(null)
-          }}
-          household={household}
-          disabled={isPending}
-        />
-      </FormField>
+      {household && (
+        <FormField label="Scope" htmlFor="itemScope">
+          <ScopeRadio
+            value={itemScope}
+            onChange={(val) => {
+              setItemScope(val)
+              setItemDefaultStoreId(null)
+            }}
+            household={household}
+            disabled={isPending}
+          />
+        </FormField>
+      )}
 
       <FormField label="Notes (optional)" htmlFor="itemNotes">
         <input
@@ -224,17 +226,19 @@ export const EditPantryItemForm = ({
         />
       </FormField>
 
-      <FormField label="Scope" htmlFor={`editScope-${itemId}`}>
-        <ScopeRadio
-          value={editScope}
-          onChange={(val) => {
-            setEditScope(val)
-            setEditDefaultStoreId(null)
-          }}
-          household={household}
-          disabled={isPending}
-        />
-      </FormField>
+      {household && (
+        <FormField label="Scope" htmlFor={`editScope-${itemId}`}>
+          <ScopeRadio
+            value={editScope}
+            onChange={(val) => {
+              setEditScope(val)
+              setEditDefaultStoreId(null)
+            }}
+            household={household}
+            disabled={isPending}
+          />
+        </FormField>
+      )}
 
       <FormField label="Notes (optional)" htmlFor={`editNotes-${itemId}`}>
         <input

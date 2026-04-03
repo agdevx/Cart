@@ -2,7 +2,7 @@
 // ABOUTME: Shows current trip in progress and completed trips list
 
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { ChevronDown, ShoppingCart } from 'lucide-react'
 
@@ -24,6 +24,7 @@ import { TripCreateForm } from './trip-create-form'
 
 export const ShoppingPage = () => {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { data: household } = useHouseholdQuery()
   const { data: trips, isLoading } = useTripsQuery()
   const createMutation = useCreateTripMutation()
@@ -31,10 +32,24 @@ export const ShoppingPage = () => {
   const deleteMutation = useDeleteTripMutation()
   const reopenMutation = useReopenTripMutation()
 
-  const [showCreateForm, setShowCreateForm] = useState(false)
+  /*
+   * Read ?planDate=YYYY-MM-DD once on mount (from calendar "Plan a trip" action).
+   * The param is consumed during state initialization and cleared from the URL
+   * so refreshing the page doesn't re-open the form.
+   */
+  const [planDateParam] = useState(() => {
+    const planDate = searchParams.get('planDate')
+    if (planDate) {
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+    return planDate
+  })
+
+  const [showCreateForm, setShowCreateForm] = useState(!!planDateParam)
   // formKey forces the form to remount when opened, resetting its internal state
   const [formKey, setFormKey] = useState(0)
   const [showCompleted, setShowCompleted] = useState(false)
+  const [initialDate, setInitialDate] = useState<string | undefined>(planDateParam ?? undefined)
 
   const inProgressTrips = trips?.filter((trip) => trip.isStarted && !trip.isCompleted) || []
   const planningTrips = trips?.filter((trip) => !trip.isStarted && !trip.isCompleted) || []
@@ -58,7 +73,7 @@ export const ShoppingPage = () => {
     updateMutation.mutate({ tripId, name, tripDate })
   }
 
-  /* Long-press in TripCard is the confirmation — fire the mutation directly */
+  /* TripCard shows a confirmation dialog with hold-to-delete — fire the mutation directly */
   const handleDelete = (tripId: string, _tripName: string) => {
     deleteMutation.mutate(tripId)
   }
@@ -88,9 +103,10 @@ export const ShoppingPage = () => {
         <TripCreateForm
           key={formKey}
           household={household}
+          initialDate={initialDate}
           onSubmit={handleCreateTrip}
-          onCancel={() => setShowCreateForm(false)}
-          isPending={createMutation.isPending}
+          onCancel={() => { setShowCreateForm(false); setInitialDate(undefined) }}
+          isPending={createMutation.isPending || createMutation.isSuccess}
         />
       )}
 

@@ -135,10 +135,10 @@ export const LoginPage = () => {
           </FormField>
           <button
             type="submit"
-            disabled={loginMutation.isPending || !isValid}
+            disabled={loginMutation.isPending || loginMutation.isSuccess || !isValid}
             className="flex w-full items-center justify-center bg-teal text-white py-3 px-4 rounded-xl font-display font-bold hover:bg-teal-light disabled:bg-bg-warm disabled:text-text-tertiary disabled:cursor-not-allowed transition-colors"
           >
-            {loginMutation.isPending ? <Spinner /> : 'Login'}
+            {(loginMutation.isPending || loginMutation.isSuccess) ? <Spinner /> : 'Login'}
           </button>
         </form>
 

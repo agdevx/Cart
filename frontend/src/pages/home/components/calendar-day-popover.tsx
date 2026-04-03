@@ -68,7 +68,7 @@ export const CalendarDayPopover = ({
     <>
       {/* Backdrop — closes the popover on click */}
       <div
-        className="fixed inset-0 bg-black/30 z-40"
+        className="fixed inset-0 bg-black/30 z-50"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -78,9 +78,9 @@ export const CalendarDayPopover = ({
         role="dialog"
         aria-modal="true"
         aria-label={`Trips for ${displayDate}`}
-        className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-md px-4 pb-6 animate-slide-up"
+        className="fixed bottom-0 left-0 right-0 z-60 mx-auto max-w-md px-4 pb-6 animate-slide-up"
       >
-        <div className="bg-surface rounded-2xl shadow-lg overflow-hidden">
+        <div className={`bg-surface rounded-2xl shadow-lg overflow-hidden ${isPast ? 'pb-5' : ''}`}>
           {/* Header */}
           <div className="px-5 pt-5 pb-3">
             <p className="text-text-secondary text-sm font-semibold">

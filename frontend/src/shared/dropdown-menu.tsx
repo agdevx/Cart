@@ -12,15 +12,24 @@ interface DropdownMenuProps {
 
 export const DropdownMenu = ({ anchorRef, children, onClose }: DropdownMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null)
-  const [position, setPosition] = useState({ top: 0, right: 0 })
+  const [position, setPosition] = useState<{ top?: number; bottom?: number; right: number }>({ top: 0, right: 0 })
 
   const updatePosition = useCallback(() => {
-    if (anchorRef.current) {
-      const rect = anchorRef.current.getBoundingClientRect()
-      setPosition({
-        top: rect.bottom + 4,
-        right: window.innerWidth - rect.right,
-      })
+    if (!anchorRef.current) { return }
+
+    const rect = anchorRef.current.getBoundingClientRect()
+    const menuHeight = menuRef.current?.offsetHeight ?? 150
+    const spaceBelow = window.innerHeight - rect.bottom
+    const gap = 4
+
+    /*
+     * Prefer showing the menu below the anchor. If there isn't enough room
+     * below (menu height + gap), flip it above instead.
+     */
+    if (spaceBelow >= menuHeight + gap) {
+      setPosition({ top: rect.bottom + gap, right: window.innerWidth - rect.right })
+    } else {
+      setPosition({ bottom: window.innerHeight - rect.top + gap, right: window.innerWidth - rect.right })
     }
   }, [anchorRef])
 
@@ -58,7 +67,7 @@ export const DropdownMenu = ({ anchorRef, children, onClose }: DropdownMenuProps
     <div
       ref={menuRef}
       className="fixed bg-surface rounded-xl shadow-lg border border-navy/10 py-1 z-50 min-w-[140px]"
-      style={{ top: position.top, right: position.right }}
+      style={{ top: position.top, bottom: position.bottom, right: position.right }}
     >
       {children}
     </div>,
