@@ -507,12 +507,13 @@ export const HouseholdPage = () => {
         )}
       </div>
 
-      {/* Leave Confirmation Dialog */}
+      {/* Leave Confirmation Dialog — requires 5-second long-press */}
       {showLeaveConfirm && (
         <ConfirmDialog
           title="Leave Household"
           message={`Are you sure you want to leave "${household.name}"?`}
-          confirmLabel="Leave"
+          confirmLabel="Hold to Leave"
+          holdDuration={DELETE_HOLD_DURATION_MS}
           onConfirm={handleLeave}
           onCancel={() => setShowLeaveConfirm(false)}
           isPending={leaveMutation.isPending}
