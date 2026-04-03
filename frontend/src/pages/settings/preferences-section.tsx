@@ -81,14 +81,42 @@ export const PreferencesSection = () => {
     setLocationError('')
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const lat = position.coords.latitude
         const lon = position.coords.longitude
-        const displayName = `Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)}`
 
         setLocationLat(lat)
         setLocationLon(lon)
-        setLocationName(displayName)
+
+        /* Reverse-geocode coordinates to a human-readable city name via Nominatim */
+        try {
+          const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+          const response = await fetch(url, {
+            headers: { 'User-Agent': 'AGDevX.Cart/1.0 (https://github.com/AGDevX/Cart)' },
+          })
+          const data = await response.json()
+          const address = data?.address
+
+          if (address) {
+            const city = address.city || address.town || address.village || address.hamlet || address.municipality || ''
+            const state = address.state || ''
+            const country = address.country || ''
+
+            /* "City, State" for US addresses, "City, Country" for international */
+            const isUS = address.country_code === 'us'
+            const displayName = city
+              ? `${city}, ${isUS ? state : country}`
+              : `${state || country}`
+
+            setLocationName(displayName)
+          } else {
+            setLocationName(`Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)}`)
+          }
+        } catch {
+          /* Fall back to raw coordinates if reverse geocoding fails */
+          setLocationName(`Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)}`)
+        }
+
         setIsDirty(true)
         setIsLocating(false)
       },
