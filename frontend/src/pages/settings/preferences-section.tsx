@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { MapPin, MapPinOff, Navigation, Search } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useUpdateUserPreferencesMutation } from '@/apis/agdevx-cart-api/user-preferences/update-user-preferences.mutation'
 import { useUserPreferencesQuery } from '@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query'
 import { Spinner } from '@/shared/spinner'
@@ -34,7 +35,9 @@ interface GeocodingResponse {
 
 export const PreferencesSection = () => {
   const { data: preferences } = useUserPreferencesQuery()
+  const { data: household } = useHouseholdQuery()
   const updateMutation = useUpdateUserPreferencesMutation()
+  const hasHousehold = !!household
 
   /** Local state mirrors query data; changes here are unsaved until the user clicks Save */
   const [selectedPage, setSelectedPage] = useState(preferences?.defaultPage ?? '/home')
@@ -219,7 +222,7 @@ export const PreferencesSection = () => {
         <div className="px-4 py-3">
           <div className="text-xs text-text-tertiary mb-2">Default Page</div>
           <div className="flex gap-1.5">
-            {DEFAULT_PAGE_OPTIONS.map((option) => {
+            {DEFAULT_PAGE_OPTIONS.filter((option) => option.path !== '/household' || hasHousehold).map((option) => {
               const isSelected = selectedPage === option.path
               return (
                 <button

@@ -9,12 +9,14 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useUpdateUserPreferencesMutation } from '@/apis/agdevx-cart-api/user-preferences/update-user-preferences.mutation'
 import { useUserPreferencesQuery } from '@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query'
 import { queryClient } from '@/apis/tanstack-query/query-client'
 
 import { PreferencesSection } from '../preferences-section'
 
+vi.mock('@/apis/agdevx-cart-api/household/use-household.query')
 vi.mock('@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query')
 vi.mock('@/apis/agdevx-cart-api/user-preferences/update-user-preferences.mutation')
 
@@ -36,6 +38,11 @@ describe('PreferencesSection', () => {
     vi.clearAllMocks()
     queryClient.clear()
     setupMutation()
+
+    //== Default: user has a household — tests that need no-household override this
+    vi.mocked(useHouseholdQuery).mockReturnValue({
+      data: { id: 'h1', name: 'Test Household' },
+    } as unknown as ReturnType<typeof useHouseholdQuery>)
   })
 
   it('renders all default page options', () => {
@@ -49,6 +56,23 @@ describe('PreferencesSection', () => {
     expect(screen.getByRole('button', { name: 'Shopping' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Pantry' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Household' })).toBeInTheDocument()
+  })
+
+  it('hides Household default page option when user has no household', () => {
+    vi.mocked(useHouseholdQuery).mockReturnValue({
+      data: null,
+    } as unknown as ReturnType<typeof useHouseholdQuery>)
+
+    vi.mocked(useUserPreferencesQuery).mockReturnValue({
+      data: { defaultPage: '/home', locationLatitude: null, locationLongitude: null, locationDisplayName: null },
+    } as unknown as ReturnType<typeof useUserPreferencesQuery>)
+
+    render(createElement(PreferencesSection), { wrapper })
+
+    expect(screen.getByRole('button', { name: 'Home' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Shopping' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Pantry' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Household' })).not.toBeInTheDocument()
   })
 
   it('highlights the current default page', () => {
