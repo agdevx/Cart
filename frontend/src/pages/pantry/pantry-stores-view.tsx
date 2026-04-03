@@ -177,7 +177,13 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
         <EmptyState
           icon={Package}
           title="No stores yet"
-          subtitle="Add your first store to organize your shopping"
+          subtitle={
+            filter === 'all'
+              ? 'Add your first store to organize your shopping'
+              : filter === 'personal'
+                ? 'Add a personal store to get started'
+                : `No stores in this household yet`
+          }
           actionLabel="Add Store"
           onAction={onOpenCreateForm}
         />
