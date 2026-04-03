@@ -194,6 +194,53 @@ describe('PreferencesSection', () => {
     expect(screen.getByText('No location set')).toBeInTheDocument()
   })
 
+  it('shows city name from reverse geocoding after "Use my location"', async () => {
+    vi.mocked(useUserPreferencesQuery).mockReturnValue({
+      data: { defaultPage: '/shopping', locationLatitude: null, locationLongitude: null, locationDisplayName: null },
+    } as unknown as ReturnType<typeof useUserPreferencesQuery>)
+
+    /*
+     * Mock navigator.geolocation to immediately return coordinates.
+     * Mock fetch to return a Nominatim-shaped response with a US address.
+     */
+    const mockGetCurrentPosition = vi.fn(
+      (success: PositionCallback) => {
+        success({
+          coords: { latitude: 41.4993, longitude: -81.6944 },
+        } as GeolocationPosition)
+      }
+    )
+
+    Object.defineProperty(globalThis.navigator, 'geolocation', {
+      value: { getCurrentPosition: mockGetCurrentPosition },
+      configurable: true,
+    })
+
+    const originalFetch = globalThis.fetch
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      json: async () => ({
+        address: {
+          city: 'Cleveland',
+          state: 'Ohio',
+          country: 'United States',
+          country_code: 'us',
+        },
+      }),
+    })
+
+    render(createElement(PreferencesSection), { wrapper })
+
+    await userEvent.click(screen.getByRole('button', { name: /use my location/i }))
+
+    //== After geolocation + reverse geocoding, the display name should appear
+    expect(await screen.findByText('Cleveland, Ohio')).toBeInTheDocument()
+
+    //== Save button should appear since dirty state was set
+    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument()
+
+    globalThis.fetch = originalFetch
+  })
+
   it('disables Save button while mutation is pending', async () => {
     setupMutation(true)
     vi.mocked(useUserPreferencesQuery).mockReturnValue({

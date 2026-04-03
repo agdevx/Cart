@@ -51,6 +51,28 @@ describe('useHouseholdQuery', () => {
     expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/household')
   })
 
+  it('returns null data on 204 No Content response', async () => {
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      isAuthenticated: true,
+      user: { id: '1', email: 'test@example.com', name: 'Test', createdBy: null, createdDate: '', modifiedBy: null, modifiedDate: null },
+      setAuth: vi.fn(),
+      logout: vi.fn(),
+    })
+
+    vi.spyOn(apiFetchModule, 'apiFetch').mockResolvedValue({
+      ok: true,
+      status: 204,
+      json: async () => null,
+    } as unknown as Response)
+
+    const { result } = renderHook(() => useHouseholdQuery(), { wrapper })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(result.current.data).toBeNull()
+    expect(apiFetchModule.apiFetch).toHaveBeenCalledWith('/api/v1/household')
+  })
+
   it('handles fetch error', async () => {
     vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
       isAuthenticated: true,
