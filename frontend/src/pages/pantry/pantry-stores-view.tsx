@@ -14,7 +14,6 @@ import { ConfirmDialog } from '@/shared/confirm-dialog'
 import { DropdownMenu } from '@/shared/dropdown-menu'
 import { EmptyState } from '@/shared/empty-state'
 import { SectionHeader } from '@/shared/section-header'
-import { SkeletonCard } from '@/shared/skeleton-card'
 import { sortStores } from '@/utils/sort-stores'
 
 import type { InventoryFilter } from './pantry-items-view'
@@ -40,13 +39,7 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
   const kebabRef = useRef<HTMLButtonElement>(null)
 
   if (isLoading) {
-    return (
-      <div className="space-y-2 mt-2">
-        {[0, 1].map((i) => (
-          <SkeletonCard key={i} rows={[{ width: '45%' }, { width: '20%' }]} />
-        ))}
-      </div>
-    )
+    return null
   }
 
   const householdStores = household

@@ -103,14 +103,13 @@ describe('PantryStoresView', () => {
     vi.clearAllMocks()
   })
 
-  it('renders loading state', () => {
+  it('renders nothing while loading', () => {
     setupMocks({ storesLoading: true, householdLoading: true })
 
     const { container } = renderView()
 
-    //== Skeleton loader divs should be visible with animate-pulse class
-    const skeletons = container.querySelectorAll('.animate-pulse')
-    expect(skeletons.length).toBeGreaterThan(0)
+    //== Component returns null during loading — no visible content
+    expect(container.innerHTML).toBe('')
   })
 
   it('renders household and personal store sections', () => {
