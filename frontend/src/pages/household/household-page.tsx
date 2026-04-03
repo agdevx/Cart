@@ -473,35 +473,34 @@ export const HouseholdPage = () => {
                 <h2 className="font-display text-sm font-semibold uppercase tracking-[1.5px] text-coral">Danger Zone</h2>
                 <ChevronDown className={`w-4 h-4 text-coral transition-transform ${dangerZoneOpen ? 'rotate-180' : ''}`} />
               </button>
-              <div className={`grid transition-all duration-200 ${dangerZoneOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
-                <div className="overflow-hidden">
-                  <div className="px-5 pb-5 space-y-3">
-                    {/* Leave Household — available to all members */}
-                    <button
-                      onClick={() => setShowLeaveConfirm(true)}
-                      className="w-full flex items-center justify-center gap-2 py-3 bg-surface rounded-xl shadow-sm text-coral font-display font-bold text-sm hover:bg-coral/5 transition-colors"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Leave Household
-                    </button>
 
-                    {/* Delete Household — owner-only */}
-                    {isOwner && (
-                      <>
-                        <p className="text-sm text-text-secondary">
-                          This will permanently delete the household and all its items and stores. This cannot be undone.
-                        </p>
-                        <button
-                          onClick={() => setShowDeleteConfirm(true)}
-                          className="w-full py-3 bg-coral text-white rounded-xl font-display font-bold hover:bg-coral/90 transition-colors"
-                        >
-                          Delete Household
-                        </button>
-                      </>
-                    )}
-                  </div>
+              {dangerZoneOpen && (
+                <div className="px-5 pb-5 space-y-3 animate-fade-in">
+                  {/* Leave Household — available to all members */}
+                  <button
+                    onClick={() => setShowLeaveConfirm(true)}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-surface rounded-xl shadow-sm text-coral font-display font-bold text-sm hover:bg-coral/5 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Leave Household
+                  </button>
+
+                  {/* Delete Household — owner-only */}
+                  {isOwner && (
+                    <>
+                      <p className="text-sm text-text-secondary">
+                        This will permanently delete the household and all its items and stores. This cannot be undone.
+                      </p>
+                      <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="w-full py-3 bg-coral text-white rounded-xl font-display font-bold hover:bg-coral/90 transition-colors"
+                      >
+                        Delete Household
+                      </button>
+                    </>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
           </>
         )}

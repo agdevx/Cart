@@ -218,11 +218,14 @@ describe('HouseholdPage', () => {
     expect(screen.getByText('ABC123')).toBeInTheDocument()
   })
 
-  it('renders leave button', () => {
+  it('renders leave button inside danger zone', async () => {
     setupMocks()
+    const user = userEvent.setup()
 
     renderPage()
 
+    //== Danger zone starts collapsed — expand it first
+    await user.click(screen.getByText('Danger Zone'))
     expect(screen.getByText('Leave Household')).toBeInTheDocument()
   })
 })
