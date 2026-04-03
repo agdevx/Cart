@@ -113,7 +113,7 @@ describe('PreferencesSection', () => {
 
     render(createElement(PreferencesSection), { wrapper })
 
-    expect(screen.getByPlaceholderText('Search city...')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Search by city or zip')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument()
   })
 

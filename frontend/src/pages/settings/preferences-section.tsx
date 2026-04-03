@@ -225,7 +225,7 @@ export const PreferencesSection = () => {
         <div className="px-4 py-3">
           <div className="text-xs text-text-tertiary mb-2">Default Page</div>
           <div className="flex gap-1.5">
-            {DEFAULT_PAGE_OPTIONS.filter((option) => option.path !== '/household' || hasHousehold).map((option) => {
+            {DEFAULT_PAGE_OPTIONS.filter((option) => option.path !== '/household' || showHouseholdPage).map((option) => {
               const isSelected = selectedPage === option.path
               return (
                 <button
@@ -306,7 +306,7 @@ export const PreferencesSection = () => {
               value={citySearch}
               onChange={(e) => setCitySearch(e.target.value)}
               onKeyDown={handleCitySearchKeyDown}
-              placeholder="Search city..."
+              placeholder="Search by city or zip"
               className="flex-1 min-w-0 px-3 py-2 border border-navy/10 rounded-xl bg-surface text-sm text-text placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-teal focus:border-transparent"
             />
             <button
