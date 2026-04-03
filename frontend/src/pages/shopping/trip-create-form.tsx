@@ -30,7 +30,7 @@ export const TripCreateForm = ({ household, initialDate, isPending, onSubmit, on
     const now = new Date()
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
   })
-  const [tripScope, setTripScope] = useState<string>('personal')
+  const [tripScope, setTripScope] = useState<string>(household ? '' : 'personal')
 
   const schema = useMemo(() => ({
     name: [isRequired('Trip name')],
@@ -50,7 +50,7 @@ export const TripCreateForm = ({ household, initialDate, isPending, onSubmit, on
     onSubmit({
       name: tripName.trim(),
       tripDate: tripDate || null,
-      householdId: tripScope === 'personal' ? null : tripScope,
+      householdId: (!tripScope || tripScope === 'personal') ? null : tripScope,
     })
   }
 
@@ -96,7 +96,7 @@ export const TripCreateForm = ({ household, initialDate, isPending, onSubmit, on
         onCancel={onCancel}
         submitLabel="Create"
         isPending={isPending}
-        disabled={!isValid}
+        disabled={!isValid || (!!household && !tripScope)}
       />
     </form>
   )
