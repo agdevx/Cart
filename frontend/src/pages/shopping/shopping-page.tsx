@@ -1,7 +1,7 @@
 // ABOUTME: Shopping page displaying active trip and trip history
 // ABOUTME: Shows current trip in progress and completed trips list
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { ChevronDown, ShoppingCart } from 'lucide-react'
@@ -24,7 +24,7 @@ import { TripCreateForm } from './trip-create-form'
 
 export const ShoppingPage = () => {
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const { data: household } = useHouseholdQuery()
   const { data: trips, isLoading } = useTripsQuery()
   const createMutation = useCreateTripMutation()
@@ -32,22 +32,24 @@ export const ShoppingPage = () => {
   const deleteMutation = useDeleteTripMutation()
   const reopenMutation = useReopenTripMutation()
 
-  const [showCreateForm, setShowCreateForm] = useState(false)
+  /*
+   * Read ?planDate=YYYY-MM-DD once on mount (from calendar "Plan a trip" action).
+   * The param is consumed during state initialization and cleared from the URL
+   * so refreshing the page doesn't re-open the form.
+   */
+  const [planDateParam] = useState(() => {
+    const planDate = searchParams.get('planDate')
+    if (planDate) {
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+    return planDate
+  })
+
+  const [showCreateForm, setShowCreateForm] = useState(!!planDateParam)
   // formKey forces the form to remount when opened, resetting its internal state
   const [formKey, setFormKey] = useState(0)
   const [showCompleted, setShowCompleted] = useState(false)
-  const [initialDate, setInitialDate] = useState<string | undefined>(undefined)
-
-  /* Auto-open create form when navigated with ?planDate=YYYY-MM-DD from the calendar */
-  useEffect(() => {
-    const planDate = searchParams.get('planDate')
-    if (planDate) {
-      setInitialDate(planDate)
-      setFormKey((k) => k + 1)
-      setShowCreateForm(true)
-      setSearchParams({}, { replace: true })
-    }
-  }, [searchParams, setSearchParams])
+  const [initialDate, setInitialDate] = useState<string | undefined>(planDateParam ?? undefined)
 
   const inProgressTrips = trips?.filter((trip) => trip.isStarted && !trip.isCompleted) || []
   const planningTrips = trips?.filter((trip) => !trip.isStarted && !trip.isCompleted) || []
