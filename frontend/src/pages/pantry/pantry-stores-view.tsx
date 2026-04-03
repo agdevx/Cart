@@ -38,6 +38,18 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const kebabRef = useRef<HTMLButtonElement>(null)
 
+  const handleCreate = async (data: PantryStoreFormData) => {
+    try {
+      await createMutation.mutateAsync({
+        name: data.name,
+        householdId: data.householdId,
+      })
+      onCloseCreateForm()
+    } catch {
+      // Error handled by mutation state
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="animate-fade-in">
@@ -70,18 +82,6 @@ export const PantryStoresView = ({ filter, showCreateForm, onOpenCreateForm, onC
 
   /* True when the currently visible scope has no stores (not just the global list) */
   const isFilteredEmpty = filteredStores !== null ? filteredStores.length === 0 : !stores || stores.length === 0
-
-  const handleCreate = async (data: PantryStoreFormData) => {
-    try {
-      await createMutation.mutateAsync({
-        name: data.name,
-        householdId: data.householdId,
-      })
-      onCloseCreateForm()
-    } catch {
-      // Error handled by mutation state
-    }
-  }
 
   const handleStartEdit = (store: NonNullable<typeof stores>[number]) => {
     setEditingStoreId(store.id)
