@@ -1,8 +1,8 @@
 // ABOUTME: Shopping page displaying active trip and trip history
 // ABOUTME: Shows current trip in progress and completed trips list
 
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { ChevronDown, ShoppingCart } from 'lucide-react'
 
@@ -24,6 +24,7 @@ import { TripCreateForm } from './trip-create-form'
 
 export const ShoppingPage = () => {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { data: household } = useHouseholdQuery()
   const { data: trips, isLoading } = useTripsQuery()
   const createMutation = useCreateTripMutation()
@@ -35,6 +36,18 @@ export const ShoppingPage = () => {
   // formKey forces the form to remount when opened, resetting its internal state
   const [formKey, setFormKey] = useState(0)
   const [showCompleted, setShowCompleted] = useState(false)
+  const [initialDate, setInitialDate] = useState<string | undefined>(undefined)
+
+  /* Auto-open create form when navigated with ?planDate=YYYY-MM-DD from the calendar */
+  useEffect(() => {
+    const planDate = searchParams.get('planDate')
+    if (planDate) {
+      setInitialDate(planDate)
+      setFormKey((k) => k + 1)
+      setShowCreateForm(true)
+      setSearchParams({}, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   const inProgressTrips = trips?.filter((trip) => trip.isStarted && !trip.isCompleted) || []
   const planningTrips = trips?.filter((trip) => !trip.isStarted && !trip.isCompleted) || []
@@ -88,8 +101,9 @@ export const ShoppingPage = () => {
         <TripCreateForm
           key={formKey}
           household={household}
+          initialDate={initialDate}
           onSubmit={handleCreateTrip}
-          onCancel={() => setShowCreateForm(false)}
+          onCancel={() => { setShowCreateForm(false); setInitialDate(undefined) }}
           isPending={createMutation.isPending || createMutation.isSuccess}
         />
       )}

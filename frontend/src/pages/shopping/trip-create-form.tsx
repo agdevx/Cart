@@ -17,14 +17,16 @@ export interface TripCreateFormData {
 
 interface TripCreateFormProps {
   readonly household: { id: string; name: string | null } | null | undefined
+  readonly initialDate?: string
   readonly isPending: boolean
   readonly onSubmit: (data: TripCreateFormData) => void
   readonly onCancel: () => void
 }
 
-export const TripCreateForm = ({ household, isPending, onSubmit, onCancel }: TripCreateFormProps) => {
+export const TripCreateForm = ({ household, initialDate, isPending, onSubmit, onCancel }: TripCreateFormProps) => {
   const [tripName, setTripName] = useState('')
   const [tripDate, setTripDate] = useState(() => {
+    if (initialDate) { return initialDate }
     const now = new Date()
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
   })
