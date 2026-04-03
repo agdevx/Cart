@@ -15,6 +15,7 @@ export const useHouseholdQuery = () => {
     queryKey: ['household'],
     queryFn: async (): Promise<Household | null> => {
       const response = await apiFetch('/api/v1/household')
+      if (response.status === 204) return null
       return response.json()
     },
     enabled: isAuthenticated,
