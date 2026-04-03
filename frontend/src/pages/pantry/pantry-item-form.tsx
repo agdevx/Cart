@@ -55,7 +55,7 @@ export const CreatePantryItemForm = ({
 }: CreatePantryItemFormProps) => {
   const [itemName, setItemName] = useState('')
   const [itemNotes, setItemNotes] = useState('')
-  const [itemScope, setItemScope] = useState<string>(initialScope)
+  const [itemScope, setItemScope] = useState<string>(household ? initialScope : 'personal')
   const [itemDefaultStoreId, setItemDefaultStoreId] = useState<string | null>(null)
 
   //== Filter stores by the selected scope so only relevant options are shown
