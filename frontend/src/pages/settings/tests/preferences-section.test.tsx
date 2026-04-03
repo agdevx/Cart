@@ -58,13 +58,9 @@ describe('PreferencesSection', () => {
     expect(screen.getByRole('button', { name: 'Household' })).toBeInTheDocument()
   })
 
-  it('hides Household default page option when user has no household', () => {
-    vi.mocked(useHouseholdQuery).mockReturnValue({
-      data: null,
-    } as unknown as ReturnType<typeof useHouseholdQuery>)
-
+  it('hides Household default page option when showHouseholdPage is false', () => {
     vi.mocked(useUserPreferencesQuery).mockReturnValue({
-      data: { defaultPage: '/home', locationLatitude: null, locationLongitude: null, locationDisplayName: null },
+      data: { defaultPage: '/home', locationLatitude: null, locationLongitude: null, locationDisplayName: null, showHouseholdPage: false },
     } as unknown as ReturnType<typeof useUserPreferencesQuery>)
 
     render(createElement(PreferencesSection), { wrapper })

@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react'
 import { MapPin, MapPinOff, Navigation, Search } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useUpdateUserPreferencesMutation } from '@/apis/agdevx-cart-api/user-preferences/update-user-preferences.mutation'
 import { useUserPreferencesQuery } from '@/apis/agdevx-cart-api/user-preferences/use-user-preferences.query'
 import { Spinner } from '@/shared/spinner'
@@ -35,9 +34,7 @@ interface GeocodingResponse {
 
 export const PreferencesSection = () => {
   const { data: preferences } = useUserPreferencesQuery()
-  const { data: household } = useHouseholdQuery()
   const updateMutation = useUpdateUserPreferencesMutation()
-  const hasHousehold = !!household
 
   /** Local state mirrors query data; changes here are unsaved until the user clicks Save */
   const [selectedPage, setSelectedPage] = useState(preferences?.defaultPage ?? '/home')
@@ -189,7 +186,16 @@ export const PreferencesSection = () => {
   }
 
   const handleShowHouseholdPageChange = () => {
-    setShowHouseholdPage(prev => !prev)
+    setShowHouseholdPage(prev => {
+      const next = !prev
+
+      /* Reset default page if Household tab is being hidden while it's selected */
+      if (!next && selectedPage === '/household') {
+        setSelectedPage('/home')
+      }
+
+      return next
+    })
     setIsDirty(true)
   }
 
