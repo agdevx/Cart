@@ -80,7 +80,7 @@ export const CalendarDayPopover = ({
         aria-label={`Trips for ${displayDate}`}
         className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-md px-4 pb-6 animate-slide-up"
       >
-        <div className="bg-surface rounded-2xl shadow-lg overflow-hidden">
+        <div className={`bg-surface rounded-2xl shadow-lg overflow-hidden ${isPast ? 'pb-5' : ''}`}>
           {/* Header */}
           <div className="px-5 pt-5 pb-3">
             <p className="text-text-secondary text-sm font-semibold">
