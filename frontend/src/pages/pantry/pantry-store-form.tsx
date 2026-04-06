@@ -78,7 +78,7 @@ export const CreatePantryStoreForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="mt-3 mb-4 p-5 bg-surface rounded-2xl shadow-sm">
-      <FormField label="Store Name" htmlFor="storeName" error={errors.name ?? duplicateError ?? undefined}>
+      <FormField label="Store Name" htmlFor="storeName" error={errors.name ?? duplicateError ?? undefined} required>
         <input
           id="storeName"
           type="text"
@@ -93,7 +93,7 @@ export const CreatePantryStoreForm = ({
       </FormField>
 
       {household && (
-        <FormField label="Scope" htmlFor="storeScope">
+        <FormField label="Scope" htmlFor="storeScope" required>
           <ScopeRadio
             value={storeScope}
             onChange={setStoreScope}
@@ -158,7 +158,7 @@ export const EditPantryStoreForm = ({
 
   return (
     <div className="mt-2 p-5 bg-surface rounded-2xl shadow-sm">
-      <FormField label="Store Name" htmlFor={`editStoreName-${storeId}`} error={errors.name ?? duplicateError ?? undefined}>
+      <FormField label="Store Name" htmlFor={`editStoreName-${storeId}`} error={errors.name ?? duplicateError ?? undefined} required>
         <input
           id={`editStoreName-${storeId}`}
           type="text"
@@ -172,7 +172,7 @@ export const EditPantryStoreForm = ({
       </FormField>
 
       {household && (
-        <FormField label="Scope" htmlFor={`editStoreScope-${storeId}`}>
+        <FormField label="Scope" htmlFor={`editStoreScope-${storeId}`} required>
           <ScopeRadio
             value={editingScope}
             onChange={setEditingScope}

@@ -32,7 +32,7 @@ describe('FormField', () => {
         <input id="email" />
       </FormField>
     )
-    const label = screen.getByText('Email')
+    const label = screen.getByText('Email').closest('label')!
     expect(label.className).toContain('text-coral')
   })
 
@@ -42,7 +42,25 @@ describe('FormField', () => {
         <input id="email" />
       </FormField>
     )
-    const label = screen.getByText('Email')
+    const label = screen.getByText('Email').closest('label')!
     expect(label.className).toContain('text-navy-soft')
+  })
+
+  it('should apply required-field class when required', () => {
+    render(
+      <FormField label="Email" htmlFor="email" required>
+        <input id="email" />
+      </FormField>
+    )
+    expect(screen.getByText('Email').className).toContain('required-field')
+  })
+
+  it('should not apply required-field class when not required', () => {
+    render(
+      <FormField label="Email" htmlFor="email">
+        <input id="email" />
+      </FormField>
+    )
+    expect(screen.getByText('Email').className).not.toContain('required-field')
   })
 })

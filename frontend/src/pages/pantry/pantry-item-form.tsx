@@ -94,7 +94,7 @@ export const CreatePantryItemForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="mb-4 p-5 bg-surface rounded-2xl shadow-sm">
-      <FormField label="Item Name" htmlFor="itemName" error={errors.name}>
+      <FormField label="Item Name" htmlFor="itemName" error={errors.name} required>
         <input
           id="itemName"
           type="text"
@@ -109,7 +109,7 @@ export const CreatePantryItemForm = ({
       </FormField>
 
       {household && (
-        <FormField label="Scope" htmlFor="itemScope">
+        <FormField label="Scope" htmlFor="itemScope" required>
           <ScopeRadio
             value={itemScope}
             onChange={(val) => {
@@ -212,7 +212,7 @@ export const EditPantryItemForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="p-5 bg-surface rounded-2xl shadow-sm mt-2">
-      <FormField label="Item Name" htmlFor={`editName-${itemId}`} error={errors.name}>
+      <FormField label="Item Name" htmlFor={`editName-${itemId}`} error={errors.name} required>
         <input
           id={`editName-${itemId}`}
           type="text"
@@ -227,7 +227,7 @@ export const EditPantryItemForm = ({
       </FormField>
 
       {household && (
-        <FormField label="Scope" htmlFor={`editScope-${itemId}`}>
+        <FormField label="Scope" htmlFor={`editScope-${itemId}`} required>
           <ScopeRadio
             value={editScope}
             onChange={(val) => {

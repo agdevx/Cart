@@ -56,7 +56,7 @@ export const TripCreateForm = ({ household, initialDate, isPending, onSubmit, on
 
   return (
     <form onSubmit={handleSubmit} className="mt-3 mb-4 p-5 bg-surface rounded-2xl shadow-sm">
-      <FormField label="Trip Name" htmlFor="tripName" error={errors.name}>
+      <FormField label="Trip Name" htmlFor="tripName" error={errors.name} required>
         <input
           id="tripName"
           type="text"
@@ -70,7 +70,7 @@ export const TripCreateForm = ({ household, initialDate, isPending, onSubmit, on
         />
       </FormField>
 
-      <FormField label="Trip Date" htmlFor="tripDate">
+      <FormField label="Trip Date" htmlFor="tripDate" required>
         <input
           id="tripDate"
           type="date"
@@ -82,7 +82,7 @@ export const TripCreateForm = ({ household, initialDate, isPending, onSubmit, on
       </FormField>
 
       {household && (
-        <FormField label="Scope" htmlFor="tripScope">
+        <FormField label="Scope" htmlFor="tripScope" required>
           <ScopeRadio
             value={tripScope}
             onChange={setTripScope}

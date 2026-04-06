@@ -109,7 +109,7 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
         <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wider">Profile</span>
       </div>
       <div key={formKey} className="rounded-xl bg-surface p-4">
-        <FormField label="Name" htmlFor="profile-name" error={errors.name} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
+        <FormField label="Name" htmlFor="profile-name" error={errors.name} required labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
           <input
             id="profile-name"
             type="text"
@@ -121,7 +121,7 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
             autoComplete="name"
           />
         </FormField>
-        <FormField label="Email" htmlFor="profile-email" error={errors.email} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
+        <FormField label="Email" htmlFor="profile-email" error={errors.email} required labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
           <input
             id="profile-email"
             type="email"
@@ -136,7 +136,7 @@ export const ProfileSection = ({ user, isEditing, onStartEdit, onCancel, onSaved
 
         {emailChanged && (
           <div className="border-2 border-dashed border-teal/30 rounded-xl p-3 bg-teal/[0.03]">
-            <FormField label="Current Password" htmlFor="profile-current-password" error={errors.currentPassword} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
+            <FormField label="Current Password" htmlFor="profile-current-password" error={errors.currentPassword} required labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
               <input
                 id="profile-current-password"
                 type="password"

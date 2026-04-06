@@ -57,6 +57,12 @@ input, textarea, select {
   animation: spin 600ms linear infinite;
 }
 
+/* Appends a coral asterisk to labels for required form fields */
+.required-field::after {
+  content: " *";
+  color: var(--color-coral);
+}
+
 /* Hide scrollbar while keeping scroll functionality */
 .scrollbar-hide {
   -ms-overflow-style: none;
