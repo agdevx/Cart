@@ -104,11 +104,13 @@ The backend also enforces the 500-item limit, returning `400 Bad Request` if exc
 
 A new **"Pantry"** section appears in Settings after the Security section, as its own component file (following the `ProfileSection`/`SecuritySection` pattern).
 
-**Contents:**
-- Section header: "Pantry" (matches existing Profile/Security header style)
-- "Import Items from CSV" label with description: "Add pantry items in bulk from a CSV file"
-- "Download Template" link — downloads a CSV file with the header row and example data rows
-- File picker button — native file input with `accept=".csv"`
+**Layout: Compact card** (matches collapsed Profile/Security style). Single card with:
+- Top row: "Import Items" sublabel + "Add pantry items in bulk from a CSV file" description
+- Bottom row (separated by border): "Download Template" link | file picker | Import button
+
+**Details:**
+- "Download Template" link — generates and downloads a CSV file client-side
+- File picker — styled file input with `accept=".csv"`, shows filename when selected
 - Import button — disabled until a file is selected, shows spinner while importing
 
 After import completes, the file selection resets and the inventory + store TanStack Query caches are invalidated (since new items and stores may have been created).
