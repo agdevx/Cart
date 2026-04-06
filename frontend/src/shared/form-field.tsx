@@ -8,19 +8,21 @@ interface FormFieldProps {
   readonly htmlFor: string
   readonly error?: string
   readonly children: ReactNode
+  /** Shows a coral asterisk after the label to indicate the field is required. */
+  readonly required?: boolean
   /** Overrides the default label size classes. Defaults to 'text-sm font-semibold'. */
   readonly labelSizeClassName?: string
   /** Overrides the label color when no error is present. Defaults to 'text-navy-soft'. */
   readonly labelDefaultColor?: string
 }
 
-export const FormField = ({ label, htmlFor, error, children, labelSizeClassName, labelDefaultColor }: FormFieldProps) => (
+export const FormField = ({ label, htmlFor, error, children, required, labelSizeClassName, labelDefaultColor }: FormFieldProps) => (
   <div className="mb-3">
     <label
       htmlFor={htmlFor}
       className={`block mb-1 ${labelSizeClassName ?? 'text-sm font-semibold'} ${error ? 'text-coral' : (labelDefaultColor ?? 'text-navy-soft')}`}
     >
-      {label}
+      <span className={required ? 'required-field' : undefined}>{label}</span>
     </label>
     {children}
     {error && <p className="mt-1 text-sm text-coral">{error}</p>}

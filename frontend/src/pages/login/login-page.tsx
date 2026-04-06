@@ -107,7 +107,7 @@ export const LoginPage = () => {
         <h2 className="font-display text-xl font-extrabold text-navy mb-6">Sign in</h2>
 
         <form onSubmit={handleSubmit}>
-          <FormField label="Email" htmlFor="email" error={errors.email}>
+          <FormField label="Email" htmlFor="email" error={errors.email} required>
             <input
               id="email"
               type="email"
@@ -120,7 +120,7 @@ export const LoginPage = () => {
               autoComplete="email"
             />
           </FormField>
-          <FormField label="Password" htmlFor="password" error={errors.password}>
+          <FormField label="Password" htmlFor="password" error={errors.password} required>
             <input
               id="password"
               type="password"

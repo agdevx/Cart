@@ -127,7 +127,7 @@ export const RegisterPage = () => {
 
         <form onSubmit={handleSubmit}>
           {/* Email Field */}
-          <FormField label="Email" htmlFor="email" error={errors.email}>
+          <FormField label="Email" htmlFor="email" error={errors.email} required>
             <input
               id="email"
               type="email"
@@ -142,7 +142,7 @@ export const RegisterPage = () => {
           </FormField>
 
           {/* Password Field */}
-          <FormField label="Password" htmlFor="password" error={errors.password}>
+          <FormField label="Password" htmlFor="password" error={errors.password} required>
             <input
               id="password"
               type="password"
@@ -159,7 +159,7 @@ export const RegisterPage = () => {
           </FormField>
 
           {/* Confirm Password Field */}
-          <FormField label="Confirm Password" htmlFor="confirmPassword" error={errors.confirmPassword}>
+          <FormField label="Confirm Password" htmlFor="confirmPassword" error={errors.confirmPassword} required>
             <input
               id="confirmPassword"
               type="password"
@@ -174,7 +174,7 @@ export const RegisterPage = () => {
           </FormField>
 
           {/* Name Field */}
-          <FormField label="Name" htmlFor="name" error={errors.name}>
+          <FormField label="Name" htmlFor="name" error={errors.name} required>
             <input
               id="name"
               type="text"

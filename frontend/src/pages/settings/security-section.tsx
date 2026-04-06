@@ -106,7 +106,7 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
         <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wider">Security</span>
       </div>
       <div key={formKey} className="rounded-xl bg-surface p-4">
-        <FormField label="Current Password" htmlFor="security-current-password" error={errors.currentPassword} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
+        <FormField label="Current Password" htmlFor="security-current-password" error={errors.currentPassword} required labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
           <input
             id="security-current-password"
             type="password"
@@ -119,7 +119,7 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
           />
         </FormField>
         <div>
-          <FormField label="New Password" htmlFor="security-new-password" error={errors.newPassword} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
+          <FormField label="New Password" htmlFor="security-new-password" error={errors.newPassword} required labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
             <input
               id="security-new-password"
               type="password"
@@ -133,7 +133,7 @@ export const SecuritySection = ({ isEditing, onStartEdit, onCancel, onSaved, suc
             <PasswordCriteria password={newPassword} />
           </FormField>
         </div>
-        <FormField label="Confirm New Password" htmlFor="security-confirm-password" error={errors.confirmPassword} labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
+        <FormField label="Confirm New Password" htmlFor="security-confirm-password" error={errors.confirmPassword} required labelSizeClassName="text-xs" labelDefaultColor="text-text-tertiary">
           <input
             id="security-confirm-password"
             type="password"
