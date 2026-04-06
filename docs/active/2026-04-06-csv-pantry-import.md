@@ -13,7 +13,7 @@ Name,Notes,Default Store,Scope
 Milk,,Costco,personal
 Chicken Breast,Boneless skinless,Costco,household
 Paper Towels,,Target,personal
-Ibuprofen,200mg,,personal
+Ibuprofen,200mg,,
 ```
 
 **Columns (matched by position):**
@@ -26,13 +26,16 @@ Ibuprofen,200mg,,personal
 | Scope | No | — | `personal` |
 
 **Parsing rules:**
+- RFC 4180 compliant — quoted fields are supported (e.g., `"Boneless, skinless"` embeds a comma)
+- UTF-8 BOM (`\uFEFF`) is stripped if present (common in Excel exports)
 - First row is always the header and is skipped
 - Whitespace trimmed on all values
 - Empty `Notes`, `Default Store`, and `Scope` are null/default
-- Rows with fewer than 4 columns are padded with empty values (a row with just a name is valid — notes, store, and scope all get defaults)
+- Rows with fewer than 4 columns are padded with empty values (a row with just a name is valid)
+- Rows with more than 4 columns — extra columns are silently ignored
 - Scope accepts `personal` or `household` (case-insensitive); invalid values make the row invalid
 - The frontend defaults blank/missing scope to `"personal"` before sending to the API
-- Entirely empty rows are silently skipped (not counted as invalid)
+- Entirely empty rows (literal blank lines or all-whitespace/comma rows) are silently skipped
 - Max 500 data rows per import
 
 ### Architecture: Frontend Parses, Backend Imports
@@ -41,7 +44,7 @@ The frontend handles file selection and CSV parsing. The backend handles all bus
 
 ### API
 
-**`POST /api/v1/inventory/import`**
+**`POST /api/v1/inventory/import`** — Returns `200 OK` always (the response body is a result report, not a creation confirmation).
 
 Request body:
 ```json
@@ -55,7 +58,7 @@ Request DTO per item:
 - `Name` (string, required, max 200)
 - `Notes` (string?, max 500)
 - `DefaultStore` (string?, max 100) — store name, not ID
-- `Scope` (string, required) — `"personal"` or `"household"`
+- `Scope` (string, required) — `"personal"` or `"household"`. The backend rejects blank/missing scope (the frontend always fills it in).
 
 Response body:
 ```json
@@ -70,7 +73,9 @@ Response body:
 
 ### Backend Processing Logic
 
-All steps happen within a single transaction:
+All steps happen within a single transaction. The import uses a dedicated service method — it does not loop through the existing single-item `CreateInventoryItem` path.
+
+The backend also enforces the 500-item limit, returning `400 Bad Request` if exceeded (defense-in-depth — the frontend checks first).
 
 1. **Validate rows** — reject rows with empty/missing name, name exceeding 200 chars, notes exceeding 500 chars, default store name exceeding 100 chars, or invalid scope value. Count as `invalidRowsSkipped`.
 
@@ -82,12 +87,13 @@ All steps happen within a single transaction:
    - All user's inventory items (personal + household) for duplicate detection
    - All user's stores (personal + household) for store matching
 
-5. **Duplicate detection** — case-insensitive name match within the same scope. An item named "Milk" in personal scope is not a duplicate of "Milk" in household scope. Count matches as `duplicatesSkipped`.
+5. **Duplicate detection** — case-insensitive name match within the same scope, checked against both existing items AND earlier rows in the same CSV. An item named "Milk" in personal scope is not a duplicate of "Milk" in household scope. Count matches as `duplicatesSkipped`.
 
 6. **Store resolution** — for each non-skipped row with a `DefaultStore` value:
    - Case-insensitive match against existing stores in the same scope
    - If no match, create the store in that scope (personal stores get `UserId`, household stores get `HouseholdId`)
    - Deduplicate within the CSV itself — if 10 rows reference "Costco" in personal scope, create one store
+   - Stores are scoped to match the item's scope. A personal item referencing "Costco" and a household item referencing "Costco" may result in two separate stores if "Costco" doesn't already exist in both scopes. This is consistent with the existing UI, which scopes store dropdowns to the item's scope.
 
 7. **Bulk create** — add all non-duplicate items with resolved store IDs.
 
@@ -95,7 +101,7 @@ All steps happen within a single transaction:
 
 ### Frontend: Settings UI
 
-A new **"Pantry"** section appears in Settings after the Security section.
+A new **"Pantry"** section appears in Settings after the Security section, as its own component file (following the `ProfileSection`/`SecuritySection` pattern).
 
 **Contents:**
 - Section header: "Pantry" (matches existing Profile/Security header style)
@@ -104,7 +110,7 @@ A new **"Pantry"** section appears in Settings after the Security section.
 - File picker button — native file input with `accept=".csv"`
 - Import button — disabled until a file is selected, shows spinner while importing
 
-After import completes, the file selection resets.
+After import completes, the file selection resets and the inventory + store TanStack Query caches are invalidated (since new items and stores may have been created).
 
 **Frontend validation (before API call):**
 - File must parse as CSV with data rows
@@ -115,15 +121,15 @@ After import completes, the file selection resets.
 
 Up to 3 toasts can appear after import. The logic:
 
-**Success toast (shown when at least one item was imported):**
+**Success toast (type: success, shown when at least one item was imported):**
 - Only personal items imported → "Imported X items"
 - Only household items imported → "Imported X items"
 - Both scopes imported → "Imported X personal items and Y household items"
 
-**Household skip toast (shown when `householdItemsSkipped > 0`):**
+**Household skip toast (type: warning, shown when `householdItemsSkipped > 0`):**
 - "Since you are not in a household, we could not import those items"
 
-**Validation/duplicate skip toast (shown when `duplicatesSkipped > 0` or `invalidRowsSkipped > 0`):**
+**Validation/duplicate skip toast (type: warning, shown when `duplicatesSkipped > 0` or `invalidRowsSkipped > 0`):**
 - Both → "X duplicate and Y invalid items were skipped"
 - Duplicates only → "X duplicate items were skipped"
 - Invalid only → "X invalid items were skipped"
@@ -134,7 +140,7 @@ If zero items were imported and there are only skip toasts, no success toast is 
 
 - **Wrong file type** — `accept=".csv"` on file input restricts selection. If a non-parseable file gets through, frontend shows error toast.
 - **Empty file** — frontend detects zero data rows, shows error toast, no API call.
-- **Row limit exceeded** — frontend checks after parsing, shows error toast, no API call.
+- **Row limit exceeded** — frontend checks after parsing, shows error toast, no API call. Backend also rejects with 400 as defense-in-depth.
 - **All rows skipped** — no success toast, only skip toast(s).
 - **Network/server error** — standard `apiFetch` error handling. Transaction rolls back, no items created.
 
@@ -147,8 +153,10 @@ Name,Notes,Default Store,Scope
 Milk,,Costco,personal
 Chicken Breast,Boneless skinless,Costco,household
 Paper Towels,,Target,personal
-Ibuprofen,200mg,,personal
+Ibuprofen,200mg,,
 ```
+
+The last row demonstrates that a blank scope defaults to `personal`.
 
 ---
 
