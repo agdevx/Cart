@@ -27,6 +27,7 @@ Ibuprofen,200mg,,
 
 **Parsing rules:**
 - RFC 4180 compliant — quoted fields are supported (e.g., `"Boneless, skinless"` embeds a comma)
+- **Encoding**: read as UTF-8 first. If the decoded text contains the Unicode replacement character (U+FFFD), re-read the file as Windows-1252 as a fallback. This handles both Excel "CSV UTF-8" and plain "CSV" exports.
 - UTF-8 BOM (`\uFEFF`) is stripped if present (common in Excel exports)
 - First row is always the header and is skipped
 - Whitespace trimmed on all values
