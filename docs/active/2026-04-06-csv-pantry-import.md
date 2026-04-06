@@ -1,4 +1,4 @@
-# CSV Pantry Import
+# CSV Pantry Import + Package Updates + Database Indexes
 
 ## Design Spec
 
@@ -149,6 +149,31 @@ Chicken Breast,Boneless skinless,Costco,household
 Paper Towels,,Target,personal
 Ibuprofen,200mg,,personal
 ```
+
+---
+
+## Package Updates
+
+### npm (Frontend)
+
+Update all npm packages to latest **except eslint** (which stays at its current version). Run `npm outdated` to identify what needs updating, then `npm update` / manual `package.json` edits as needed. Verify with `npm run dev`, `npx tsc -b --noEmit`, `npx eslint src/`, and `npx vitest run`.
+
+### NuGet (Backend)
+
+Update all NuGet packages across all projects in `backend/`. Run `dotnet list package --outdated` to identify updates, then update via `dotnet add package`. Verify with `dotnet build` and `dotnet test` across all test projects.
+
+---
+
+## Database Index Review
+
+Audit all tables and add indexes that benefit query patterns used by the application. Focus areas:
+
+- Foreign key columns used in WHERE/JOIN clauses that aren't already indexed
+- Columns used in filtering and ordering (e.g., `Name` for case-insensitive lookups)
+- Composite indexes for common query patterns
+- Review existing indexes for redundancy
+
+Changes are implemented as EF Core model configuration in `CartDbContext` and require a new migration.
 
 ## Implementation Plan
 
