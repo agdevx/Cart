@@ -111,7 +111,8 @@ A new **"Pantry"** section appears in Settings after the Security section, as it
 **Details:**
 - "Download Template" link — generates and downloads a CSV file client-side
 - File picker — styled file input with `accept=".csv"`, shows filename when selected
-- Import button — disabled until a file is selected, shows spinner while importing
+- Import button — disabled until a file is selected, shows only a spinner (no text) while importing
+- Filename display uses ellipsis truncation (`min-width: 0` + `text-overflow: ellipsis`) to prevent overflow
 
 After import completes, the file selection resets and the inventory + store TanStack Query caches are invalidated (since new items and stores may have been created).
 
