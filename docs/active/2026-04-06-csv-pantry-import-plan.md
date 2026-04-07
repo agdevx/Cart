@@ -68,9 +68,10 @@ Run from `frontend/`:
 npx tsc -b --noEmit
 npx eslint src/
 npx vitest run
+npm run dev
 ```
 
-All must pass with zero errors.
+All must pass with zero errors. Verify dev server starts successfully, then stop it.
 
 - [ ] **Step 4: Commit**
 
@@ -138,30 +139,18 @@ Review the current indexes and query patterns. Here are the existing indexes and
 - `InventoryItem`: indexes on `HouseholdId`, `OwnerUserId`
 - `UserPreferences`: unique on `UserId`
 
-**Recommended additions:**
+**Recommended addition:**
 
-1. `InventoryItem`: index on `DefaultStoreId` — used in `.Include(i => i.DefaultStore)` joins on every inventory query
-2. `TripItem`: index on `IsChecked` — trip items are frequently filtered by checked status in the UI
-3. `Trip`: index on `Status` — trips are filtered by open/completed status in queries and bulk updates
+1. `InventoryItem`: index on `DefaultStoreId` — used in `.Include(i => i.DefaultStore)` FK joins on every inventory query. This is the only missing FK index in the schema.
 
-- [ ] **Step 1: Add indexes to CartDbContext**
+Boolean columns (`IsCompleted`, `IsChecked`) have extremely low cardinality and offer negligible benefit as standalone indexes in SQLite. No indexes added for those.
+
+- [ ] **Step 1: Add index to CartDbContext**
 
 In `backend/AGDevX.Cart.Data/CartDbContext.cs`, add to the InventoryItem configuration:
 
 ```csharp
 entity.HasIndex(i => i.DefaultStoreId);
-```
-
-Add to the TripItem configuration:
-
-```csharp
-entity.HasIndex(ti => ti.IsChecked);
-```
-
-Add to the Trip configuration:
-
-```csharp
-entity.HasIndex(t => t.Status);
 ```
 
 - [ ] **Step 2: Create EF Core migration**
@@ -173,7 +162,7 @@ dotnet ef migrations add AddPerformanceIndexes --project AGDevX.Cart.Data --star
 
 - [ ] **Step 3: Review the generated migration**
 
-Read the migration file in `backend/AGDevX.Cart.Data/Migrations/` and verify it only contains `CreateIndex` calls for the three new indexes. No table drops, no column changes.
+Read the migration file in `backend/AGDevX.Cart.Data/Migrations/` and verify it only contains a `CreateIndex` call for `DefaultStoreId`. No table drops, no column changes.
 
 - [ ] **Step 4: Verify build and tests pass**
 
@@ -187,7 +176,7 @@ dotnet test
 
 ```bash
 git add backend/AGDevX.Cart.Data/
-git commit -m "feat: add database indexes for DefaultStoreId, IsChecked, Status"
+git commit -m "feat: add database index for InventoryItem.DefaultStoreId"
 ```
 
 ---
@@ -561,6 +550,39 @@ public class InventoryImportServiceTests
     }
 
     [Fact]
+    public async Task Should_AutoCreateHouseholdStore_WhenNotExisting()
+    {
+        //== Arrange
+        var userId = Guid.NewGuid();
+        var householdId = Guid.NewGuid();
+        await SeedUser(userId, householdId);
+
+        _mockInventoryRepository.Setup(r => r.GetPersonalItems(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<InventoryItem>());
+        _mockInventoryRepository.Setup(r => r.GetHouseholdItems(householdId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<InventoryItem>());
+        _mockStoreRepository.Setup(r => r.GetPersonalStores(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Store>());
+        _mockStoreRepository.Setup(r => r.GetHouseholdStores(householdId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Store>());
+
+        var items = new List<ImportInventoryItemRequest>
+        {
+            new() { Name = "Milk", DefaultStore = "Costco", Scope = "household" },
+        };
+
+        //== Act
+        var result = await _inventoryService.ImportInventoryItems(items, userId);
+
+        //== Assert
+        result.HouseholdItemsImported.Should().Be(1);
+
+        var createdStore = _dbContext.ChangeTracker.Entries<Store>().Single().Entity;
+        createdStore.HouseholdId.Should().Be(householdId);
+        createdStore.UserId.Should().BeNull();
+    }
+
+    [Fact]
     public async Task Should_ReuseExistingStore_CaseInsensitive()
     {
         //== Arrange
@@ -658,11 +680,13 @@ public async Task<ImportInventoryResult> ImportInventoryItems(IList<ImportInvent
     foreach (var item in items)
     {
         var trimmedName = item.Name?.Trim() ?? "";
+        var trimmedNotes = item.Notes?.Trim();
+        var trimmedStore = item.DefaultStore?.Trim();
         var trimmedScope = item.Scope?.Trim().ToLowerInvariant() ?? "";
 
         if (string.IsNullOrWhiteSpace(trimmedName) || trimmedName.Length > 200
-            || (item.Notes != null && item.Notes.Length > 500)
-            || (item.DefaultStore != null && item.DefaultStore.Trim().Length > 100)
+            || (trimmedNotes != null && trimmedNotes.Length > 500)
+            || (trimmedStore != null && trimmedStore.Length > 100)
             || (trimmedScope != "personal" && trimmedScope != "household"))
         {
             result.InvalidRowsSkipped++;
@@ -670,8 +694,8 @@ public async Task<ImportInventoryResult> ImportInventoryItems(IList<ImportInvent
         }
 
         item.Name = trimmedName;
-        item.Notes = item.Notes?.Trim();
-        item.DefaultStore = item.DefaultStore?.Trim();
+        item.Notes = trimmedNotes;
+        item.DefaultStore = trimmedStore;
         item.Scope = trimmedScope;
 
         if (trimmedScope == "household")
@@ -707,8 +731,12 @@ public async Task<ImportInventoryResult> ImportInventoryItems(IList<ImportInvent
         existingHouseholdItems.Select(i => i.Name.ToLowerInvariant()));
 
     //== Build store lookup maps
-    var personalStoreMap = existingPersonalStores.ToDictionary(s => s.Name.ToLowerInvariant(), s => s.Id);
-    var householdStoreMap = existingHouseholdStores.ToDictionary(s => s.Name.ToLowerInvariant(), s => s.Id);
+    var personalStoreMap = existingPersonalStores
+        .GroupBy(s => s.Name.ToLowerInvariant())
+        .ToDictionary(g => g.Key, g => g.First().Id);
+    var householdStoreMap = existingHouseholdStores
+        .GroupBy(s => s.Name.ToLowerInvariant())
+        .ToDictionary(g => g.Key, g => g.First().Id);
 
     //== Step 3: Process rows, resolve stores, deduplicate
     var itemsToCreate = new List<InventoryItem>();
@@ -880,10 +908,114 @@ using AGDevX.Cart.Shared.DTOs;
 
 - [ ] **Step 3: Write controller tests**
 
-Add tests to the existing `InventoryControllerTests.cs` file following the same patterns used in that file. Tests should cover:
-- Successful import returns `200 OK` with the result DTO
-- Over 500 items returns `400 Bad Request`
-- Unauthorized user returns `401`
+Add to `backend/AGDevX.Cart.Api.Tests/Controllers/InventoryControllerTests.cs`:
+
+```csharp
+[Fact]
+public async Task Should_ReturnOk_When_ImportSucceeds()
+{
+    // Arrange
+    var mockService = new Mock<IInventoryService>();
+    var controller = new InventoryController(mockService.Object);
+    var userId = Guid.NewGuid();
+
+    var user = new ClaimsPrincipal(new ClaimsIdentity([
+        new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+    ]));
+
+    controller.ControllerContext = new ControllerContext
+    {
+        HttpContext = new DefaultHttpContext { User = user }
+    };
+
+    var importResult = new ImportInventoryResult
+    {
+        PersonalItemsImported = 3,
+        HouseholdItemsImported = 0,
+        DuplicatesSkipped = 1,
+        HouseholdItemsSkipped = 0,
+        InvalidRowsSkipped = 0,
+    };
+
+    var items = new List<ImportInventoryItemRequest>
+    {
+        new() { Name = "Milk", Scope = "personal" },
+    };
+
+    mockService.Setup(s => s.ImportInventoryItems(It.IsAny<IList<ImportInventoryItemRequest>>(), userId, It.IsAny<CancellationToken>()))
+               .ReturnsAsync(importResult);
+
+    // Act
+    var result = await controller.Import(items);
+
+    // Assert
+    var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+    okResult.Value.Should().BeEquivalentTo(importResult);
+}
+
+[Fact]
+public async Task Should_ReturnBadRequest_When_ImportExceedsLimit()
+{
+    // Arrange
+    var mockService = new Mock<IInventoryService>();
+    var controller = new InventoryController(mockService.Object);
+    var userId = Guid.NewGuid();
+
+    var user = new ClaimsPrincipal(new ClaimsIdentity([
+        new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+    ]));
+
+    controller.ControllerContext = new ControllerContext
+    {
+        HttpContext = new DefaultHttpContext { User = user }
+    };
+
+    var items = Enumerable.Range(0, 501)
+        .Select(i => new ImportInventoryItemRequest { Name = $"Item {i}", Scope = "personal" })
+        .ToList();
+
+    mockService.Setup(s => s.ImportInventoryItems(It.IsAny<IList<ImportInventoryItemRequest>>(), userId, It.IsAny<CancellationToken>()))
+               .ThrowsAsync(new ArgumentException("Import cannot exceed 500 items"));
+
+    // Act
+    var result = await controller.Import(items);
+
+    // Assert
+    result.Should().BeOfType<BadRequestObjectResult>();
+}
+
+[Fact]
+public async Task Should_ReturnUnauthorized_When_ImportUserNotFound()
+{
+    // Arrange
+    var mockService = new Mock<IInventoryService>();
+    var controller = new InventoryController(mockService.Object);
+    var userId = Guid.NewGuid();
+
+    var user = new ClaimsPrincipal(new ClaimsIdentity([
+        new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+    ]));
+
+    controller.ControllerContext = new ControllerContext
+    {
+        HttpContext = new DefaultHttpContext { User = user }
+    };
+
+    var items = new List<ImportInventoryItemRequest>
+    {
+        new() { Name = "Milk", Scope = "personal" },
+    };
+
+    mockService.Setup(s => s.ImportInventoryItems(It.IsAny<IList<ImportInventoryItemRequest>>(), userId, It.IsAny<CancellationToken>()))
+               .ThrowsAsync(new UnauthorizedAccessException("User not found"));
+
+    // Act
+    var result = await controller.Import(items);
+
+    // Assert
+    result.Should().BeOfType<UnauthorizedObjectResult>();
+}
+```
 
 - [ ] **Step 4: Run all API tests**
 
@@ -945,7 +1077,13 @@ Create `frontend/src/utils/tests/csv-parser.test.ts`:
 
 import { describe, expect, it } from 'vitest'
 
-import { parseCsv, readFileWithEncodingFallback } from '../csv-parser'
+import { parseCsv } from '../csv-parser'
+
+/*
+ * readFileWithEncodingFallback is not unit-tested here because it depends on
+ * the browser FileReader API. It should be verified via manual testing with
+ * Excel-exported CSVs in both "CSV UTF-8" and plain "CSV" formats.
+ */
 
 describe('parseCsv', () => {
   it('should parse simple CSV rows', () => {
@@ -1321,6 +1459,33 @@ describe('PantrySection', () => {
 
     render(createElement(PantrySection), { wrapper })
     expect(screen.getByRole('button', { name: /import/i })).toBeDisabled()
+  })
+
+  it('should enable import button after file selection', async () => {
+    render(createElement(PantrySection), { wrapper })
+
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    const csvFile = new File(['Name,Notes,Store,Scope\nMilk,,,personal'], 'test.csv', { type: 'text/csv' })
+
+    await userEvent.upload(fileInput, csvFile)
+
+    expect(screen.getByRole('button', { name: /import/i })).toBeEnabled()
+    expect(screen.getByText('test.csv')).toBeInTheDocument()
+  })
+
+  it('should call mutate with parsed CSV data on import', async () => {
+    render(createElement(PantrySection), { wrapper })
+
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    const csvFile = new File(['Name,Notes,Store,Scope\nMilk,,Costco,personal'], 'test.csv', { type: 'text/csv' })
+
+    await userEvent.upload(fileInput, csvFile)
+    await userEvent.click(screen.getByRole('button', { name: /import/i }))
+
+    expect(mockMutate).toHaveBeenCalledWith(
+      [{ name: 'Milk', notes: null, defaultStore: 'Costco', scope: 'personal' }],
+      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
+    )
   })
 })
 ```
