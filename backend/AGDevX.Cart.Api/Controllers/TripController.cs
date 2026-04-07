@@ -68,6 +68,22 @@ public class TripController(ITripService tripService) : ControllerBase
         }
     }
 
+    //== Duplicate an existing trip with its items
+    [HttpPost("{id}/duplicate")]
+    public async Task<IActionResult> Duplicate(Guid id, [FromBody] CreateTripRequest request, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var trip = await tripService.DuplicateTrip(id, request.Name, request.TripDate, request.HouseholdId, userId, cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = trip.Id }, trip);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
+        }
+    }
+
     //== Update an existing trip
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTripRequest request, CancellationToken cancellationToken = default)

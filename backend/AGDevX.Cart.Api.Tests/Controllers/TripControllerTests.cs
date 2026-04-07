@@ -408,4 +408,48 @@ public class TripControllerTests
         mockService.Verify(s => s.UpdateTrip(tripId, request.Name, tripDate, userId, It.IsAny<CancellationToken>()), Times.Once);
         result.Should().BeOfType<NoContentResult>();
     }
+
+    [Fact]
+    public async Task Should_ReturnCreated_When_DuplicateSucceeds()
+    {
+        // Arrange
+        var mockService = new Mock<ITripService>();
+        var userId = Guid.NewGuid();
+        var sourceTripId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
+
+        var newTrip = new Trip { Id = Guid.NewGuid(), Name = "Dup Trip" };
+        mockService.Setup(s => s.DuplicateTrip(sourceTripId, "Dup Trip", null, null, userId, It.IsAny<CancellationToken>()))
+                   .ReturnsAsync(newTrip);
+
+        var request = new CreateTripRequest { Name = "Dup Trip" };
+
+        // Act
+        var result = await controller.Duplicate(sourceTripId, request);
+
+        // Assert
+        var createdResult = result.Should().BeOfType<CreatedAtActionResult>().Subject;
+        createdResult.Value.Should().BeEquivalentTo(newTrip);
+    }
+
+    [Fact]
+    public async Task Should_ReturnUnauthorized_When_DuplicateAccessDenied()
+    {
+        // Arrange
+        var mockService = new Mock<ITripService>();
+        var userId = Guid.NewGuid();
+        var sourceTripId = Guid.NewGuid();
+        var controller = CreateController(mockService, userId);
+
+        mockService.Setup(s => s.DuplicateTrip(sourceTripId, It.IsAny<string>(), It.IsAny<DateOnly?>(), It.IsAny<Guid?>(), userId, It.IsAny<CancellationToken>()))
+                   .ThrowsAsync(new UnauthorizedAccessException("No access"));
+
+        var request = new CreateTripRequest { Name = "Dup" };
+
+        // Act
+        var result = await controller.Duplicate(sourceTripId, request);
+
+        // Assert
+        result.Should().BeOfType<UnauthorizedObjectResult>();
+    }
 }
