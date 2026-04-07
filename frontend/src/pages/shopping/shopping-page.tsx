@@ -20,6 +20,7 @@ import { SectionHeader } from '@/shared/section-header'
 import { SkeletonCard } from '@/shared/skeleton-card'
 import { TripCard } from '@/shared/trip-card'
 
+import { DuplicateTripDialog } from './duplicate-trip-dialog'
 import { TripCreateForm } from './trip-create-form'
 
 export const ShoppingPage = () => {
@@ -49,6 +50,7 @@ export const ShoppingPage = () => {
   // formKey forces the form to remount when opened, resetting its internal state
   const [formKey, setFormKey] = useState(0)
   const [showCompleted, setShowCompleted] = useState(false)
+  const [duplicatingTripId, setDuplicatingTripId] = useState<string | null>(null)
   const [initialDate, setInitialDate] = useState<string | undefined>(planDateParam ?? undefined)
 
   const inProgressTrips = trips?.filter((trip) => trip.isStarted && !trip.isCompleted) || []
@@ -118,7 +120,7 @@ export const ShoppingPage = () => {
           </div>
           <div className="space-y-3">
             {inProgressTrips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} onDelete={handleDelete} onReopen={handleReopen} />
+              <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} onDelete={handleDelete} onReopen={handleReopen} onDuplicate={(tripId) => setDuplicatingTripId(tripId)} />
             ))}
           </div>
         </div>
@@ -132,7 +134,7 @@ export const ShoppingPage = () => {
           </div>
           <div className="space-y-3">
             {planningTrips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} onDelete={handleDelete} onReopen={handleReopen} />
+              <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} onDelete={handleDelete} onReopen={handleReopen} onDuplicate={(tripId) => setDuplicatingTripId(tripId)} />
             ))}
           </div>
         </div>
@@ -154,7 +156,7 @@ export const ShoppingPage = () => {
             <div className="overflow-hidden">
               <div className="space-y-3">
                 {completedTrips.map((trip) => (
-                  <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} onDelete={handleDelete} onReopen={handleReopen} />
+                  <TripCard key={trip.id} trip={trip} onUpdate={handleUpdate} onDelete={handleDelete} onReopen={handleReopen} onDuplicate={(tripId) => setDuplicatingTripId(tripId)} />
                 ))}
               </div>
             </div>
@@ -173,6 +175,22 @@ export const ShoppingPage = () => {
       )}
 
       </div>
+
+      {duplicatingTripId && (() => {
+        const duplicatingTrip = trips?.find((t) => t.id === duplicatingTripId) ?? null
+        return duplicatingTrip && (
+          <DuplicateTripDialog
+            sourceTripId={duplicatingTripId}
+            sourceHouseholdId={duplicatingTrip.householdId ?? null}
+            household={household ? { id: household.id, name: household.name } : null}
+            onClose={() => setDuplicatingTripId(null)}
+            onSuccess={(newTripId) => {
+              setDuplicatingTripId(null)
+              navigate(tripDetailPath(newTripId))
+            }}
+          />
+        )
+      })()}
 
       {/* FAB — hidden while create form is open to avoid double-entry confusion */}
       {!showCreateForm && (

@@ -14,4 +14,5 @@ public interface ITripService
     Task<Trip> StartTrip(Guid tripId, Guid userId, CancellationToken cancellationToken = default);
     Task<Trip> CompleteTrip(Guid tripId, Guid userId, CancellationToken cancellationToken = default);
     Task<Trip> ReopenTrip(Guid tripId, Guid userId, CancellationToken cancellationToken = default);
+    Task<Trip> DuplicateTrip(Guid sourceTripId, string name, DateOnly? tripDate, Guid? householdId, Guid userId, CancellationToken cancellationToken = default);
 }

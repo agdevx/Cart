@@ -1,17 +1,20 @@
 // ABOUTME: Trip detail page for planning mode
 // ABOUTME: Allows adding items to trip and starting shopping session
 
-import { useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
-import { ArrowLeft, ShoppingCart } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { ArrowLeft, Copy, ShoppingCart } from 'lucide-react'
 
+import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
 import { useDeleteTripItemMutation } from '@/apis/agdevx-cart-api/trip/delete-trip-item.mutation'
 import { useStartTripMutation } from '@/apis/agdevx-cart-api/trip/start-trip.mutation'
 import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-trip-item.mutation'
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
-import { activeTripPath, ROUTES, tripAddItemsPath } from '@/routes'
+import { activeTripPath, ROUTES, tripAddItemsPath, tripDetailPath } from '@/routes'
+import { useSSE } from '@/services/use-sse.service'
 import { useStoreAccordionState } from '@/services/use-store-accordion-state.service'
 import { useStoresWithDisplayNamesService } from '@/services/use-stores-with-display-names.service'
 import { EmptyState } from '@/shared/empty-state'
@@ -23,16 +26,30 @@ import { StoreAccordion } from '@/shared/store-accordion'
 import { TripItemRow } from '@/shared/trip-item-row'
 import { groupTripItemsByStore } from '@/utils/group-trip-items-by-store'
 
+import { DuplicateTripDialog } from './duplicate-trip-dialog'
+
 export const TripDetailPage = () => {
   const { tripId } = useParams<{ tripId: string }>()
   const navigate = useNavigate()
+  const { data: household } = useHouseholdQuery()
   const { data: trip, isLoading: tripLoading } = useTripQuery(tripId!)
   const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!)
   const { stores, storeDisplayNames } = useStoresWithDisplayNamesService()
   const { isExpanded, toggleStore } = useStoreAccordionState(tripId!, 'planning', trip?.isCompleted ?? false)
+  const queryClient = useQueryClient()
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false)
   const startMutation = useStartTripMutation()
   const updateMutation = useUpdateTripItemMutation()
   const deleteMutation = useDeleteTripItemMutation()
+
+  const handleSSEMessage = useCallback(
+    (_data: unknown) => {
+      queryClient.invalidateQueries({ queryKey: ['trips', tripId, 'items'] })
+    },
+    [queryClient, tripId],
+  )
+
+  useSSE(`/api/v1/trips/${tripId}/events`, handleSSEMessage, !!tripId && !trip?.isCompleted)
 
   const groupedItems = useMemo(() => {
     if (!tripItems) return []
@@ -94,7 +111,16 @@ export const TripDetailPage = () => {
           <ArrowLeft className="w-4 h-4" />
           Back to Trips
         </button>
-        <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">{trip.name}</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="font-display text-[28px] font-extrabold text-navy tracking-tight">{trip.name}</h1>
+          <button
+            onClick={() => setShowDuplicateDialog(true)}
+            className="flex items-center gap-1.5 text-sm font-semibold text-teal hover:text-teal-light transition-colors"
+          >
+            <Copy className="w-4 h-4" />
+            Duplicate
+          </button>
+        </div>
       </div>
 
       {!readOnly && (
@@ -157,6 +183,19 @@ export const TripDetailPage = () => {
           actions={[
             { label: 'Add Items', onClick: () => navigate(tripAddItemsPath(tripId!)) },
           ]}
+        />
+      )}
+
+      {showDuplicateDialog && trip && (
+        <DuplicateTripDialog
+          sourceTripId={trip.id}
+          sourceHouseholdId={trip.householdId ?? null}
+          household={household ? { id: household.id, name: household.name } : null}
+          onClose={() => setShowDuplicateDialog(false)}
+          onSuccess={(newTripId) => {
+            setShowDuplicateDialog(false)
+            navigate(tripDetailPath(newTripId))
+          }}
         />
       )}
     </div>

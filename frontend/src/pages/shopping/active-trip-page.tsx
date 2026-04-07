@@ -26,6 +26,8 @@ import { TripItemRow } from '@/shared/trip-item-row'
 import { fireCompletionConfetti } from '@/utils/confetti'
 import { groupTripItemsByStore } from '@/utils/group-trip-items-by-store'
 
+import { PresenceBanner } from './presence-banner'
+
 export const ActiveTripPage = () => {
   const { tripId } = useParams<{ tripId: string }>()
   const navigate = useNavigate()
@@ -34,6 +36,7 @@ export const ActiveTripPage = () => {
   const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!)
   const { stores, storeDisplayNames } = useStoresWithDisplayNamesService()
   const { isExpanded, toggleStore, autoCollapseIfAllChecked, cleanup } = useStoreAccordionState(tripId!, 'shopping', trip?.isCompleted ?? false)
+  const [presenceUsers, setPresenceUsers] = useState<{ userId: string; userName: string }[]>([])
   const checkMutation = useCheckTripItemMutation()
   const completeMutation = useCompleteTripMutation()
   const updateMutation = useUpdateTripItemMutation()
@@ -53,15 +56,40 @@ export const ActiveTripPage = () => {
   }, [groupedItems, autoCollapseIfAllChecked])
 
   const handleSSEMessage = useCallback(
-    (_data: unknown) => {
-      // Invalidate trip items query to refetch with latest data
-      queryClient.invalidateQueries({ queryKey: ['trips', tripId, 'items'] })
+    (data: unknown) => {
+      const event = data as { eventType?: string; data?: string }
+      if (!event?.eventType) return
+
+      switch (event.eventType) {
+        case 'PresenceSnapshot': {
+          const parsed = JSON.parse(event.data ?? '{}') as { users?: { userId: string; userName: string }[] }
+          setPresenceUsers(parsed.users ?? [])
+          break
+        }
+
+        case 'UserJoined': {
+          const parsed = JSON.parse(event.data ?? '{}') as { userId: string; userName: string }
+          setPresenceUsers((prev) => [...prev.filter((u) => u.userId !== parsed.userId), parsed])
+          break
+        }
+
+        case 'UserLeft': {
+          const parsed = JSON.parse(event.data ?? '{}') as { userId: string }
+          setPresenceUsers((prev) => prev.filter((u) => u.userId !== parsed.userId))
+          break
+        }
+
+        default:
+          //== Item events: invalidate cache for refetch
+          queryClient.invalidateQueries({ queryKey: ['trips', tripId, 'items'] })
+          break
+      }
     },
-    [queryClient, tripId]
+    [queryClient, tripId],
   )
 
   // Connect to SSE for real-time updates
-  useSSE(`/api/v1/trips/${tripId}/events`, handleSSEMessage, !!tripId)
+  useSSE(`/api/v1/trips/${tripId}/events`, handleSSEMessage, !!tripId && !trip?.isCompleted)
 
   const handleToggleItem = (tripItemId: string, currentlyChecked: boolean) => {
     if (!tripId) return
@@ -164,6 +192,8 @@ export const ActiveTripPage = () => {
           </div>
         </div>
       </div>
+
+      <PresenceBanner users={presenceUsers} />
 
       <div className='mb-4'>
         <SectionHeader title={`Shopping List (${totalCount})`} />

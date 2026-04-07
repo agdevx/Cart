@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { MoreVertical, Pencil, RotateCcw, Trash2 } from 'lucide-react'
+import { Copy, MoreVertical, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 
 import type { Trip } from '@/apis/agdevx-cart-api/models/trip'
 import { activeTripPath, tripDetailPath } from '@/routes'
@@ -19,12 +19,13 @@ interface TripCardProps {
   onUpdate: (tripId: string, name: string, tripDate: string | null) => void
   onDelete: (tripId: string, tripName: string) => void
   onReopen: (tripId: string) => void
+  onDuplicate: (tripId: string) => void
 }
 
 /** Duration in milliseconds the user must hold the delete button before it fires */
 const DELETE_HOLD_DURATION_MS = 3000
 
-export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) => {
+export const TripCard = ({ trip, onUpdate, onDelete, onReopen, onDuplicate }: TripCardProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState(trip.name)
@@ -62,6 +63,13 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
     e.stopPropagation()
     setMenuOpen(false)
     onReopen(trip.id)
+  }
+
+  const handleDuplicateClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setMenuOpen(false)
+    onDuplicate(trip.id)
   }
 
   const commitEdit = () => {
@@ -113,6 +121,13 @@ export const TripCard = ({ trip, onUpdate, onDelete, onReopen }: TripCardProps) 
               >
                 <Pencil className="w-4 h-4" />
                 Edit
+              </button>
+              <button
+                onClick={handleDuplicateClick}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-navy hover:bg-navy/5 transition-colors"
+              >
+                <Copy className="w-4 h-4" />
+                Duplicate
               </button>
               {trip.isCompleted && (
                 <button

@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated:** 2026-04-01
+**Last Updated:** 2026-04-07
 
 ## How to Use This File
 
@@ -22,10 +22,10 @@ This is the single source of truth for where the project stands. Read it at the 
 | Suite              | Tests | Files                      |
 | ------------------ | ----- | -------------------------- |
 | Backend — Data     | 70    | AGDevX.Cart.Data.Tests     |
-| Backend — Services | 129   | AGDevX.Cart.Services.Tests |
-| Backend — API      | 112   | AGDevX.Cart.Api.Tests      |
+| Backend — Services | 156   | AGDevX.Cart.Services.Tests |
+| Backend — API      | 117   | AGDevX.Cart.Api.Tests      |
 | Backend — Auth     | 22    | AGDevX.Cart.Auth.Tests     |
-| Frontend — Vitest  | 555   | 86 test files              |
+| Frontend — Vitest  | 593   | 91 test files              |
 
 ## Known Issues / Tech Debt
 
@@ -38,22 +38,17 @@ This is the single source of truth for where the project stands. Read it at the 
 
 | Enhancement               | Planning Doc                                                                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Contributor/SSE Epic      | No planning doc yet (trip collaborator UX, SSE visibility filtering deferred from single-household migration, SSE heartbeat needed for Cloudflare Tunnel — 100s idle timeout kills connections without keepalive) |
 | Home Page — Trip Templates | No planning doc yet                                                                                                              |
 | Camera / Barcode Scanning | No planning doc yet                                                                                                             |
 | Inventory Categories      | No planning doc yet                                                                                                             |
-| Seed pantry items         | No planning doc yet                                                                                                             |
-| CSV Import (Stores & Items) | No planning doc yet (import from CSV + downloadable CSV templates)                                                             |
-| Database Index Review     | No planning doc yet (audit and add proper indexes to DB tables)                                                                 |
 | Container Image Versioning | No planning doc yet (review tagging strategy for Docker Hub images)                                                             |
-| NuGet Package Updates     | No planning doc yet                                                                                                             |
 | Container Health Checks   | No planning doc yet (Docker HEALTHCHECK in Dockerfiles + depends_on conditions)                                                 |
 
 ## In Progress Enhancements
 
 | Enhancement       | Planning Doc                                                                                  |
 | ----------------- | --------------------------------------------------------------------------------------------- |
-| Cloudflare Tunnel Migration | [docs/active/2026-03-31-cloudflare-tunnel.md](../docs/active/2026-03-31-cloudflare-tunnel.md) |
+| *(none)* | |
 
 ## Completed Enhancements
 
@@ -82,3 +77,7 @@ This is the single source of truth for where the project stands. Read it at the 
 | Home Page (Greeting, Trip Calendar, Weather, Preferences)  | 2026-03-29 | [docs/archive/2026-03-29-home-page.md](../docs/archive/2026-03-29-home-page.md)                                                         |
 | Single Household Architecture                              | 2026-03-31 | [docs/archive/2026-03-30-single-household.md](../docs/archive/2026-03-30-single-household.md)                                           |
 | Docker Deployment                                          | 2026-03-31 | [docs/archive/2026-03-28-docker-deployment.md](../docs/archive/2026-03-28-docker-deployment.md)                                         |
+| CSV Pantry Import + Package Updates + Database Indexes      | 2026-04-07 | [docs/archive/2026-04-06-csv-pantry-import.md](../docs/archive/2026-04-06-csv-pantry-import.md)                                         |
+| Trip Duplication                                           | 2026-04-07 | [docs/archive/2026-04-06-trip-duplication.md](../docs/archive/2026-04-06-trip-duplication.md)                                           |
+| Contributor/SSE Epic (Heartbeat, Presence, All-Page SSE)   | 2026-04-07 | [docs/archive/2026-04-06-contributor-sse-epic.md](../docs/archive/2026-04-06-contributor-sse-epic.md)                                   |
+| Cloudflare Tunnel Migration                                | 2026-04-07 | [docs/archive/2026-03-31-cloudflare-tunnel.md](../docs/archive/2026-03-31-cloudflare-tunnel.md)                                         |

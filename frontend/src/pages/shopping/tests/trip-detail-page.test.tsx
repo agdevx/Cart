@@ -34,6 +34,10 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
+vi.mock('@/services/use-sse.service', () => ({
+  useSSE: vi.fn(),
+}))
+
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>{children}</BrowserRouter>

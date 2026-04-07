@@ -95,7 +95,7 @@ describe('TripCard', () => {
 
   it('renders planning trip with name and trip date', () => {
     render(
-      <TripCard trip={planningTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={planningTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -105,7 +105,7 @@ describe('TripCard', () => {
 
   it('renders started trip with name and trip date', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -115,7 +115,7 @@ describe('TripCard', () => {
 
   it('renders completed trip with completion date', () => {
     render(
-      <TripCard trip={completedTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={completedTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -125,7 +125,7 @@ describe('TripCard', () => {
 
   it('shows kebab menu with Edit and Delete for active trip', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -139,7 +139,7 @@ describe('TripCard', () => {
 
   it('shows kebab menu with Edit, Reopen, and Delete for completed trip', () => {
     render(
-      <TripCard trip={completedTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={completedTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -152,7 +152,7 @@ describe('TripCard', () => {
 
   it('shows edit form below card content when Edit is clicked', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -172,7 +172,7 @@ describe('TripCard', () => {
 
   it('calls onUpdate with name when Save is clicked', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -188,7 +188,7 @@ describe('TripCard', () => {
 
   it('calls onUpdate with name for personal trips', () => {
     render(
-      <TripCard trip={personalTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={personalTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -202,7 +202,7 @@ describe('TripCard', () => {
 
   it('cancels edit on Cancel button without calling onUpdate', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -222,7 +222,7 @@ describe('TripCard', () => {
 
   it('disables Save button when name is empty', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -237,7 +237,7 @@ describe('TripCard', () => {
 
   it('opens confirmation dialog when Delete is clicked in kebab menu', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -256,7 +256,7 @@ describe('TripCard', () => {
     vi.useFakeTimers()
 
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -280,7 +280,7 @@ describe('TripCard', () => {
     vi.useFakeTimers()
 
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -301,7 +301,7 @@ describe('TripCard', () => {
 
   it('closes confirmation dialog when Cancel is clicked', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -320,7 +320,7 @@ describe('TripCard', () => {
 
   it('calls onReopen with tripId when Reopen is clicked on completed trip', () => {
     render(
-      <TripCard trip={completedTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={completedTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -332,7 +332,7 @@ describe('TripCard', () => {
 
   it('closes kebab menu on outside click', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -349,7 +349,7 @@ describe('TripCard', () => {
 
   it('closes kebab menu on Escape key', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 
@@ -362,7 +362,7 @@ describe('TripCard', () => {
 
   it('active trip card links to /shopping/{tripId}/active', () => {
     render(
-      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} />,
+      <TripCard trip={activeTrip} onUpdate={mockOnUpdate} onDelete={mockOnDelete} onReopen={mockOnReopen} onDuplicate={vi.fn()} />,
       { wrapper }
     )
 

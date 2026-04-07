@@ -15,6 +15,7 @@ public class InventoryServiceTests
 {
     private readonly Mock<IInventoryRepository> _mockInventoryRepository;
     private readonly Mock<ITripItemRepository> _mockTripItemRepository;
+    private readonly Mock<IStoreRepository> _mockStoreRepository;
     private readonly CartDbContext _dbContext;
     private readonly InventoryService _inventoryService;
 
@@ -22,13 +23,14 @@ public class InventoryServiceTests
     {
         _mockInventoryRepository = new Mock<IInventoryRepository>();
         _mockTripItemRepository = new Mock<ITripItemRepository>();
+        _mockStoreRepository = new Mock<IStoreRepository>();
 
         var options = new DbContextOptionsBuilder<CartDbContext>()
                       .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                       .Options;
         _dbContext = new CartDbContext(options);
 
-        _inventoryService = new InventoryService(_mockInventoryRepository.Object, _dbContext, _mockTripItemRepository.Object);
+        _inventoryService = new InventoryService(_mockInventoryRepository.Object, _dbContext, _mockTripItemRepository.Object, _mockStoreRepository.Object);
     }
 
     private async Task SeedUser(Guid userId, Guid? householdId = null)

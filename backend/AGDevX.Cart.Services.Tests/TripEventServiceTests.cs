@@ -130,4 +130,171 @@ public class TripEventServiceTests
         // Assert
         observable1.Should().BeSameAs(observable2);
     }
+
+    [Fact]
+    public void Should_PublishUserJoined_When_FirstConnectionForUser()
+    {
+        // Arrange
+        var service = new TripEventService();
+        var tripId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var receivedEvents = new List<TripEvent>();
+
+        var observable = service.SubscribeToTrip(tripId);
+        observable.Subscribe(e => receivedEvents.Add(e));
+
+        // Act
+        service.RegisterPresence(tripId, userId, "Sarah");
+
+        // Assert
+        receivedEvents.Should().HaveCount(1);
+        receivedEvents[0].EventType.Should().Be("UserJoined");
+        receivedEvents[0].Data.Should().Contain("Sarah");
+    }
+
+    [Fact]
+    public void Should_NotPublishUserJoined_When_AdditionalTabForSameUser()
+    {
+        // Arrange
+        var service = new TripEventService();
+        var tripId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var receivedEvents = new List<TripEvent>();
+
+        var observable = service.SubscribeToTrip(tripId);
+        observable.Subscribe(e => receivedEvents.Add(e));
+
+        service.RegisterPresence(tripId, userId, "Sarah");
+        receivedEvents.Clear();
+
+        // Act — second tab
+        service.RegisterPresence(tripId, userId, "Sarah");
+
+        // Assert
+        receivedEvents.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Should_PublishUserLeft_When_LastConnectionForUser()
+    {
+        // Arrange
+        var service = new TripEventService();
+        var tripId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var receivedEvents = new List<TripEvent>();
+
+        var observable = service.SubscribeToTrip(tripId);
+        observable.Subscribe(e => receivedEvents.Add(e));
+
+        service.RegisterPresence(tripId, userId, "Sarah");
+        receivedEvents.Clear();
+
+        // Act
+        service.UnregisterPresence(tripId, userId);
+
+        // Assert
+        receivedEvents.Should().HaveCount(1);
+        receivedEvents[0].EventType.Should().Be("UserLeft");
+    }
+
+    [Fact]
+    public void Should_NotPublishUserLeft_When_OtherTabsRemain()
+    {
+        // Arrange
+        var service = new TripEventService();
+        var tripId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var receivedEvents = new List<TripEvent>();
+
+        var observable = service.SubscribeToTrip(tripId);
+        observable.Subscribe(e => receivedEvents.Add(e));
+
+        service.RegisterPresence(tripId, userId, "Sarah");
+        service.RegisterPresence(tripId, userId, "Sarah"); // second tab
+        receivedEvents.Clear();
+
+        // Act — close one tab
+        service.UnregisterPresence(tripId, userId);
+
+        // Assert
+        receivedEvents.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Should_ReturnPresence_ExcludingSpecifiedUser()
+    {
+        // Arrange
+        var service = new TripEventService();
+        var tripId = Guid.NewGuid();
+        var user1 = Guid.NewGuid();
+        var user2 = Guid.NewGuid();
+
+        service.SubscribeToTrip(tripId);
+        service.RegisterPresence(tripId, user1, "Sarah");
+        service.RegisterPresence(tripId, user2, "Mike");
+
+        // Act
+        var presence = service.GetPresence(tripId, excludeUserId: user1);
+
+        // Assert
+        presence.Should().HaveCount(1);
+        presence[0].UserName.Should().Be("Mike");
+    }
+
+    [Fact]
+    public void Should_IncrementSubscriberCount_OnSubscribe()
+    {
+        // Arrange
+        var service = new TripEventService();
+        var tripId = Guid.NewGuid();
+
+        // Act
+        service.IncrementSubscribers(tripId);
+        service.IncrementSubscribers(tripId);
+
+        // Assert — subject should still exist
+        var observable = service.SubscribeToTrip(tripId);
+        observable.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void Should_CleanupSubject_When_LastSubscriberLeaves()
+    {
+        // Arrange
+        var service = new TripEventService();
+        var tripId = Guid.NewGuid();
+        var completed = false;
+
+        var observable = service.SubscribeToTrip(tripId);
+        observable.Subscribe(_ => { }, () => completed = true);
+
+        service.IncrementSubscribers(tripId);
+
+        // Act
+        service.DecrementSubscribers(tripId);
+
+        // Assert
+        completed.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Should_NotCleanupSubject_When_OtherSubscribersRemain()
+    {
+        // Arrange
+        var service = new TripEventService();
+        var tripId = Guid.NewGuid();
+        var completed = false;
+
+        var observable = service.SubscribeToTrip(tripId);
+        observable.Subscribe(_ => { }, () => completed = true);
+
+        service.IncrementSubscribers(tripId);
+        service.IncrementSubscribers(tripId);
+
+        // Act
+        service.DecrementSubscribers(tripId);
+
+        // Assert
+        completed.Should().BeFalse();
+    }
 }

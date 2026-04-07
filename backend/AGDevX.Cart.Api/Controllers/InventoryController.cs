@@ -124,6 +124,26 @@ public class InventoryController(IInventoryService inventoryService) : Controlle
         }
     }
 
+    //== Import inventory items from CSV data
+    [HttpPost("import")]
+    public async Task<IActionResult> Import([FromBody] IList<ImportInventoryItemRequest> items, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var result = await inventoryService.ImportInventoryItems(items, userId, cancellationToken);
+            return Ok(result);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { errorCode = "UNAUTHORIZED", message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { errorCode = "BAD_REQUEST", message = ex.Message });
+        }
+    }
+
     //== Update an existing inventory item
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateInventoryItemRequest request, CancellationToken cancellationToken = default)

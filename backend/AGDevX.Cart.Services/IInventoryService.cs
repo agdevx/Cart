@@ -2,11 +2,13 @@
 // ABOUTME: Defines operations for creating, retrieving, updating, and deleting inventory items with household membership validation
 
 using AGDevX.Cart.Data.Models;
+using AGDevX.Cart.Shared.DTOs;
 
 namespace AGDevX.Cart.Services;
 
 public interface IInventoryService
 {
+    Task<ImportInventoryResult> ImportInventoryItems(IList<ImportInventoryItemRequest> items, Guid userId, CancellationToken cancellationToken = default);
     Task<InventoryItem> CreateInventoryItem(InventoryItem inventoryItem, Guid userId, CancellationToken cancellationToken = default);
     Task<IEnumerable<InventoryItem>> GetAllUserInventory(Guid userId, CancellationToken cancellationToken = default);
     Task<IEnumerable<InventoryItem>> GetHouseholdInventory(Guid householdId, Guid userId, CancellationToken cancellationToken = default);
