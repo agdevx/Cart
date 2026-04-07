@@ -1,9 +1,10 @@
 // ABOUTME: Full-screen page for selecting pantry items to add to a shopping trip
 // ABOUTME: Supports search, source filtering, batch selection, and quantity editing
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Search } from 'lucide-react'
 
 import { useInventoryQuery } from '@/apis/agdevx-cart-api/inventory/use-inventory.query'
@@ -11,6 +12,7 @@ import { useAddTripItemMutation } from '@/apis/agdevx-cart-api/trip/add-trip-ite
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { tripDetailPath } from '@/routes'
+import { useSSE } from '@/services/use-sse.service'
 import { useStoresWithDisplayNamesService } from '@/services/use-stores-with-display-names.service'
 import { EmptyState } from '@/shared/empty-state'
 import { ScopeFilter } from '@/shared/scope-filter'
@@ -32,7 +34,17 @@ export const AddTripItemsPage = () => {
   const { data: inventory } = useInventoryQuery()
   const { household, stores, storeDisplayNames } = useStoresWithDisplayNamesService()
   const { data: tripItems } = useTripItemsQuery(tripId!)
+  const queryClient = useQueryClient()
   const addTripItemMutation = useAddTripItemMutation()
+
+  const handleSSEMessage = useCallback(
+    (_data: unknown) => {
+      queryClient.invalidateQueries({ queryKey: ['trips', tripId, 'items'] })
+    },
+    [queryClient, tripId],
+  )
+
+  useSSE(`/api/v1/trips/${tripId}/events`, handleSSEMessage, !!tripId)
 
   const [searchText, setSearchText] = useState('')
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')

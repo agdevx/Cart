@@ -1,9 +1,10 @@
 // ABOUTME: Trip detail page for planning mode
 // ABOUTME: Allows adding items to trip and starting shopping session
 
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useNavigate,useParams } from 'react-router-dom'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Copy, ShoppingCart } from 'lucide-react'
 
 import { useHouseholdQuery } from '@/apis/agdevx-cart-api/household/use-household.query'
@@ -13,6 +14,7 @@ import { useUpdateTripItemMutation } from '@/apis/agdevx-cart-api/trip/update-tr
 import { useTripQuery } from '@/apis/agdevx-cart-api/trip/use-trip.query'
 import { useTripItemsQuery } from '@/apis/agdevx-cart-api/trip/use-trip-items.query'
 import { activeTripPath, ROUTES, tripAddItemsPath, tripDetailPath } from '@/routes'
+import { useSSE } from '@/services/use-sse.service'
 import { useStoreAccordionState } from '@/services/use-store-accordion-state.service'
 import { useStoresWithDisplayNamesService } from '@/services/use-stores-with-display-names.service'
 import { EmptyState } from '@/shared/empty-state'
@@ -34,10 +36,20 @@ export const TripDetailPage = () => {
   const { data: tripItems, isLoading: itemsLoading } = useTripItemsQuery(tripId!)
   const { stores, storeDisplayNames } = useStoresWithDisplayNamesService()
   const { isExpanded, toggleStore } = useStoreAccordionState(tripId!, 'planning', trip?.isCompleted ?? false)
+  const queryClient = useQueryClient()
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false)
   const startMutation = useStartTripMutation()
   const updateMutation = useUpdateTripItemMutation()
   const deleteMutation = useDeleteTripItemMutation()
+
+  const handleSSEMessage = useCallback(
+    (_data: unknown) => {
+      queryClient.invalidateQueries({ queryKey: ['trips', tripId, 'items'] })
+    },
+    [queryClient, tripId],
+  )
+
+  useSSE(`/api/v1/trips/${tripId}/events`, handleSSEMessage, !!tripId && !trip?.isCompleted)
 
   const groupedItems = useMemo(() => {
     if (!tripItems) return []
