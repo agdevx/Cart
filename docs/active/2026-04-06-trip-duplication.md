@@ -69,12 +69,12 @@ New method on `TripService`: `Task<Trip> DuplicateTrip(Guid sourceTripId, string
 Steps in a single transaction:
 1. Verify user has access to the source trip via `VerifyTripAccess` (throws `UnauthorizedAccessException` for both not-found and unauthorized)
 2. If `householdId` is set, verify user is a household member (throws `UnauthorizedAccessException`)
-4. Create the new `Trip` entity — add to DbContext via `dbContext.Trips.Add()` (do NOT call `tripRepository.Create()`, which calls `SaveChangesAsync` per entity)
-5. Fetch items from the source trip via `ITripItemRepository`
-6. Apply visibility filtering: on household source trips, keep only household items + items where `CreatedBy == userId`
-7. Clone each item with reset checked state, new IDs, and re-derived `IsHouseholdItem`
-8. Add all cloned items via `dbContext.TripItems.AddRange()`
-9. Single `SaveChangesAsync` — atomic commit of new trip + all cloned items
+3. Create the new `Trip` entity — add to DbContext via `dbContext.Trips.Add()` (do NOT call `tripRepository.Create()`, which calls `SaveChangesAsync` per entity)
+4. Fetch items from the source trip via `ITripItemRepository`
+5. Apply visibility filtering: on household source trips, keep only household items + items where `CreatedBy == userId`
+6. Clone each item with reset checked state, new IDs, and re-derived `IsHouseholdItem`
+7. Add all cloned items via `dbContext.TripItems.AddRange()`
+8. Single `SaveChangesAsync` — atomic commit of new trip + all cloned items
 
 **No SSE events** are published for cloned items. This is deliberate — the new trip has no active subscribers yet. The duplicating user navigates to the trip detail page and fetches items fresh via the query cache.
 
