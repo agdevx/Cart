@@ -401,4 +401,109 @@ public class InventoryControllerTests
         // Assert
         result.Should().BeOfType<UnauthorizedObjectResult>();
     }
+
+    [Fact]
+    public async Task Should_ReturnOk_When_ImportSucceeds()
+    {
+        // Arrange
+        var mockService = new Mock<IInventoryService>();
+        var controller = new InventoryController(mockService.Object);
+        var userId = Guid.NewGuid();
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        ]));
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        var importResult = new ImportInventoryResult
+        {
+            PersonalItemsImported = 3,
+            HouseholdItemsImported = 0,
+            DuplicatesSkipped = 1,
+            HouseholdItemsSkipped = 0,
+            InvalidRowsSkipped = 0,
+        };
+
+        var items = new List<ImportInventoryItemRequest>
+        {
+            new() { Name = "Milk", Scope = "personal" },
+        };
+
+        mockService.Setup(s => s.ImportInventoryItems(It.IsAny<IList<ImportInventoryItemRequest>>(), userId, It.IsAny<CancellationToken>()))
+                   .ReturnsAsync(importResult);
+
+        // Act
+        var result = await controller.Import(items);
+
+        // Assert
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().BeEquivalentTo(importResult);
+    }
+
+    [Fact]
+    public async Task Should_ReturnBadRequest_When_ImportExceedsLimit()
+    {
+        // Arrange
+        var mockService = new Mock<IInventoryService>();
+        var controller = new InventoryController(mockService.Object);
+        var userId = Guid.NewGuid();
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        ]));
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        var items = Enumerable.Range(0, 501)
+            .Select(i => new ImportInventoryItemRequest { Name = $"Item {i}", Scope = "personal" })
+            .ToList();
+
+        mockService.Setup(s => s.ImportInventoryItems(It.IsAny<IList<ImportInventoryItemRequest>>(), userId, It.IsAny<CancellationToken>()))
+                   .ThrowsAsync(new ArgumentException("Import cannot exceed 500 items"));
+
+        // Act
+        var result = await controller.Import(items);
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    [Fact]
+    public async Task Should_ReturnUnauthorized_When_ImportUserNotFound()
+    {
+        // Arrange
+        var mockService = new Mock<IInventoryService>();
+        var controller = new InventoryController(mockService.Object);
+        var userId = Guid.NewGuid();
+
+        var user = new ClaimsPrincipal(new ClaimsIdentity([
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+        ]));
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        var items = new List<ImportInventoryItemRequest>
+        {
+            new() { Name = "Milk", Scope = "personal" },
+        };
+
+        mockService.Setup(s => s.ImportInventoryItems(It.IsAny<IList<ImportInventoryItemRequest>>(), userId, It.IsAny<CancellationToken>()))
+                   .ThrowsAsync(new UnauthorizedAccessException("User not found"));
+
+        // Act
+        var result = await controller.Import(items);
+
+        // Assert
+        result.Should().BeOfType<UnauthorizedObjectResult>();
+    }
 }
