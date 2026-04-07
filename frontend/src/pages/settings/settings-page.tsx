@@ -9,6 +9,7 @@ import type { UpdateProfileResponse } from '@/apis/agdevx-cart-api/auth/update-p
 import { useAuth } from '@/auth/use-auth'
 import { PageHeader } from '@/shared/page-header'
 
+import { PantrySection } from './pantry-section'
 import { PreferencesSection } from './preferences-section'
 import { ProfileSection } from './profile-section'
 import { SecuritySection } from './security-section'
@@ -52,6 +53,7 @@ export const SettingsPage = () => {
           onSaved={handlePasswordSaved}
           successMessage={passwordSuccessMessage}
         />
+        <PantrySection />
         <button
           onClick={logout}
           className="w-full flex items-center justify-center gap-2 py-3.5 border-2 border-coral/30 text-coral rounded-xl font-display font-bold hover:bg-coral/8 transition-colors"
