@@ -25,6 +25,9 @@ The `{id}` path param is the source trip to copy items from. The request body de
 - User must have access to the source trip (same `VerifyTripAccess` check used by all trip operations)
 - If `householdId` is set, user must be a member of that household (same check as `CreateTrip`)
 
+**Error responses:**
+- `401 Unauthorized` — user doesn't have access to the source trip (or it doesn't exist), or isn't a member of the target household (`UnauthorizedAccessException`). Follows the existing pattern where `VerifyTripAccess` does not distinguish "not found" from "unauthorized" to avoid leaking trip existence.
+
 ### What Gets Copied
 
 Each item from the source trip is cloned into the new trip.
@@ -36,14 +39,16 @@ Each item from the source trip is cloned into the new trip.
 - `StoreId` — FK to store (may be null if the store was deleted)
 - `Quantity`
 - `Notes` — shopping-specific notes
-- `IsHouseholdItem` — scope snapshot from the source item
+
+**Re-derived fields:**
+- `IsHouseholdItem` — set based on the *destination* trip's scope, not copied from the source. If the new trip has a `HouseholdId`, all cloned items get `IsHouseholdItem = true`. If the new trip is personal, all get `IsHouseholdItem = false`. This ensures the field accurately describes the item's visibility context on the new trip.
 
 **Reset fields:**
 - `Id` — new GUID
 - `TripId` — points to the new trip
 - `IsChecked` = false
 - `CheckedAt` = null
-- `CreatedBy`, `CreatedDate`, `ModifiedBy`, `ModifiedDate` — set fresh by `SaveChangesAsync`
+- `CreatedBy`, `CreatedDate`, `ModifiedBy`, `ModifiedDate` — set fresh by `CartDbContext.SaveChangesAsync` (the existing EF override that populates audit fields on all `BaseEntity` entries)
 
 ### Item Visibility Filtering
 
@@ -57,27 +62,35 @@ On personal trips, all items are copied (they're all the creator's).
 
 ### Backend Logic
 
-New method on `TripService`: `DuplicateTrip(Guid sourceTripId, string name, DateOnly? tripDate, Guid? householdId, Guid userId)`
+New method on `TripService`: `Task<Trip> DuplicateTrip(Guid sourceTripId, string name, DateOnly? tripDate, Guid? householdId, Guid userId, CancellationToken cancellationToken = default)`
+
+`TripService` gets a new dependency on `ITripItemRepository` to fetch source trip items directly (bypassing `TripItemService` since this is a bulk clone, not individual adds).
 
 Steps in a single transaction:
-1. Verify user has access to the source trip
-2. If `householdId` is set, verify user is a household member
-3. Create the new trip in Planning state (`IsStarted = false`, `IsCompleted = false`)
-4. Fetch items from the source trip with visibility filtering (household items + current user's personal items)
-5. Clone each item with reset checked state and new IDs
-6. `SaveChangesAsync` — atomic commit of new trip + all cloned items
+1. Verify user has access to the source trip via `VerifyTripAccess` (throws `UnauthorizedAccessException` for both not-found and unauthorized)
+2. If `householdId` is set, verify user is a household member (throws `UnauthorizedAccessException`)
+4. Create the new `Trip` entity — add to DbContext via `dbContext.Trips.Add()` (do NOT call `tripRepository.Create()`, which calls `SaveChangesAsync` per entity)
+5. Fetch items from the source trip via `ITripItemRepository`
+6. Apply visibility filtering: on household source trips, keep only household items + items where `CreatedBy == userId`
+7. Clone each item with reset checked state, new IDs, and re-derived `IsHouseholdItem`
+8. Add all cloned items via `dbContext.TripItems.AddRange()`
+9. Single `SaveChangesAsync` — atomic commit of new trip + all cloned items
+
+**No SSE events** are published for cloned items. This is deliberate — the new trip has no active subscribers yet. The duplicating user navigates to the trip detail page and fetches items fresh via the query cache.
 
 ### Frontend: Duplicate Dialog
 
 A modal dialog triggered from two places:
-- Trip card kebab menu on the shopping page (new "Duplicate" option)
-- Trip detail page (kebab menu)
+- **Trip card kebab menu** on the shopping page — new "Duplicate" option added to the existing "Trip actions" menu
+- **Trip detail page** — a new trip-level action needs to be added (currently the page only has item-level kebab menus, not a trip-level one). Add a "Duplicate" action to the page header area, using the same pattern as other trip-level actions.
 
 **Dialog contents:**
 - Trip Name (text input, required, blank)
 - Trip Date (date input, blank)
-- Scope (ScopeRadio, shown only if user has a household)
+- Scope (ScopeRadio, shown only if user has a household — defaults to the source trip's scope)
 - Create / Cancel buttons
+
+Name and date are intentionally blank (not pre-filled from the source trip). The user fills them in fresh.
 
 **After success:**
 - Success toast: "Trip created"
@@ -91,6 +104,24 @@ A modal dialog triggered from two places:
 - **Deleted inventory items** — trip items with `InventoryItemId = null` are copied. They retain their denormalized `ItemName` and `StoreName`.
 - **Deleted stores** — trip items with `StoreId = null` are copied with their denormalized `StoreName`.
 - **Source trip in any state** — duplication always works. The new trip starts in Planning.
+
+### Key Test Cases
+
+**Backend:**
+- Duplicate a personal trip as personal — all items copied
+- Duplicate a household trip as personal (cross-scope) — items copied, `IsHouseholdItem` re-derived to false
+- Duplicate a personal trip as household (cross-scope) — items copied, `IsHouseholdItem` re-derived to true
+- Household trip with mixed visibility — only household items + current user's personal items copied
+- Empty trip — new empty trip created
+- Source trip not found or unauthorized — 401 (same behavior, no existence leak)
+- User not a member of target household — 401
+- Over-limit (if applicable) or general validation
+
+**Frontend:**
+- Dialog renders with blank name, blank date, scope defaulting to source trip scope
+- Submit disabled when name is empty
+- Successful duplicate navigates to new trip detail page
+- Error handling for failed API call
 
 ## Implementation Plan
 
