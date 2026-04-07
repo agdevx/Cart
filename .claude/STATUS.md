@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated:** 2026-04-06
+**Last Updated:** 2026-04-07
 
 ## How to Use This File
 
@@ -49,6 +49,9 @@ This is the single source of truth for where the project stands. Read it at the 
 | Enhancement       | Planning Doc                                                                                  |
 | ----------------- | --------------------------------------------------------------------------------------------- |
 | Cloudflare Tunnel Migration | [docs/active/2026-03-31-cloudflare-tunnel.md](../docs/active/2026-03-31-cloudflare-tunnel.md) |
+| CSV Pantry Import + Package Updates + Database Indexes | [docs/archive/2026-04-06-csv-pantry-import.md](../docs/archive/2026-04-06-csv-pantry-import.md) — PR #39 |
+| Trip Duplication | [docs/archive/2026-04-06-trip-duplication.md](../docs/archive/2026-04-06-trip-duplication.md) — PR #39 |
+| Contributor/SSE Epic (Heartbeat, Presence, All-Page SSE) | [docs/archive/2026-04-06-contributor-sse-epic.md](../docs/archive/2026-04-06-contributor-sse-epic.md) — PR #39 |
 
 ## Completed Enhancements
 
@@ -77,6 +80,3 @@ This is the single source of truth for where the project stands. Read it at the 
 | Home Page (Greeting, Trip Calendar, Weather, Preferences)  | 2026-03-29 | [docs/archive/2026-03-29-home-page.md](../docs/archive/2026-03-29-home-page.md)                                                         |
 | Single Household Architecture                              | 2026-03-31 | [docs/archive/2026-03-30-single-household.md](../docs/archive/2026-03-30-single-household.md)                                           |
 | Docker Deployment                                          | 2026-03-31 | [docs/archive/2026-03-28-docker-deployment.md](../docs/archive/2026-03-28-docker-deployment.md)                                         |
-| CSV Pantry Import + Package Updates + Database Indexes      | 2026-04-06 | [docs/archive/2026-04-06-csv-pantry-import.md](../docs/archive/2026-04-06-csv-pantry-import.md)                                         |
-| Trip Duplication                                           | 2026-04-06 | [docs/archive/2026-04-06-trip-duplication.md](../docs/archive/2026-04-06-trip-duplication.md)                                           |
-| Contributor/SSE Epic (Heartbeat, Presence, All-Page SSE)   | 2026-04-06 | [docs/archive/2026-04-06-contributor-sse-epic.md](../docs/archive/2026-04-06-contributor-sse-epic.md)                                   |

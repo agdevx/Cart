@@ -40,31 +40,35 @@ backend/
 ├── AGDevX.Cart.Api.Tests/
 ├── AGDevX.Cart.Auth/             # BCrypt password hashing, session auth
 ├── AGDevX.Cart.Auth.Tests/
-├── AGDevX.Cart.Services/         # Business logic layer
+├── AGDevX.Cart.Services/         # Business logic layer (includes TripEventService for SSE)
 ├── AGDevX.Cart.Services.Tests/
 ├── AGDevX.Cart.Data/             # EF Core DbContext, models, repositories
 ├── AGDevX.Cart.Data.Tests/
-└── AGDevX.Cart.Shared/           # DTOs, config
+└── AGDevX.Cart.Shared/           # DTOs, config, models (TripEvent), extensions, security
 
 frontend/src/
 ├── apis/                         # apiFetch wrapper + TanStack Query hooks (one file per endpoint)
 ├── auth/                         # AuthProvider, useAuth hook, session management
+├── libs/                         # Low-level client libraries (SSE client)
 ├── pages/                        # Each page gets its own folder
-│   ├── shopping/                 # Page component + page-specific components + tests
+│   ├── home/                     # Home page (greeting, trip calendar, weather)
+│   ├── shopping/                 # Shopping trips, trip detail, active trip, add items, duplicate dialog, presence banner
 │   ├── pantry/
 │   ├── household/
-│   ├── settings/
+│   ├── settings/                 # Profile, security, preferences, pantry CSV import
 │   ├── login/
 │   └── register/
 ├── shared/                       # Components used by multiple pages
 ├── services/                     # Hooks for data fetching and business logic (*Service suffix)
 ├── state/                        # Jotai atoms (auth, household scope)
 ├── styles/                       # globals.css (Tailwind theme, animations)
-└── utils/                        # Pure utility functions (confetti, greeting, sorting, etc.)
+├── utilities/                    # Test setup (vitest config, type declarations)
+└── utils/                        # Pure utility functions (confetti, greeting, sorting, CSV parser, etc.)
 
 deploy/                           # Server deployment templates (not used in dev)
 ├── caddy/                        # Shared Caddy reverse proxy (docker-compose.yml, Caddyfile)
-└── cart/                         # Cart app stack (docker-compose.yml, .env.example)
+├── cart/                         # Cart app stack (docker-compose.yml, .env.example)
+└── cloudflared/                  # Cloudflare Tunnel config
 ```
 
 ## Frontend Architecture Rules
@@ -83,6 +87,9 @@ deploy/                           # Server deployment templates (not used in dev
 - **API layer:** `apiFetch()` wrapper handles credentials, error extraction, and `VITE_API_BASE_URL` prepending. Each endpoint gets a TanStack Query hook file in `apis/agdevx-cart-api/`.
 - **State:** Jotai atoms for auth state and household scope. TanStack Query for server state.
 - **Styling:** Tailwind CSS 4 with custom theme in `globals.css`. Design system colors: `navy`, `teal`, `coral`, `amber`. Font: `font-display` (Bricolage Grotesque), `font-body` (Nunito).
+- **SSE (Server-Sent Events):** `TripEventsController` streams real-time trip item changes and presence events. 60s heartbeat via `PeriodicTimer` keeps Cloudflare Tunnel alive. `TripEventService` (singleton) manages per-trip Rx Subjects, presence registry with ref counting, and subscriber lifecycle cleanup. Frontend `useSSE` hook connects on all trip pages (gated on `!isCompleted`). `ActiveTripPage` dispatches presence events (`PresenceSnapshot`, `UserJoined`, `UserLeft`) to render a "who's shopping with you" banner.
+- **CSV Import:** `POST /api/v1/inventory/import` accepts parsed CSV rows. Frontend parses RFC 4180 CSV with encoding fallback (`csv-parser.ts`), backend validates, deduplicates, auto-creates stores, and bulk-creates items in a single transaction.
+- **Trip Duplication:** `POST /api/v1/trip/{id}/duplicate` clones visible trip items with scope re-derivation and visibility filtering. Available from trip card kebab menu and trip detail page.
 
 ## Frontend Testing Patterns
 
