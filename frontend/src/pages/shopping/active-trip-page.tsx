@@ -89,7 +89,7 @@ export const ActiveTripPage = () => {
   )
 
   // Connect to SSE for real-time updates
-  useSSE(`/api/v1/trips/${tripId}/events`, handleSSEMessage, !!tripId)
+  useSSE(`/api/v1/trips/${tripId}/events`, handleSSEMessage, !!tripId && !trip?.isCompleted)
 
   const handleToggleItem = (tripItemId: string, currentlyChecked: boolean) => {
     if (!tripId) return

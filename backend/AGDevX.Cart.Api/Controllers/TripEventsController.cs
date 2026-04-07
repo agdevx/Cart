@@ -66,7 +66,7 @@ public class TripEventsController(
 
             //== Send initial presence snapshot
             var currentPresence = _tripEventService.GetPresence(tripId, excludeUserId: userId);
-            var snapshotData = JsonSerializer.Serialize(new { users = currentPresence.Select(p => new { p.UserId, p.UserName }) });
+            var snapshotData = JsonSerializer.Serialize(new { users = currentPresence.Select(p => new { userId = p.UserId, userName = p.UserName }) });
             var snapshotEvent = new TripEvent
             {
                 TripId = tripId,

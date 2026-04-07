@@ -99,11 +99,12 @@ public class TripEventService : ITripEventService
                 return (existing.Name, existing.Count - 1);
             });
 
-        //== Clean up zero-count entries and publish UserLeft
+        //== Clean up zero-count entries — also handles ghost entries from concurrent double-unregister
+        tripPresence.TryRemove(userId, out _);
+
+        //== Publish UserLeft only when a real user was removed
         if (removedUserName != null)
         {
-            tripPresence.TryRemove(userId, out _);
-
             var data = JsonSerializer.Serialize(new { userId, userName = removedUserName });
 
             PublishEvent(new TripEvent
