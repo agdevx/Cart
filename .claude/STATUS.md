@@ -22,10 +22,10 @@ This is the single source of truth for where the project stands. Read it at the 
 | Suite              | Tests | Files                      |
 | ------------------ | ----- | -------------------------- |
 | Backend — Data     | 70    | AGDevX.Cart.Data.Tests     |
-| Backend — Services | 140   | AGDevX.Cart.Services.Tests |
-| Backend — API      | 115   | AGDevX.Cart.Api.Tests      |
+| Backend — Services | 148   | AGDevX.Cart.Services.Tests |
+| Backend — API      | 117   | AGDevX.Cart.Api.Tests      |
 | Backend — Auth     | 22    | AGDevX.Cart.Auth.Tests     |
-| Frontend — Vitest  | 583   | 89 test files              |
+| Frontend — Vitest  | 588   | 90 test files              |
 
 ## Known Issues / Tech Debt
 
@@ -79,3 +79,4 @@ This is the single source of truth for where the project stands. Read it at the 
 | Single Household Architecture                              | 2026-03-31 | [docs/archive/2026-03-30-single-household.md](../docs/archive/2026-03-30-single-household.md)                                           |
 | Docker Deployment                                          | 2026-03-31 | [docs/archive/2026-03-28-docker-deployment.md](../docs/archive/2026-03-28-docker-deployment.md)                                         |
 | CSV Pantry Import + Package Updates + Database Indexes      | 2026-04-06 | [docs/archive/2026-04-06-csv-pantry-import.md](../docs/archive/2026-04-06-csv-pantry-import.md)                                         |
+| Trip Duplication                                           | 2026-04-06 | [docs/archive/2026-04-06-trip-duplication.md](../docs/archive/2026-04-06-trip-duplication.md)                                           |
