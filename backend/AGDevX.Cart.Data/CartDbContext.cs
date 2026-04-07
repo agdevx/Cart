@@ -75,6 +75,7 @@ public class CartDbContext(DbContextOptions<CartDbContext> options, IHttpContext
         {
             entity.HasIndex(i => i.HouseholdId);
             entity.HasIndex(i => i.OwnerUserId);
+            entity.HasIndex(i => i.DefaultStoreId);
 
             //== Cascade delete inventory items when household is deleted
             entity.HasOne(i => i.Household)
