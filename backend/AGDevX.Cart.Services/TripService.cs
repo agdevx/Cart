@@ -6,7 +6,7 @@ using AGDevX.Cart.Data.Repositories;
 
 namespace AGDevX.Cart.Services;
 
-public class TripService(ITripRepository tripRepository, CartDbContext dbContext) : ITripService
+public class TripService(ITripRepository tripRepository, CartDbContext dbContext, ITripItemRepository tripItemRepository) : ITripService
 {
     public async Task<Trip> CreateTrip(string name, DateOnly? tripDate, Guid? householdId, Guid userId, CancellationToken cancellationToken = default)
     {
@@ -131,6 +131,61 @@ public class TripService(ITripRepository tripRepository, CartDbContext dbContext
         trip.IsStarted = false;
 
         return await tripRepository.Update(trip, cancellationToken);
+    }
+
+    public async Task<Trip> DuplicateTrip(Guid sourceTripId, string name, DateOnly? tripDate, Guid? householdId, Guid userId, CancellationToken cancellationToken = default)
+    {
+        //== Verify access to source trip
+        var user = await GetUserOrThrow(userId, cancellationToken);
+        await VerifyTripAccess(sourceTripId, userId, user.HouseholdId, cancellationToken);
+
+        //== Verify household membership if targeting a household
+        if (householdId.HasValue && user.HouseholdId != householdId.Value)
+        {
+            throw new UnauthorizedAccessException("User is not a member of the specified household");
+        }
+
+        //== Create the new trip in Planning state
+        var newTrip = new Trip
+        {
+            Id = Guid.NewGuid(),
+            Name = name,
+            TripDate = tripDate,
+            HouseholdId = householdId,
+            IsCompleted = false,
+            CompletedAt = null,
+            IsStarted = false,
+            StartedAt = null,
+        };
+        dbContext.Trips.Add(newTrip);
+
+        //== Fetch source items and apply visibility filtering
+        var sourceItems = await tripItemRepository.GetTripItems(sourceTripId, cancellationToken);
+        var visibleItems = sourceItems.Where(ti => ti.IsHouseholdItem || ti.CreatedBy == userId);
+
+        //== Clone each visible item
+        var isHouseholdTrip = householdId.HasValue;
+        var clonedItems = visibleItems.Select(source => new TripItem
+        {
+            Id = Guid.NewGuid(),
+            TripId = newTrip.Id,
+            InventoryItemId = source.InventoryItemId,
+            ItemName = source.ItemName,
+            StoreName = source.StoreName,
+            StoreId = source.StoreId,
+            Quantity = source.Quantity,
+            Notes = source.Notes,
+            IsHouseholdItem = isHouseholdTrip,
+            IsChecked = false,
+            CheckedAt = null,
+        });
+
+        dbContext.TripItems.AddRange(clonedItems);
+
+        //== Atomic commit — new trip + all cloned items
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return newTrip;
     }
 
     private async Task<User> GetUserOrThrow(Guid userId, CancellationToken cancellationToken)

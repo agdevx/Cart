@@ -14,19 +14,21 @@ namespace AGDevX.Cart.Services.Tests;
 public class TripServiceTests
 {
     private readonly Mock<ITripRepository> _mockTripRepository;
+    private readonly Mock<ITripItemRepository> _mockTripItemRepository;
     private readonly CartDbContext _dbContext;
     private readonly TripService _tripService;
 
     public TripServiceTests()
     {
         _mockTripRepository = new Mock<ITripRepository>();
+        _mockTripItemRepository = new Mock<ITripItemRepository>();
 
         var options = new DbContextOptionsBuilder<CartDbContext>()
                       .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                       .Options;
         _dbContext = new CartDbContext(options);
 
-        _tripService = new TripService(_mockTripRepository.Object, _dbContext);
+        _tripService = new TripService(_mockTripRepository.Object, _dbContext, _mockTripItemRepository.Object);
     }
 
     [Fact]
