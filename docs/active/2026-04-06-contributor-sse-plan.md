@@ -334,17 +334,32 @@ public class TripEventService : ITripEventService
             return;
         }
 
-        if (!tripPresence.TryGetValue(userId, out var entry))
-        {
-            return;
-        }
+        string? removedUserName = null;
 
-        if (entry.Count <= 1)
+        /*
+         * Atomic decrement-or-remove using AddOrUpdate. If count reaches 0,
+         * remove the entry entirely. This avoids TOCTOU races when multiple
+         * tabs disconnect concurrently.
+         */
+        tripPresence.AddOrUpdate(
+            userId,
+            addValue: ("", 0), // should not happen — unregister without register
+            updateValueFactory: (_, existing) =>
+            {
+                if (existing.Count <= 1)
+                {
+                    removedUserName = existing.Name;
+                    return (existing.Name, 0); // mark for removal
+                }
+                return (existing.Name, existing.Count - 1);
+            });
+
+        //== Clean up zero-count entries and publish UserLeft
+        if (removedUserName != null)
         {
-            //== Last connection for this user — remove and publish UserLeft
             tripPresence.TryRemove(userId, out _);
 
-            var data = JsonSerializer.Serialize(new { userId, userName = entry.Name });
+            var data = JsonSerializer.Serialize(new { userId, userName = removedUserName });
 
             PublishEvent(new TripEvent
             {
@@ -353,11 +368,6 @@ public class TripEventService : ITripEventService
                 Data = data,
                 Timestamp = DateTime.UtcNow,
             });
-        }
-        else
-        {
-            //== Other tabs remain — just decrement
-            tripPresence.TryUpdate(userId, (entry.Name, entry.Count - 1), entry);
         }
     }
 
@@ -515,16 +525,26 @@ public class TripEventsController(
 
             try
             {
+                /*
+                 * Race pattern: reuse pending tasks across iterations. When the heartbeat timer
+                 * wins the race, the moveNext task is still pending (waiting for the next event).
+                 * We must NOT call MoveNextAsync() again while the previous call is outstanding.
+                 * Same applies to the heartbeat timer's WaitForNextTickAsync().
+                 */
+                Task<bool>? moveNextTask = null;
+                Task<bool>? heartbeatTask = null;
+
                 while (true)
                 {
-                    var moveNext = enumerator.MoveNextAsync().AsTask();
-                    var heartbeat = heartbeatTimer.WaitForNextTickAsync(cancellationToken).AsTask();
+                    moveNextTask ??= enumerator.MoveNextAsync().AsTask();
+                    heartbeatTask ??= heartbeatTimer.WaitForNextTickAsync(cancellationToken).AsTask();
 
-                    var winner = await Task.WhenAny(moveNext, heartbeat);
+                    var winner = await Task.WhenAny(moveNextTask, heartbeatTask);
 
-                    if (winner == moveNext)
+                    if (winner == moveNextTask)
                     {
-                        if (!await moveNext) break;
+                        if (!await moveNextTask) break;
+                        moveNextTask = null; // consumed — get next event on next iteration
 
                         var tripEvent = enumerator.Current;
 
@@ -548,6 +568,9 @@ public class TripEventsController(
                     }
                     else
                     {
+                        await heartbeatTask; // consume the tick
+                        heartbeatTask = null; // get next tick on next iteration
+
                         //== Heartbeat: SSE comment to keep Cloudflare Tunnel alive
                         await Response.WriteAsync(":heartbeat\n\n", cancellationToken);
                         await Response.Body.FlushAsync(cancellationToken);
@@ -795,6 +818,17 @@ describe('PresenceBanner', () => {
     expect(screen.getByText('Sarah and Mike are shopping with you')).toBeInTheDocument()
   })
 
+  it('should render three users with comma-separated names', () => {
+    render(createElement(PresenceBanner, {
+      users: [
+        { userId: '1', userName: 'Sarah' },
+        { userId: '2', userName: 'Mike' },
+        { userId: '3', userName: 'Bob' },
+      ],
+    }))
+    expect(screen.getByText('Sarah, Mike, and Bob are shopping with you')).toBeInTheDocument()
+  })
+
   it('should use first character of name for initial', () => {
     render(createElement(PresenceBanner, {
       users: [{ userId: '1', userName: 'august' }],
@@ -838,7 +872,9 @@ export const PresenceBanner = ({ users }: PresenceBannerProps) => {
   const names = users.map((u) => u.userName)
   const message = names.length === 1
     ? `${names[0]} is shopping with you`
-    : `${names.join(' and ')} are shopping with you`
+    : names.length === 2
+      ? `${names[0]} and ${names[1]} are shopping with you`
+      : `${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]} are shopping with you`
 
   return (
     <div className="bg-teal/8 border border-teal/20 rounded-xl px-3 py-2 mb-3 flex items-center gap-2.5 animate-fade-in">

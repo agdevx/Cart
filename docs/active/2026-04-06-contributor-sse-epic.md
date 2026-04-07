@@ -16,9 +16,9 @@ Three interconnected improvements to the real-time collaboration experience on h
 
 **Problem:** Cloudflare Tunnel enforces a 100-second idle timeout on proxied connections. If no data is written to the SSE response within that window, Cloudflare kills the connection. The browser's `EventSource` auto-reconnects, but the user experiences a brief gap and a full refetch.
 
-**Fix:** In `TripEventsController`, write `:heartbeat\n\n` (an SSE comment, ignored by `EventSource`) to the response stream every 60 seconds of inactivity.
+**Fix:** In `TripEventsController`, write `:heartbeat\n\n` (an SSE comment, ignored by `EventSource`) to the response stream every 60 seconds.
 
-**Implementation detail:** The current `await foreach` loop over the observable's `ToAsyncEnumerable()` cannot be directly interleaved with a timer. The loop must be refactored to use manual async enumeration (`GetAsyncEnumerator()` + `MoveNextAsync()`) so each iteration step can race against a `PeriodicTimer(60s)` via `Task.WhenAny`. When a real event wins the race, the heartbeat timer resets. When the timer wins, write the heartbeat comment and loop.
+**Implementation detail:** The current `await foreach` loop over the observable's `ToAsyncEnumerable()` cannot be directly interleaved with a timer. The loop must be refactored to use manual async enumeration (`GetAsyncEnumerator()` + `MoveNextAsync()`) so each iteration step can race against a `PeriodicTimer(60s)` via `Task.WhenAny`. Whichever task wins the race is consumed and nulled out; the losing task is reused on the next iteration (critical — calling `MoveNextAsync()` or `WaitForNextTickAsync()` while a previous call is still pending would throw). When an event wins, process it normally. When the timer wins, write the heartbeat comment.
 
 The `PeriodicTimer` must be disposed in a `try/finally` block when the connection ends.
 
@@ -116,8 +116,7 @@ Presence is only displayed on `ActiveTripPage`. The other trip pages get SSE for
 ### Key Test Cases
 
 **Backend:**
-- Heartbeat writes comment every 60s of inactivity
-- Heartbeat timer resets when a real event is sent
+- Heartbeat writes comment every 60s when no events arrive
 - Subject cleanup when last subscriber disconnects (reference counting)
 - RegisterPresence publishes UserJoined for new users
 - RegisterPresence does NOT publish UserJoined for additional tabs (count > 1)
