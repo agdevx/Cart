@@ -48,7 +48,7 @@ This is the single source of truth for where the project stands. Read it at the 
 
 | Enhancement       | Planning Doc                                                                                  |
 | ----------------- | --------------------------------------------------------------------------------------------- |
-| Cloudflare Tunnel Migration | [docs/active/2026-03-31-cloudflare-tunnel.md](../docs/active/2026-03-31-cloudflare-tunnel.md) |
+| *(none)* | |
 
 ## Completed Enhancements
 
@@ -80,3 +80,4 @@ This is the single source of truth for where the project stands. Read it at the 
 | CSV Pantry Import + Package Updates + Database Indexes      | 2026-04-07 | [docs/archive/2026-04-06-csv-pantry-import.md](../docs/archive/2026-04-06-csv-pantry-import.md)                                         |
 | Trip Duplication                                           | 2026-04-07 | [docs/archive/2026-04-06-trip-duplication.md](../docs/archive/2026-04-06-trip-duplication.md)                                           |
 | Contributor/SSE Epic (Heartbeat, Presence, All-Page SSE)   | 2026-04-07 | [docs/archive/2026-04-06-contributor-sse-epic.md](../docs/archive/2026-04-06-contributor-sse-epic.md)                                   |
+| Cloudflare Tunnel Migration                                | 2026-04-07 | [docs/archive/2026-03-31-cloudflare-tunnel.md](../docs/archive/2026-03-31-cloudflare-tunnel.md)                                         |
