@@ -39,8 +39,6 @@ This is the single source of truth for where the project stands. Read it at the 
 | Enhancement               | Planning Doc                                                                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | Contributor/SSE Epic      | No planning doc yet (trip collaborator UX, SSE visibility filtering deferred from single-household migration, SSE heartbeat needed for Cloudflare Tunnel — 100s idle timeout kills connections without keepalive) |
-| Home Page — Activity Feed | No planning doc yet (14 event types, dedicated ActivityEvent table, separate household vs personal sections)                     |
-| Home Page — Shopping List Preview | No planning doc yet                                                                                                       |
 | Home Page — Trip Templates | No planning doc yet                                                                                                              |
 | Camera / Barcode Scanning | No planning doc yet                                                                                                             |
 | Inventory Categories      | No planning doc yet                                                                                                             |
@@ -49,8 +47,7 @@ This is the single source of truth for where the project stands. Read it at the 
 | Database Index Review     | No planning doc yet (audit and add proper indexes to DB tables)                                                                 |
 | Container Image Versioning | No planning doc yet (review tagging strategy for Docker Hub images)                                                             |
 | NuGet Package Updates     | No planning doc yet                                                                                                             |
-| Watchtower Auto-Deploy    | No planning doc yet (auto-pull and restart cart containers on new Docker Hub images, scope to cart only — not infra containers)  |
-| Container Health Checks   | No planning doc yet (Docker HEALTHCHECK in Dockerfiles + depends_on conditions, prerequisite for Watchtower rollback safety)    |
+| Container Health Checks   | No planning doc yet (Docker HEALTHCHECK in Dockerfiles + depends_on conditions)                                                 |
 
 ## In Progress Enhancements
 
