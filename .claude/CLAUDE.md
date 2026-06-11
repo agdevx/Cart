@@ -83,7 +83,7 @@ deploy/                           # Server deployment templates (not used in dev
 
 ## Architecture Patterns
 
-- **Auth:** Cookie-based sessions. Cookie `.Cart.Auth`, 30-min sliding expiration, `credentials: 'include'` on all fetches. `useAuth()` hook from `@/auth/use-auth`.
+- **Auth:** Cookie-based sessions. Cookie `.Cart.Auth`, 30-day sliding expiration, `credentials: 'include'` on all fetches. `useAuth()` hook from `@/auth/use-auth`.
 - **API layer:** `apiFetch()` wrapper handles credentials, error extraction, and `VITE_API_BASE_URL` prepending. Each endpoint gets a TanStack Query hook file in `apis/agdevx-cart-api/`.
 - **State:** Jotai atoms for auth state and household scope. TanStack Query for server state.
 - **Styling:** Tailwind CSS 4 with custom theme in `globals.css`. Design system colors: `navy`, `teal`, `coral`, `amber`. Font: `font-display` (Bricolage Grotesque), `font-body` (Nunito).

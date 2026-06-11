@@ -156,7 +156,7 @@ The backend uses SQLite with Entity Framework Core:
     "CartDb": "Data Source=cart.db"
   },
   "CookieSettings": {
-    "SessionTimeoutMinutes": 30
+    "SessionTimeoutMinutes": 43200
   }
 }
 ```
